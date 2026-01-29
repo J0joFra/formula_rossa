@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingBag, ExternalLink, Heart, Star, Shirt, Watch, Gift, Flag } from 'lucide-react';
-import { Button } from "@/components/ui/button";
+import { Button } from "../ui/button";
 
 const shopCategories = [
   {
@@ -27,5 +27,7 @@ const shopCategories = [
     icon: Star,
     image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop',
     priceRange: '€30 - €200',
-  },
-  {
+  }
+];
+
+

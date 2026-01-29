@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Newspaper, ExternalLink, Clock, Loader2, RefreshCw, TrendingUp } from 'lucide-react';
-import { Button } from "@/components/ui/button";
+import { Button } from "../ui/button";
 
 const mockNews = [
   {

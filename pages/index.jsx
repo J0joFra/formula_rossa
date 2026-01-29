@@ -1,11 +1,11 @@
 import React, { useRef, useState, useEffect } from 'react';
-import Navigation from '@/components/ferrari/Navigation';
-import HeroSection from '@/components/ferrari/HeroSection';
-import StatsSection from '@/components/ferrari/StatsSection';
-import PredictorSection from '@/components/ferrari/PredictorSection';
-import NewsSection from '@/components/ferrari/NewsSection';
-import FanZoneSection from '@/components/ferrari/FanZoneSection';
-import Footer from '@/components/ferrari/Footer';
+import Navigation from '@/Components/ferrari/Navigation';
+import HeroSection from '@/Components/ferrari/HeroSection';
+import StatsSection from '@/Components/ferrari/StatsSection';
+import PredictorSection from '@/Components/ferrari/PredictorSection';
+import NewsSection from '@/Components/ferrari/NewsSection';
+import FanZoneSection from '@/Components/ferrari/FanZoneSection';
+import Footer from '@/Components/ferrari/Footer';
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState('home');

@@ -1,8 +1,9 @@
-// PredictorSection.jsx - VERSIONE CORRETTA
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Zap, Trophy, Target, TrendingUp, Loader2, Sparkles, RefreshCw } from 'lucide-react';
-import { Button } from "@/components/ui/button";
+import { Button } from "../ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Slider } from "../ui/slider";
 
 const circuits2025 = [
   { id: 'monza', name: 'Italian GP', track: 'Monza', country: 'Italy' },
