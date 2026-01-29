@@ -1,22 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  
-  output: 'export',
-  
   images: {
-    unoptimized: true, 
     domains: ['images.unsplash.com'],
   },
-  
-  trailingSlash: true,
-  
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  // NIENTE 'output: export', NIENTE 'trailingSlash'
 }
 
 module.exports = nextConfig
