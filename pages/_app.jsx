@@ -41,60 +41,46 @@ function MyApp({ Component, pageProps }) {
         
         {/* Stili globali */}
         <style>{`
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
-          
-          body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #000000;
-            color: #ffffff;
-            overflow-x: hidden;
-          }
-          
-          /* Scrollbar Ferrari */
-          ::-webkit-scrollbar {
-            width: 10px;
-          }
-          
-          ::-webkit-scrollbar-track {
-            background: #1a1a1a;
-          }
-          
-          ::-webkit-scrollbar-thumb {
+          /* Slider personalizzato */
+          .slider::-webkit-slider-thumb {
+            appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
             background: #DC0000;
-            border-radius: 5px;
+            cursor: pointer;
+            border: 2px solid white;
           }
           
-          ::-webkit-scrollbar-thumb:hover {
-            background: #FF0000;
+          .slider::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #DC0000;
+            cursor: pointer;
+            border: 2px solid white;
           }
           
-          /* Effetti Ferrari */
-          .ferrari-glow {
-            box-shadow: 0 0 30px rgba(220, 0, 0, 0.3);
+          /* Line clamp per testo */
+          .line-clamp-1 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 1;
           }
           
-          .bg-ferrari-gradient {
-            background: linear-gradient(135deg, #DC0000 0%, #000000 50%, #FFD700 100%);
+          .line-clamp-2 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
           }
           
-          /* Punti animati Ferrari */
-          @keyframes ferrari-pulse {
-            0%, 100% { 
-              opacity: 0.1;
-              transform: scale(1);
-            }
-            50% { 
-              opacity: 0.3;
-              transform: scale(1.1);
-            }
-          }
-          
-          .animate-ferrari-pulse {
-            animation: ferrari-pulse 2s ease-in-out infinite;
+          .line-clamp-3 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
           }
         `}</style>
       </Head>
