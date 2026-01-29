@@ -3,8 +3,34 @@ import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { Trophy, TrendingUp, Users, Calendar, ChevronRight } from 'lucide-react';
 
-// Historical Ferrari Data
+// Historical Ferrari Data (Dal 1996 al 2025)
 const historicalData = [
+  // Era Schumacher 
+  { year: 1996, wins: 3, podiums: 9, points: 70, position: 2, driver1: 'Schumacher', driver2: 'Irvine' },
+  { year: 1997, wins: 5, podiums: 13, points: 102, position: 2, driver1: 'Schumacher', driver2: 'Irvine' },
+  { year: 1998, wins: 6, podiums: 19, points: 133, position: 2, driver1: 'Schumacher', driver2: 'Irvine' },
+  { year: 1999, wins: 6, podiums: 17, points: 128, position: 1, driver1: 'Irvine', driver2: 'Schumacher/Salo' },
+  { year: 2000, wins: 10, podiums: 21, points: 170, position: 1, driver1: 'Schumacher', driver2: 'Barrichello' },
+  { year: 2001, wins: 9, podiums: 24, points: 179, position: 1, driver1: 'Schumacher', driver2: 'Barrichello' },
+  { year: 2002, wins: 15, podiums: 27, points: 221, position: 1, driver1: 'Schumacher', driver2: 'Barrichello' },
+  { year: 2003, wins: 8, podiums: 16, points: 158, position: 1, driver1: 'Schumacher', driver2: 'Barrichello' },
+  { year: 2004, wins: 15, podiums: 29, points: 262, position: 1, driver1: 'Schumacher', driver2: 'Barrichello' },
+  { year: 2005, wins: 1, podiums: 10, points: 100, position: 3, driver1: 'Schumacher', driver2: 'Barrichello' },
+  { year: 2006, wins: 9, podiums: 19, points: 201, position: 2, driver1: 'Schumacher', driver2: 'Massa' },
+  
+  // Era Post-Schumi 
+  { year: 2007, wins: 9, podiums: 22, points: 204, position: 1, driver1: 'Räikkönen', driver2: 'Massa' },
+  { year: 2008, wins: 8, podiums: 19, points: 172, position: 1, driver1: 'Massa', driver2: 'Räikkönen' },
+  { year: 2009, wins: 1, podiums: 6, points: 70, position: 4, driver1: 'Räikkönen', driver2: 'Massa/Badoer/Fisichella' },
+  
+  // Era Alonso
+  { year: 2010, wins: 5, podiums: 15, points: 396, position: 3, driver1: 'Alonso', driver2: 'Massa' },
+  { year: 2011, wins: 1, podiums: 10, points: 375, position: 3, driver1: 'Alonso', driver2: 'Massa' },
+  { year: 2012, wins: 3, podiums: 15, points: 400, position: 2, driver1: 'Alonso', driver2: 'Massa' },
+  { year: 2013, wins: 2, podiums: 10, points: 354, position: 3, driver1: 'Alonso', driver2: 'Massa' },
+  { year: 2014, wins: 0, podiums: 2, points: 216, position: 4, driver1: 'Alonso', driver2: 'Räikkönen' },
+
+  // Era Vettel / Leclerc 
   { year: 2015, wins: 3, podiums: 17, points: 428, position: 2, driver1: 'Vettel', driver2: 'Räikkönen' },
   { year: 2016, wins: 0, podiums: 11, points: 398, position: 3, driver1: 'Vettel', driver2: 'Räikkönen' },
   { year: 2017, wins: 5, podiums: 20, points: 522, position: 2, driver1: 'Vettel', driver2: 'Räikkönen' },
@@ -15,15 +41,25 @@ const historicalData = [
   { year: 2022, wins: 4, podiums: 20, points: 554, position: 2, driver1: 'Sainz', driver2: 'Leclerc' },
   { year: 2023, wins: 1, podiums: 12, points: 406, position: 3, driver1: 'Sainz', driver2: 'Leclerc' },
   { year: 2024, wins: 5, podiums: 18, points: 652, position: 2, driver1: 'Sainz', driver2: 'Leclerc' },
+  { year: 2025, wins: 9, podiums: 21, points: 712, position: 1, driver1: 'Hamilton', driver2: 'Leclerc' },
 ];
 
+// Legends Data 
 const legendsData = [
   { name: 'M. Schumacher', wins: 72, titles: 5, years: '1996-2006' },
   { name: 'N. Lauda', wins: 15, titles: 2, years: '1974-1977' },
-  { name: 'A. Ascari', wins: 11, titles: 2, years: '1950-1953' },
-  { name: 'K. Räikkönen', wins: 10, titles: 1, years: '2007-2009, 2014-2018' },
   { name: 'S. Vettel', wins: 14, titles: 0, years: '2015-2020' },
-  { name: 'C. Leclerc', wins: 7, titles: 0, years: '2019-presente' },
+  { name: 'A. Ascari', wins: 13, titles: 2, years: '1950-1953' },
+  { name: 'C. Leclerc', wins: 12, titles: 0, years: '2019-presente' },
+  { name: 'F. Alonso', wins: 11, titles: 0, years: '2010-2014' },
+  { name: 'F. Massa', wins: 11, titles: 0, years: '2006-2013' },
+  { name: 'K. Räikkönen', wins: 10, titles: 1, years: '2007-2009, 2014-2018' },
+  { name: 'J. Surtees', wins: 4, titles: 1, years: '1963-1966' },
+  { name: 'J.M. Fangio', wins: 3, titles: 1, years: '1956' },
+  { name: 'M. Hawthorn', wins: 3, titles: 1, years: '1953-1958' },
+  { name: 'P. Hill', wins: 3, titles: 1, years: '1958-1962' },
+  { name: 'G. Villeneuve', wins: 6, titles: 0, years: '1977-1982' },
+  { name: 'L. Hamilton', wins: 4, titles: 0, years: '2025-presente' }, // Basato sulla stagione 2025
 ];
 
 const COLORS = ['#DC0000', '#FF4444', '#FF6666', '#FF8888', '#FFAAAA', '#FFCCCC'];
