@@ -1,9 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, Zap, Trophy, Target, TrendingUp, Loader2, Sparkles, RefreshCw } from 'lucide-react';
-import { Button } from "../ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Slider } from "../ui/slider";
 
 const circuits2025 = [
   { id: 'bahrain', name: 'Bahrain GP', track: 'Sakhir', country: 'Bahrain' },
@@ -33,36 +28,37 @@ const circuits2025 = [
 ];
 
 export default function PredictorSection() {
-  // Initialize state for selected circuit
   const [selectedCircuit, setSelectedCircuit] = useState(circuits2025[0]);
 
   return (
-    <div className="mb-6">
-      <label className="block text-gray-400 mb-3 font-medium">Gran Premio</label>
-      <div className="relative">
-        <select
-          value={selectedCircuit.id}
-          onChange={(e) => {
-            const circuit = circuits2025.find(c => c.id === e.target.value);
-            setSelectedCircuit(circuit || circuits2025[0]);
-          }}
-          className="w-full p-4 bg-gray-800/30 border border-gray-700 rounded-xl text-white appearance-none focus:outline-none focus:border-ferrari-red"
-        >
-          {circuits2025.map((circuit) => (
-            <option key={circuit.id} value={circuit.id}>
-              {circuit.name} - {circuit.track}
-            </option>
-          ))}
-        </select>
-        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+    <div>
+      <div className="mb-6">
+        <label className="block text-gray-400 mb-3 font-medium">Gran Premio</label>
+        <div className="relative">
+          <select
+            value={selectedCircuit.id}
+            onChange={(e) => {
+              const circuit = circuits2025.find(c => c.id === e.target.value);
+              setSelectedCircuit(circuit || circuits2025[0]);
+            }}
+            className="w-full p-4 bg-gray-800/30 border border-gray-700 rounded-xl text-white appearance-none focus:outline-none focus:border-ferrari-red"
+          >
+            {circuits2025.map((circuit) => (
+              <option key={circuit.id} value={circuit.id}>
+                {circuit.name} - {circuit.track}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
         </div>
+        <p className="mt-2 text-sm text-gray-500">
+          Selezionato: <span className="text-ferrari-gold">{selectedCircuit.name}</span> - {selectedCircuit.country}
+        </p>
       </div>
-      <p className="mt-2 text-sm text-gray-500">
-        Selezionato: <span className="text-ferrari-gold">{selectedCircuit.name}</span> - {selectedCircuit.country}
-      </p>
     </div>
   );
 }
