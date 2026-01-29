@@ -29,3 +29,16 @@ export default function Navigation({ activeSection, onNavigate }) {
 
   return (
     <>
+      <nav>
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => handleNavClick(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </nav>
+    </>
+  );
+}

@@ -15,17 +15,38 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-zinc-400 text-sm mb-6">
-              La leggenda che ha scritto la storia della Formula 1. 
+              La leggenda che ha scritto la storia della Formula 1.
               Passione, innovazione ed eccellenza dal 1947.
             </p>
+
             <div className="flex gap-3">
               {[
                 { icon: Instagram, href: 'https://instagram.com/scuderiaferrari' },
                 { icon: Twitter, href: 'https://twitter.com/scuderiaferrari' },
                 { icon: Youtube, href: 'https://youtube.com/scuderiaferrari' },
                 { icon: Facebook, href: 'https://facebook.com/scuderiaferrari' },
-              ].map((social, i) => (
-                <a
-                  key={i}
-                  href={social.href}
-                  target="_blank"
+              ].map((social, i) => {
+                const Icon = social.icon;
+                return (
+                  <a
+                    key={i}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-zinc-400 hover:text-red-600 transition"
+                  >
+                    <Icon size={20} />
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-8 border-t border-zinc-800 text-center text-zinc-500 text-sm flex items-center justify-center gap-2">
+          Made with <Heart className="text-red-600" size={14} /> by Ferrari fans
+        </div>
+      </div>
+    </footer>
+  );
+}
