@@ -10,14 +10,14 @@ function MyApp({ Component, pageProps }) {
         {/* Configurazione colori Ferrari - VERSIONE CORRETTA */}
         <script dangerouslySetInnerHTML={{
           __html: `
-            tailwind.config = {
-              theme: {
-                extend: {
-                  colors: {
-                    'ferrari-red': '#DC0000',
-                    'ferrari-yellow': '#FFD700',
-                    'ferrari-dark': '#0A0A0A'
-                  },
+          tailwind.config = {
+            theme: {
+              extend: {
+                colors: {
+                  'ferrari-red': '#DC0000',
+                  'ferrari-gold': '#FFC300',  // Cambiato da yellow a gold
+                  'ferrari-dark': '#0A0A0A'
+                },
                   animation: {
                     'pulse-slow': 'pulse 3s ease-in-out infinite',
                     'float': 'float 6s ease-in-out infinite',
