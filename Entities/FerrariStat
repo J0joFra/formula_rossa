@@ -24,7 +24,7 @@
     },
     "championship_position": {
       "type": "number",
-      "description": "Posizione nel campionato costruttori"
+      "description": "Posizione nel campionato costruttori:"
     },
     "drivers": {
       "type": "array",
