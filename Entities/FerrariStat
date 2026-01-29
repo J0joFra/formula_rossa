@@ -1,0 +1,50 @@
+{
+  "name": "FerrariStat",
+  "type": "object",
+  "properties": {
+    "year": {
+      "type": "number",
+      "description": "Anno della stagione"
+    },
+    "wins": {
+      "type": "number",
+      "description": "Vittorie nella stagione"
+    },
+    "podiums": {
+      "type": "number",
+      "description": "Podi totali"
+    },
+    "poles": {
+      "type": "number",
+      "description": "Pole position"
+    },
+    "points": {
+      "type": "number",
+      "description": "Punti totali"
+    },
+    "championship_position": {
+      "type": "number",
+      "description": "Posizione nel campionato costruttori"
+    },
+    "drivers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "wins": {
+            "type": "number"
+          },
+          "points": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "year"
+  ]
+}
