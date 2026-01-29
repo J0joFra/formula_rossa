@@ -7,19 +7,32 @@ function MyApp({ Component, pageProps }) {
         {/* Tailwind CSS da CDN */}
         <script src="https://cdn.tailwindcss.com"></script>
         
-        {/* Configurazione colori Ferrari */}
-        <script>
-          tailwind.config = {
-            theme: {
-              extend: {
-                colors: {
-                  'ferrari-red': '#DC0000',
-                  'ferrari-yellow': '#FFD700',
+        {/* Configurazione colori Ferrari - VERSIONE CORRETTA */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            tailwind.config = {
+              theme: {
+                extend: {
+                  colors: {
+                    'ferrari-red': '#DC0000',
+                    'ferrari-yellow': '#FFD700',
+                    'ferrari-dark': '#0A0A0A'
+                  },
+                  animation: {
+                    'pulse-slow': 'pulse 3s ease-in-out infinite',
+                    'float': 'float 6s ease-in-out infinite',
+                  },
+                  keyframes: {
+                    float: {
+                      '0%, 100%': { transform: 'translateY(0)' },
+                      '50%': { transform: 'translateY(-20px)' },
+                    }
+                  }
                 }
               }
             }
-          }
-        </script>
+          `
+        }} />
         
         {/* Font Inter */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -64,16 +77,34 @@ function MyApp({ Component, pageProps }) {
             box-shadow: 0 0 30px rgba(220, 0, 0, 0.3);
           }
           
-          .animate-pulse-slow {
-            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          .bg-ferrari-gradient {
+            background: linear-gradient(135deg, #DC0000 0%, #000000 50%, #FFD700 100%);
           }
           
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+          /* Punti animati Ferrari */
+          @keyframes ferrari-pulse {
+            0%, 100% { 
+              opacity: 0.1;
+              transform: scale(1);
+            }
+            50% { 
+              opacity: 0.3;
+              transform: scale(1.1);
+            }
+          }
+          
+          .animate-ferrari-pulse {
+            animation: ferrari-pulse 2s ease-in-out infinite;
           }
         `}</style>
       </Head>
+      
+      {/* SFONDO CON PUNTI FERRARI */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-ferrari-red rounded-full opacity-10 animate-ferrari-pulse blur-3xl"></div>
+        <div className="absolute bottom-1/3 right-1/3 w-96 h-96 bg-ferrari-yellow rounded-full opacity-5 animate-ferrari-pulse blur-3xl" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/2 right-1/4 w-48 h-48 bg-ferrari-red rounded-full opacity-7 animate-ferrari-pulse blur-3xl" style={{animationDelay: '0.5s'}}></div>
+      </div>
       
       <Component {...pageProps} />
     </>
