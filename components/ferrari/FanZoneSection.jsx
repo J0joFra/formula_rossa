@@ -30,4 +30,11 @@ const shopCategories = [
   }
 ];
 
+export default function FanZoneSection() {
+  return (
+    <section>
+      {/* contenuto */}
+    </section>
+  );
+}
 

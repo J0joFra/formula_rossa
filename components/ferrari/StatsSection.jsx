@@ -29,3 +29,10 @@ const legendsData = [
 
 const COLORS = ['#DC0000', '#FF4444', '#FF6666', '#FF8888', '#FFAAAA', '#FFCCCC'];
 
+export default function StatsSection() {
+  return (
+    <section>
+      {/* contenuto */}
+    </section>
+  );
+}
