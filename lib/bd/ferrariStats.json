@@ -1,0 +1,35 @@
+// lib/db/ferrariStats.json 
+{
+  "historicalPerformance": {
+    "monza": { wins: 20, podiums: 45, lastWin: 2023, strength: 0.95 },
+    "monaco": { wins: 9, podiums: 32, lastWin: 2024, strength: 0.85 },
+    "spa": { wins: 18, podiums: 40, lastWin: 2024, strength: 0.90 },
+    "silverstone": { wins: 17, podiums: 38, lastWin: 2024, strength: 0.88 },
+    "suzuka": { wins: 7, podiums: 20, lastWin: 2024, strength: 0.75 },
+    "interlagos": { wins: 10, podiums: 25, lastWin: 2022, strength: 0.80 }
+  },
+  "driverStats": {
+    "leclerc": {
+      "totalWins": 11,
+      "poles": 25,
+      "podiums": 40,
+      "fastestLaps": 15,
+      "points": 1358
+    },
+    "sainz": {
+      "totalWins": 3,
+      "poles": 5,
+      "podiums": 21,
+      "fastestLaps": 8,
+      "points": 1055
+    }
+  },
+  "season2024": {
+    "wins": 7,
+    "podiums": 27,
+    "points": 663,
+    "constructorPosition": 2,
+    "bestRace": "Monaco GP",
+    "note": "Carlos Sainz sostituito da Lewis Hamilton dopo Dutch GP"
+  }
+}
