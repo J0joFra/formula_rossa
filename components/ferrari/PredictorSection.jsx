@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { FerrariPredictionService } from '../../services/ferrariPredictionService';
+import { useFerrariData } from '../../hooks/useOpenF1Data';
+import { CIRCUITS_2025 } from '../../lib/openf1/constants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Zap, Trophy, Target, TrendingUp, Loader2, Sparkles, RefreshCw } from 'lucide-react';
 import { Button } from "../ui/button";
