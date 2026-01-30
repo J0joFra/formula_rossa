@@ -7,8 +7,8 @@ import {
   BarChart as BarChartIcon, PieChart as PieChartIcon,
   Activity, GitCompare, Heart, Star
 } from 'lucide-react';
-import { OpenF1Client } from '../../lib/openf1/client';
-import { useFerrariData } from '../../hooks/useFerrariData';
+import { getFerrariData } from '@/lib/openf1/client';  
+import useFerrariData from '@/hooks/useFerrariData';
 
 // Componente per le statistiche real-time
 const LiveStatsComponent = ({ sessionKey }) => {
