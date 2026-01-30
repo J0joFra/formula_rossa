@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getDriverStandings } from '@/lib/services/standingsService';
+import { getDriverStandings } from '../../lib/services/standingsService';
 
 export default function DriverStandings({ season }) {
   const [standings, setStandings] = useState([]);

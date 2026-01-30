@@ -1,6 +1,5 @@
 // components/standings/MaidenSection.jsx
-import { getMaidenAchievements } from '@/lib/services/analysisService';
-
+import { getMaidenAchievements } from '../../lib/services/analysisService';
 export default function MaidenSection({ season }) {
   const maidenData = getMaidenAchievements(season);
   
