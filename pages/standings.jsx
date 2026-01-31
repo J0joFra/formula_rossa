@@ -1,43 +1,103 @@
 // pages/standings.jsx
-/*'use client';
-
-import { useState } from 'react';
-import DriverStandings from '../components/standings/DriverStandings';
-import ConstructorStandings from '../components/standings/ConstructorStandings';
-import MaidenSection from '../components/standings/MaidenSection';
-import SeasonSelector from '../components/standings/SeasonSelector'; */
-
 import { useState, useEffect } from 'react';
-import dataLoader from '../dataLoader';
 
 export default function StandingsPage() {
   const [driverStandings, setDriverStandings] = useState([]);
   const [constructorStandings, setConstructorStandings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedSeason, setSelectedSeason] = useState(2025);
+  const [drivers, setDrivers] = useState({});
+  const [constructors, setConstructors] = useState({});
 
   useEffect(() => {
     loadStandings();
-  }, [selectedSeason]);
+  }, []);
+
+  async function loadJSON(path) {
+    try {
+      const response = await fetch(path);
+      if (!response.ok) {
+        console.warn(`⚠️ File not found: ${path}`);
+        return null;
+      }
+      const data = await response.json();
+      return Array.isArray(data) ? data : null;
+    } catch (error) {
+      console.error(`❌ Error loading ${path}:`, error.message);
+      return null;
+    }
+  }
 
   async function loadStandings() {
     try {
       setLoading(true);
       setError(null);
 
-      // Carica tutti i dati
-      await dataLoader.loadAllData();
+      console.log('🚀 Loading standings data...');
 
-      // Ottieni classifiche per la stagione selezionata
-      const drivers = dataLoader.getDriverStandings(selectedSeason);
-      const constructors = dataLoader.getConstructorStandings(selectedSeason);
+      const [
+        driversData,
+        constructorsData,
+        driverStandingsData,
+        constructorStandingsData
+      ] = await Promise.all([
+        loadJSON('/data/drivers.json'),
+        loadJSON('/data/constructors.json'),
+        loadJSON('/data/driver_standings.json'),
+        loadJSON('/data/constructor_standings.json')
+      ]);
 
-      console.log('🏎️ Driver standings:', drivers);
-      console.log('🏭 Constructor standings:', constructors);
+      if (!driversData || !constructorsData || !driverStandingsData || !constructorStandingsData) {
+        throw new Error('Failed to load required data files');
+      }
 
-      setDriverStandings(drivers);
-      setConstructorStandings(constructors);
+      console.log('📊 Data loaded:', {
+        drivers: driversData.length,
+        constructors: constructorsData.length,
+        driverStandings: driverStandingsData.length,
+        constructorStandings: constructorStandingsData.length
+      });
+
+      const driversMap = {};
+      driversData.forEach(d => {
+        driversMap[d.driver_id] = d;
+      });
+
+      const constructorsMap = {};
+      constructorsData.forEach(c => {
+        constructorsMap[c.constructor_id] = c;
+      });
+
+      setDrivers(driversMap);
+      setConstructors(constructorsMap);
+
+      const drivers2025 = driverStandingsData.filter(s => s.season === 2025);
+      const constructors2025 = constructorStandingsData.filter(s => s.season === 2025);
+
+      console.log('📅 2025 data:', {
+        drivers: drivers2025.length,
+        constructors: constructors2025.length
+      });
+
+      if (drivers2025.length > 0) {
+        const maxRound = Math.max(...drivers2025.map(s => s.round));
+        const finalDrivers = drivers2025
+          .filter(s => s.round === maxRound)
+          .sort((a, b) => a.position - b.position);
+        
+        console.log('🏎️ Final driver standings:', finalDrivers.length);
+        setDriverStandings(finalDrivers);
+      }
+
+      if (constructors2025.length > 0) {
+        const maxRound = Math.max(...constructors2025.map(s => s.round));
+        const finalConstructors = constructors2025
+          .filter(s => s.round === maxRound && s.position !== null)
+          .sort((a, b) => a.position - b.position);
+        
+        console.log('🏭 Final constructor standings:', finalConstructors.length);
+        setConstructorStandings(finalConstructors);
+      }
 
     } catch (err) {
       console.error('❌ Error loading standings:', err);
@@ -73,10 +133,10 @@ export default function StandingsPage() {
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-red-500 mb-3 text-center">Errore</h2>
-          <p className="text-gray-300 text-center">{error}</p>
+          <p className="text-gray-300 text-center mb-4">{error}</p>
           <button 
             onClick={loadStandings}
-            className="w-full mt-6 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
           >
             Riprova
           </button>
@@ -87,11 +147,10 @@ export default function StandingsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
-      {/* Header */}
       <div className="bg-gradient-to-r from-red-600 to-red-800 shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <h1 className="text-5xl font-black text-center mb-4 tracking-tight">
-            Formula 1 {selectedSeason}
+            Formula 1 2025
           </h1>
           <p className="text-center text-red-100 text-lg">
             World Championship Standings
@@ -101,7 +160,6 @@ export default function StandingsPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
-        {/* Driver Standings */}
         <section className="mb-16">
           <div className="flex items-center mb-6">
             <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent"></div>
@@ -114,7 +172,7 @@ export default function StandingsPage() {
           {driverStandings.length === 0 ? (
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 text-center border border-gray-700">
               <p className="text-gray-400 text-lg">
-                Nessun dato disponibile per la stagione {selectedSeason}
+                Nessun dato disponibile per la stagione 2025
               </p>
             </div>
           ) : (
@@ -126,56 +184,55 @@ export default function StandingsPage() {
                       <th className="p-4 text-left font-bold">POS</th>
                       <th className="p-4 text-left font-bold">DRIVER</th>
                       <th className="p-4 text-left font-bold">NATIONALITY</th>
-                      <th className="p-4 text-left font-bold">TEAM</th>
                       <th className="p-4 text-right font-bold">POINTS</th>
                       <th className="p-4 text-right font-bold">WINS</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {driverStandings.map((standing, index) => (
-                      <tr 
-                        key={standing.driver.id}
-                        className={`
-                          border-b border-gray-700 transition-all duration-200
-                          ${index % 2 === 0 ? 'bg-gray-800/20' : 'bg-gray-800/40'}
-                          hover:bg-red-900/20 hover:scale-[1.01]
-                        `}
-                      >
-                        <td className="p-4">
-                          <div className={`
-                            font-black text-xl
-                            ${index === 0 ? 'text-yellow-400' : ''}
-                            ${index === 1 ? 'text-gray-300' : ''}
-                            ${index === 2 ? 'text-orange-400' : ''}
-                            ${index > 2 ? 'text-gray-400' : ''}
-                          `}>
-                            {standing.position}
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          <div className="font-bold text-lg">
-                            {standing.driver.givenName}{' '}
-                            <span className="text-red-400">{standing.driver.familyName}</span>
-                          </div>
-                        </td>
-                        <td className="p-4 text-gray-400">
-                          {standing.driver.nationality || 'N/A'}
-                        </td>
-                        <td className="p-4">
-                          <span className="bg-gray-700/50 px-3 py-1 rounded-full text-sm font-medium">
-                            {standing.constructor.name}
-                          </span>
-                        </td>
-                        <td className="p-4 text-right">
-                          <span className="font-bold text-xl text-red-400">
-                            {standing.points}
-                          </span>
-                        </td>
-                        <td className="p-4 text-right text-gray-300 font-semibold">
-                          {standing.wins}
-                        </td>
-                      </tr>
-                    ))}
+                    {driverStandings.map((standing, index) => {
+                      const driver = drivers[standing.driver_id] || {};
+                      return (
+                        <tr 
+                          key={standing.driver_id}
+                          className={`
+                            border-b border-gray-700 transition-all duration-200
+                            ${index % 2 === 0 ? 'bg-gray-800/20' : 'bg-gray-800/40'}
+                            hover:bg-red-900/20 hover:scale-[1.01]
+                          `}
+                        >
+                          <td className="p-4">
+                            <div className={`
+                              font-black text-xl
+                              ${index === 0 ? 'text-yellow-400' : ''}
+                              ${index === 1 ? 'text-gray-300' : ''}
+                              ${index === 2 ? 'text-orange-400' : ''}
+                              ${index > 2 ? 'text-gray-400' : ''}
+                            `}>
+                              {standing.position}
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="font-bold text-lg">
+                              {driver.givenName || ''}{' '}
+                              <span className="text-red-400">
+                                {driver.familyName || standing.driver_id}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="p-4 text-gray-400">
+                            {driver.nationality || 'N/A'}
+                          </td>
+                          <td className="p-4 text-right">
+                            <span className="font-bold text-xl text-red-400">
+                              {standing.points}
+                            </span>
+                          </td>
+                          <td className="p-4 text-right text-gray-300 font-semibold">
+                            {standing.wins}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -183,7 +240,6 @@ export default function StandingsPage() {
           )}
         </section>
 
-        {/* Constructor Standings */}
         <section>
           <div className="flex items-center mb-6">
             <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent"></div>
@@ -196,7 +252,7 @@ export default function StandingsPage() {
           {constructorStandings.length === 0 ? (
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 text-center border border-gray-700">
               <p className="text-gray-400 text-lg">
-                Nessun dato disponibile per la stagione {selectedSeason}
+                Nessun dato disponibile per la stagione 2025
               </p>
             </div>
           ) : (
@@ -213,50 +269,53 @@ export default function StandingsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {constructorStandings.map((standing, index) => (
-                      <tr 
-                        key={standing.constructor.id}
-                        className={`
-                          border-b border-gray-700 transition-all duration-200
-                          ${index % 2 === 0 ? 'bg-gray-800/20' : 'bg-gray-800/40'}
-                          hover:bg-red-900/20 hover:scale-[1.01]
-                          ${standing.constructor.id === 'ferrari' ? 'border-l-4 border-l-red-600' : ''}
-                        `}
-                      >
-                        <td className="p-4">
-                          <div className={`
-                            font-black text-xl
-                            ${index === 0 ? 'text-yellow-400' : ''}
-                            ${index === 1 ? 'text-gray-300' : ''}
-                            ${index === 2 ? 'text-orange-400' : ''}
-                            ${index > 2 ? 'text-gray-400' : ''}
-                          `}>
-                            {standing.position}
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          <div className="font-bold text-lg flex items-center">
-                            {standing.constructor.id === 'ferrari' && (
-                              <span className="mr-2 text-2xl">🏎️</span>
-                            )}
-                            <span className={standing.constructor.id === 'ferrari' ? 'text-red-400' : ''}>
-                              {standing.constructor.name}
+                    {constructorStandings.map((standing, index) => {
+                      const constructor = constructors[standing.constructor_id] || {};
+                      return (
+                        <tr 
+                          key={standing.constructor_id}
+                          className={`
+                            border-b border-gray-700 transition-all duration-200
+                            ${index % 2 === 0 ? 'bg-gray-800/20' : 'bg-gray-800/40'}
+                            hover:bg-red-900/20 hover:scale-[1.01]
+                            ${standing.constructor_id === 'ferrari' ? 'border-l-4 border-l-red-600' : ''}
+                          `}
+                        >
+                          <td className="p-4">
+                            <div className={`
+                              font-black text-xl
+                              ${index === 0 ? 'text-yellow-400' : ''}
+                              ${index === 1 ? 'text-gray-300' : ''}
+                              ${index === 2 ? 'text-orange-400' : ''}
+                              ${index > 2 ? 'text-gray-400' : ''}
+                            `}>
+                              {standing.position}
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="font-bold text-lg flex items-center">
+                              {standing.constructor_id === 'ferrari' && (
+                                <span className="mr-2 text-2xl">🏎️</span>
+                              )}
+                              <span className={standing.constructor_id === 'ferrari' ? 'text-red-400' : ''}>
+                                {constructor.name || standing.constructor_id}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="p-4 text-gray-400">
+                            {constructor.nationality || 'N/A'}
+                          </td>
+                          <td className="p-4 text-right">
+                            <span className="font-bold text-xl text-red-400">
+                              {standing.points}
                             </span>
-                          </div>
-                        </td>
-                        <td className="p-4 text-gray-400">
-                          {standing.constructor.nationality || 'N/A'}
-                        </td>
-                        <td className="p-4 text-right">
-                          <span className="font-bold text-xl text-red-400">
-                            {standing.points}
-                          </span>
-                        </td>
-                        <td className="p-4 text-right text-gray-300 font-semibold">
-                          {standing.wins}
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td className="p-4 text-right text-gray-300 font-semibold">
+                            {standing.wins}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
