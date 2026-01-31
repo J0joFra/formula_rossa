@@ -8,10 +8,12 @@ export default function StandingsPage() {
   const [error, setError] = useState(null);
   const [drivers, setDrivers] = useState({});
   const [constructors, setConstructors] = useState({});
+  const [selectedSeason, setSelectedSeason] = useState(2025);
+  const [availableSeasons, setAvailableSeasons] = useState([]);
 
   useEffect(() => {
     loadStandings();
-  }, []);
+  }, [selectedSeason]);
 
   async function loadJSON(path) {
     try {
@@ -33,7 +35,7 @@ export default function StandingsPage() {
       setLoading(true);
       setError(null);
 
-      console.log('🚀 Loading standings data...');
+      console.log('🚀 Loading standings data for season', selectedSeason);
 
       const [
         driversData,
@@ -58,6 +60,7 @@ export default function StandingsPage() {
         constructorStandings: constructorStandingsData.length
       });
 
+      // Crea mappe per lookup veloce
       const driversMap = {};
       driversData.forEach(d => {
         driversMap[d.driver_id] = d;
@@ -71,32 +74,43 @@ export default function StandingsPage() {
       setDrivers(driversMap);
       setConstructors(constructorsMap);
 
-      const drivers2025 = driverStandingsData.filter(s => s.season === 2025);
-      const constructors2025 = constructorStandingsData.filter(s => s.season === 2025);
+      // Trova tutte le stagioni disponibili
+      const seasons = [...new Set(driverStandingsData.map(s => s.season))].sort((a, b) => b - a);
+      setAvailableSeasons(seasons);
+      console.log('📅 Available seasons:', seasons);
 
-      console.log('📅 2025 data:', {
-        drivers: drivers2025.length,
-        constructors: constructors2025.length
+      // Filtra per stagione selezionata
+      const driversForSeason = driverStandingsData.filter(s => s.season === selectedSeason);
+      const constructorsForSeason = constructorStandingsData.filter(s => s.season === selectedSeason);
+
+      console.log(`📅 ${selectedSeason} data:`, {
+        drivers: driversForSeason.length,
+        constructors: constructorsForSeason.length
       });
 
-      if (drivers2025.length > 0) {
-        const maxRound = Math.max(...drivers2025.map(s => s.round));
-        const finalDrivers = drivers2025
+      // Prendi solo l'ultimo round della stagione
+      if (driversForSeason.length > 0) {
+        const maxRound = Math.max(...driversForSeason.map(s => s.round));
+        const finalDrivers = driversForSeason
           .filter(s => s.round === maxRound)
           .sort((a, b) => a.position - b.position);
         
         console.log('🏎️ Final driver standings:', finalDrivers.length);
         setDriverStandings(finalDrivers);
+      } else {
+        setDriverStandings([]);
       }
 
-      if (constructors2025.length > 0) {
-        const maxRound = Math.max(...constructors2025.map(s => s.round));
-        const finalConstructors = constructors2025
+      if (constructorsForSeason.length > 0) {
+        const maxRound = Math.max(...constructorsForSeason.map(s => s.round));
+        const finalConstructors = constructorsForSeason
           .filter(s => s.round === maxRound && s.position !== null)
           .sort((a, b) => a.position - b.position);
         
         console.log('🏭 Final constructor standings:', finalConstructors.length);
         setConstructorStandings(finalConstructors);
+      } else {
+        setConstructorStandings([]);
       }
 
     } catch (err) {
@@ -147,19 +161,46 @@ export default function StandingsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
+      {/* Header con Season Selector */}
       <div className="bg-gradient-to-r from-red-600 to-red-800 shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-5xl font-black text-center mb-4 tracking-tight">
-            Formula 1 2025
-          </h1>
-          <p className="text-center text-red-100 text-lg">
-            World Championship Standings
-          </p>
+          <div className="flex flex-col items-center space-y-4">
+            <h1 className="text-5xl font-black text-center tracking-tight">
+              Formula 1 {selectedSeason}
+            </h1>
+            <p className="text-center text-red-100 text-lg">
+              World Championship Standings
+            </p>
+            
+            {/* Season Selector */}
+            {availableSeasons.length > 0 && (
+              <div className="flex items-center space-x-3 bg-black/30 backdrop-blur-sm rounded-xl px-6 py-3 border border-red-500/30">
+                <label htmlFor="season-select" className="text-red-100 font-semibold">
+                  Season:
+                </label>
+                <select
+                  id="season-select"
+                  value={selectedSeason}
+                  onChange={(e) => setSelectedSeason(Number(e.target.value))}
+                  className="bg-gray-900 text-white font-bold px-4 py-2 rounded-lg border-2 border-red-600 
+                           hover:border-red-500 focus:border-red-400 focus:ring-2 focus:ring-red-500/50 
+                           transition-all cursor-pointer outline-none"
+                >
+                  {availableSeasons.map(season => (
+                    <option key={season} value={season}>
+                      {season}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
+        {/* Driver Standings */}
         <section className="mb-16">
           <div className="flex items-center mb-6">
             <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent"></div>
@@ -172,7 +213,7 @@ export default function StandingsPage() {
           {driverStandings.length === 0 ? (
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 text-center border border-gray-700">
               <p className="text-gray-400 text-lg">
-                Nessun dato disponibile per la stagione 2025
+                Nessun dato disponibile per la stagione {selectedSeason}
               </p>
             </div>
           ) : (
@@ -240,6 +281,7 @@ export default function StandingsPage() {
           )}
         </section>
 
+        {/* Constructor Standings */}
         <section>
           <div className="flex items-center mb-6">
             <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent"></div>
@@ -252,7 +294,7 @@ export default function StandingsPage() {
           {constructorStandings.length === 0 ? (
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 text-center border border-gray-700">
               <p className="text-gray-400 text-lg">
-                Nessun dato disponibile per la stagione 2025
+                Nessun dato disponibile per la stagione {selectedSeason}
               </p>
             </div>
           ) : (
