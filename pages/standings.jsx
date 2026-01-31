@@ -3,6 +3,30 @@ import { useState, useEffect } from 'react';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 
+// Mappatura nazionalità -> codice ISO per le bandiere
+const nationalityToCountryCode = {
+  'Monegasque': 'mc',
+  'Spanish': 'es',
+  'British': 'gb',
+  'Dutch': 'nl',
+  'Mexican': 'mx',
+  'Australian': 'au',
+  'German': 'de',
+  'French': 'fr',
+  'Canadian': 'ca',
+  'Japanese': 'jp',
+  'Danish': 'dk',
+  'Finnish': 'fi',
+  'Chinese': 'cn',
+  'Thai': 'th',
+  'American': 'us',
+  'Brazilian': 'br',
+  'Italian': 'it',
+  'Austrian': 'at',
+  'Swiss': 'ch',
+  'New Zealander': 'nz'
+};
+
 export default function StandingsPage() {
   const [driverStandings, setDriverStandings] = useState([]);
   const [constructorStandings, setConstructorStandings] = useState([]);
@@ -13,7 +37,6 @@ export default function StandingsPage() {
   const [selectedSeason, setSelectedSeason] = useState(2025);
   const [availableSeasons, setAvailableSeasons] = useState([]);
   
-  // Stati per l'espansione delle classifiche
   const [showFullDrivers, setShowFullDrivers] = useState(false);
   const [showFullConstructors, setShowFullConstructors] = useState(false);
   
@@ -37,7 +60,6 @@ export default function StandingsPage() {
     try {
       setLoading(true);
       setError(null);
-      // Reset espansione al cambio stagione
       setShowFullDrivers(false);
       setShowFullConstructors(false);
 
@@ -106,6 +128,11 @@ export default function StandingsPage() {
     setActiveSection(sectionId);
   };
 
+  const getFlagUrl = (nationality) => {
+    const code = nationalityToCountryCode[nationality];
+    return code ? `https://flagcdn.com/w40/${code}.png` : null;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -114,20 +141,15 @@ export default function StandingsPage() {
     );
   }
 
-  // Logica per decidere quanti elementi mostrare
   const visibleDrivers = showFullDrivers ? driverStandings : driverStandings.slice(0, 5);
   const visibleConstructors = showFullConstructors ? constructorStandings : constructorStandings.slice(0, 5);
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* SFONDO CON PUNTI FERRARI (Solo Rossi) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
         <div className="absolute top-1/3 right-1/3 w-6 h-6 bg-red-600 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
         <div className="absolute bottom-1/4 left-1/3 w-3 h-3 bg-red-400 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
-        
-        {/* Rimossi i puntini gialli qui */}
-        
         <div className="absolute inset-0 opacity-5"
           style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, #DC0000 1px, transparent 0)`,
@@ -191,20 +213,27 @@ export default function StandingsPage() {
                   <tbody>
                     {visibleDrivers.map((standing, index) => {
                       const driver = drivers[standing.driver_id] || {};
+                      const isFerrariDriver = standing.constructor_id === 'ferrari';
+                      const flag = getFlagUrl(driver.nationality);
+                      
                       return (
-                        <tr key={standing.driver_id} className="border-b border-zinc-800/50 hover:bg-red-600/5 transition-colors group">
+                        <tr key={standing.driver_id} className={`border-b border-zinc-800/50 hover:bg-red-600/5 transition-colors group ${isFerrariDriver ? 'bg-red-600/10' : ''}`}>
                           <td className="p-5">
                             <span className={`text-2xl font-black italic ${index < 3 ? 'text-red-600' : 'text-zinc-700'}`}>
                               {standing.position}
                             </span>
                           </td>
                           <td className="p-5">
-                            <div className="font-bold text-lg group-hover:translate-x-1 transition-transform">
+                            <div className={`font-bold text-lg group-hover:translate-x-1 transition-transform ${isFerrariDriver ? 'text-red-500' : ''}`}>
                               <span className="text-gray-400 font-medium">{driver.givenName}</span> {driver.familyName?.toUpperCase()}
+                              {isFerrariDriver && <span className="ml-2">🐎</span>}
                             </div>
                           </td>
                           <td className="p-5 text-zinc-500 font-medium uppercase text-sm">
-                            {driver.nationality}
+                            <div className="flex items-center gap-2">
+                              {flag && <img src={flag} alt="" className="w-5 h-auto shadow-sm" />}
+                              {driver.nationality}
+                            </div>
                           </td>
                           <td className="p-5 text-right font-bold text-zinc-400">
                             {standing.wins}
@@ -219,7 +248,6 @@ export default function StandingsPage() {
                 </table>
               </div>
               
-              {/* Bottone Espandi Piloti */}
               {driverStandings.length > 5 && (
                 <button 
                   onClick={() => setShowFullDrivers(!showFullDrivers)}
@@ -256,6 +284,8 @@ export default function StandingsPage() {
                     {visibleConstructors.map((standing, index) => {
                       const constructor = constructors[standing.constructor_id] || {};
                       const isFerrari = standing.constructor_id === 'ferrari';
+                      const flag = getFlagUrl(constructor.nationality);
+                      
                       return (
                         <tr 
                           key={standing.constructor_id} 
@@ -273,7 +303,10 @@ export default function StandingsPage() {
                             </div>
                           </td>
                           <td className="p-5 text-zinc-500 font-medium uppercase text-sm">
-                            {constructor.nationality}
+                            <div className="flex items-center gap-2">
+                              {flag && <img src={flag} alt="" className="w-5 h-auto shadow-sm" />}
+                              {constructor.nationality}
+                            </div>
                           </td>
                           <td className="p-5 text-right font-bold text-zinc-400">
                             {standing.wins}
@@ -288,7 +321,6 @@ export default function StandingsPage() {
                 </table>
               </div>
 
-              {/* Bottone Espandi Costruttori */}
               {constructorStandings.length > 5 && (
                 <button 
                   onClick={() => setShowFullConstructors(!showFullConstructors)}
