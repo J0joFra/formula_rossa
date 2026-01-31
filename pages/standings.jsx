@@ -71,29 +71,20 @@ const nationalityToCountryCode = {
   'New Zealander': 'nz'
 };
 
-// Mock dati calendar
-const raceCalendar = [
-  { id: 1, code: 'AUS', date: 'Mar 16', country: 'au' },
-  { id: 2, code: 'CHN', date: 'Mar 23', country: 'cn' },
-  { id: 3, code: 'JPN', date: 'Apr 6', country: 'jp' },
-  { id: 4, code: 'BHR', date: 'Apr 13', country: 'bh' },
-  { id: 5, code: 'SAU', date: 'Apr 20', country: 'sa' },
-  { id: 6, code: 'MIA', date: 'May 4', country: 'us' },
-  { id: 7, code: 'EMI', date: 'May 18', country: 'it' },
-  { id: 8, code: 'MCO', date: 'May 25', country: 'mc' },
-  { id: 9, code: 'ESP', date: 'Jun 1', country: 'es' },
-  { id: 10, code: 'CAN', date: 'Jun 15', country: 'ca' },
-  { id: 11, code: 'AUT', date: 'Jun 29', country: 'at' },
-  { id: 12, code: 'GBR', date: 'Jul 6', country: 'gb' },
-  { id: 13, code: 'BEL', date: 'Jul 27', country: 'be' },
-  { id: 14, code: 'HUN', date: 'Aug 3', country: 'hu' },
-  { id: 15, code: 'NLD', date: 'Aug 31', country: 'nl' },
-  { id: 16, code: 'ITA', date: 'Sep 7', country: 'it' },
-];
+// Map calendar
+const circuitToCountry = {
+    'albert_park': 'au', 'shanghai': 'cn', 'suzuka': 'jp', 'bahrain': 'bh',
+    'jeddah': 'sa', 'miami': 'us', 'imola': 'it', 'monaco': 'mc',
+    'catalunya': 'es', 'villeneuve': 'ca', 'red_bull_ring': 'at', 'silverstone': 'gb',
+    'spa': 'be', 'hungaroring': 'hu', 'zandvoort': 'nl', 'monza': 'it',
+    'baku': 'az', 'marina_bay': 'sg', 'americas': 'us', 'rodriguez': 'mx',
+    'interlagos': 'br', 'vegas': 'us', 'losail': 'qa', 'yas_marina': 'ae'
+};
 
 export default function StandingsPage() {
   const [driverStandings, setDriverStandings] = useState([]);
   const [constructorStandings, setConstructorStandings] = useState([]);
+  const [calendar, setCalendar] = useState([]);
   const [loading, setLoading] = useState(true);
   const [drivers, setDrivers] = useState({});
   const [constructors, setConstructors] = useState({});
@@ -116,11 +107,12 @@ export default function StandingsPage() {
   async function loadStandings() {
     try {
       setLoading(true);
-      const [drData, coData, drStData, coStData] = await Promise.all([
+      const [drData, coData, drStData, coStData, resData] = await Promise.all([
         loadJSON('/data/drivers.json'),
         loadJSON('/data/constructors.json'),
         loadJSON('/data/driver_standings.json'),
-        loadJSON('/data/constructor_standings.json')
+        loadJSON('/data/constructor_standings.json'),
+        loadJSON('/data/results.json')
       ]);
 
       const drMap = {}; drData?.forEach(d => drMap[d.driver_id] = d);
@@ -130,23 +122,37 @@ export default function StandingsPage() {
       const seasons = [...new Set(drStData?.map(s => s.season))].sort((a, b) => b - a);
       setAvailableSeasons(seasons);
 
+      // Classifica Piloti
       const drS = drStData?.filter(s => s.season === selectedSeason) || [];
       if (drS.length > 0) {
         const maxR = Math.max(...drS.map(s => s.round));
         setDriverStandings(drS.filter(s => s.round === maxR && s.position).sort((a, b) => a.position - b.position));
       }
       
+      // Classifica Costruttori
       const coS = coStData?.filter(s => s.season === selectedSeason) || [];
       if (coS.length > 0) {
         const maxR = Math.max(...coS.map(s => s.round));
         setConstructorStandings(coS.filter(s => s.round === maxR && s.position).sort((a, b) => a.position - b.position));
       }
+
+      // Calendario Gare (da results.json)
+      const seasonRaces = resData?.filter(r => r.season === selectedSeason)
+                                  .sort((a, b) => a.round - b.round) || [];
+      setCalendar(seasonRaces);
+
     } finally { setLoading(false); }
   }
 
-  const getFlagUrl = (nat) => {
-    const code = nationalityToCountryCode[nat];
+  const getFlagUrl = (natOrCircuit, isCircuit = false) => {
+    const code = isCircuit ? circuitToCountry[natOrCircuit] : nationalityToCountryCode[natOrCircuit];
     return code ? `https://flagcdn.com/w40/${code}.png` : null;
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   const visibleDrivers = showFullDrivers ? driverStandings : driverStandings.slice(0, 5);
@@ -160,9 +166,8 @@ export default function StandingsPage() {
 
       <main className="max-w-7xl mx-auto px-4 pt-32 pb-20 relative z-10">
         
-        {/* Header Stagione */}
         <div className="flex justify-between items-end mb-12 border-b border-red-600/30 pb-6">
-          <h1 className="text-5xl font-black italic italic uppercase tracking-tighter">Standings <span className="text-red-600">{selectedSeason}</span></h1>
+          <h1 className="text-5xl font-black italic uppercase tracking-tighter">Standings <span className="text-red-600">{selectedSeason}</span></h1>
           <select value={selectedSeason} onChange={(e) => setSelectedSeason(Number(e.target.value))} className="bg-zinc-900 border-l-4 border-red-600 px-4 py-2 font-bold outline-none">
             {availableSeasons.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
@@ -182,6 +187,7 @@ export default function StandingsPage() {
                 <tr className="text-zinc-500 uppercase text-[10px] border-b border-zinc-800">
                   <th className="p-4 w-12">Pos</th>
                   <th className="p-4">Driver</th>
+                  <th className="p-4">Team</th>
                   <th className="p-4 w-12 text-center">Nat</th>
                   <th className="p-4 text-right">Pts</th>
                 </tr>
@@ -195,6 +201,15 @@ export default function StandingsPage() {
                     <tr key={s.driver_id} className={`border-b border-zinc-800/30 ${isFerrari ? 'bg-red-600/10' : ''}`}>
                       <td className={`p-4 font-black italic ${i < 3 ? 'text-red-600' : 'text-zinc-600'}`}>{s.position}</td>
                       <td className={`p-4 font-bold ${isFerrari ? 'text-red-500' : ''}`}>{d.familyName?.toUpperCase()}</td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                           {/* Assumendo che i loghi siano in /images/teams/ID.png */}
+                           <img src={`/images/teams/${s.constructor_id}.png`} 
+                                onError={(e) => e.target.style.display='none'} 
+                                className="w-6 h-6 object-contain" alt="" />
+                           <span className="text-[10px] text-zinc-400 hidden md:block">{constructors[s.constructor_id]?.name}</span>
+                        </div>
+                      </td>
                       <td className="p-4 text-center">{flag && <img src={flag} className="w-5 mx-auto opacity-80" alt="" />}</td>
                       <td className="p-4 text-right font-black">{s.points}</td>
                     </tr>
@@ -230,7 +245,14 @@ export default function StandingsPage() {
                   return (
                     <tr key={s.constructor_id} className={`border-b border-zinc-800/30 ${isFerrari ? 'bg-red-600/10' : ''}`}>
                       <td className={`p-4 font-black italic ${i < 3 ? 'text-red-600' : 'text-zinc-600'}`}>{s.position}</td>
-                      <td className={`p-4 font-bold ${isFerrari ? 'text-red-500' : ''}`}>{c.name?.toUpperCase()}</td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2 font-bold">
+                          <img src={`/images/teams/${s.constructor_id}.png`} 
+                               onError={(e) => e.target.style.display='none'} 
+                               className="w-6 h-6 object-contain" alt="" />
+                          <span className={isFerrari ? 'text-red-500' : ''}>{c.name?.toUpperCase()}</span>
+                        </div>
+                      </td>
                       <td className="p-4 text-center">{flag && <img src={flag} className="w-5 mx-auto opacity-80" alt="" />}</td>
                       <td className="p-4 text-right font-black">{s.points}</td>
                     </tr>
@@ -244,7 +266,7 @@ export default function StandingsPage() {
           </section>
         </div>
 
-        {/* SEASON OVERVIEW (Stile Screenshot) */}
+        {/* SEASON OVERVIEW */}
         <section className="bg-white rounded-xl overflow-hidden shadow-2xl">
           <div className="bg-[#1a2332] p-4 text-center">
             <h2 className="text-white text-2xl font-bold">Season Overview</h2>
@@ -252,16 +274,13 @@ export default function StandingsPage() {
           
           <div className="p-8 grid grid-cols-1 lg:grid-cols-3 gap-12">
             
-            {/* Stats Summary */}
             <div className="space-y-4">
               <h3 className="text-zinc-800 text-xl font-bold mb-6">Stats Summary</h3>
               <div className="space-y-3">
                 {[
-                  { label: 'World Champion', val: 'Lando Norris', color: 'border-yellow-400 bg-yellow-50', icon: '🏆' },
-                  { label: 'Constructor Champion', val: 'McLaren', color: 'border-purple-400 bg-purple-50', icon: '🎗️' },
-                  { label: 'Most Wins', val: 'Max Verstappen (x8)', color: 'border-zinc-200 bg-white', icon: '🏆' },
-                  { label: 'Most Poles', val: 'Max Verstappen (x8)', color: 'border-zinc-200 bg-white', icon: '🎯' },
-                  { label: 'Most Podiums', val: 'Lando Norris (x18)', color: 'border-zinc-200 bg-white', icon: '🥉' },
+                  { label: 'World Champion', val: driverStandings[0] ? `${drivers[driverStandings[0].driver_id]?.givenName} ${drivers[driverStandings[0].driver_id]?.familyName}` : '-', color: 'border-yellow-400 bg-yellow-50', icon: '🏆' },
+                  { label: 'Constructor Champion', val: constructorStandings[0] ? constructors[constructorStandings[0].constructor_id]?.name : '-', color: 'border-purple-400 bg-purple-50', icon: '🎗️' },
+                  { label: 'Most Wins', val: driverStandings[0] ? `${drivers[driverStandings[0].driver_id]?.familyName} (x${driverStandings[0].wins})` : '-', color: 'border-zinc-200 bg-white', icon: '🏆' },
                 ].map((stat, idx) => (
                   <div key={idx} className={`flex justify-between items-center p-4 border rounded-lg ${stat.color}`}>
                     <div className="flex items-center gap-3">
@@ -274,34 +293,32 @@ export default function StandingsPage() {
               </div>
             </div>
 
-            {/* Race Calendar */}
             <div className="lg:col-span-2">
               <h3 className="text-zinc-800 text-xl font-bold mb-6">Race Calendar</h3>
               <div className="grid grid-cols-4 md:grid-cols-6 gap-4">
-                {raceCalendar.map((race) => (
-                  <div key={race.id} className="relative flex flex-col items-center">
-                    {/* Numero round */}
-                    <div className="absolute -top-2 -left-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center z-10 border-2 border-white">
-                      {race.id}
-                    </div>
-                    {/* Card bandiera */}
-                    <div className="bg-white border border-zinc-200 rounded-lg p-1 w-full hover:shadow-md transition-shadow">
-                      <img src={`https://flagcdn.com/w160/${race.country}.png`} className="w-full h-10 object-cover rounded-md mb-2 shadow-inner" alt={race.code} />
-                      <div className="bg-green-500 text-white text-[10px] font-black text-center py-1 rounded">
-                        {race.code}
+                {calendar.map((race) => {
+                  const countryCode = circuitToCountry[race.circuit_id];
+                  return (
+                    <div key={race.race_id} className="relative flex flex-col items-center">
+                      <div className="absolute -top-2 -left-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center z-10 border-2 border-white">
+                        {race.round}
                       </div>
-                      <div className="text-zinc-400 text-[9px] text-center mt-1 font-bold">
-                        {race.date}
+                      <div className="bg-white border border-zinc-200 rounded-lg p-1 w-full hover:shadow-md transition-shadow">
+                        <img src={`https://flagcdn.com/w160/${countryCode || 'un'}.png`} className="w-full h-10 object-cover rounded-md mb-2 shadow-inner" alt="" />
+                        <div className="bg-green-500 text-white text-[10px] font-black text-center py-1 rounded">
+                          {race.race_name.split(' ')[0].substring(0,3).toUpperCase()}
+                        </div>
+                        <div className="text-zinc-400 text-[9px] text-center mt-1 font-bold">
+                          {formatDate(race.date)}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
-
           </div>
         </section>
-
       </main>
       <Footer />
     </div>
