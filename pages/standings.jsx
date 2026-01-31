@@ -8,7 +8,7 @@ import MaidenSection from '../components/standings/MaidenSection';
 import SeasonSelector from '../components/standings/SeasonSelector'; */
 
 import { useState, useEffect } from 'react';
-import dataLoader from '../services/dataLoader';
+import dataLoader from '../dataLoader';
 
 export default function StandingsPage() {
   const [driverStandings, setDriverStandings] = useState([]);
