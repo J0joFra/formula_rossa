@@ -1,5 +1,5 @@
 // pages/standings.jsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 
@@ -13,7 +13,10 @@ export default function StandingsPage() {
   const [selectedSeason, setSelectedSeason] = useState(2025);
   const [availableSeasons, setAvailableSeasons] = useState([]);
   
-  // Stato per la navigazione (manteniamo coerenza con index)
+  // Stati per l'espansione delle classifiche
+  const [showFullDrivers, setShowFullDrivers] = useState(false);
+  const [showFullConstructors, setShowFullConstructors] = useState(false);
+  
   const [activeSection, setActiveSection] = useState('stats');
 
   useEffect(() => {
@@ -34,6 +37,9 @@ export default function StandingsPage() {
     try {
       setLoading(true);
       setError(null);
+      // Reset espansione al cambio stagione
+      setShowFullDrivers(false);
+      setShowFullConstructors(false);
 
       const [
         driversData,
@@ -66,7 +72,6 @@ export default function StandingsPage() {
       const driversForSeason = driverStandingsData.filter(s => s.season === selectedSeason);
       const constructorsForSeason = constructorStandingsData.filter(s => s.season === selectedSeason);
 
-      // MODIFICA 2: Filtro piloti senza posizione (null o undefined)
       if (driversForSeason.length > 0) {
         const maxRound = Math.max(...driversForSeason.map(s => s.round));
         const finalDrivers = driversForSeason
@@ -94,7 +99,6 @@ export default function StandingsPage() {
     }
   }
 
-  // Gestione navigazione (rimanda alla home se necessario o gestisce lo scroll)
   const handleNavigate = (sectionId) => {
     if (sectionId === 'home') {
         window.location.href = '/';
@@ -110,15 +114,20 @@ export default function StandingsPage() {
     );
   }
 
+  // Logica per decidere quanti elementi mostrare
+  const visibleDrivers = showFullDrivers ? driverStandings : driverStandings.slice(0, 5);
+  const visibleConstructors = showFullConstructors ? constructorStandings : constructorStandings.slice(0, 5);
+
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {/* SFONDO CON PUNTI FERRARI (Copiato da index.jsx) */}
+      {/* SFONDO CON PUNTI FERRARI (Solo Rossi) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
         <div className="absolute top-1/3 right-1/3 w-6 h-6 bg-red-600 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
         <div className="absolute bottom-1/4 left-1/3 w-3 h-3 bg-red-400 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-1/2 left-1/5 w-5 h-5 bg-yellow-500 rounded-full animate-bounce"></div>
-        <div className="absolute bottom-1/3 right-1/4 w-4 h-4 bg-yellow-400 rounded-full animate-bounce" style={{animationDelay: '0.3s'}}></div>
+        
+        {/* Rimossi i puntini gialli qui */}
+        
         <div className="absolute inset-0 opacity-5"
           style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, #DC0000 1px, transparent 0)`,
@@ -127,7 +136,6 @@ export default function StandingsPage() {
         ></div>
       </div>
 
-      {/* MODIFICA 1: Inserimento Navigation identica a index.jsx */}
       <div className="relative z-20">
         <Navigation activeSection={activeSection} onNavigate={handleNavigate} />
       </div>
@@ -135,7 +143,6 @@ export default function StandingsPage() {
       <main className="relative z-10 pt-32 pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          {/* Header integrato nello stile della pagina */}
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-red-600/30 pb-8">
             <div>
               <h1 className="text-6xl font-black italic tracking-tighter">
@@ -144,7 +151,6 @@ export default function StandingsPage() {
               <p className="text-gray-400 mt-2 uppercase tracking-widest">World Championship Classification</p>
             </div>
 
-            {/* Season Selector stilizzato */}
             {availableSeasons.length > 0 && (
               <div className="mt-6 md:mt-0 flex items-center space-x-3">
                 <span className="text-sm font-bold text-gray-500 uppercase">Select Season</span>
@@ -163,7 +169,7 @@ export default function StandingsPage() {
 
           {/* Driver Standings */}
           <section className="mb-20">
-            <div className="flex items-center mb-8">
+            <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold uppercase tracking-tighter flex items-center">
                 <span className="w-8 h-1 bg-red-600 mr-3"></span>
                 Drivers Championship
@@ -183,7 +189,7 @@ export default function StandingsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {driverStandings.map((standing, index) => {
+                    {visibleDrivers.map((standing, index) => {
                       const driver = drivers[standing.driver_id] || {};
                       return (
                         <tr key={standing.driver_id} className="border-b border-zinc-800/50 hover:bg-red-600/5 transition-colors group">
@@ -212,12 +218,22 @@ export default function StandingsPage() {
                   </tbody>
                 </table>
               </div>
+              
+              {/* Bottone Espandi Piloti */}
+              {driverStandings.length > 5 && (
+                <button 
+                  onClick={() => setShowFullDrivers(!showFullDrivers)}
+                  className="w-full py-4 bg-zinc-900/80 hover:bg-zinc-800 text-xs font-black tracking-widest uppercase transition-colors border-t border-zinc-800"
+                >
+                  {showFullDrivers ? '↑ Show Top 5' : '↓ View Full Standings'}
+                </button>
+              )}
             </div>
           </section>
 
           {/* Constructor Standings */}
           <section>
-            <div className="flex items-center mb-8">
+            <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold uppercase tracking-tighter flex items-center">
                 <span className="w-8 h-1 bg-red-600 mr-3"></span>
                 Constructors Championship
@@ -237,7 +253,7 @@ export default function StandingsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {constructorStandings.map((standing, index) => {
+                    {visibleConstructors.map((standing, index) => {
                       const constructor = constructors[standing.constructor_id] || {};
                       const isFerrari = standing.constructor_id === 'ferrari';
                       return (
@@ -271,6 +287,16 @@ export default function StandingsPage() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Bottone Espandi Costruttori */}
+              {constructorStandings.length > 5 && (
+                <button 
+                  onClick={() => setShowFullConstructors(!showFullConstructors)}
+                  className="w-full py-4 bg-zinc-900/80 hover:bg-zinc-800 text-xs font-black tracking-widest uppercase transition-colors border-t border-zinc-800"
+                >
+                  {showFullConstructors ? '↑ Show Top 5' : '↓ View Full Standings'}
+                </button>
+              )}
             </div>
           </section>
         </div>
