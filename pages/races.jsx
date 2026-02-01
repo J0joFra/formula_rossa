@@ -6,12 +6,14 @@ import Link from 'next/link';
 
 const circuitToCountry = {
   'albert-park': 'au', 'albert_park': 'au',
-  'shanghai': 'cn', 
-  'suzuka': 'jp', 
-  'bahrain': 'bh',
-  'jeddah': 'sa', 
-  'miami': 'us', 
-  'imola': 'it', 
+  'shanghai': 'cn', 'jose-carlos-pace': 'br', 'jose_carlos_pace': 'br',
+  'suzuka': 'jp', 'suzuka-circuit': 'jp', 'suzuka_circuit': 'jp',
+  'bahrain': 'bh', 'sakhir': 'bh', 'manama': 'bh', 'bahrain-international-circuit': 'bh',
+  'bahrain_international_circuit': 'bh', 'juan y-ignacio-cobos': 'ar', 'juan_y_ignacio_cobos': 'ar',
+  'jeddah': 'sa', 'juan-y-oscar-galvez': 'ar', 'juan_y_oscar_galvez': 'ar', 'moscow': 'ru',
+  'miami': 'us', 'mosport': 'ca', 'mosport': 'ca', 'clementon-park': 'ca', 'clementon_park': 'ca',
+  'alain-prost': 'fr', 'alain_prost': 'fr', 'sharjah': 'ae', 'clermont-ferrand': 'fr', 'clermont_ferrand': 'fr',
+  'imola': 'it', 'charade': 'fr', 
   'monaco': 'mc',
   'catalunya': 'es', 
   'villeneuve': 'ca', 
@@ -20,7 +22,7 @@ const circuitToCountry = {
   'spa': 'be', 
   'hungaroring': 'hu', 
   'zandvoort': 'nl', 
-  'monza': 'it',
+  'monza': 'it', 'hermanos-rodriguez': 'mx', 'hermanos_rodriguez': 'mx',
   'baku': 'az', 'bowmanville': 'ca',
   'marina-bay': 'sg', 'marina_bay': 'sg',
   'americas': 'us', 'adelaide': 'au', 'buenos-aires': 'ar', 'buenos_aires': 'ar',
@@ -187,17 +189,17 @@ const getPositionBackground = (position) => {
     case 3:
       return 'bg-gradient-to-r from-amber-700/50 to-amber-800/50 border-l-4 border-amber-700';
     case 4:
-      return 'bg-gradient-to-r from-blue-500/25 to-blue-600/25 border-l-4 border-blue-500';
+      return 'bg-gradient-to-r from-gray-500/25 to-gray-600/25 border-l-4 border-gray-500';
     case 5:
-      return 'bg-gradient-to-r from-blue-500/25 to-blue-600/25 border-l-4 border-blue-500';
+      return 'bg-gradient-to-r from-gray-500/25 to-gray-600/25 border-l-4 border-gray-500';
     case 6:
-      return 'bg-gradient-to-r from-blue-500/25 to-blue-600/25 border-l-4 border-blue-500';
+      return 'bg-gradient-to-r from-gray-500/25 to-gray-600/25 border-l-4 border-gray-500';
     case 7:
-      return 'bg-gradient-to-r from-blue-500/25 to-blue-600/25 border-l-4 border-blue-500';
+      return 'bg-gradient-to-r from-gray-500/25 to-gray-600/25 border-l-4 border-gray-500';
     case 8:
-      return 'bg-gradient-to-r from-blue-500/25 to-blue-600/25 border-l-4 border-blue-500';
+      return 'bg-gradient-to-r from-gray-500/25 to-gray-600/25 border-l-4 border-gray-500';
     case 9:
-      return 'bg-gradient-to-r from-blue-500/25 to-blue-600/25 border-l-4 border-blue-500';
+      return 'bg-gradient-to-r from-gray-500/25 to-gray-600/25 border-l-4 border-gray-500';
     case 10:
       return 'bg-gradient-to-r from-amber-900/25 to-amber-950/25 border-l-4 border-amber-900';
     default:
@@ -326,9 +328,6 @@ export default function RaceDetailsPage() {
           <div className="text-red-600 font-black uppercase text-xs mb-2 tracking-[0.2em]">
             Round {raceInfo.round} • {raceInfo.year}
           </div>
-          <h1 className="text-6xl md:text-8xl font-black italic uppercase tracking-tighter leading-none mb-10">
-            {raceInfo.name || raceInfo.officialName}
-          </h1>
 
           {/* Nuovo Layout Header a 3 Blocchi */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
