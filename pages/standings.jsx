@@ -63,7 +63,8 @@ const circuitToCountry = {
   'galvez': 'ar', 'jacarepagua': 'br',
   'fuji': 'jp', 'okayama': 'jp', 'sepang': 'my',
   'buddh': 'in', 'yeongam': 'kr', 'istanbul': 'tr',
-  'sochi': 'ru', 'mugello': 'it', 'portimao': 'pt'
+  'sochi': 'ru', 'mugello': 'it', 'portimao': 'pt', 'cota': 'us', 
+  'yas_marina': 'ae', 'yas-marina': 'ae'
 };
 
 export default function StandingsPage() {
