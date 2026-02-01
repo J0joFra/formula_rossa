@@ -63,50 +63,34 @@ export default function StandingsPage() {
     try {
       setLoading(true);
       const [drData, coData, drStData, coStData, racesData] = await Promise.all([
-        loadJSON('/data/drivers.json'),
-        loadJSON('/data/constructors.json'),
-        loadJSON('/data/driver_standings.json'),
-        loadJSON('/data/constructor_standings.json'),
-        loadJSON('/data/races.json')
+        loadJSON('/data/f1db-drivers.json'),
+        loadJSON('/data/f1db-constructors.json'),
+        loadJSON('/data/f1db-races-driver-standings.json'),
+        loadJSON('/data/f1db-races-constructor-standings.json'),
+        loadJSON('/data/f1db-races.json')
       ]);
 
-      if (drData) {
-        const drMap = {}; drData.forEach(d => drMap[d.driver_id] = d);
-        setDrivers(drMap);
-      }
-      if (coData) {
-        const coMap = {}; coData.forEach(c => coMap[c.constructor_id] = c);
-        setConstructors(coMap);
+      // Mappatura ID 
+      const drMap = {}; drData?.forEach(d => drMap[d.id] = d);
+      const coMap = {}; coData?.forEach(c => coMap[c.id] = c);
+      setDrivers(drMap); setConstructors(coMap);
+
+      // .year)
+      const seasons = [...new Set(drStData?.map(s => s.year))].sort((a, b) => b - a);
+      setAvailableSeasons(seasons);
+
+      // driverId e positionNumber
+      const drS = drStData?.filter(s => s.year === selectedSeason) || [];
+      if (drS.length > 0) {
+        const maxR = Math.max(...drS.map(s => s.round));
+        setDriverStandings(drS.filter(s => s.round === maxR && s.positionNumber).sort((a, b) => a.positionNumber - b.positionNumber));
       }
 
-      if (drStData) {
-        const seasons = [...new Set(drStData.map(s => s.season))].sort((a, b) => b - a);
-        setAvailableSeasons(seasons);
-        const drS = drStData.filter(s => s.season === selectedSeason);
-        if (drS.length > 0) {
-          const maxR = Math.max(...drS.map(s => s.round));
-          setDriverStandings(drS.filter(s => s.round === maxR && s.position).sort((a, b) => a.position - b.position));
-        }
-      }
+      // Calendar
+      const seasonRaces = racesData?.filter(r => r.year === selectedSeason).sort((a, b) => a.round - b.round) || [];
+      setCalendar(seasonRaces);
 
-      if (coStData) {
-        const coS = coStData.filter(s => s.season === selectedSeason);
-        if (coS.length > 0) {
-          const maxR = Math.max(...coS.map(s => s.round));
-          setConstructorStandings(coS.filter(s => s.round === maxR && s.position).sort((a, b) => a.position - b.position));
-        }
-      }
-
-      if (racesData) {
-        const seasonRaces = racesData.filter(r => r.season === selectedSeason).sort((a, b) => a.round - b.round);
-        setCalendar(seasonRaces);
-      }
-
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error(err); } finally { setLoading(false); }
   }
 
   useEffect(() => {
