@@ -1,5 +1,5 @@
-// pages/standings.jsx
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 
@@ -22,21 +22,21 @@ const nationalityToCountryCode = {
 };
 
 const circuitToCountry = {
-    'albert_park': 'au', 'shanghai': 'cn', 'suzuka': 'jp', 'bahrain': 'bh',
-    'jeddah': 'sa', 'miami': 'us', 'imola': 'it', 'monaco': 'mc',
-    'catalunya': 'es', 'villeneuve': 'ca', 'red_bull_ring': 'at', 'silverstone': 'gb',
-    'spa': 'be', 'hungaroring': 'hu', 'zandvoort': 'nl', 'monza': 'it',
-    'baku': 'az', 'marina_bay': 'sg', 'americas': 'us', 'rodriguez': 'mx',
-    'interlagos': 'br', 'vegas': 'us', 'losail': 'qa', 'yas_marina': 'ae',
-    'indianapolis': 'us', 'bremgarten': 'ch', 'reims': 'fr', 'nurburgring': 'de', 
-    'pedralbes': 'es', 'essarts': 'fr', 'galvez': 'ar', 'aintree': 'gb', 'pescara': 'it',
-    'boavista': 'pt', 'ain-diab': 'ma', 'avus': 'de', 'monsanto': 'pt', 'sebring': 'us',
-    'riverside': 'us', 'watkins_glen': 'us', 'george': 'za', 'zeltweg': 'at', 'brands_hatch': 'gb',
-    'charade': 'fr', 'kyalami': 'za', 'lemans': 'fr', 'mosport': 'ca', 'jarama': 'es',
-    'montjuic': 'es', 'tremblant': 'ca', 'hockenheimring': 'de', 'ricard': 'fr', 'nivelles': 'be',
-    'zolder': 'be', 'anderstorp': 'se', 'dijon': 'fr', 'fuji': 'jp', 'jacarepagua': 'br',
-    'donington': 'gb', 'okayama': 'jp', 'estoril': 'pt', 'magny_cours': 'fr', 'sepang': 'my',
-    'buddh': 'in', 'yeongam': 'kr', 'istanbul': 'tr', 'sochi': 'ru', 'valencia': 'es'
+  'albert_park': 'au', 'shanghai': 'cn', 'suzuka': 'jp', 'bahrain': 'bh',
+  'jeddah': 'sa', 'miami': 'us', 'imola': 'it', 'monaco': 'mc',
+  'catalunya': 'es', 'villeneuve': 'ca', 'red_bull_ring': 'at', 'silverstone': 'gb',
+  'spa': 'be', 'hungaroring': 'hu', 'zandvoort': 'nl', 'monza': 'it',
+  'baku': 'az', 'marina_bay': 'sg', 'americas': 'us', 'rodriguez': 'mx',
+  'interlagos': 'br', 'vegas': 'us', 'losail': 'qa', 'yas_marina': 'ae',
+  'indianapolis': 'us', 'bremgarten': 'ch', 'reims': 'fr', 'nurburgring': 'de', 
+  'pedralbes': 'es', 'essarts': 'fr', 'galvez': 'ar', 'aintree': 'gb', 'pescara': 'it',
+  'boavista': 'pt', 'ain-diab': 'ma', 'avus': 'de', 'monsanto': 'pt', 'sebring': 'us',
+  'riverside': 'us', 'watkins_glen': 'us', 'george': 'za', 'zeltweg': 'at', 'brands_hatch': 'gb',
+  'charade': 'fr', 'kyalami': 'za', 'lemans': 'fr', 'mosport': 'ca', 'jarama': 'es',
+  'montjuic': 'es', 'tremblant': 'ca', 'hockenheimring': 'de', 'ricard': 'fr', 'nivelles': 'be',
+  'zolder': 'be', 'anderstorp': 'se', 'dijon': 'fr', 'fuji': 'jp', 'jacarepagua': 'br',
+  'donington': 'gb', 'okayama': 'jp', 'estoril': 'pt', 'magny_cours': 'fr', 'sepang': 'my',
+  'buddh': 'in', 'yeongam': 'kr', 'istanbul': 'tr', 'sochi': 'ru', 'valencia': 'es'
 };
 
 export default function StandingsPage() {
@@ -46,7 +46,7 @@ export default function StandingsPage() {
   const [loading, setLoading] = useState(true);
   const [drivers, setDrivers] = useState({});
   const [constructors, setConstructors] = useState({});
-  const [selectedSeason, setSelectedSeason] = useState(2025);
+  const [selectedSeason, setSelectedSeason] = useState(2024);
   const [availableSeasons, setAvailableSeasons] = useState([]);
   const [showFullDrivers, setShowFullDrivers] = useState(false);
   const [showFullConstructors, setShowFullConstructors] = useState(false);
@@ -79,40 +79,38 @@ export default function StandingsPage() {
         setConstructors(coMap);
       }
 
-      const seasons = [...new Set(drStData?.map(s => s.season))].sort((a, b) => b - a);
-      if (seasons.length === 0 && racesData) {
-          const calendarSeasons = [...new Set(racesData.map(r => r.season))].sort((a, b) => b - a);
-          setAvailableSeasons(calendarSeasons);
-      } else {
-          setAvailableSeasons(seasons);
+      if (drStData) {
+        const seasons = [...new Set(drStData.map(s => s.season))].sort((a, b) => b - a);
+        setAvailableSeasons(seasons);
+        const drS = drStData.filter(s => s.season === selectedSeason);
+        if (drS.length > 0) {
+          const maxR = Math.max(...drS.map(s => s.round));
+          setDriverStandings(drS.filter(s => s.round === maxR && s.position).sort((a, b) => a.position - b.position));
+        }
       }
 
-      const drS = drStData?.filter(s => s.season === selectedSeason) || [];
-      if (drS.length > 0) {
-        const maxR = Math.max(...drS.map(s => s.round));
-        setDriverStandings(drS.filter(s => s.round === maxR && s.position).sort((a, b) => a.position - b.position));
-      } else {
-        setDriverStandings([]);
-      }
-      
-      const coS = coStData?.filter(s => s.season === selectedSeason) || [];
-      if (coS.length > 0) {
-        const maxR = Math.max(...coS.map(s => s.round));
-        setConstructorStandings(coS.filter(s => s.round === maxR && s.position).sort((a, b) => a.position - b.position));
-      } else {
-        setConstructorStandings([]);
+      if (coStData) {
+        const coS = coStData.filter(s => s.season === selectedSeason);
+        if (coS.length > 0) {
+          const maxR = Math.max(...coS.map(s => s.round));
+          setConstructorStandings(coS.filter(s => s.round === maxR && s.position).sort((a, b) => a.position - b.position));
+        }
       }
 
-      const seasonRaces = racesData?.filter(r => r.season === selectedSeason).sort((a, b) => a.round - b.round) || [];
-      setCalendar(seasonRaces);
+      if (racesData) {
+        const seasonRaces = racesData.filter(r => r.season === selectedSeason).sort((a, b) => a.round - b.round);
+        setCalendar(seasonRaces);
+      }
 
-    } finally { 
-      setLoading(false); 
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   }
 
-  useEffect(() => { 
-    loadStandings(); 
+  useEffect(() => {
+    loadStandings();
   }, [selectedSeason]);
 
   const getFlagUrl = (natOrCircuit, isCircuit = false) => {
@@ -156,13 +154,14 @@ export default function StandingsPage() {
           <select 
             value={selectedSeason} 
             onChange={(e) => setSelectedSeason(Number(e.target.value))} 
-            className="bg-zinc-900 border-l-4 border-red-600 px-4 py-2 font-bold outline-none text-white"
+            className="bg-zinc-900 border-l-4 border-red-600 px-4 py-2 font-bold outline-none text-white cursor-pointer"
           >
             {availableSeasons.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
+          {/* Drivers */}
           <section className="bg-zinc-900/40 border border-zinc-800 rounded-sm overflow-hidden">
             <div className="p-4 border-b border-zinc-800 bg-zinc-900/80 flex items-center gap-3">
                <div className="w-1 h-6 bg-red-600"></div>
@@ -189,16 +188,12 @@ export default function StandingsPage() {
                       <td className={`p-4 font-bold ${isFerrari ? 'text-red-500' : ''}`}>{d.familyName?.toUpperCase()}</td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
-                        <td className="p-4">
-                          <div className="flex items-center gap-2">
-                             <img src={`/images/teams/${s.constructor_id}.png`} 
-                                  onError={(e) => e.target.style.display='none'} 
-                                  className="w-6 h-6 object-contain" alt="" />
-                             <span className={`text-[11px] font-bold uppercase ${isFerrari ? 'text-red-500' : 'text-zinc-300'}`}>
-                                {constructors[s.constructor_id]?.name || s.constructor_id}
-                             </span>
-                          </div>
-                        </td>
+                           <img src={`/images/teams/${s.constructor_id}.png`} onError={(e) => e.target.style.display='none'} className="w-5 h-5 object-contain" alt="" />
+                           <span className={`text-[10px] uppercase font-bold ${isFerrari ? 'text-red-500' : 'text-zinc-400'}`}>
+                             {constructors[s.constructor_id]?.name || s.constructor_id}
+                           </span>
+                        </div>
+                      </td>
                       <td className="p-4 text-center">{flag && <img src={flag} className="w-5 mx-auto opacity-80" alt="" />}</td>
                       <td className="p-4 text-right font-black">{s.points}</td>
                     </tr>
@@ -211,6 +206,7 @@ export default function StandingsPage() {
             </button>
           </section>
 
+          {/* Constructors */}
           <section className="bg-zinc-900/40 border border-zinc-800 rounded-sm overflow-hidden">
             <div className="p-4 border-b border-zinc-800 bg-zinc-900/80 flex items-center gap-3">
                <div className="w-1 h-6 bg-red-600"></div>
@@ -252,6 +248,7 @@ export default function StandingsPage() {
           </section>
         </div>
 
+        {/* Calendar Section */}
         <section className="bg-zinc-900/40 border border-zinc-800 rounded-sm overflow-hidden mt-12">
           <div className="p-4 border-b border-zinc-800 bg-zinc-900/80 flex items-center gap-3">
              <div className="w-1 h-6 bg-red-600"></div>
@@ -263,18 +260,18 @@ export default function StandingsPage() {
               {calendar.length > 0 ? calendar.map((race) => {
                 const countryCode = circuitToCountry[race.circuit_id];
                 return (
-                    <Link 
-                      key={race.race_id} 
-                      href={`/races?id=${race.race_id}`} // Link alla nuova pagina
-                      className="relative group block"
-                    >
-                      <div className="absolute -top-2 -left-2 bg-red-600 text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center z-20 shadow-lg border border-black group-hover:scale-110 transition-transform">
-                        {race.round}
-                      </div>
-                      <div className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-3 hover:border-red-600 hover:bg-zinc-800 transition-all group-hover:-translate-y-1">
+                  <Link key={race.race_id} href={`/races?id=${race.race_id}`} className="relative group block">
+                    <div className="absolute -top-2 -left-2 bg-red-600 text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center z-20 shadow-lg border border-black group-hover:scale-110 transition-transform">
+                      {race.round}
+                    </div>
+                    <div className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-3 hover:border-red-600 transition-all group-hover:-translate-y-1">
                       <div className="h-12 w-full mb-3 overflow-hidden rounded-md bg-zinc-700">
                         {countryCode ? (
-                          <img src={`https://flagcdn.com/w160/${countryCode}.png`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt={race.race_name} />
+                          <img 
+                            src={`https://flagcdn.com/w160/${countryCode}.png`} 
+                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
+                            alt="" 
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-[10px] text-zinc-500 uppercase">No Flag</div>
                         )}
@@ -289,7 +286,7 @@ export default function StandingsPage() {
                         {race.circuit_id.replace(/_/g, ' ')}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               }) : (
                 <div className="col-span-full py-10 text-center text-zinc-500 italic">
