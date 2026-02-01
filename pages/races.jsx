@@ -12,7 +12,7 @@ const countryCodeToFlag = {
   NOR: 'no', DNK: 'dk', FIN: 'fi', POL: 'pl', CZE: 'cz',
   GRC: 'gr', HUN: 'hu', IRL: 'ie', UKR: 'ua', ROU: 'ro',
   BGR: 'bg', HRV: 'hr', SVK: 'sk', SVN: 'si', EST: 'ee',
-  LVA: 'lv', LTU: 'lt', ISL: 'is', LUX: 'lu',  MCO: 'mc',
+  LVA: 'lv', LTU: 'lt', ISL: 'is', LUX: 'lu', MCO: 'mc',
 
   // Americhe
   USA: 'us', CAN: 'ca', MEX: 'mx', BRA: 'br', ARG: 'ar',
@@ -236,9 +236,6 @@ export default function RaceDetailsPage() {
           <div className="text-red-600 font-black uppercase text-xs mb-2 tracking-[0.2em]">
             Round {raceInfo.round} • {raceInfo.year}
           </div>
-          <h1 className="text-6xl md:text-8xl font-black italic uppercase tracking-tighter leading-none mb-10">
-            {raceInfo.officialName}
-          </h1>
 
           {/* Layout Header a 3 Blocchi */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
