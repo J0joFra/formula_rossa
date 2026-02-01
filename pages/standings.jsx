@@ -274,4 +274,9 @@ export default function StandingsPage() {
       </Link>
     );
   })}
-</div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}
