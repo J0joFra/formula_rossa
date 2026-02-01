@@ -39,33 +39,33 @@ const getFlagCodeFromCountry = (countryCode) => {
   return countryCode.slice(0, 2).toLowerCase();
 };
 
-// Funzione per ottenere il colore di sfondo in base alla posizione
+// Funzione per ottenere il colore di sfondo in base alla posizione (bianco)
 const getPositionBackground = (position) => {
   const pos = parseInt(position);
   
   switch(pos) {
     case 1:
-      return 'bg-gradient-to-r from-yellow-500/10 to-yellow-600/10 border-l-4 border-yellow-500';
+      return 'bg-gradient-to-r from-yellow-100 to-yellow-200 border-l-4 border-yellow-500';
     case 2:
-      return 'bg-gradient-to-r from-gray-300/10 to-gray-400/10 border-l-4 border-gray-300';
+      return 'bg-gradient-to-r from-gray-100 to-gray-200 border-l-4 border-gray-400';
     case 3:
-      return 'bg-gradient-to-r from-amber-700/10 to-amber-800/10 border-l-4 border-amber-700';
+      return 'bg-gradient-to-r from-amber-100 to-amber-200 border-l-4 border-amber-700';
     case 4:
-      return 'bg-gradient-to-r from-blue-500/5 to-blue-600/5 border-l-4 border-blue-500';
+      return 'bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-400';
     case 5:
-      return 'bg-gradient-to-r from-blue-500/5 to-blue-600/5 border-l-4 border-blue-500';
+      return 'bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-400';
     case 6:
-      return 'bg-gradient-to-r from-blue-500/5 to-blue-600/5 border-l-4 border-blue-500';
+      return 'bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-400';
     case 7:
-      return 'bg-gradient-to-r from-blue-500/5 to-blue-600/5 border-l-4 border-blue-500';
+      return 'bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-400';
     case 8:
-      return 'bg-gradient-to-r from-blue-500/5 to-blue-600/5 border-l-4 border-blue-500';
+      return 'bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-400';
     case 9:
-      return 'bg-gradient-to-r from-blue-500/5 to-blue-600/5 border-l-4 border-blue-500';
+      return 'bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-400';
     case 10:
-      return 'bg-gradient-to-r from-amber-900/10 to-amber-950/10 border-l-4 border-amber-900';
+      return 'bg-gradient-to-r from-amber-50 to-amber-100 border-l-4 border-amber-800';
     default:
-      return 'bg-gradient-to-r from-zinc-900/5 to-zinc-900/10 border-l-4 border-zinc-800';
+      return 'bg-gradient-to-r from-zinc-50 to-zinc-100 border-l-4 border-zinc-400';
   }
 };
 
@@ -75,15 +75,15 @@ const getPositionTextColor = (position) => {
   
   switch(pos) {
     case 1:
-      return 'text-yellow-500';
+      return 'text-yellow-800';
     case 2:
-      return 'text-gray-300';
+      return 'text-gray-700';
     case 3:
-      return 'text-amber-700';
+      return 'text-amber-800';
     case 10:
       return 'text-amber-900';
     default:
-      return 'text-zinc-500';
+      return 'text-zinc-700';
   }
 };
 
@@ -255,39 +255,41 @@ export default function RaceDetailsPage() {
             <div className="p-4 border-b border-zinc-800 bg-zinc-900/80 flex justify-between items-center">
               <h2 className="font-black uppercase text-xs text-red-600 tracking-widest">Driver Standings</h2>
             </div>
-            <table className="w-full text-left text-sm">
-              <tbody>
-                {visibleDrivers.map((s, i) => {
-                  const isFerrariDriver = isFerrari(s.constructorId);
-                  const constructorName = getConstructorName(s.constructorId);
-                  const position = s.positionText;
-                  const bgClass = getPositionBackground(position);
-                  const textClass = getPositionTextColor(position);
-                  
-                  return (
-                    <tr key={i} className={`${bgClass} hover:bg-white/10 transition-all duration-300`}>
-                      <td className="p-4 w-12 font-black italic">
-                        <div className={`${textClass} group-hover:text-white transition-colors`}>
-                          {position}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex flex-col">
-                          <div className={`font-bold uppercase tracking-tight ${isFerrariDriver ? 'text-[#ff2800]' : 'text-white'}`}>
-                            {drivers[s.driverId]?.firstName} <span className={`${isFerrariDriver ? 'text-[#ff2800]' : 'text-red-600'}`}>
-                              {drivers[s.driverId]?.lastName}
-                            </span>
+            <div className="overflow-hidden">
+              <table className="w-full text-left text-sm">
+                <tbody>
+                  {visibleDrivers.map((s, i) => {
+                    const isFerrariDriver = isFerrari(s.constructorId);
+                    const constructorName = getConstructorName(s.constructorId);
+                    const position = s.positionText;
+                    const bgClass = getPositionBackground(position);
+                    const textClass = getPositionTextColor(position);
+                    
+                    return (
+                      <tr key={i} className={`${bgClass} hover:bg-white/90 transition-all duration-300`}>
+                        <td className="p-4 w-12 font-black italic">
+                          <div className={`${textClass} font-bold text-lg`}>
+                            {position}
                           </div>
-                          <div className={`text-xs font-bold uppercase mt-1 ${isFerrariDriver ? 'text-[#ff2800]' : 'text-zinc-400'}`}>
-                            {constructorName}
+                        </td>
+                        <td className="p-4">
+                          <div className="flex flex-col">
+                            <div className={`font-bold uppercase tracking-tight ${isFerrariDriver ? 'text-[#ff2800]' : 'text-black'}`}>
+                              {drivers[s.driverId]?.firstName} <span className={`${isFerrariDriver ? 'text-[#ff2800]' : 'text-red-700'}`}>
+                                {drivers[s.driverId]?.lastName}
+                              </span>
+                            </div>
+                            <div className={`text-xs font-bold uppercase mt-1 ${isFerrariDriver ? 'text-[#ff2800]' : 'text-zinc-700'}`}>
+                              {constructorName}
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
             
             {driverStandings.length > 10 && (
               <button 
@@ -304,30 +306,32 @@ export default function RaceDetailsPage() {
             <div className="p-4 border-b border-zinc-800 bg-zinc-900/80">
               <h2 className="font-black uppercase text-xs text-red-600 tracking-widest">Constructor Standings</h2>
             </div>
-            <table className="w-full text-left text-sm">
-              <tbody>
-                {constructorStandings.map((s, i) => {
-                  const isFerrariConstructor = isFerrari(s.constructorId);
-                  const position = s.positionText;
-                  const bgClass = getPositionBackground(position);
-                  const textClass = getPositionTextColor(position);
-                  
-                  return (
-                    <tr key={i} className={`${bgClass} hover:bg-white/10 transition-all duration-300`}>
-                      <td className="p-4 w-12 font-black italic">
-                        <div className={`${textClass} group-hover:text-white transition-colors`}>
-                          {position}
-                        </div>
-                      </td>
-                      <td className={`p-4 font-bold uppercase tracking-tight ${isFerrariConstructor ? 'text-[#ff2800]' : 'text-white'}`}>
-                        {constructors[s.constructorId]?.name}
-                      </td>
-                      <td className="p-4 text-right font-black text-white">{s.points}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="overflow-hidden">
+              <table className="w-full text-left text-sm">
+                <tbody>
+                  {constructorStandings.map((s, i) => {
+                    const isFerrariConstructor = isFerrari(s.constructorId);
+                    const position = s.positionText;
+                    const bgClass = getPositionBackground(position);
+                    const textClass = getPositionTextColor(position);
+                    
+                    return (
+                      <tr key={i} className={`${bgClass} hover:bg-white/90 transition-all duration-300`}>
+                        <td className="p-4 w-12 font-black italic">
+                          <div className={`${textClass} font-bold text-lg`}>
+                            {position}
+                          </div>
+                        </td>
+                        <td className={`p-4 font-bold uppercase tracking-tight ${isFerrariConstructor ? 'text-[#ff2800]' : 'text-black'}`}>
+                          {constructors[s.constructorId]?.name}
+                        </td>
+                        <td className="p-4 text-right font-black text-black">{s.points}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </section>
         </div>
       </main>
