@@ -4,20 +4,69 @@ import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
 
-// ISO 3166-1 alpha-2
+// ISO 3166-1 alpha-3 -> alpha-2 (lowercase, per flag)
 const countryCodeToFlag = {
-  'ARE': 'ae', 'ARG': 'ar', 'AUS': 'au', 'AUT': 'at', 'AZE': 'az',
-  'BHR': 'bh', 'BEL': 'be', 'BRA': 'br', 'CAN': 'ca', 'CHN': 'cn',
-  'DEU': 'de', 'ESP': 'es', 'FRA': 'fr', 'GBR': 'gb', 'HUN': 'hu',
-  'ITA': 'it', 'JPN': 'jp', 'MCO': 'mc', 'MEX': 'mx', 'NLD': 'nl',
-  'PRT': 'pt', 'QAT': 'qa', 'RUS': 'ru', 'SAU': 'sa', 'SGP': 'sg',
-  'TUR': 'tr', 'USA': 'us', 'ZAF': 'za', 'CHE': 'ch', 'MAR': 'ma',
-  'SWE': 'se', 'KOR': 'kr', 'IND': 'in', 'MYS': 'my', 'THA': 'th',
-  'VNM': 'vn', 'FIN': 'fi', 'DNK': 'dk', 'NOR': 'no', 'POL': 'pl',
-  'CZE': 'cz', 'GRC': 'gr', 'HKG': 'hk', 'IRL': 'ie', 'ISR': 'il',
-  'NZL': 'nz', 'PHL': 'ph', 'TWN': 'tw', 'UKR': 'ua', 'GER': 'de', 
-  'UK': 'gb', 'GB': 'gb', 'ENG': 'gb', 'UAE': 'ae',
-  'SUI': 'ch', 'RSA': 'za', 'UAE': 'ae', 'KSA': 'sa'
+  // Europa
+  ITA: 'it', FRA: 'fr', DEU: 'de', ESP: 'es', PRT: 'pt',
+  NLD: 'nl', BEL: 'be', CHE: 'ch', AUT: 'at', SWE: 'se',
+  NOR: 'no', DNK: 'dk', FIN: 'fi', POL: 'pl', CZE: 'cz',
+  GRC: 'gr', HUN: 'hu', IRL: 'ie', UKR: 'ua', ROU: 'ro',
+  BGR: 'bg', HRV: 'hr', SVK: 'sk', SVN: 'si', EST: 'ee',
+  LVA: 'lv', LTU: 'lt', ISL: 'is', LUX: 'lu',  MCO: 'mc',
+
+  // Americhe
+  USA: 'us', CAN: 'ca', MEX: 'mx', BRA: 'br', ARG: 'ar',
+  CHL: 'cl', COL: 'co', PER: 'pe', URY: 'uy', VEN: 've',
+
+  // Asia
+  CHN: 'cn',
+  JPN: 'jp',
+  KOR: 'kr',
+  IND: 'in',
+  THA: 'th',
+  VNM: 'vn',
+  MYS: 'my',
+  SGP: 'sg',
+  IDN: 'id',
+  PHL: 'ph',
+  TWN: 'tw',
+  HKG: 'hk',
+  ISR: 'il',
+  SAU: 'sa',
+  ARE: 'ae',
+  QAT: 'qa',
+  KWT: 'kw',
+  BHR: 'bh',
+  OMN: 'om',
+
+  // Africa
+  ZAF: 'za',
+  MAR: 'ma',
+  DZA: 'dz',
+  TUN: 'tn',
+  EGY: 'eg',
+  NGA: 'ng',
+  KEN: 'ke',
+  GHA: 'gh',
+
+  // Oceania
+  AUS: 'au',
+  NZL: 'nz',
+
+  // Altri
+  TUR: 'tr',
+  RUS: 'ru',
+  AZE: 'az',
+
+  // Alias NON ISO (comodi ma opzionali)
+  UK: 'gb',
+  GB: 'gb',
+  ENG: 'gb',
+  GER: 'de',
+  SUI: 'ch',
+  UAE: 'ae',
+  KSA: 'sa',
+  RSA: 'za'
 };
 
 const getFlagCodeFromCountry = (countryCode) => {
@@ -188,20 +237,20 @@ export default function RaceDetailsPage() {
             Round {raceInfo.round} • {raceInfo.year}
           </div>
           <h1 className="text-6xl md:text-8xl font-black italic uppercase tracking-tighter leading-none mb-10">
-            {raceInfo.name || raceInfo.officialName}
+            {raceInfo.officialName}
           </h1>
 
-          {/* Nuovo Layout Header a 3 Blocchi */}
+          {/* Layout Header a 3 Blocchi */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             
-            {/* Blocco 1: Info Circuito (Occupa 2 colonne) */}
+            {/* Info Circuito */}
             <div className="md:col-span-2 bg-zinc-900/50 border-l-4 border-red-600 p-6 flex flex-col justify-center">
               <p className="text-[10px] text-zinc-500 font-black uppercase mb-1 tracking-widest">Circuit</p>
               <p className="text-3xl font-black uppercase italic leading-none mb-2">{circuitInfo?.name}</p>
               <p className="text-sm text-zinc-400 font-bold uppercase">{circuitInfo?.placeName}, {circuitInfo?.countryId}</p>
             </div>
 
-            {/* Blocco 2: Bandiera */}
+            {/* Bandiera */}
             <div className="bg-zinc-900/50 border border-zinc-800 p-6 flex items-center justify-center rounded-sm">
               {flagCode ? (
                 <img 
@@ -218,7 +267,7 @@ export default function RaceDetailsPage() {
               )}
             </div>
 
-            {/* Blocco 3: Mappa Piccola Quadrata */}
+            {/* Mappa Piccola Quadrata */}
             <div className="bg-zinc-900/50 border border-zinc-800 aspect-square overflow-hidden rounded-sm relative group">
               {mapUrl ? (
                 <iframe 
