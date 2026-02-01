@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
-import Head from 'next/head';
 
 // ISO 3166-1 alpha-2
 const countryCodeToFlag = {
@@ -98,24 +97,6 @@ const calculateBoundingBox = (lat, lon, radiusKm = 10) => {
   };
 };
 
-// Aggiungi questa funzione di pulizia del nome gara
-const cleanRaceName = (name) => {
-  if (!name) return '';
-  
-  return name
-    // Rimuove "Formula 1", "F1", "F1®", "FORMULA 1" all'inizio
-    .replace(/^(Formula\s*1\s*(®)?\s*|F1\s*(®)?\s*|FORMULA\s*1\s*)/i, '')
-    // Rimuove "Grand Prix of" all'inizio
-    .replace(/^Grand\s*Prix\s*of\s*/i, '')
-    // Rimuove "Formula 1 Aramco", "Formula 1 Gulf Air" ecc
-    .replace(/^Formula\s*1\s*[A-Za-z\s-]+\s*/i, '')
-    // Rimuove sponsorizzazioni comuni all'inizio
-    .replace(/^(stc\s*|aramco\s*|gulf\s*air\s*|pirelli\s*|heineken\s*|emirates\s*|rolex\s*|aws\s*)/i, '')
-    // Rimuove doppi spazi e trim
-    .replace(/\s+/g, ' ')
-    .trim();
-};
-
 export default function RaceDetailsPage() {
   const router = useRouter();
   const { id } = router.query;
@@ -195,17 +176,6 @@ export default function RaceDetailsPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Aggiungi il componente Head con il nome pulito */}
-      <Head>
-        <title>
-          {raceInfo 
-            ? `${cleanRaceName(raceInfo.name || raceInfo.officialName)} ${raceInfo.year}`
-            : 'Race Details'
-          }
-        </title>
-        <meta name="description" content={`Details for ${cleanRaceName(raceInfo?.name || raceInfo?.officialName)} ${raceInfo?.year}`} />
-      </Head>
-      
       <Navigation activeSection="calendar" />
       
       <main className="max-w-7xl mx-auto px-4 pt-32 pb-20">
