@@ -37,21 +37,6 @@ const getFlagCodeFromCountry = (countryCode) => {
   return countryCode.slice(0, 2).toLowerCase();
 };
 
-const cleanRaceName = (name) => {
-  if (!name) return '';
-  
-const cleanRaceName = (name) => {
-  if (!name) return '';
-  
-  return name
-    .replace(/^(Formula\s*1\s*(®)?\s*|F1\s*(®)?\s*|FORMULA\s*1\s*)/i, '')
-    .replace(/^Grand\s*Prix\s*of\s*/i, '')
-    .replace(/^Formula\s*1\s*[\p{L}\s-]+\s*/iu, '')
-    .replace(/^(stc\s*|aramco\s*|gulf\s*air\s*|pirelli\s*|heineken\s*|emirates\s*|rolex\s*|aws\s*)/i, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-};
-
 const getPositionBackground = (position) => {
   const pos = parseInt(position);
   
@@ -111,6 +96,24 @@ const calculateBoundingBox = (lat, lon, radiusKm = 10) => {
     maxLon: lon + lonDelta,
     maxLat: lat + latDelta
   };
+};
+
+// Aggiungi questa funzione di pulizia del nome gara
+const cleanRaceName = (name) => {
+  if (!name) return '';
+  
+  return name
+    // Rimuove "Formula 1", "F1", "F1®", "FORMULA 1" all'inizio
+    .replace(/^(Formula\s*1\s*(®)?\s*|F1\s*(®)?\s*|FORMULA\s*1\s*)/i, '')
+    // Rimuove "Grand Prix of" all'inizio
+    .replace(/^Grand\s*Prix\s*of\s*/i, '')
+    // Rimuove "Formula 1 Aramco", "Formula 1 Gulf Air" ecc
+    .replace(/^Formula\s*1\s*[A-Za-z\s-]+\s*/i, '')
+    // Rimuove sponsorizzazioni comuni all'inizio
+    .replace(/^(stc\s*|aramco\s*|gulf\s*air\s*|pirelli\s*|heineken\s*|emirates\s*|rolex\s*|aws\s*)/i, '')
+    // Rimuove doppi spazi e trim
+    .replace(/\s+/g, ' ')
+    .trim();
 };
 
 export default function RaceDetailsPage() {
@@ -215,7 +218,6 @@ export default function RaceDetailsPage() {
             Round {raceInfo.round} • {raceInfo.year}
           </div>
           <h1 className="text-6xl md:text-8xl font-black italic uppercase tracking-tighter leading-none mb-10">
-            {/* Puoi anche pulire il titolo visualizzato nella pagina se vuoi */}
             {raceInfo.name || raceInfo.officialName}
           </h1>
 
