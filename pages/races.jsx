@@ -37,6 +37,18 @@ const getFlagCodeFromCountry = (countryCode) => {
   return countryCode.slice(0, 2).toLowerCase();
 };
 
+const cleanRaceName = (name) => {
+  if (!name) return '';
+  
+  return name
+    .replace(/^(Formula\s*1\s*(®)?\s*|F1\s*(®)?\s*|FORMULA\s*1\s*)/i, '')
+    .replace(/^Grand\s*Prix\s*of\s*/i, 
+    .replace(/^Formula\s*1\s*[\p{L}\s-]+\s*/iu, '')
+    .replace(/^(stc\s*|aramco\s*|gulf\s*air\s*|pirelli\s*|heineken\s*|emirates\s*|rolex\s*|aws\s*)/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
 const getPositionBackground = (position) => {
   const pos = parseInt(position);
   
@@ -177,15 +189,15 @@ export default function RaceDetailsPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Aggiungi il componente Head per modificare il titolo della pagina */}
+      {/* Aggiungi il componente Head con il nome pulito */}
       <Head>
         <title>
           {raceInfo 
-            ? `${raceInfo.name || raceInfo.officialName} ${raceInfo.year}`
+            ? `${cleanRaceName(raceInfo.name || raceInfo.officialName)} ${raceInfo.year}`
             : 'Race Details'
           }
         </title>
-        <meta name="description" content={`Details for ${raceInfo?.name || raceInfo?.officialName} ${raceInfo?.year}`} />
+        <meta name="description" content={`Details for ${cleanRaceName(raceInfo?.name || raceInfo?.officialName)} ${raceInfo?.year}`} />
       </Head>
       
       <Navigation activeSection="calendar" />
@@ -200,6 +212,7 @@ export default function RaceDetailsPage() {
             Round {raceInfo.round} • {raceInfo.year}
           </div>
           <h1 className="text-6xl md:text-8xl font-black italic uppercase tracking-tighter leading-none mb-10">
+            {/* Puoi anche pulire il titolo visualizzato nella pagina se vuoi */}
             {raceInfo.name || raceInfo.officialName}
           </h1>
 
