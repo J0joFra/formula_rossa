@@ -40,9 +40,12 @@ const getFlagCodeFromCountry = (countryCode) => {
 const cleanRaceName = (name) => {
   if (!name) return '';
   
+const cleanRaceName = (name) => {
+  if (!name) return '';
+  
   return name
     .replace(/^(Formula\s*1\s*(®)?\s*|F1\s*(®)?\s*|FORMULA\s*1\s*)/i, '')
-    .replace(/^Grand\s*Prix\s*of\s*/i, 
+    .replace(/^Grand\s*Prix\s*of\s*/i, '')
     .replace(/^Formula\s*1\s*[\p{L}\s-]+\s*/iu, '')
     .replace(/^(stc\s*|aramco\s*|gulf\s*air\s*|pirelli\s*|heineken\s*|emirates\s*|rolex\s*|aws\s*)/i, '')
     .replace(/\s+/g, ' ')
