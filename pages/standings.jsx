@@ -22,31 +22,91 @@ const nationalityToCountryCode = {
 };
 
 const circuitToCountry = {
-  'albert_park': 'au', 'shanghai': 'cn', 'suzuka': 'jp', 'bahrain': 'bh',
-  'jeddah': 'sa', 'miami': 'us', 'imola': 'it', 'monaco': 'mc',
-  'catalunya': 'es', 'villeneuve': 'ca', 'red_bull_ring': 'at', 'silverstone': 'gb',
-  'spa': 'be', 'hungaroring': 'hu', 'zandvoort': 'nl', 'monza': 'it',
-  'baku': 'az', 'marina_bay': 'sg', 'americas': 'us', 'rodriguez': 'mx',
-  'interlagos': 'br', 'vegas': 'us', 'losail': 'qa', 'yas_marina': 'ae',
-  'indianapolis': 'us', 'sebring': 'us', 'riverside': 'us',
-  'watkins_glen': 'us', 'long_beach': 'us', 'phoenix': 'us',
-  'detroit': 'us', 'dallas': 'us', 'caesars_palace': 'us',
-  'bremgarten': 'ch', 'reims': 'fr', 'nurburgring': 'de',
-  'pedralbes': 'es', 'essarts': 'fr', 'aintree': 'gb',
-  'pescara': 'it', 'boavista': 'pt', 'avus': 'de',
-  'monsanto': 'pt', 'brands_hatch': 'gb', 'charade': 'fr',
-  'zeltweg': 'at', 'lemans': 'fr', 'jarama': 'es',
-  'montjuic': 'es', 'hockenheimring': 'de', 'ricard': 'fr',
-  'nivelles': 'be', 'zolder': 'be', 'anderstorp': 'se',
-  'dijon': 'fr', 'donington': 'gb', 'estoril': 'pt',
-  'magny_cours': 'fr', 'valencia': 'es',
-  'ain-diab': 'ma', 'george': 'za', 'kyalami': 'za',
-  'galvez': 'ar', 'jacarepagua': 'br',
-  'fuji': 'jp', 'okayama': 'jp', 'sepang': 'my',
-  'buddh': 'in', 'yeongam': 'kr', 'istanbul': 'tr',
+  // === Moderni / principali ===
+  'albert_park': 'au', 'albert-park': 'au',
+  'shanghai': 'cn',
+  'suzuka': 'jp',
+  'bahrain': 'bh',
+  'jeddah': 'sa',
+  'miami': 'us',
+  'imola': 'it',
+  'monaco': 'mc',
+  'catalunya': 'es',
+  'villeneuve': 'ca',
+  'red_bull_ring': 'at', 'red-bull-ring': 'at',
+  'silverstone': 'gb',
+  'spa': 'be',
+  'hungaroring': 'hu',
+  'zandvoort': 'nl',
+  'monza': 'it',
+  'baku': 'az',
+  'marina_bay': 'sg', 'marina-bay': 'sg',
+  'americas': 'us',
+  'rodriguez': 'mx',
+  'interlagos': 'br',
+  'vegas': 'us',
+  'losail': 'qa',
+  'yas_marina': 'ae', 'yas-marina': 'ae',
+
+  // === USA storici ===
+  'indianapolis': 'us',
+  'sebring': 'us',
+  'riverside': 'us',
+  'watkins_glen': 'us', 'watkins-glen': 'us',
+  'long_beach': 'us', 'long-beach': 'us',
+  'phoenix': 'us',
+  'detroit': 'us',
+  'dallas': 'us',
+  'caesars_palace': 'us', 'caesars-palace': 'us',
+
+  // === Europa storici ===
+  'bremgarten': 'ch',
+  'reims': 'fr',
+  'nurburgring': 'de',
+  'pedralbes': 'es',
+  'essarts': 'fr',
+  'aintree': 'gb',
+  'pescara': 'it',
+  'boavista': 'pt',
+  'avus': 'de',
+  'monsanto': 'pt',
+  'brands_hatch': 'gb', 'brands-hatch': 'gb',
+  'charade': 'fr',
+  'zeltweg': 'at',
+  'lemans': 'fr', 'le-mans': 'fr',
+  'jarama': 'es',
+  'montjuic': 'es',
+  'hockenheimring': 'de',
+  'ricard': 'fr',
+  'nivelles': 'be',
+  'zolder': 'be',
+  'anderstorp': 'se',
+  'dijon': 'fr',
+  'donington': 'gb',
+  'estoril': 'pt',
+  'magny_cours': 'fr', 'magny-cours': 'fr',
+  'valencia': 'es',
+
+  // === Africa ===
+  'ain_diab': 'ma', 'ain-diab': 'ma',
+  'george': 'za',
+  'kyalami': 'za',
+
+  // === Sud America ===
+  'galvez': 'ar',
+  'jacarepagua': 'br',
+
+  // === Asia / Medio Oriente ===
+  'fuji': 'jp',
+  'okayama': 'jp',
+  'sepang': 'my',
+  'buddh': 'in',
+  'yeongam': 'kr',
+  'istanbul': 'tr',
   'sochi': 'ru',
-  'mugello': 'it',
-  'portimao': 'pt'
+
+  // === One-off recenti ===
+  'mugello': 'it'
 };
 
 export default function StandingsPage() {
@@ -165,23 +225,53 @@ export default function StandingsPage() {
           </div>
         </div>
 
-        {/* Calendar Section */}
-        <h2 className="mb-6 font-black uppercase tracking-widest text-sm text-red-600">Race Calendar</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {calendar.map((race) => {
-            const countryCode = circuitToCountry[race.circuitId];
-            return (
-              <Link key={race.id} href={`/races?id=${race.id}`} className="bg-zinc-900 border border-zinc-800 p-4 hover:border-red-600 transition-all group">
-                 <div className="text-red-600 font-black text-xs mb-1">R{race.round}</div>
-                 <div className="font-bold text-[11px] uppercase truncate text-white">{race.name}</div>
-                 <div className="text-[10px] text-zinc-500 mb-3">{race.date}</div>
-                 {countryCode && <img src={`https://flagcdn.com/w40/${countryCode}.png`} className="w-6 h-auto opacity-70 group-hover:opacity-100" alt="" />}
-              </Link>
-            )
-          })}
+{/* Calendar Section */}
+<h2 className="mb-8 font-black uppercase tracking-[0.2em] text-sm text-red-600 border-b border-red-600/20 pb-2">
+  Race Calendar {selectedSeason}
+</h2>
+
+<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+  {calendar.map((race) => {
+    const countryCode = circuitToCountry[race.circuitId];
+    
+    return (
+      <Link 
+        key={race.id} 
+        href={`/races?id=${race.id}`} 
+        className="relative group bg-zinc-900 border border-zinc-800 rounded-sm overflow-hidden hover:border-red-600 transition-all duration-300"
+      >
+        {/* Cerchietto Rosso con Numero */}
+        <div className="absolute top-2 left-2 z-20 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center shadow-lg border border-black/20">
+          <span className="text-white text-[10px] font-black">{race.round}</span>
         </div>
-      </main>
-      <Footer />
-    </div>
-  );
-}
+
+        {/* Contenitore Bandiera (Grande) */}
+        <div className="relative h-24 w-full overflow-hidden bg-zinc-800">
+          {countryCode ? (
+            <img 
+              src={`https://flagcdn.com/w320/${countryCode}.png`} 
+              className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500" 
+              alt={race.name} 
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-[8px] text-zinc-600 uppercase font-black">
+              Flag missing
+            </div>
+          )}
+          {/* Overlay gradiente per leggere meglio il testo se necessario */}
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent opacity-60"></div>
+        </div>
+
+        {/* Info Gara Sotto */}
+        <div className="p-3 bg-zinc-900">
+          <div className="font-black text-[10px] uppercase truncate text-white mb-1 tracking-tighter">
+            {race.name.replace('Grand Prix', 'GP')}
+          </div>
+          <div className="text-[9px] font-bold text-zinc-500 group-hover:text-red-500 transition-colors">
+            {race.date}
+          </div>
+        </div>
+      </Link>
+    );
+  })}
+</div>
