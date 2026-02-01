@@ -3,8 +3,9 @@ import { useRouter } from 'next/router';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
+import Head from 'next/head';
 
-// Mappa dei codici paese F1 a ISO 3166-1 alpha-2
+// ISO 3166-1 alpha-2
 const countryCodeToFlag = {
   'ARE': 'ae', 'ARG': 'ar', 'AUS': 'au', 'AUT': 'at', 'AZE': 'az',
   'BHR': 'bh', 'BEL': 'be', 'BRA': 'br', 'CAN': 'ca', 'CHN': 'cn',
@@ -176,6 +177,17 @@ export default function RaceDetailsPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* Aggiungi il componente Head per modificare il titolo della pagina */}
+      <Head>
+        <title>
+          {raceInfo 
+            ? `${raceInfo.name || raceInfo.officialName} ${raceInfo.year}`
+            : 'Race Details'
+          }
+        </title>
+        <meta name="description" content={`Details for ${raceInfo?.name || raceInfo?.officialName} ${raceInfo?.year}`} />
+      </Head>
+      
       <Navigation activeSection="calendar" />
       
       <main className="max-w-7xl mx-auto px-4 pt-32 pb-20">
