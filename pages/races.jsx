@@ -6,67 +6,63 @@ import Link from 'next/link';
 
 // ISO 3166-1 alpha-3 -> alpha-2 
 const countryCodeToFlag = {
-  // Europa
-  ITA: 'it', FRA: 'fr', DEU: 'de', ESP: 'es', PRT: 'pt',
-  NLD: 'nl', BEL: 'be', CHE: 'ch', AUT: 'at', SWE: 'se',
-  NOR: 'no', DNK: 'dk', FIN: 'fi', POL: 'pl', CZE: 'cz',
-  GRC: 'gr', HUN: 'hu', IRL: 'ie', UKR: 'ua', ROU: 'ro',
-  BGR: 'bg', HRV: 'hr', SVK: 'sk', SVN: 'si', EST: 'ee',
-  LVA: 'lv', LTU: 'lt', ISL: 'is', LUX: 'lu', MCO: 'mc',
+  ITA: 'it',
+  FRA: 'fr',
+  DEU: 'de',
+  ESP: 'es',
+  PRT: 'pt',
+  NLD: 'nl',
+  BEL: 'be',
+  CHE: 'ch',
+  AUT: 'at',
+  SWE: 'se',
+  HUN: 'hu',
+  GBR: 'gb',
+  IRL: 'ie',
+  POL: 'pl',
+  CZE: 'cz',
+  GRC: 'gr',
+  ROU: 'ro',
+  BGR: 'bg',
+  HRV: 'hr',
+  SVN: 'si',
+  SVK: 'sk',
+  EST: 'ee',
+  LVA: 'lv',
+  LTU: 'lt',
+  ISL: 'is',
+  LUX: 'lu',
+  MCO: 'mc',
 
   // Americhe
-  USA: 'us', CAN: 'ca', MEX: 'mx', BRA: 'br', ARG: 'ar',
-  CHL: 'cl', COL: 'co', PER: 'pe', URY: 'uy', VEN: 've',
+  USA: 'us',
+  CAN: 'ca',
+  MEX: 'mx',
+  BRA: 'br',
+  ARG: 'ar',
 
   // Asia
   CHN: 'cn',
   JPN: 'jp',
   KOR: 'kr',
   IND: 'in',
-  THA: 'th',
-  VNM: 'vn',
   MYS: 'my',
   SGP: 'sg',
-  IDN: 'id',
-  PHL: 'ph',
-  TWN: 'tw',
-  HKG: 'hk',
-  ISR: 'il',
-  SAU: 'sa',
-  ARE: 'ae',
   QAT: 'qa',
-  KWT: 'kw',
-  BHR: 'bh',
-  OMN: 'om',
+  ARE: 'ae',
+  SAU: 'sa',
+  AZE: 'az',
+  TUR: 'tr',
 
   // Africa
   ZAF: 'za',
   MAR: 'ma',
-  DZA: 'dz',
-  TUN: 'tn',
-  EGY: 'eg',
-  NGA: 'ng',
-  KEN: 'ke',
-  GHA: 'gh',
 
   // Oceania
   AUS: 'au',
-  NZL: 'nz',
 
-  // Altri
-  TUR: 'tr',
-  RUS: 'ru',
-  AZE: 'az',
-
-  // Alias NON ISO (comodi ma opzionali)
-  UK: 'gb',
-  GB: 'gb',
-  ENG: 'gb',
-  GER: 'de',
-  SUI: 'ch',
-  UAE: 'ae',
-  KSA: 'sa',
-  RSA: 'za'
+  // Europa / Asia
+  RUS: 'ru'
 };
 
 const getFlagCodeFromCountry = (countryCode) => {
