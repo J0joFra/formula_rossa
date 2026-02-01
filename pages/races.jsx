@@ -4,17 +4,39 @@ import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
 
-// Helper 
-const convertCountryCode = (code3) => {
-  const mapping = {
-    'BHR': 'bh', 'SAU': 'sa', 'AUS': 'au', 'JPN': 'jp', 'CHN': 'cn',
-    'USA': 'us', 'ITA': 'it', 'MCO': 'mc', 'ESP': 'es', 'CAN': 'ca',
-    'AUT': 'at', 'GBR': 'gb', 'HUN': 'hu', 'BEL': 'be', 'NLD': 'nl',
-    'AZE': 'az', 'SGP': 'sg', 'MEX': 'mx', 'BRA': 'br', 'QAT': 'qa',
-    'ARE': 'ae', 'FRA': 'fr', 'DEU': 'de', 'PRT': 'pt', 'ZAF': 'za',
-    'ARG': 'ar', 'CHE': 'ch', 'MAR': 'ma', 'SWE': 'se'
-  };
-  return mapping[code3?.toUpperCase()] || code3?.toLowerCase().slice(0, 2);
+// Mappa dei codici paese F1 a ISO 3166-1 alpha-2
+const countryCodeToFlag = {
+  'ARE': 'ae', 'ARG': 'ar', 'AUS': 'au', 'AUT': 'at', 'AZE': 'az',
+  'BHR': 'bh', 'BEL': 'be', 'BRA': 'br', 'CAN': 'ca', 'CHN': 'cn',
+  'DEU': 'de', 'ESP': 'es', 'FRA': 'fr', 'GBR': 'gb', 'HUN': 'hu',
+  'ITA': 'it', 'JPN': 'jp', 'MCO': 'mc', 'MEX': 'mx', 'NLD': 'nl',
+  'PRT': 'pt', 'QAT': 'qa', 'RUS': 'ru', 'SAU': 'sa', 'SGP': 'sg',
+  'TUR': 'tr', 'USA': 'us', 'ZAF': 'za', 'CHE': 'ch', 'MAR': 'ma',
+  'SWE': 'se', 'KOR': 'kr', 'IND': 'in', 'MYS': 'my',
+  
+  // Codici alternativi/vecchi
+  'GER': 'de', 'UK': 'gb', 'GB': 'gb', 'ENG': 'gb', 'UAE': 'ae',
+  'SUI': 'ch', 'RSA': 'za', 'UAE': 'ae', 'KSA': 'sa'
+};
+
+// Funzione per convertire codice paese F1 in codice bandiera
+const getFlagCodeFromCountry = (countryCode) => {
+  if (!countryCode) return '';
+  
+  const upperCode = countryCode.toUpperCase();
+  
+  // Cerca corrispondenza diretta
+  if (countryCodeToFlag[upperCode]) {
+    return countryCodeToFlag[upperCode];
+  }
+  
+  // Se è già un codice a 2 lettere, usalo direttamente
+  if (countryCode.length === 2) {
+    return countryCode.toLowerCase();
+  }
+  
+  // Fallback: usa le prime 2 lettere
+  return countryCode.slice(0, 2).toLowerCase();
 };
 
 export default function RaceDetailsPage() {
@@ -53,7 +75,8 @@ export default function RaceDetailsPage() {
       const currentRace = racesData?.find(r => r.id === parseInt(id));
       if (currentRace) {
         setRaceInfo(currentRace);
-        setCircuitInfo(circuitsData?.find(c => c.id === currentRace.circuitId));
+        const circuit = circuitsData?.find(c => c.id === currentRace.circuitId);
+        setCircuitInfo(circuit);
         
         const dMap = {}; drData?.forEach(d => dMap[d.id] = d);
         const cMap = {}; coData?.forEach(c => cMap[c.id] = c);
@@ -70,8 +93,18 @@ export default function RaceDetailsPage() {
   if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-red-600 font-black tracking-widest">LOADING...</div>;
   if (!raceInfo) return <div className="min-h-screen bg-black text-white p-20 text-center font-bold">RACE NOT FOUND</div>;
 
-  const flagCode = convertCountryCode(circuitInfo?.countryId);
+  const flagCode = getFlagCodeFromCountry(circuitInfo?.countryId);
   const visibleDrivers = showFullDrivers ? driverStandings : driverStandings.slice(0, 10);
+
+  // Funzione per controllare se è un pilota/scuderia Ferrari
+  const isFerrari = (constructorId) => {
+    const constructorName = constructors[constructorId]?.name?.toLowerCase();
+    return constructorName?.includes('ferrari') || false;
+  };
+
+  const getConstructorName = (constructorId) => {
+    return constructors[constructorId]?.name || '';
+  };
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -102,12 +135,19 @@ export default function RaceDetailsPage() {
 
             {/* Blocco 2: Bandiera */}
             <div className="bg-zinc-900/50 border border-zinc-800 p-6 flex items-center justify-center rounded-sm">
-              <img 
-                src={`https://flagcdn.com/h80/${flagCode}.png`} 
-                className="h-16 w-auto shadow-2xl rounded-sm object-contain" 
-                alt={circuitInfo?.countryId}
-                onError={(e) => e.target.style.display='none'}
-              />
+              {flagCode ? (
+                <img 
+                  src={`https://flagcdn.com/h80/${flagCode}.png`} 
+                  className="h-16 w-auto shadow-2xl rounded-sm object-contain" 
+                  alt={circuitInfo?.countryId}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = `https://flagcdn.com/h80/${circuitInfo?.countryId?.slice(0, 2).toLowerCase() || 'xx'}.png`;
+                  }}
+                />
+              ) : (
+                <div className="text-zinc-500 text-sm font-bold">No Flag</div>
+              )}
             </div>
 
             {/* Blocco 3: Mappa Piccola Quadrata */}
@@ -120,6 +160,7 @@ export default function RaceDetailsPage() {
                   scrolling="no" 
                   src={`https://www.openstreetmap.org/export/embed.html?bbox=${circuitInfo.longitude-0.008}%2C${circuitInfo.latitude-0.005}%2C${circuitInfo.longitude+0.008}%2C${circuitInfo.latitude+0.005}&layer=mapnik&marker=${circuitInfo.latitude}%2C${circuitInfo.longitude}`}
                   className="grayscale invert opacity-50 group-hover:opacity-100 transition-opacity duration-500"
+                  title={`Map of ${circuitInfo?.name}`}
                 ></iframe>
               )}
               <div className="absolute inset-0 pointer-events-none border border-white/5"></div>
@@ -137,17 +178,29 @@ export default function RaceDetailsPage() {
             </div>
             <table className="w-full text-left text-sm">
               <tbody>
-                {visibleDrivers.map((s, i) => (
-                  <tr key={i} className="border-b border-zinc-800/30 hover:bg-white/5 transition-colors group">
-                    <td className="p-4 w-12 font-black italic text-zinc-500 group-hover:text-red-600">{s.positionText}</td>
-                    <td className="p-4">
-                      <div className="font-bold text-white uppercase tracking-tight">
-                        {drivers[s.driverId]?.firstName} <span className="text-red-600">{drivers[s.driverId]?.lastName}</span>
-                      </div>
-                    </td>
-                    <td className="p-4 text-right font-black text-white">{s.points}</td>
-                  </tr>
-                ))}
+                {visibleDrivers.map((s, i) => {
+                  const isFerrariDriver = isFerrari(s.constructorId);
+                  const constructorName = getConstructorName(s.constructorId);
+                  return (
+                    <tr key={i} className="border-b border-zinc-800/30 hover:bg-white/5 transition-colors group">
+                      <td className="p-4 w-12 font-black italic text-zinc-500 group-hover:text-red-600">
+                        {s.positionText}
+                      </td>
+                      <td className="p-4">
+                        <div className="flex flex-col">
+                          <div className={`font-bold uppercase tracking-tight ${isFerrariDriver ? 'text-[#ff2800]' : 'text-white'}`}>
+                            {drivers[s.driverId]?.firstName} <span className={`${isFerrariDriver ? 'text-[#ff2800]' : 'text-red-600'}`}>
+                              {drivers[s.driverId]?.lastName}
+                            </span>
+                          </div>
+                          <div className={`text-xs font-bold uppercase mt-1 ${isFerrariDriver ? 'text-[#ff2800]' : 'text-zinc-400'}`}>
+                            {constructorName}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
             
@@ -168,13 +221,20 @@ export default function RaceDetailsPage() {
             </div>
             <table className="w-full text-left text-sm">
               <tbody>
-                {constructorStandings.map((s, i) => (
-                  <tr key={i} className="border-b border-zinc-800/30 hover:bg-white/5 transition-colors group">
-                    <td className="p-4 w-12 font-black italic text-zinc-500 group-hover:text-red-600">{s.positionText}</td>
-                    <td className="p-4 font-bold text-white uppercase tracking-tight">{constructors[s.constructorId]?.name}</td>
-                    <td className="p-4 text-right font-black text-white">{s.points}</td>
-                  </tr>
-                ))}
+                {constructorStandings.map((s, i) => {
+                  const isFerrariConstructor = isFerrari(s.constructorId);
+                  return (
+                    <tr key={i} className="border-b border-zinc-800/30 hover:bg-white/5 transition-colors group">
+                      <td className="p-4 w-12 font-black italic text-zinc-500 group-hover:text-red-600">
+                        {s.positionText}
+                      </td>
+                      <td className={`p-4 font-bold uppercase tracking-tight ${isFerrariConstructor ? 'text-[#ff2800]' : 'text-white'}`}>
+                        {constructors[s.constructorId]?.name}
+                      </td>
+                      <td className="p-4 text-right font-black text-white">{s.points}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </section>
