@@ -39,6 +39,71 @@ const getFlagCodeFromCountry = (countryCode) => {
   return countryCode.slice(0, 2).toLowerCase();
 };
 
+// Funzione per ottenere il colore di sfondo in base alla posizione
+const getPositionBackground = (position) => {
+  const pos = parseInt(position);
+  
+  switch(pos) {
+    case 1:
+      return 'bg-gradient-to-r from-yellow-500/10 to-yellow-600/10 border-l-4 border-yellow-500';
+    case 2:
+      return 'bg-gradient-to-r from-gray-300/10 to-gray-400/10 border-l-4 border-gray-300';
+    case 3:
+      return 'bg-gradient-to-r from-amber-700/10 to-amber-800/10 border-l-4 border-amber-700';
+    case 4:
+      return 'bg-gradient-to-r from-blue-500/5 to-blue-600/5 border-l-4 border-blue-500';
+    case 5:
+      return 'bg-gradient-to-r from-blue-500/5 to-blue-600/5 border-l-4 border-blue-500';
+    case 6:
+      return 'bg-gradient-to-r from-blue-500/5 to-blue-600/5 border-l-4 border-blue-500';
+    case 7:
+      return 'bg-gradient-to-r from-blue-500/5 to-blue-600/5 border-l-4 border-blue-500';
+    case 8:
+      return 'bg-gradient-to-r from-blue-500/5 to-blue-600/5 border-l-4 border-blue-500';
+    case 9:
+      return 'bg-gradient-to-r from-blue-500/5 to-blue-600/5 border-l-4 border-blue-500';
+    case 10:
+      return 'bg-gradient-to-r from-amber-900/10 to-amber-950/10 border-l-4 border-amber-900';
+    default:
+      return 'bg-gradient-to-r from-zinc-900/5 to-zinc-900/10 border-l-4 border-zinc-800';
+  }
+};
+
+// Funzione per ottenere il testo della posizione in base al colore
+const getPositionTextColor = (position) => {
+  const pos = parseInt(position);
+  
+  switch(pos) {
+    case 1:
+      return 'text-yellow-500';
+    case 2:
+      return 'text-gray-300';
+    case 3:
+      return 'text-amber-700';
+    case 10:
+      return 'text-amber-900';
+    default:
+      return 'text-zinc-500';
+  }
+};
+
+// Funzione per calcolare bounding box per mappa (10km radius)
+const calculateBoundingBox = (lat, lon, radiusKm = 10) => {
+  // Gradi per kilometro (approssimativo)
+  const latPerKm = 1 / 111.32; // 1 grado latitudine ≈ 111.32 km
+  const lonPerKm = 1 / (111.32 * Math.cos(lat * Math.PI / 180)); // 1 grado longitudine varia con latitudine
+  
+  const latDelta = radiusKm * latPerKm;
+  const lonDelta = radiusKm * lonPerKm;
+  
+  return {
+    minLon: lon - lonDelta,
+    minLat: lat - latDelta,
+    maxLon: lon + lonDelta,
+    maxLat: lat + latDelta
+  };
+};
+
 export default function RaceDetailsPage() {
   const router = useRouter();
   const { id } = router.query;
@@ -95,6 +160,16 @@ export default function RaceDetailsPage() {
 
   const flagCode = getFlagCodeFromCountry(circuitInfo?.countryId);
   const visibleDrivers = showFullDrivers ? driverStandings : driverStandings.slice(0, 10);
+  
+  // Calcola bounding box per la mappa se abbiamo coordinate
+  let mapUrl = '';
+  if (circuitInfo?.latitude && circuitInfo?.longitude) {
+    const bbox = calculateBoundingBox(
+      parseFloat(circuitInfo.latitude),
+      parseFloat(circuitInfo.longitude)
+    );
+    mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox.minLon}%2C${bbox.minLat}%2C${bbox.maxLon}%2C${bbox.maxLat}&layer=mapnik&marker=${circuitInfo.latitude}%2C${circuitInfo.longitude}`;
+  }
 
   // Funzione per controllare se è un pilota/scuderia Ferrari
   const isFerrari = (constructorId) => {
@@ -152,16 +227,20 @@ export default function RaceDetailsPage() {
 
             {/* Blocco 3: Mappa Piccola Quadrata */}
             <div className="bg-zinc-900/50 border border-zinc-800 aspect-square overflow-hidden rounded-sm relative group">
-              {circuitInfo?.latitude && (
+              {mapUrl ? (
                 <iframe 
                   width="100%" 
                   height="100%" 
                   frameBorder="0" 
                   scrolling="no" 
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${circuitInfo.longitude-0.008}%2C${circuitInfo.latitude-0.005}%2C${circuitInfo.longitude+0.008}%2C${circuitInfo.latitude+0.005}&layer=mapnik&marker=${circuitInfo.latitude}%2C${circuitInfo.longitude}`}
+                  src={mapUrl}
                   className="grayscale invert opacity-50 group-hover:opacity-100 transition-opacity duration-500"
                   title={`Map of ${circuitInfo?.name}`}
                 ></iframe>
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-zinc-500 text-sm font-bold">Map Not Available</div>
+                </div>
               )}
               <div className="absolute inset-0 pointer-events-none border border-white/5"></div>
             </div>
@@ -181,10 +260,16 @@ export default function RaceDetailsPage() {
                 {visibleDrivers.map((s, i) => {
                   const isFerrariDriver = isFerrari(s.constructorId);
                   const constructorName = getConstructorName(s.constructorId);
+                  const position = s.positionText;
+                  const bgClass = getPositionBackground(position);
+                  const textClass = getPositionTextColor(position);
+                  
                   return (
-                    <tr key={i} className="border-b border-zinc-800/30 hover:bg-white/5 transition-colors group">
-                      <td className="p-4 w-12 font-black italic text-zinc-500 group-hover:text-red-600">
-                        {s.positionText}
+                    <tr key={i} className={`${bgClass} hover:bg-white/10 transition-all duration-300`}>
+                      <td className="p-4 w-12 font-black italic">
+                        <div className={`${textClass} group-hover:text-white transition-colors`}>
+                          {position}
+                        </div>
                       </td>
                       <td className="p-4">
                         <div className="flex flex-col">
@@ -223,10 +308,16 @@ export default function RaceDetailsPage() {
               <tbody>
                 {constructorStandings.map((s, i) => {
                   const isFerrariConstructor = isFerrari(s.constructorId);
+                  const position = s.positionText;
+                  const bgClass = getPositionBackground(position);
+                  const textClass = getPositionTextColor(position);
+                  
                   return (
-                    <tr key={i} className="border-b border-zinc-800/30 hover:bg-white/5 transition-colors group">
-                      <td className="p-4 w-12 font-black italic text-zinc-500 group-hover:text-red-600">
-                        {s.positionText}
+                    <tr key={i} className={`${bgClass} hover:bg-white/10 transition-all duration-300`}>
+                      <td className="p-4 w-12 font-black italic">
+                        <div className={`${textClass} group-hover:text-white transition-colors`}>
+                          {position}
+                        </div>
                       </td>
                       <td className={`p-4 font-bold uppercase tracking-tight ${isFerrariConstructor ? 'text-[#ff2800]' : 'text-white'}`}>
                         {constructors[s.constructorId]?.name}
