@@ -62,6 +62,7 @@ export default function StandingsPage() {
   async function loadStandings() {
     try {
       setLoading(true);
+      // Caricamento file F1DB
       const [drData, coData, drStData, coStData, racesData] = await Promise.all([
         loadJSON('/data/f1db-drivers.json'),
         loadJSON('/data/f1db-constructors.json'),
@@ -70,216 +71,105 @@ export default function StandingsPage() {
         loadJSON('/data/f1db-races.json')
       ]);
 
-      // Mappatura ID 
-      const drMap = {}; drData?.forEach(d => drMap[d.id] = d);
-      const coMap = {}; coData?.forEach(c => coMap[c.id] = c);
+      const drMap = {}; drData?.forEach(d => { if(d.id) drMap[d.id] = d });
+      const coMap = {}; coData?.forEach(c => { if(c.id) coMap[c.id] = c });
       setDrivers(drMap); setConstructors(coMap);
 
-      // .year)
       const seasons = [...new Set(drStData?.map(s => s.year))].sort((a, b) => b - a);
       setAvailableSeasons(seasons);
 
-      // driverId e positionNumber
       const drS = drStData?.filter(s => s.year === selectedSeason) || [];
       if (drS.length > 0) {
         const maxR = Math.max(...drS.map(s => s.round));
         setDriverStandings(drS.filter(s => s.round === maxR && s.positionNumber).sort((a, b) => a.positionNumber - b.positionNumber));
       }
 
-      // Calendar
-      const seasonRaces = racesData?.filter(r => r.year === selectedSeason).sort((a, b) => a.round - b.round) || [];
-      setCalendar(seasonRaces);
+      const coS = coStData?.filter(s => s.year === selectedSeason) || [];
+      if (coS.length > 0) {
+        const maxR = Math.max(...coS.map(s => s.round));
+        setConstructorStandings(coS.filter(s => s.round === maxR && s.positionNumber).sort((a, b) => a.positionNumber - b.positionNumber));
+      }
 
-    } catch (err) { console.error(err); } finally { setLoading(false); }
+      setCalendar(racesData?.filter(r => r.year === selectedSeason).sort((a, b) => a.round - b.round) || []);
+    } catch (e) {
+      console.error("Errore caricamento:", e);
+    } finally { setLoading(false); }
   }
 
-  useEffect(() => {
-    loadStandings();
-  }, [selectedSeason]);
-
-  const getFlagUrl = (natOrCircuit, isCircuit = false) => {
-    const code = isCircuit ? circuitToCountry[natOrCircuit] : nationalityToCountryCode[natOrCircuit];
-    return code ? `https://flagcdn.com/w40/${code}.png` : null;
-  };
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  };
+  useEffect(() => { loadStandings(); }, [selectedSeason]);
 
   const visibleDrivers = showFullDrivers ? driverStandings : driverStandings.slice(0, 5);
   const visibleConstructors = showFullConstructors ? constructorStandings : constructorStandings.slice(0, 5);
 
-  if (loading) return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <div className="animate-spin rounded-full h-20 w-20 border-4 border-t-red-600 border-zinc-800"></div>
-    </div>
-  );
+  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center"><div className="animate-spin rounded-full h-20 w-20 border-4 border-t-red-600"></div></div>;
 
   return (
-    <div className="min-h-screen bg-black text-white relative">
-      <Navigation 
-        activeSection={activeSection} 
-        onNavigate={(id) => {
-          if (id === 'home') {
-            if (typeof window !== 'undefined') window.location.href = '/';
-          } else {
-            setActiveSection(id);
-          }
-        }} 
-      />
-
-      <main className="max-w-7xl mx-auto px-4 pt-32 pb-20 relative z-10">
+    <div className="min-h-screen bg-black text-white">
+      <Navigation activeSection="stats" />
+      <main className="max-w-7xl mx-auto px-4 pt-32 pb-20">
         <div className="flex justify-between items-end mb-12 border-b border-red-600/30 pb-6">
-          <h1 className="text-5xl font-black italic uppercase tracking-tighter">
-            Standings <span className="text-red-600">{selectedSeason}</span>
-          </h1>
-          <select 
-            value={selectedSeason} 
-            onChange={(e) => setSelectedSeason(Number(e.target.value))} 
-            className="bg-zinc-900 border-l-4 border-red-600 px-4 py-2 font-bold outline-none text-white cursor-pointer"
-          >
+          <h1 className="text-5xl font-black italic uppercase tracking-tighter">Standings <span className="text-red-600">{selectedSeason}</span></h1>
+          <select value={selectedSeason} onChange={(e) => setSelectedSeason(Number(e.target.value))} className="bg-zinc-900 border-l-4 border-red-600 px-4 py-2 font-bold outline-none text-white">
             {availableSeasons.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
-          {/* Drivers */}
-          <section className="bg-zinc-900/40 border border-zinc-800 rounded-sm overflow-hidden">
-            <div className="p-4 border-b border-zinc-800 bg-zinc-900/80 flex items-center gap-3">
-               <div className="w-1 h-6 bg-red-600"></div>
-               <h2 className="font-black uppercase tracking-widest text-sm">Drivers</h2>
-            </div>
+          {/* Driver Table */}
+          <div className="bg-zinc-900/40 border border-zinc-800">
+            <h2 className="p-4 font-black uppercase text-sm border-b border-zinc-800 text-red-600">Drivers</h2>
             <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="text-zinc-500 uppercase text-[10px] border-b border-zinc-800">
-                  <th className="p-4 w-12">Pos</th>
-                  <th className="p-4">Driver</th>
-                  <th className="p-4">Team</th>
-                  <th className="p-4 w-12 text-center">Nat</th>
-                  <th className="p-4 text-right">Pts</th>
-                </tr>
-              </thead>
               <tbody>
-                {visibleDrivers.map((s, i) => {
-                  const d = drivers[s.driver_id] || {};
-                  const isFerrari = s.constructor_id === 'ferrari';
-                  const flag = getFlagUrl(d.nationality);
-                  return (
-                    <tr key={s.driver_id} className={`border-b border-zinc-800/30 ${isFerrari ? 'bg-red-600/10' : ''}`}>
-                      <td className={`p-4 font-black italic ${i < 3 ? 'text-red-600' : 'text-zinc-600'}`}>{s.position}</td>
-                      <td className={`p-4 font-bold ${isFerrari ? 'text-red-500' : ''}`}>{d.familyName?.toUpperCase()}</td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                           <img src={`/images/teams/${s.constructor_id}.png`} onError={(e) => e.target.style.display='none'} className="w-5 h-5 object-contain" alt="" />
-                           <span className={`text-[10px] uppercase font-bold ${isFerrari ? 'text-red-500' : 'text-zinc-400'}`}>
-                             {constructors[s.constructor_id]?.name || s.constructor_id}
-                           </span>
-                        </div>
-                      </td>
-                      <td className="p-4 text-center">{flag && <img src={flag} className="w-5 mx-auto opacity-80" alt="" />}</td>
-                      <td className="p-4 text-right font-black">{s.points}</td>
-                    </tr>
-                  )
-                })}
+                {visibleDrivers.map((s) => (
+                  <tr key={s.driverId} className="border-b border-zinc-800/30 hover:bg-white/5 transition-colors">
+                    <td className="p-4 w-12 font-black italic text-zinc-500">{s.positionNumber}</td>
+                    <td className="p-4 font-bold">{drivers[s.driverId]?.lastName?.toUpperCase()}</td>
+                    <td className="p-4 text-zinc-500 text-[10px] uppercase font-bold">{constructors[s.constructorId]?.name || s.constructorId}</td>
+                    <td className="p-4 text-right font-black">{s.points}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
             <button onClick={() => setShowFullDrivers(!showFullDrivers)} className="w-full p-3 text-[10px] font-black uppercase text-zinc-500 hover:text-white transition-colors">
               {showFullDrivers ? '↑ Close' : '↓ View All'}
             </button>
-          </section>
+          </div>
 
-          {/* Constructors */}
-          <section className="bg-zinc-900/40 border border-zinc-800 rounded-sm overflow-hidden">
-            <div className="p-4 border-b border-zinc-800 bg-zinc-900/80 flex items-center gap-3">
-               <div className="w-1 h-6 bg-red-600"></div>
-               <h2 className="font-black uppercase tracking-widest text-sm">Constructors</h2>
-            </div>
+          {/* Constructor Table */}
+          <div className="bg-zinc-900/40 border border-zinc-800">
+            <h2 className="p-4 font-black uppercase text-sm border-b border-zinc-800 text-red-600">Constructors</h2>
             <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="text-zinc-500 uppercase text-[10px] border-b border-zinc-800">
-                  <th className="p-4 w-12">Pos</th>
-                  <th className="p-4">Team</th>
-                  <th className="p-4 w-12 text-center">Nat</th>
-                  <th className="p-4 text-right">Pts</th>
-                </tr>
-              </thead>
               <tbody>
-                {visibleConstructors.map((s, i) => {
-                  const c = constructors[s.constructor_id] || {};
-                  const isFerrari = s.constructor_id === 'ferrari';
-                  const flag = getFlagUrl(c.nationality);
-                  return (
-                    <tr key={s.constructor_id} className={`border-b border-zinc-800/30 ${isFerrari ? 'bg-red-600/10' : ''}`}>
-                      <td className={`p-4 font-black italic ${i < 3 ? 'text-red-600' : 'text-zinc-600'}`}>{s.position}</td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2 font-bold">
-                          <img src={`/images/teams/${s.constructor_id}.png`} onError={(e) => e.target.style.display='none'} className="w-6 h-6 object-contain" alt="" />
-                          <span className={isFerrari ? 'text-red-500' : ''}>{c.name?.toUpperCase()}</span>
-                        </div>
-                      </td>
-                      <td className="p-4 text-center">{flag && <img src={flag} className="w-5 mx-auto opacity-80" alt="" />}</td>
-                      <td className="p-4 text-right font-black">{s.points}</td>
-                    </tr>
-                  )
-                })}
+                {visibleConstructors.map((s) => (
+                  <tr key={s.constructorId} className="border-b border-zinc-800/30 hover:bg-white/5 transition-colors">
+                    <td className="p-4 w-12 font-black italic text-zinc-500">{s.positionNumber}</td>
+                    <td className="p-4 font-bold">{constructors[s.constructorId]?.name?.toUpperCase()}</td>
+                    <td className="p-4 text-right font-black">{s.points}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
             <button onClick={() => setShowFullConstructors(!showFullConstructors)} className="w-full p-3 text-[10px] font-black uppercase text-zinc-500 hover:text-white transition-colors">
               {showFullConstructors ? '↑ Close' : '↓ View All'}
             </button>
-          </section>
+          </div>
         </div>
 
         {/* Calendar Section */}
-        <section className="bg-zinc-900/40 border border-zinc-800 rounded-sm overflow-hidden mt-12">
-          <div className="p-4 border-b border-zinc-800 bg-zinc-900/80 flex items-center gap-3">
-             <div className="w-1 h-6 bg-red-600"></div>
-             <h2 className="font-black uppercase tracking-widest text-sm">Race Calendar {selectedSeason}</h2>
-          </div>
-          
-          <div className="p-6">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {calendar.length > 0 ? calendar.map((race) => {
-                const countryCode = circuitToCountry[race.circuit_id];
-                return (
-                  <Link key={race.race_id} href={`/races?id=${race.race_id}`} className="relative group block">
-                    <div className="absolute -top-2 -left-2 bg-red-600 text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center z-20 shadow-lg border border-black group-hover:scale-110 transition-transform">
-                      {race.round}
-                    </div>
-                    <div className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-3 hover:border-red-600 transition-all group-hover:-translate-y-1">
-                      <div className="h-12 w-full mb-3 overflow-hidden rounded-md bg-zinc-700">
-                        {countryCode ? (
-                          <img 
-                            src={`https://flagcdn.com/w160/${countryCode}.png`} 
-                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
-                            alt="" 
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-[10px] text-zinc-500 uppercase">No Flag</div>
-                        )}
-                      </div>
-                      <div className="text-[11px] font-black text-red-500 uppercase mb-1 truncate">
-                        {race.race_name.replace('Grand Prix', 'GP')}
-                      </div>
-                      <div className="text-[10px] text-zinc-400 font-bold">
-                        {formatDate(race.date)}
-                      </div>
-                      <div className="text-[9px] text-zinc-500 uppercase mt-2 truncate">
-                        {race.circuit_id.replace(/_/g, ' ')}
-                      </div>
-                    </div>
-                  </Link>
-                );
-              }) : (
-                <div className="col-span-full py-10 text-center text-zinc-500 italic">
-                  No calendar data available for this season.
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
+        <h2 className="mb-6 font-black uppercase tracking-widest text-sm text-red-600">Race Calendar</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {calendar.map((race) => {
+            const countryCode = circuitToCountry[race.circuitId];
+            return (
+              <Link key={race.id} href={`/races?id=${race.id}`} className="bg-zinc-900 border border-zinc-800 p-4 hover:border-red-600 transition-all group">
+                 <div className="text-red-600 font-black text-xs mb-1">R{race.round}</div>
+                 <div className="font-bold text-[11px] uppercase truncate text-white">{race.name}</div>
+                 <div className="text-[10px] text-zinc-500 mb-3">{race.date}</div>
+                 {countryCode && <img src={`https://flagcdn.com/w40/${countryCode}.png`} className="w-6 h-auto opacity-70 group-hover:opacity-100" alt="" />}
+              </Link>
+            )
+          })}
+        </div>
       </main>
       <Footer />
     </div>
