@@ -189,10 +189,16 @@ export default function StandingsPage() {
                       <td className={`p-4 font-bold ${isFerrari ? 'text-red-500' : ''}`}>{d.familyName?.toUpperCase()}</td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
-                           <img src={`/images/teams/${s.constructor_id}.png`} onError={(e) => e.target.style.display='none'} className="w-6 h-6 object-contain" alt="" />
-                           <span className="text-[10px] text-zinc-400 hidden md:block">{constructors[s.constructor_id]?.name}</span>
-                        </div>
-                      </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                             <img src={`/images/teams/${s.constructor_id}.png`} 
+                                  onError={(e) => e.target.style.display='none'} 
+                                  className="w-6 h-6 object-contain" alt="" />
+                             <span className={`text-[11px] font-bold uppercase ${isFerrari ? 'text-red-500' : 'text-zinc-300'}`}>
+                                {constructors[s.constructor_id]?.name || s.constructor_id}
+                             </span>
+                          </div>
+                        </td>
                       <td className="p-4 text-center">{flag && <img src={flag} className="w-5 mx-auto opacity-80" alt="" />}</td>
                       <td className="p-4 text-right font-black">{s.points}</td>
                     </tr>
@@ -257,11 +263,15 @@ export default function StandingsPage() {
               {calendar.length > 0 ? calendar.map((race) => {
                 const countryCode = circuitToCountry[race.circuit_id];
                 return (
-                  <div key={race.race_id} className="relative group">
-                    <div className="absolute -top-2 -left-2 bg-red-600 text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center z-20 shadow-lg border border-black">
-                      {race.round}
-                    </div>
-                    <div className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-3 hover:border-red-600 transition-all group-hover:-translate-y-1">
+                    <Link 
+                      key={race.race_id} 
+                      href={`/races?id=${race.race_id}`} // Link alla nuova pagina
+                      className="relative group block"
+                    >
+                      <div className="absolute -top-2 -left-2 bg-red-600 text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center z-20 shadow-lg border border-black group-hover:scale-110 transition-transform">
+                        {race.round}
+                      </div>
+                      <div className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-3 hover:border-red-600 hover:bg-zinc-800 transition-all group-hover:-translate-y-1">
                       <div className="h-12 w-full mb-3 overflow-hidden rounded-md bg-zinc-700">
                         {countryCode ? (
                           <img src={`https://flagcdn.com/w160/${countryCode}.png`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt={race.race_name} />
