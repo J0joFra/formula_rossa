@@ -210,7 +210,7 @@ const getPositionTextColor = (position) => {
   }
 };
 
-const calculateBoundingBox = (lat, lon, radiusKm = 10) => {
+const calculateBoundingBox = (lat, lon, radiusKm = 5) => {
   const latPerKm = 1 / 111.32; // 1 grado latitudine ≈ 111.32 km
   const lonPerKm = 1 / (111.32 * Math.cos(lat * Math.PI / 180)); 
   
