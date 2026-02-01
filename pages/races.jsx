@@ -4,7 +4,7 @@ import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
 
-// ISO 3166-1 alpha-3 -> alpha-2 (lowercase, per flag)
+// ISO 3166-1 alpha-3 -> alpha-2 
 const countryCodeToFlag = {
   // Europa
   ITA: 'it', FRA: 'fr', DEU: 'de', ESP: 'es', PRT: 'pt',

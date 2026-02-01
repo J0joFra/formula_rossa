@@ -41,13 +41,19 @@ const circuitToCountry = {
   'baku': 'az', 
   'marina-bay': 'sg', 'marina_bay': 'sg',
   'americas': 'us', 
-  'rodriguez': 'mx',
-  'interlagos': 'br', 
-  'vegas': 'us', 
-  'losail': 'qa', 
-  'yas-marina': 'ae', 'yas_marina': 'ae',
-  'indianapolis': 'us', 'sebring': 'us', 'riverside': 'us',
-  'watkins-glen': 'us', 'watkins_glen': 'us',
+  'rodriguez': 'mx', 'le castellet': 'fr', 'le_castellet': 'fr',
+  'interlagos': 'br', 'spielberg': 'at',
+  'vegas': 'us', 'mexico-city': 'mx', 'mexico_city': 'mx',
+  'sakhir': 'bh', 'spa-francorchamps': 'be', 'spa_francorchamps': 'be',
+  'losail': 'qa', 'louvre': 'fr', 'abu-dhabi': 'ae',  'abu_dhabi': 'ae',
+  'yas-marina': 'ae', 'yas_marina': 'ae', 'austin': 'us',
+  'silverstone-circuit': 'gb', 'silverstone_circuit': 'gb',
+  'paul-ricard': 'fr', 'paul_ricard': 'fr', 'las-vegas': 'us', 'las_vegas': 'us',
+  'indianapolis': 'us', 'sebring': 'us', 'riverside': 'us', 'las-vegas': 'us',
+  'watkins-glen': 'us', 'watkins_glen': 'us', 'lusail': 'qa',
+  ' Brands Hatch': 'gb', 'brands_hatch': 'gb',
+  'donington-park': 'gb', 'donington_park': 'gb',
+  'monterey': 'us', 'laguna-seca': 'us', 'laguna_seca': 'us',
   'long-beach': 'us', 'long_beach': 'us',
   'phoenix': 'us', 'detroit': 'us', 'dallas': 'us', 'caesars-palace': 'us',
   'bremgarten': 'ch', 'reims': 'fr', 'nurburgring': 'de',
@@ -64,7 +70,7 @@ const circuitToCountry = {
   'fuji': 'jp', 'okayama': 'jp', 'sepang': 'my',
   'buddh': 'in', 'yeongam': 'kr', 'istanbul': 'tr',
   'sochi': 'ru', 'mugello': 'it', 'portimao': 'pt', 'cota': 'us', 
-  'yas_marina': 'ae', 'yas-marina': 'ae'
+  'yas_marina': 'ae', 'yas-marina': 'ae', 'melbourne': 'au', 'montreal': 'ca'
 };
 
 export default function StandingsPage() {
