@@ -4,81 +4,110 @@ import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
 
-// ISO 3166-1 alpha-3 -> alpha-2 
-const countryCodeToFlag = {
-  ITA: 'it',
-  FRA: 'fr',
-  DEU: 'de',
-  ESP: 'es',
-  PRT: 'pt',
-  NLD: 'nl',
-  BEL: 'be',
-  CHE: 'ch',
-  AUT: 'at',
-  SWE: 'se',
-  HUN: 'hu',
-  GBR: 'gb',
-  IRL: 'ie',
-  POL: 'pl',
-  CZE: 'cz',
-  GRC: 'gr',
-  ROU: 'ro',
-  BGR: 'bg',
-  HRV: 'hr',
-  SVN: 'si',
-  SVK: 'sk',
-  EST: 'ee',
-  LVA: 'lv',
-  LTU: 'lt',
-  ISL: 'is',
-  LUX: 'lu',
-  MCO: 'mc',
-
-  // Americhe
-  USA: 'us',
-  CAN: 'ca',
-  MEX: 'mx',
-  BRA: 'br',
-  ARG: 'ar',
-
-  // Asia
-  CHN: 'cn',
-  JPN: 'jp',
-  KOR: 'kr',
-  IND: 'in',
-  MYS: 'my',
-  SGP: 'sg',
-  QAT: 'qa',
-  ARE: 'ae',
-  SAU: 'sa',
-  AZE: 'az',
-  TUR: 'tr',
-
-  // Africa
-  ZAF: 'za',
-  MAR: 'ma',
-
-  // Oceania
-  AUS: 'au',
-
-  // Europa / Asia
-  RUS: 'ru'
+const circuitToCountry = {
+  'albert-park': 'au', 'albert_park': 'au',
+  'shanghai': 'cn', 
+  'suzuka': 'jp', 
+  'bahrain': 'bh',
+  'jeddah': 'sa', 
+  'miami': 'us', 
+  'imola': 'it', 
+  'monaco': 'mc',
+  'catalunya': 'es', 
+  'villeneuve': 'ca', 
+  'red-bull-ring': 'at', 'red_bull_ring': 'at',
+  'silverstone': 'gb',
+  'spa': 'be', 
+  'hungaroring': 'hu', 
+  'zandvoort': 'nl', 
+  'monza': 'it',
+  'baku': 'az', 'bowmanville': 'ca',
+  'marina-bay': 'sg', 'marina_bay': 'sg',
+  'americas': 'us', 'adelaide': 'au', 'buenos-aires': 'ar', 'buenos_aires': 'ar',
+  'rodriguez': 'mx', 'le castellet': 'fr', 'le_castellet': 'fr',
+  'interlagos': 'br', 'spielberg': 'at', 'rouen': 'fr',
+  'vegas': 'us', 'mexico-city': 'mx', 'mexico_city': 'mx',
+  'sakhir': 'bh', 'spa-francorchamps': 'be', 'spa_francorchamps': 'be',
+  'losail': 'qa', 'louvre': 'fr', 'abu-dhabi': 'ae',  'abu_dhabi': 'ae',
+  'yas-marina': 'ae', 'yas_marina': 'ae', 'austin': 'us',
+  'silverstone-circuit': 'gb', 'silverstone_circuit': 'gb',
+  'paul-ricard': 'fr', 'paul_ricard': 'fr', 'las-vegas': 'us', 'las_vegas': 'us',
+  'indianapolis': 'us', 'sebring': 'us', 'riverside': 'us', 'las-vegas': 'us',
+  'watkins-glen': 'us', 'watkins_glen': 'us', 'lusail': 'qa',
+  'brands-hatch': 'gb', 'brands_hatch': 'gb',
+  'donington-park': 'gb', 'donington_park': 'gb',
+  'monterey': 'us', 'laguna-seca': 'us', 'laguna_seca': 'us',
+  'long-beach': 'us', 'long_beach': 'us',
+  'phoenix': 'us', 'detroit': 'us', 'dallas': 'us', 'caesars-palace': 'us',
+  'bremgarten': 'ch', 'reims': 'fr', 'nurburgring': 'de',
+  'pedralbes': 'es', 'essarts': 'fr', 'aintree': 'gb',
+  'pescara': 'it', 'boavista': 'pt', 'avus': 'de',
+  'monsanto': 'pt', 'brands-hatch': 'gb', 'brands_hatch': 'gb',
+  'charade': 'fr', 'zeltweg': 'at', 'lemans': 'fr', 'jarama': 'es',
+  'montjuic': 'es', 'hockenheimring': 'de', 'ricard': 'fr',
+  'nivelles': 'be', 'zolder': 'be', 'anderstorp': 'se',
+  'dijon': 'fr', 'donington': 'gb', 'estoril': 'pt',
+  'magny-cours': 'fr', 'magny_cours': 'fr',
+  'valencia': 'es', 'ain-diab': 'ma', 'george': 'za', 'kyalami': 'za',
+  'galvez': 'ar', 'jacarepagua': 'br',
+  'fuji': 'jp', 'okayama': 'jp', 'sepang': 'my',
+  'buddh': 'in', 'yeongam': 'kr', 'istanbul': 'tr',
+  'sochi': 'ru', 'mugello': 'it', 'portimao': 'pt', 'cota': 'us', 
+  'yas_marina': 'ae', 'yas-marina': 'ae', 'melbourne': 'au', 'montreal': 'ca',
+  'yas marina': 'ae',
 };
 
-const getFlagCodeFromCountry = (countryCode) => {
-  if (!countryCode) return '';
+const getFlagCodeFromCircuit = (circuitName) => {
+  if (!circuitName) return '';
+  const normalized = circuitName.toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '') 
+    .replace(/\s+/g, '-') 
+    .replace(/-+/g, '-') 
+    .trim();
   
-  const upperCode = countryCode.toUpperCase();
-  
-  if (countryCodeToFlag[upperCode]) {
-    return countryCodeToFlag[upperCode];
+  if (circuitToCountry[normalized]) {
+    return circuitToCountry[normalized];
   }
   
-  if (countryCode.length === 2) {
-    return countryCode.toLowerCase();
+  for (const [circuit, code] of Object.entries(circuitToCountry)) {
+    if (normalized.includes(circuit) || circuit.includes(normalized)) {
+      return code;
+    }
   }
   
-  return countryCode.slice(0, 2).toLowerCase();
+  const lowerName = circuitName.toLowerCase();
+  if (lowerName.includes('abu dhabi') || lowerName.includes('yas marina') || lowerName.includes('dubai')) {
+    return 'ae';
+  }
+  if (lowerName.includes('silverstone') || lowerName.includes('brands') || lowerName.includes('donington')) {
+    return 'gb';
+  }
+  if (lowerName.includes('monza') || lowerName.includes('imola') || lowerName.includes('mugello')) {
+    return 'it';
+  }
+  if (lowerName.includes('monaco') || lowerName.includes('monte carlo')) {
+    return 'mc';
+  }
+  if (lowerName.includes('spa') || lowerName.includes('francorchamps')) {
+    return 'be';
+  }
+  if (lowerName.includes('nürburgring') || lowerName.includes('nurburgring') || lowerName.includes('hockenheim')) {
+    return 'de';
+  }
+  if (lowerName.includes('montreal') || lowerName.includes('villeneuve')) {
+    return 'ca';
+  }
+  if (lowerName.includes('melbourne') || lowerName.includes('adelaide')) {
+    return 'au';
+  }
+  if (lowerName.includes('interlagos') || lowerName.includes('rio') || lowerName.includes('brazil')) {
+    return 'br';
+  }
+  if (lowerName.includes('mexico') || lowerName.includes('rodriguez')) {
+    return 'mx';
+  }
+  
+  return '';
 };
 
 const getPositionBackground = (position) => {
@@ -196,10 +225,9 @@ export default function RaceDetailsPage() {
   if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-red-600 font-black tracking-widest">LOADING...</div>;
   if (!raceInfo) return <div className="min-h-screen bg-black text-white p-20 text-center font-bold">RACE NOT FOUND</div>;
 
-  const flagCode = getFlagCodeFromCountry(circuitInfo?.countryId);
+  const flagCode = getFlagCodeFromCircuit(circuitInfo?.name);
   const visibleDrivers = showFullDrivers ? driverStandings : driverStandings.slice(0, 10);
-  
-  // Calcola bounding box per la mappa se abbiamo coordinate
+
   let mapUrl = '';
   if (circuitInfo?.latitude && circuitInfo?.longitude) {
     const bbox = calculateBoundingBox(
@@ -232,18 +260,21 @@ export default function RaceDetailsPage() {
           <div className="text-red-600 font-black uppercase text-xs mb-2 tracking-[0.2em]">
             Round {raceInfo.round} • {raceInfo.year}
           </div>
+          <h1 className="text-6xl md:text-8xl font-black italic uppercase tracking-tighter leading-none mb-10">
+            {raceInfo.name || raceInfo.officialName}
+          </h1>
 
-          {/* Layout Header a 3 Blocchi */}
+          {/* Nuovo Layout Header a 3 Blocchi */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             
-            {/* Info Circuito */}
+            {/* Blocco 1: Info Circuito (Occupa 2 colonne) */}
             <div className="md:col-span-2 bg-zinc-900/50 border-l-4 border-red-600 p-6 flex flex-col justify-center">
               <p className="text-[10px] text-zinc-500 font-black uppercase mb-1 tracking-widest">Circuit</p>
               <p className="text-3xl font-black uppercase italic leading-none mb-2">{circuitInfo?.name}</p>
               <p className="text-sm text-zinc-400 font-bold uppercase">{circuitInfo?.placeName}, {circuitInfo?.countryId}</p>
             </div>
 
-            {/* Bandiera */}
+            {/* Blocco 2: Bandiera */}
             <div className="bg-zinc-900/50 border border-zinc-800 p-6 flex items-center justify-center rounded-sm">
               {flagCode ? (
                 <img 
@@ -252,11 +283,25 @@ export default function RaceDetailsPage() {
                   alt={circuitInfo?.countryId}
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = `https://flagcdn.com/h80/${circuitInfo?.countryId?.slice(0, 2).toLowerCase() || 'xx'}.png`;
+                    // Fallback al paese se la bandiera non viene trovata
+                    const country = circuitInfo?.countryId || '';
+                    let fallback = 'xx';
+                    
+                    if (country.includes('ARAB') || country.includes('UAE') || country.includes('EMIRATES')) {
+                      fallback = 'ae';
+                    } else if (country.length === 2) {
+                      fallback = country.toLowerCase();
+                    } else if (country.length >= 2) {
+                      fallback = country.slice(0, 2).toLowerCase();
+                    }
+                    
+                    e.target.src = `https://flagcdn.com/h80/${fallback}.png`;
                   }}
                 />
               ) : (
-                <div className="text-zinc-500 text-sm font-bold">No Flag</div>
+                <div className="text-zinc-500 text-sm font-bold">
+                  No Flag for: {circuitInfo?.name}
+                </div>
               )}
             </div>
 
