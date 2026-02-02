@@ -90,7 +90,7 @@ export default function HeroSection() {
             "Datemi una macchina che sia veloce in rettilineo e che stia in strada in curva."
           </p>
         </motion.div>
-
+      </div>
         {/* Stats Grid Dinamica */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-7xl mx-auto px-4">
         {statsConfig.map((stat, index) => (
