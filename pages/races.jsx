@@ -44,81 +44,31 @@ const circuitToCountry = {
 const getFlagCodeFromCircuit = (circuitName) => {
   if (!circuitName) return '';
   const normalized = circuitName.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
-  if (circuitToCountry[normalized]) return circuitToCountry[normalized];
-  for (const [circuit, code] of Object.entries(circuitToCountry)) {
-    if (normalized.includes(circuit) || circuit.includes(normalized)) return code;
-  }
-  return '';
-};
-
-  if (circuitToCountry[normalized]) {
-    return circuitToCountry[normalized];
-  }
   
-  for (const [circuit, code] of Object.entries(circuitToCountry)) {
-    if (normalized.includes(circuit) || circuit.includes(normalized)) {
-      return code;
-    }
-  }
+  if (circuitToCountry[normalized]) return circuitToCountry[normalized];
 
-const lowerName = circuitName.toLowerCase();
-if (lowerName.includes('abu dhabi') || lowerName.includes('yas marina') || lowerName.includes('dubai') || lowerName.includes('emirates')) {
-  return 'ae';
-}
-if (lowerName.includes('silverstone') || lowerName.includes('brands') || lowerName.includes('donington') || lowerName.includes('aintree') || lowerName.includes('british') || lowerName.includes('england') || lowerName.includes('uk')) {
-  return 'gb';
-}
-if (lowerName.includes('monza') || lowerName.includes('imola') || lowerName.includes('mugello') || lowerName.includes('pescara') || lowerName.includes('italian') || lowerName.includes('italy')) {
-  return 'it';
-}
-if (lowerName.includes('monaco') || lowerName.includes('monte carlo')) {
-  return 'mc';
-}
-if (lowerName.includes('spa') || lowerName.includes('francorchamps') || lowerName.includes('zolder') || lowerName.includes('nivelles') || lowerName.includes('belgian') || lowerName.includes('belgium')) {
-  return 'be';
-}
-if (lowerName.includes('nürburgring') || lowerName.includes('nurburgring') || lowerName.includes('hockenheim') || lowerName.includes('avus') || lowerName.includes('german') || lowerName.includes('germany')) {
-  return 'de';
-}
-if (lowerName.includes('montreal') || lowerName.includes('villeneuve') || lowerName.includes('bowmanville') || lowerName.includes('canadian') || lowerName.includes('canada')) {
-  return 'ca';
-}
-if (lowerName.includes('melbourne') || lowerName.includes('adelaide') || lowerName.includes('albert park') || lowerName.includes('australian') || lowerName.includes('australia')) {
-  return 'au';
-}
-if (lowerName.includes('interlagos') || lowerName.includes('jacarepagua') || lowerName.includes('galvez') || lowerName.includes('brazilian') || lowerName.includes('brazil') || lowerName.includes('são paulo') || lowerName.includes('sao paulo')) {
-  return 'br';
-}
-if (lowerName.includes('mexico') || lowerName.includes('rodriguez') || lowerName.includes('mexican')) {
-  return 'mx';
-}
-if (lowerName.includes('shanghai') || lowerName.includes('chinese') || lowerName.includes('china')) {
-  return 'cn';
-}
-if (lowerName.includes('suzuka') || lowerName.includes('fuji') || lowerName.includes('okayama') || lowerName.includes('japanese') || lowerName.includes('japan')) {
-  return 'jp';
-}
-if (lowerName.includes('bahrain') || lowerName.includes('sakhir')) {
-  return 'bh';
-}
-if (lowerName.includes('jeddah') || lowerName.includes('saudi') || lowerName.includes('ksa')) {
-  return 'sa';
-}
-if (lowerName.includes('miami') || lowerName.includes('austin') || lowerName.includes('americas') || lowerName.includes('cota') || lowerName.includes('indianapolis') || lowerName.includes('sebring') || lowerName.includes('riverside') || lowerName.includes('watkins glen') || lowerName.includes('long beach') || lowerName.includes('phoenix') || lowerName.includes('detroit') || lowerName.includes('dallas') || lowerName.includes('caesars palace') || lowerName.includes('monterey') || lowerName.includes('laguna seca') || lowerName.includes('las vegas') || lowerName.includes('vegas') || lowerName.includes('united states') || lowerName.includes('usa') || lowerName.includes('us')) {
-  return 'us';
-}
-if (lowerName.includes('catalunya') || lowerName.includes('barcelona') || lowerName.includes('valencia') || lowerName.includes('jarama') || lowerName.includes('montjuic') || lowerName.includes('pedralbes') || lowerName.includes('spanish') || lowerName.includes('spain')) {
-  return 'es';
-}
-if (lowerName.includes('red bull ring') || lowerName.includes('spielberg') || lowerName.includes('zeltweg') || lowerName.includes('österreichring') || lowerName.includes('austrian') || lowerName.includes('austria')) {
-  return 'at';
-}
-if (lowerName.includes('hungaroring') || lowerName.includes('hungarian') || lowerName.includes('hungary')) {
-  return 'hu';
-}
-if (lowerName.includes('zandvoort') || lowerName.includes('dutch') || lowerName.includes('netherlands') || lowerName.includes('holland')) {
-  return 'nl';
-}
+  const lowerName = circuitName.toLowerCase();
+  if (lowerName.includes('abu dhabi') || lowerName.includes('yas marina') || lowerName.includes('dubai') || lowerName.includes('emirates'))return 'ae';
+  if (lowerName.includes('silverstone') || lowerName.includes('brands') || lowerName.includes('donington') || lowerName.includes('aintree') || lowerName.includes('british') || lowerName.includes('england') || lowerName.includes('uk')) return 'gb';
+  if (lowerName.includes('monza') || lowerName.includes('imola') || lowerName.includes('mugello') || lowerName.includes('pescara') || lowerName.includes('italian') || lowerName.includes('italy')) return 'it';
+  if (lowerName.includes('monaco') || lowerName.includes('monte carlo')) return 'mc';
+  if (lowerName.includes('spa') || lowerName.includes('francorchamps') || lowerName.includes('zolder') || lowerName.includes('nivelles') || lowerName.includes('belgian') || lowerName.includes('belgium')) return 'be';
+  if (lowerName.includes('nürburgring') || lowerName.includes('nurburgring') || lowerName.includes('hockenheim') || lowerName.includes('avus') || lowerName.includes('german') || lowerName.includes('germany')) return 'de';
+  if (lowerName.includes('montreal') || lowerName.includes('villeneuve') || lowerName.includes('bowmanville') || lowerName.includes('canadian') || lowerName.includes('canada')) return 'ca';
+  if (lowerName.includes('melbourne') || lowerName.includes('adelaide') || lowerName.includes('albert park') || lowerName.includes('australian') || lowerName.includes('australia')) return 'au';
+  if (lowerName.includes('interlagos') || lowerName.includes('jacarepagua') || lowerName.includes('galvez') || lowerName.includes('brazilian') || lowerName.includes('brazil') || lowerName.includes('são paulo') || lowerName.includes('sao paulo')) return 'br';
+  if (lowerName.includes('mexico') || lowerName.includes('rodriguez') || lowerName.includes('mexican')) return 'mx';
+  if (lowerName.includes('shanghai') || lowerName.includes('chinese') || lowerName.includes('china')) return 'cn';
+  if (lowerName.includes('suzuka') || lowerName.includes('fuji') || lowerName.includes('okayama') || lowerName.includes('japanese') || lowerName.includes('japan')) return 'jp';
+  if (lowerName.includes('bahrain') || lowerName.includes('sakhir')) return 'bh';
+  if (lowerName.includes('jeddah') || lowerName.includes('saudi') || lowerName.includes('ksa')) return 'sa';
+  if (lowerName.includes('miami') || lowerName.includes('austin') || lowerName.includes('americas') || lowerName.includes('cota') || lowerName.includes('indianapolis') || lowerName.includes('sebring') || lowerName.includes('riverside') || lowerName.includes('watkins glen') || lowerName.includes('long beach') || lowerName.includes('phoenix') || lowerName.includes('detroit') || lowerName.includes('dallas') || lowerName.includes('caesars palace') || lowerName.includes('monterey') || lowerName.includes('laguna seca') || lowerName.includes('las vegas') || lowerName.includes('vegas') || lowerName.includes('united states') || lowerName.includes('usa') || lowerName.includes('us')) return 'us';
+  if (lowerName.includes('catalunya') || lowerName.includes('barcelona') || lowerName.includes('valencia') || lowerName.includes('jarama') || lowerName.includes('montjuic') || lowerName.includes('pedralbes') || lowerName.includes('spanish') return 'es';
+  if (lowerName.includes('red bull ring') || lowerName.includes('spielberg') || lowerName.includes('zeltweg') || lowerName.includes('österreichring') || lowerName.includes('austrian') || lowerName.includes('austria'))) return 'at';
+  if (lowerName.includes('hungaroring') || lowerName.includes('hungarian') || lowerName.includes('hungary')) return 'hu';
+  if (lowerName.includes('zandvoort') || lowerName.includes('dutch') || lowerName.includes('netherlands') || lowerName.includes('holland')) return 'nl';
+
+/*  
 if (lowerName.includes('baku') || lowerName.includes('azerbaijan')) {
   return 'az';
 }
@@ -158,15 +108,16 @@ if (lowerName.includes('istanbul') || lowerName.includes('turkish') || lowerName
 if (lowerName.includes('sochi') || lowerName.includes('russian') || lowerName.includes('russia')) {
   return 'ru';
 }
-
-return '';
+*/  
+  return '';
+}; 
 
 const getPositionBackground = (position) => {
   const pos = parseInt(position);
   switch(pos) {
-    case 1: return 'bg-gradient-to-r from-yellow-500/40 to-transparent border-l-4 border-yellow-500';
-    case 2: return 'bg-gradient-to-r from-gray-300/30 to-transparent border-l-4 border-gray-300';
-    case 3: return 'bg-gradient-to-r from-amber-700/30 to-transparent border-l-4 border-amber-700';
+    case 1: return 'bg-gradient-to-r from-yellow-500/30 to-transparent border-l-4 border-yellow-500';
+    case 2: return 'bg-gradient-to-r from-gray-300/20 to-transparent border-l-4 border-gray-300';
+    case 3: return 'bg-gradient-to-r from-amber-700/20 to-transparent border-l-4 border-amber-700';
     default: return 'border-l-4 border-zinc-800 hover:bg-white/5';
   }
 };
@@ -203,43 +154,45 @@ export default function RaceDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [showFullDrivers, setShowFullDrivers] = useState(false);
 
-  async function loadJSON(path) {
-    try {
-      const response = await fetch(path);
-      return response.ok ? await response.json() : null;
-    } catch { return null; }
-  }
-
   useEffect(() => {
     if (!id) return;
-    async function loadRaceData() {
+    async function loadData() {
       setLoading(true);
-      const [racesData, circuitsData, drStData, coStData, drData, coData] = await Promise.all([
-        loadJSON('/data/f1db-races.json'),
-        loadJSON('/data/f1db-circuits.json'),
-        loadJSON('/data/f1db-races-driver-standings.json'),
-        loadJSON('/data/f1db-races-constructor-standings.json'),
-        loadJSON('/data/f1db-drivers.json'),
-        loadJSON('/data/f1db-constructors.json')
-      ]);
+      try {
+        const [racesRes, circuitsRes, drStRes, coStRes, drRes, coRes] = await Promise.all([
+          fetch('/data/f1db-races.json'),
+          fetch('/data/f1db-circuits.json'),
+          fetch('/data/f1db-races-driver-standings.json'),
+          fetch('/data/f1db-races-constructor-standings.json'),
+          fetch('/data/f1db-drivers.json'),
+          fetch('/data/f1db-constructors.json')
+        ]);
 
-      const currentRace = racesData?.find(r => r.id === parseInt(id));
-      if (currentRace) {
-        setRaceInfo(currentRace);
-        setCircuitInfo(circuitsData?.find(c => c.id === currentRace.circuitId));
-        const dMap = {}; drData?.forEach(d => dMap[d.id] = d);
-        const cMap = {}; coData?.forEach(c => cMap[c.id] = c);
-        setDrivers(dMap); setConstructors(cMap);
-        setDriverStandings(drStData?.filter(s => s.raceId === currentRace.id).sort((a, b) => a.positionDisplayOrder - b.positionDisplayOrder));
-        setConstructorStandings(coStData?.filter(s => s.raceId === currentRace.id).sort((a, b) => a.positionDisplayOrder - b.positionDisplayOrder));
-      }
+        const races = await racesRes.json();
+        const circuits = await circuitsRes.json();
+        const drStandings = await drStRes.json();
+        const coStandings = await coStRes.json();
+        const driversData = await drRes.json();
+        const constructorsData = await coRes.json();
+
+        const race = races.find(r => r.id === parseInt(id));
+        if (race) {
+          setRaceInfo(race);
+          setCircuitInfo(circuits.find(c => c.id === race.circuitId));
+          const dMap = {}; driversData.forEach(d => dMap[d.id] = d);
+          const cMap = {}; constructorsData.forEach(c => cMap[c.id] = c);
+          setDrivers(dMap); setConstructors(cMap);
+          setDriverStandings(drStandings.filter(s => s.raceId === race.id).sort((a, b) => a.positionDisplayOrder - b.positionDisplayOrder));
+          setConstructorStandings(coStandings.filter(s => s.raceId === race.id).sort((a, b) => a.positionDisplayOrder - b.positionDisplayOrder));
+        }
+      } catch (err) { console.error(err); }
       setLoading(false);
     }
-    loadRaceData();
+    loadData();
   }, [id]);
 
-  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-red-600 font-black tracking-widest uppercase">Loading Race Data...</div>;
-  if (!raceInfo) return <div className="min-h-screen bg-black text-white p-20 text-center font-bold uppercase">Race Not Found</div>;
+  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-red-600 font-black tracking-widest uppercase">Loading...</div>;
+  if (!raceInfo) return <div className="min-h-screen bg-black text-white p-20 text-center font-bold">RACE NOT FOUND</div>;
 
   const visibleDrivers = showFullDrivers ? driverStandings : driverStandings.slice(0, 10);
   const flagCode = getFlagCodeFromCircuit(circuitInfo?.name);
@@ -262,7 +215,7 @@ export default function RaceDetailsPage() {
         </Link>
         
         <header className="mb-12">
-          <div className="text-red-600 font-black uppercase text-xs mb-2 tracking-[0.2em]">
+          <div className="text-red-600 font-black uppercase text-xs mb-2 tracking-widest">
             Round {raceInfo.round} • {raceInfo.year}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -272,22 +225,22 @@ export default function RaceDetailsPage() {
               <p className="text-sm text-zinc-400 font-bold uppercase">{circuitInfo?.placeName}, {circuitInfo?.countryId}</p>
             </div>
             <div className="bg-zinc-900/50 border border-zinc-800 p-6 flex items-center justify-center rounded-sm">
-              {flagCode && <img src={`https://flagcdn.com/h80/${flagCode}.png`} className="h-16 w-auto shadow-2xl rounded-sm object-contain" alt="flag" />}
+              {flagCode && <img src={`https://flagcdn.com/h80/${flagCode}.png`} className="h-14 w-auto shadow-2xl rounded-sm object-contain" alt="flag" />}
             </div>
             <div className="bg-zinc-900/50 border border-zinc-800 aspect-square overflow-hidden rounded-sm relative group">
               {mapUrl ? (
                 <iframe width="100%" height="100%" frameBorder="0" src={mapUrl} className="grayscale invert opacity-50 group-hover:opacity-100 transition-opacity duration-500"></iframe>
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-xs font-bold">Map N/A</div>
+                <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-xs font-bold uppercase tracking-widest">Map N/A</div>
               )}
             </div>
           </div>
         </header>
 
-        {/* CLASSIFICA RISULTATI GARA */}
+        {/* RACE RESULTS TABLE */}
         <section className="bg-zinc-900/40 border border-zinc-800 rounded-sm overflow-hidden mb-12 shadow-2xl">
-          <div className="p-4 border-b border-zinc-800 bg-zinc-900/80 flex justify-between items-center">
-            <h2 className="font-black uppercase text-xs text-red-600 tracking-widest">Race Results</h2>
+          <div className="p-4 border-b border-zinc-800 bg-zinc-900/80">
+            <h2 className="font-black uppercase text-xs text-red-600 tracking-widest text-center">Race Results</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm border-collapse">
@@ -337,9 +290,9 @@ export default function RaceDetailsPage() {
           )}
         </section>
 
-        {/* CLASSIFICA COSTRUTTORI (Sotto i risultati) */}
+        {/* CONSTRUCTOR STANDINGS */}
         <div className="max-w-2xl">
-          <section className="bg-zinc-900/40 border border-zinc-800 rounded-sm h-fit">
+          <section className="bg-zinc-900/40 border border-zinc-800 rounded-sm h-fit shadow-xl">
             <div className="p-4 border-b border-zinc-800 bg-zinc-900/80">
               <h2 className="font-black uppercase text-xs text-red-600 tracking-widest">Constructor Standings</h2>
             </div>
@@ -348,7 +301,7 @@ export default function RaceDetailsPage() {
                 {constructorStandings.map((s, i) => {
                   const isFerrariConstructor = isFerrari(s.constructorId);
                   return (
-                    <tr key={i} className={`${getPositionBackground(s.positionText)} hover:bg-white/5 transition-all duration-300`}>
+                    <tr key={i} className={`${getPositionBackground(s.positionText)} hover:bg-white/5 transition-all duration-300 border-b border-zinc-800/20`}>
                       <td className={`p-4 w-12 font-black italic ${getPositionTextColor(s.positionText)}`}>{s.positionText}</td>
                       <td className={`p-4 font-bold uppercase tracking-tight ${isFerrariConstructor ? 'text-[#ff2800]' : 'text-white'}`}>
                         {constructors[s.constructorId]?.name}
