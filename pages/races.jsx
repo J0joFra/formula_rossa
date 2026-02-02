@@ -83,33 +83,12 @@ const getFlagCodeFromCircuit = (circuitName) => {
   return '';
 }; 
 
-const getPositionBackground = (position) => {
-  const pos = parseInt(position);
-  switch(pos) {
-    case 1: return 'bg-gradient-to-r from-yellow-500/30 to-transparent border-l-4 border-yellow-500';
-    case 2: return 'bg-gradient-to-r from-gray-300/20 to-transparent border-l-4 border-gray-300';
-    case 3: return 'bg-gradient-to-r from-amber-700/20 to-transparent border-l-4 border-amber-700';
-    default: return 'border-l-4 border-zinc-800 hover:bg-white/5';
-  }
-};
-
-const getPositionTextColor = (position) => {
-  const pos = parseInt(position);
-  if (pos === 1) return 'text-yellow-500';
-  if (pos === 2) return 'text-gray-300';
-  if (pos === 3) return 'text-amber-700';
+const getPositionTextColor = (pos) => {
+  const p = parseInt(pos);
+  if (p === 1) return 'text-yellow-500';
+  if (p === 2) return 'text-gray-300';
+  if (p === 3) return 'text-amber-600';
   return 'text-zinc-500';
-};
-
-const calculateBoundingBox = (lat, lon, radiusKm = 2) => {
-  const latPerKm = 1 / 111.32;
-  const lonPerKm = 1 / (111.32 * Math.cos(lat * Math.PI / 180));
-  return {
-    minLon: lon - radiusKm * lonPerKm,
-    minLat: lat - radiusKm * latPerKm,
-    maxLon: lon + radiusKm * lonPerKm,
-    maxLat: lat + radiusKm * latPerKm
-  };
 };
 
 export default function RaceDetailsPage() {
@@ -118,22 +97,21 @@ export default function RaceDetailsPage() {
 
   const [raceInfo, setRaceInfo] = useState(null);
   const [circuitInfo, setCircuitInfo] = useState(null);
-  const [driverStandings, setDriverStandings] = useState([]);
+  const [raceResults, setRaceResults] = useState([]);
   const [constructorStandings, setConstructorStandings] = useState([]);
   const [drivers, setDrivers] = useState({});
   const [constructors, setConstructors] = useState({});
   const [loading, setLoading] = useState(true);
-  const [showFullDrivers, setShowFullDrivers] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     if (!id) return;
     async function loadData() {
-      setLoading(true);
       try {
-        const [racesRes, circuitsRes, drStRes, coStRes, drRes, coRes] = await Promise.all([
+        const [racesRes, circuitsRes, resultsRes, coStRes, drRes, coRes] = await Promise.all([
           fetch('/data/f1db-races.json'),
           fetch('/data/f1db-circuits.json'),
-          fetch('/data/f1db-races-driver-standings.json'),
+          fetch('/data/f1db-races-race-results.json'),
           fetch('/data/f1db-races-constructor-standings.json'),
           fetch('/data/f1db-drivers.json'),
           fetch('/data/f1db-constructors.json')
@@ -141,20 +119,21 @@ export default function RaceDetailsPage() {
 
         const races = await racesRes.json();
         const circuits = await circuitsRes.json();
-        const drStandings = await drStRes.json();
+        const results = await resultsRes.json();
         const coStandings = await coStRes.json();
-        const driversData = await drRes.json();
-        const constructorsData = await coRes.json();
+        const drData = await drRes.json();
+        const coData = await coRes.json();
 
-        const race = races.find(r => r.id === parseInt(id));
-        if (race) {
-          setRaceInfo(race);
-          setCircuitInfo(circuits.find(c => c.id === race.circuitId));
-          const dMap = {}; driversData.forEach(d => dMap[d.id] = d);
-          const cMap = {}; constructorsData.forEach(c => cMap[c.id] = c);
+        const currentRace = races.find(r => r.id === parseInt(id));
+        if (currentRace) {
+          setRaceInfo(currentRace);
+          setCircuitInfo(circuits.find(c => c.id === currentRace.circuitId));
+          const dMap = {}; drData.forEach(d => dMap[d.id] = d);
+          const cMap = {}; coData.forEach(c => cMap[c.id] = c);
           setDrivers(dMap); setConstructors(cMap);
-          setDriverStandings(drStandings.filter(s => s.raceId === race.id).sort((a, b) => a.positionDisplayOrder - b.positionDisplayOrder));
-          setConstructorStandings(coStandings.filter(s => s.raceId === race.id).sort((a, b) => a.positionDisplayOrder - b.positionDisplayOrder));
+
+          setRaceResults(results.filter(r => r.raceId === currentRace.id).sort((a, b) => a.positionDisplayOrder - b.positionDisplayOrder));
+          setConstructorStandings(coStandings.filter(s => s.raceId === currentRace.id).sort((a, b) => a.positionDisplayOrder - b.positionDisplayOrder));
         }
       } catch (err) { console.error(err); }
       setLoading(false);
@@ -165,23 +144,15 @@ export default function RaceDetailsPage() {
   if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-red-600 font-black tracking-widest uppercase">Loading...</div>;
   if (!raceInfo) return <div className="min-h-screen bg-black text-white p-20 text-center font-bold">RACE NOT FOUND</div>;
 
-  const visibleDrivers = showFullDrivers ? driverStandings : driverStandings.slice(0, 10);
+  const visibleResults = showAll ? raceResults : raceResults.slice(0, 10);
   const flagCode = getFlagCodeFromCircuit(circuitInfo?.name);
-  
-  let mapUrl = '';
-  if (circuitInfo?.latitude && circuitInfo?.longitude) {
-    const bbox = calculateBoundingBox(parseFloat(circuitInfo.latitude), parseFloat(circuitInfo.longitude));
-    mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox.minLon}%2C${bbox.minLat}%2C${bbox.maxLon}%2C${bbox.maxLat}&layer=mapnik&marker=${circuitInfo.latitude}%2C${circuitInfo.longitude}`;
-  }
-
-  const isFerrari = (constructorId) => constructors[constructorId]?.name?.toLowerCase().includes('ferrari') || false;
 
   return (
     <div className="min-h-screen bg-black text-white">
       <Navigation activeSection="calendar" />
       
       <main className="max-w-7xl mx-auto px-4 pt-32 pb-20">
-        <Link href="/standings" className="text-zinc-500 font-bold uppercase text-[10px] mb-8 inline-block hover:text-red-600 transition-colors tracking-widest">
+        <Link href="/standings" className="text-zinc-500 font-bold uppercase text-[10px] mb-8 inline-block hover:text-red-600 transition-colors">
           ← Back to Standings
         </Link>
         
@@ -191,99 +162,98 @@ export default function RaceDetailsPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2 bg-zinc-900/50 border-l-4 border-red-600 p-6 flex flex-col justify-center">
-              <p className="text-[10px] text-zinc-500 font-black uppercase mb-1 tracking-widest">Circuit</p>
-              <p className="text-3xl font-black uppercase italic leading-none mb-2">{circuitInfo?.name}</p>
-              <p className="text-sm text-zinc-400 font-bold uppercase">{circuitInfo?.placeName}, {circuitInfo?.countryId}</p>
+              <p className="text-[10px] text-zinc-500 font-black uppercase mb-1">Grand Prix</p>
+              <h1 className="text-3xl font-black uppercase italic leading-none">{raceInfo.officialName}</h1>
+              <p className="text-sm text-zinc-400 font-bold uppercase">{circuitInfo?.name}</p>
             </div>
-            <div className="bg-zinc-900/50 border border-zinc-800 p-6 flex items-center justify-center rounded-sm">
-              {flagCode && <img src={`https://flagcdn.com/h80/${flagCode}.png`} className="h-14 w-auto shadow-2xl rounded-sm object-contain" alt="flag" />}
+            <div className="bg-zinc-900/50 border border-zinc-800 p-6 flex items-center justify-center">
+              {flagCode && <img src={`https://flagcdn.com/h80/${flagCode}.png`} className="h-12 shadow-xl" alt="flag" />}
             </div>
-            <div className="bg-zinc-900/50 border border-zinc-800 aspect-square overflow-hidden rounded-sm relative group">
-              {mapUrl ? (
-                <iframe width="100%" height="100%" frameBorder="0" src={mapUrl} className="grayscale invert opacity-50 group-hover:opacity-100 transition-opacity duration-500"></iframe>
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-xs font-bold uppercase tracking-widest">Map N/A</div>
-              )}
+            <div className="bg-zinc-900/50 border border-zinc-800 aspect-square flex items-center justify-center text-zinc-500 text-[10px] font-bold uppercase tracking-widest">
+                Circuit Info
             </div>
           </div>
         </header>
 
-        {/* RACE RESULTS TABLE */}
-        <section className="bg-zinc-900/40 border border-zinc-800 rounded-sm overflow-hidden mb-12 shadow-2xl">
-          <div className="p-4 border-b border-zinc-800 bg-zinc-900/80">
-            <h2 className="font-black uppercase text-xs text-red-600 tracking-widest text-center">Race Results</h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="bg-zinc-950 text-zinc-500 text-[10px] font-black uppercase tracking-widest border-b border-zinc-800">
-                  <th className="p-4 w-12 text-center">Pos</th>
-                  <th className="p-4">Driver</th>
-                  <th className="p-4">Team</th>
-                  <th className="p-4 text-center">Grid</th>
-                  <th className="p-4 text-center">Points</th>
-                  <th className="p-4 text-center">Laps</th>
-                  <th className="p-4 text-right">Time/Retired</th>
-                </tr>
-              </thead>
-              <tbody>
-                {visibleDrivers.map((s, i) => {
-                  const isFerrariItem = isFerrari(s.constructorId);
-                  const driver = drivers[s.driverId];
-                  return (
-                    <tr key={i} className={`${getPositionBackground(s.positionText)} transition-all duration-300 border-b border-zinc-800/30 group`}>
-                      <td className={`p-4 text-center font-black italic ${getPositionTextColor(s.positionText)}`}>{s.positionText}</td>
-                      <td className="p-4">
-                        <div className={`font-bold uppercase tracking-tight ${isFerrariItem ? 'text-[#ff2800]' : 'text-white'}`}>
-                          <span className="opacity-40 font-medium mr-1 hidden sm:inline">{driver?.firstName}</span>
-                          <span>{driver?.lastName}</span>
-                        </div>
-                      </td>
-                      <td className={`p-4 text-xs font-bold uppercase ${isFerrariItem ? 'text-[#ff2800]' : 'text-zinc-400 group-hover:text-zinc-200'}`}>
-                        {constructors[s.constructorId]?.name}
-                      </td>
-                      <td className="p-4 text-center text-zinc-500 font-mono">{s.grid || '-'}</td>
-                      <td className="p-4 text-center font-black text-white">{s.points}</td>
-                      <td className="p-4 text-center text-zinc-400">{s.laps || raceInfo.laps}</td>
-                      <td className="p-4 text-right font-mono text-xs text-zinc-300 whitespace-nowrap">
-                        {s.time || s.status || (s.positionText === 'R' ? 'Retired' : 'Finished')}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          {driverStandings.length > 10 && (
-            <button onClick={() => setShowFullDrivers(!showFullDrivers)} className="w-full py-4 bg-zinc-800/30 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all text-zinc-500">
-              {showFullDrivers ? "↑ Show Top 10" : `↓ Show All ${driverStandings.length} Results`}
-            </button>
-          )}
-        </section>
+        {/* CONTENITORE GRIGLIA: AFFIANCA TABELLA RISULTATI E COSTRUTTORI */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* TABELLA PILOTI (Occupa 2/3 dello spazio su desktop) */}
+          <section className="lg:col-span-2 bg-zinc-900/40 border border-zinc-800 rounded-sm overflow-hidden h-fit shadow-2xl">
+            <div className="p-4 border-b border-zinc-800 bg-zinc-900/80">
+              <h2 className="font-black uppercase text-xs text-red-600 tracking-widest">Race Results</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead>
+                  <tr className="bg-zinc-950 text-zinc-500 text-[10px] font-black uppercase tracking-widest border-b border-zinc-800">
+                    <th className="p-4 w-12 text-center">Pos</th>
+                    <th className="p-4">Driver</th>
+                    <th className="p-4">Team</th>
+                    <th className="p-4 text-right">Time/Retired</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleResults.map((s, i) => {
+                    const constructor = constructors[s.constructorId];
+                    const isFerrari = constructor?.name?.toLowerCase().includes('ferrari');
+                    const driver = drivers[s.driverId];
 
-        {/* CONSTRUCTOR STANDINGS */}
-        <div className="max-w-2xl">
+                    return (
+                      <tr key={i} className={`border-b border-zinc-800/50 hover:bg-white/5 transition-colors ${isFerrari ? 'bg-red-600/10' : ''}`}>
+                        <td className={`p-4 text-center font-black italic ${getPositionTextColor(s.positionText)}`}>
+                          {s.positionText}
+                        </td>
+                        <td className="p-4">
+                          <div className={`font-bold uppercase tracking-tight ${isFerrari ? 'text-[#ff2800]' : 'text-white'}`}>
+                            <span className="opacity-40 font-medium mr-1 hidden sm:inline">{driver?.firstName}</span>
+                            <span>{driver?.lastName}</span>
+                          </div>
+                        </td>
+                        <td className={`p-4 text-xs font-bold uppercase ${isFerrari ? 'text-[#ff2800]' : 'text-zinc-400'}`}>
+                          {constructor?.name}
+                        </td>
+                        <td className="p-4 text-right font-mono text-xs text-zinc-300">
+                          {/* Se è il primo mostra il tempo, altrimenti mostra il gap o il motivo del ritiro */}
+                          {s.positionText === "1" ? (s.time || "Winner") : (s.gap || s.reasonRetired || s.status || "Finished")}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            {raceResults.length > 10 && (
+              <button onClick={() => setShowAll(!showAll)} className="w-full py-4 bg-zinc-800/30 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all text-zinc-500">
+                {showAll ? "↑ Show Top 10" : `↓ Show All ${raceResults.length} Results`}
+              </button>
+            )}
+          </section>
+
+          {/* TABELLA COSTRUTTORI (Occupa 1/3 dello spazio su desktop) */}
           <section className="bg-zinc-900/40 border border-zinc-800 rounded-sm h-fit shadow-xl">
             <div className="p-4 border-b border-zinc-800 bg-zinc-900/80">
               <h2 className="font-black uppercase text-xs text-red-600 tracking-widest">Constructor Standings</h2>
             </div>
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-sm border-collapse">
               <tbody>
                 {constructorStandings.map((s, i) => {
-                  const isFerrariConstructor = isFerrari(s.constructorId);
+                  const constructor = constructors[s.constructorId];
+                  const isFerrari = constructor?.name?.toLowerCase().includes('ferrari');
                   return (
-                    <tr key={i} className={`${getPositionBackground(s.positionText)} hover:bg-white/5 transition-all duration-300 border-b border-zinc-800/20`}>
-                      <td className={`p-4 w-12 font-black italic ${getPositionTextColor(s.positionText)}`}>{s.positionText}</td>
-                      <td className={`p-4 font-bold uppercase tracking-tight ${isFerrariConstructor ? 'text-[#ff2800]' : 'text-white'}`}>
-                        {constructors[s.constructorId]?.name}
+                    <tr key={i} className={`border-b border-zinc-800/30 hover:bg-white/5 transition-colors ${isFerrari ? 'bg-red-600/10' : ''}`}>
+                      <td className={`p-4 w-12 text-center font-black italic ${getPositionTextColor(s.positionText)}`}>{s.positionText}</td>
+                      <td className={`p-4 font-bold uppercase text-xs tracking-tight ${isFerrari ? 'text-[#ff2800]' : 'text-white'}`}>
+                        {constructor?.name}
                       </td>
-                      <td className="p-4 text-right font-black text-white">{s.points}</td>
+                      <td className="p-4 text-right font-black text-white px-6">{s.points}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
           </section>
+
         </div>
       </main>
 
