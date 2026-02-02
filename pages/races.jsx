@@ -471,9 +471,7 @@ export default function RaceDetailsPage() {
               </tbody>
             </table>
           </section>
-        </div>
       </main>
-
       <Footer />
     </div>
   );
