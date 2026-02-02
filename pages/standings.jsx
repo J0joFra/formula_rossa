@@ -69,7 +69,7 @@ export default function StandingsPage() {
   const [loading, setLoading] = useState(true);
   const [drivers, setDrivers] = useState({});
   const [constructors, setConstructors] = useState({});
-  const [selectedSeason, setSelectedSeason] = useState(2024);
+  const [selectedSeason, setSelectedSeason] = useState(2025);
   const [availableSeasons, setAvailableSeasons] = useState([]);
   const [showFullDrivers, setShowFullDrivers] = useState(false);
   const [showFullConstructors, setShowFullConstructors] = useState(false);
