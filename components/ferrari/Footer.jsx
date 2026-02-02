@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Instagram, Twitter, Youtube, Facebook, Heart } from 'lucide-react';
+import { Instagram, Twitter, Youtube, Facebook, Linkedin, Heart } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -27,6 +27,7 @@ export default function Footer() {
                 { icon: Instagram, href: 'https://instagram.com/scuderiaferrari' },
                 { icon: Twitter, href: 'https://twitter.com/scuderiaferrari' },
                 { icon: Youtube, href: 'https://youtube.com/scuderiaferrari' },
+                { icon: Linkedin, href: 'https://www.linkedin.com/in/joaquim-francalanci/' },
                 { icon: Facebook, href: 'https://facebook.com/scuderiaferrari' },
               ].map((social, i) => (
                 <a
