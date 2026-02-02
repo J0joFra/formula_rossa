@@ -1,8 +1,81 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, Trophy, Flag, Star } from 'lucide-react';
+import { ChevronDown, Trophy, Flag, Star, Timer } from 'lucide-react';
 
 export default function HeroSection() {
+  const [dynamicStats, setDynamicStats] = useState({
+    wins: 0,
+    podiums: 0,
+    poles: 0,
+    years: new Date().getFullYear() - 1950
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function calculateFerrariStats() {
+      try {
+        const response = await fetch('/data/f1db-races-race-results.json');
+        if (!response.ok) return;
+        const data = await response.json();
+
+        // Filtriamo solo i risultati Ferrari
+        const ferrariResults = data.filter(r => r.constructorId === 'ferrari');
+
+        const stats = ferrariResults.reduce((acc, curr) => {
+          // Conta Vittorie
+          if (curr.positionNumber === 1) acc.wins++;
+          // Conta Podi (1, 2, 3)
+          if (curr.positionNumber >= 1 && curr.positionNumber <= 3) acc.podiums++;
+          // Conta Pole Positions
+          if (curr.gridPositionNumber === 1) acc.poles++;
+          
+          return acc;
+        }, { wins: 0, podiums: 0, poles: 0 });
+
+        setDynamicStats(prev => ({
+          ...prev,
+          wins: stats.wins,
+          podiums: stats.podiums,
+          poles: stats.poles
+        }));
+      } catch (error) {
+        console.error("Errore nel calcolo statistiche Ferrari:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    calculateFerrariStats();
+  }, []);
+
+  // Definizione della struttura delle card
+  const statsConfig = [
+    { 
+      icon: Trophy, 
+      value: loading ? "..." : dynamicStats.wins, 
+      label: 'Vittorie GP', 
+      color: 'from-ferrari-red to-red-700' 
+    },
+    { 
+      icon: Star, 
+      value: loading ? "..." : dynamicStats.podiums, 
+      label: 'Podi Totali', 
+      color: 'from-ferrari-yellow to-yellow-600' 
+    },
+    { 
+      icon: Timer, 
+      value: loading ? "..." : dynamicStats.poles, 
+      label: 'Pole Positions', 
+      color: 'from-ferrari-red to-red-700' 
+    },
+    { 
+      icon: Flag, 
+      value: dynamicStats.years, 
+      label: 'Anni in F1', 
+      color: 'from-ferrari-yellow to-yellow-600' 
+    },
+  ];
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-black via-gray-900 to-black pt-20">
       {/* Sfondo animato */}
@@ -19,41 +92,40 @@ export default function HeroSection() {
           transition={{ duration: 0.8 }}
           className="mb-10"
         >
-          <div className="inline-flex items-center justify-center w-40 h-40 bg-gradient-to-br from-ferrari-yellow to-yellow-600 rounded-3xl shadow-2xl shadow-yellow-500/30 mb-8">
-            <span className="text-7xl font-black text-black">SF</span>
+          <div className="inline-flex items-center justify-center w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-ferrari-yellow to-yellow-600 rounded-3xl shadow-2xl shadow-yellow-500/30 mb-8">
+            <span className="text-6xl md:text-7xl font-black text-black tracking-tighter">SF</span>
           </div>
           
-          <h1 className="text-5xl md:text-8xl font-black mb-6">
+          <h1 className="text-5xl md:text-8xl font-black mb-6 tracking-tighter leading-tight">
             <span className="bg-gradient-to-r from-white via-ferrari-red to-ferrari-yellow bg-clip-text text-transparent">
               SCUDERIA<br />FERRARI
             </span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-12">
-            La leggenda che ha scritto la storia della Formula 1
+          <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-12 font-light italic">
+            "Datemi una macchina che sia veloce in rettilineo e che stia in strada in curva."
           </p>
         </motion.div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-          {[
-            { icon: Trophy, value: '16', label: 'Titoli Costruttori', color: 'from-ferrari-red to-red-700' },
-            { icon: Flag, value: '15', label: 'Titoli Piloti', color: 'from-ferrari-yellow to-yellow-600' },
-            { icon: Star, value: '245+', label: 'Vittorie GP', color: 'from-ferrari-red to-red-700' },
-            { icon: ChevronDown, value: '75+', label: 'Anni di Storia', color: 'from-ferrari-yellow to-yellow-600' },
-          ].map((stat, index) => (
+        {/* Stats Grid Dinamica */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
+          {statsConfig.map((stat, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 + 0.5 }}
-              className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-2xl p-6 hover:bg-gray-900 transition-all"
+              className="group bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl p-5 md:p-6 hover:border-ferrari-red/50 transition-all duration-500"
             >
-              <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${stat.color} mb-4`}>
-                <stat.icon className="w-6 h-6 text-white" />
+              <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${stat.color} mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
+                <stat.icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
-              <div className="text-3xl font-bold text-white mb-2">{stat.value}</div>
-              <div className="text-gray-400 text-sm">{stat.label}</div>
+              <div className="text-2xl md:text-4xl font-black text-white mb-1">
+                {stat.value}
+              </div>
+              <div className="text-gray-500 text-[10px] md:text-xs uppercase font-black tracking-widest">
+                {stat.label}
+              </div>
             </motion.div>
           ))}
         </div>
@@ -62,9 +134,10 @@ export default function HeroSection() {
         <motion.div
           animate={{ y: [0, 10, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
-          className="mt-16"
+          className="mt-16 cursor-pointer"
+          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
         >
-          <div className="text-gray-400 text-sm mb-2">Scopri di più</div>
+          <div className="text-gray-500 text-[10px] uppercase font-black tracking-[0.3em] mb-2">Explore Heritage</div>
           <ChevronDown className="w-6 h-6 text-ferrari-red mx-auto" />
         </motion.div>
       </div>
