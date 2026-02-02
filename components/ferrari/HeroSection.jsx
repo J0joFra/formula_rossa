@@ -80,7 +80,7 @@ export default function HeroSection() {
             <span className="text-6xl md:text-7xl font-black text-black tracking-tighter">SF</span>
           </div>
           
-          <h1 className="text-6xl md:text-9xl font-black mb-6 tracking-tighter leading-tight uppercase">
+          <h1 className="text-4xl md:text-9xl font-black mb-6 tracking-tighter leading-tight uppercase">
             <span className="bg-gradient-to-r from-white via-red-600 to-yellow-500 bg-clip-text text-transparent">
               SCUDERIA<br />FERRARI
             </span>
