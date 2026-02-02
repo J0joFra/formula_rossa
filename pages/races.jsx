@@ -91,6 +91,17 @@ const getPositionTextColor = (pos) => {
   return 'text-zinc-500';
 };
 
+const calculateBoundingBox = (lat, lon, radiusKm = 2) => {
+  const latPerKm = 1 / 111.32;
+  const lonPerKm = 1 / (111.32 * Math.cos(lat * Math.PI / 180));
+  return {
+    minLon: lon - radiusKm * lonPerKm,
+    minLat: lat - radiusKm * latPerKm,
+    maxLon: lon + radiusKm * lonPerKm,
+    maxLat: lat + radiusKm * latPerKm
+  };
+};
+
 export default function RaceDetailsPage() {
   const router = useRouter();
   const { id } = router.query;
@@ -147,38 +158,47 @@ export default function RaceDetailsPage() {
   const visibleResults = showAll ? raceResults : raceResults.slice(0, 10);
   const flagCode = getFlagCodeFromCircuit(circuitInfo?.name);
 
-  return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white font-sans">
       <Navigation activeSection="calendar" />
       
       <main className="max-w-7xl mx-auto px-4 pt-32 pb-20">
-        <Link href="/standings" className="text-zinc-500 font-bold uppercase text-[10px] mb-8 inline-block hover:text-red-600 transition-colors">
+        <Link href="/standings" className="text-zinc-500 font-bold uppercase text-[10px] mb-8 inline-block hover:text-red-600 transition-colors tracking-widest">
           ← Back to Standings
         </Link>
         
         <header className="mb-12">
-          <div className="text-red-600 font-black uppercase text-xs mb-2 tracking-widest">
+          <div className="text-red-600 font-black uppercase text-xs mb-2 tracking-[0.2em]">
             Round {raceInfo.round} • {raceInfo.year}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Box Circuito */}
             <div className="md:col-span-2 bg-zinc-900/50 border-l-4 border-red-600 p-6 flex flex-col justify-center">
-              <p className="text-[10px] text-zinc-500 font-black uppercase mb-1">Grand Prix</p>
-              <h1 className="text-3xl font-black uppercase italic leading-none">{raceInfo.officialName}</h1>
-              <p className="text-sm text-zinc-400 font-bold uppercase">{circuitInfo?.name}</p>
+              <p className="text-[10px] text-zinc-500 font-black uppercase mb-1 tracking-widest">Grand Prix</p>
+              <p className="text-3xl font-black uppercase italic leading-none mb-2">{raceInfo.officialName}</p>
+              <p className="text-sm text-zinc-400 font-bold uppercase">{circuitInfo?.name}, {circuitInfo?.countryId}</p>
             </div>
-            <div className="bg-zinc-900/50 border border-zinc-800 p-6 flex items-center justify-center">
-              {flagCode && <img src={`https://flagcdn.com/h80/${flagCode}.png`} className="h-12 shadow-xl" alt="flag" />}
+            
+            {/* Box Bandiera */}
+            <div className="bg-zinc-900/50 border border-zinc-800 p-6 flex items-center justify-center rounded-sm">
+              {flagCode && <img src={`https://flagcdn.com/h80/${flagCode}.png`} className="h-14 w-auto shadow-2xl rounded-sm object-contain" alt="flag" />}
             </div>
-            <div className="bg-zinc-900/50 border border-zinc-800 aspect-square flex items-center justify-center text-zinc-500 text-[10px] font-bold uppercase tracking-widest">
-                Circuit Info
+
+            {/* Box Mappa */}
+            <div className="bg-zinc-900/50 border border-zinc-800 aspect-square overflow-hidden rounded-sm relative group">
+              {mapUrl ? (
+                <iframe width="100%" height="100%" frameBorder="0" scrolling="no" src={mapUrl} className="grayscale invert opacity-50 group-hover:opacity-100 transition-opacity duration-500"></iframe>
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-xs font-bold uppercase">Map N/A</div>
+              )}
+              <div className="absolute inset-0 pointer-events-none border border-white/5"></div>
             </div>
           </div>
         </header>
 
-        {/* CONTENITORE GRIGLIA: AFFIANCA TABELLA RISULTATI E COSTRUTTORI */}
+        {/* Standings tables */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* TABELLA PILOTI (Occupa 2/3 dello spazio su desktop) */}
+          {/* drivers (Occupa 2/3 dello spazio su desktop) */}
           <section className="lg:col-span-2 bg-zinc-900/40 border border-zinc-800 rounded-sm overflow-hidden h-fit shadow-2xl">
             <div className="p-4 border-b border-zinc-800 bg-zinc-900/80">
               <h2 className="font-black uppercase text-xs text-red-600 tracking-widest">Race Results</h2>
