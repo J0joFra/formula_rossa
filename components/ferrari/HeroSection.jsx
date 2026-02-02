@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown, Trophy, Flag, Star, Timer, Zap, Gauge, Award } from 'lucide-react';
+import Link from 'next/link';
 
 export default function HeroSection() {
   const [dynamicStats, setDynamicStats] = useState({
@@ -52,12 +53,12 @@ export default function HeroSection() {
   }, []);
 
   const statsConfig = [
-    { icon: Trophy, value: dynamicStats.wins, label: 'Vittorie GP', color: 'from-red-600 to-red-800' },
-    { icon: Star, value: dynamicStats.podiums, label: 'Podi Totali', color: 'from-yellow-400 to-yellow-600' },
-    { icon: Timer, value: dynamicStats.poles, label: 'Pole Positions', color: 'from-red-600 to-red-800' },
-    { icon: Zap, value: dynamicStats.fastestLaps, label: 'Giri Veloci', color: 'from-yellow-400 to-yellow-600' },
-    { icon: Gauge, value: dynamicStats.totalPoints.toLocaleString(), label: 'Punti Storici', color: 'from-red-600 to-red-800' },
-    { icon: Award, value: dynamicStats.grandSlams, label: 'Grand Slams', color: 'from-yellow-400 to-yellow-600' },
+    { id: 'wins', icon: Trophy, value: dynamicStats.wins, label: 'Vittorie GP', color: 'from-red-600 to-red-800' },
+    { id: 'podiums', icon: Star, value: dynamicStats.podiums, label: 'Podi Totali', color: 'from-yellow-400 to-yellow-600' },
+    { id: 'poles', icon: Timer, value: dynamicStats.poles, label: 'Pole Positions', color: 'from-red-600 to-red-800' },
+    { id: 'fastest-laps', icon: Zap, value: dynamicStats.fastestLaps, label: 'Giri Veloci', color: 'from-yellow-400 to-yellow-600' },
+    { id: 'points', icon: Gauge, value: dynamicStats.totalPoints.toLocaleString(), label: 'Punti Storici', color: 'from-red-600 to-red-800' },
+    { id: 'grand-slams', icon: Award, value: dynamicStats.grandSlams, label: 'Grand Slams', color: 'from-yellow-400 to-yellow-600' },
   ];
 
   return (
@@ -91,26 +92,27 @@ export default function HeroSection() {
           </p>
         </motion.div>
 
-        {/* Stats Grid Dinamica - 3x3 Layout (2 righe da 3) */}
+        {/* Stats Grid Dinamica - 3x3 Layout */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl mb-32">
           {statsConfig.map((stat, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 + 0.5 }}
-              className="group bg-zinc-900/30 backdrop-blur-xl border border-white/5 rounded-2xl p-10 hover:border-red-600/40 hover:bg-zinc-900/60 transition-all duration-500 shadow-2xl flex flex-col items-center"
-            >
-              <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${stat.color} mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                <stat.icon className="w-8 h-8 text-white" />
-              </div>
-              <div className="text-4xl md:text-5xl font-black text-white mb-2 tabular-nums">
-                {loading ? <span className="animate-pulse opacity-30">---</span> : stat.value}
-              </div>
-              <div className="text-gray-500 text-xs md:text-sm uppercase font-black tracking-[0.2em] leading-tight">
-                {stat.label}
-              </div>
-            </motion.div>
+            <Link href={`/stats/${stat.id}`} key={stat.id}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 + 0.5 }}
+                className="group bg-zinc-900/30 backdrop-blur-xl border border-white/5 rounded-2xl p-10 hover:border-red-600/40 hover:bg-zinc-900/60 transition-all duration-500 shadow-2xl flex flex-col items-center cursor-pointer h-full"
+              >
+                <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${stat.color} mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                  <stat.icon className="w-8 h-8 text-white" />
+                </div>
+                <div className="text-4xl md:text-5xl font-black text-white mb-2 tabular-nums">
+                  {loading ? <span className="animate-pulse opacity-30">---</span> : stat.value}
+                </div>
+                <div className="text-gray-500 text-xs md:text-sm uppercase font-black tracking-[0.2em] leading-tight">
+                  {stat.label}
+                </div>
+              </motion.div>
+            </Link>
           ))}
         </div>
 
