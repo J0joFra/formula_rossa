@@ -189,10 +189,10 @@ export default function RaceDetailsPage() {
             Round {raceInfo.round} • {raceInfo.year}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="md:col-span-2 bg-zinc-900/50 border-l-4 border-red-600 p-6 flex flex-col justify-center">
-              <p className="text-[10px] text-zinc-500 font-black uppercase mb-1 tracking-widest">Grand Prix</p>
-              <h1 className="text-3xl font-black uppercase italic leading-none mb-2">{raceInfo.officialName}</h1>
-              <p className="text-sm text-zinc-400 font-bold uppercase">{circuitInfo?.name}, {circuitInfo?.countryId}</p>
+           <div className="md:col-span-2 bg-zinc-900/50 border-l-4 border-red-600 p-6 flex flex-col justify-center">
+              <p className="text-[10px] text-zinc-500 font-black uppercase mb-1 tracking-widest">Circuit</p>
+              <p className="text-3xl font-black uppercase italic leading-none mb-2">{circuitInfo?.name}</p>
+              <p className="text-sm text-zinc-400 font-bold uppercase">{circuitInfo?.placeName}, {circuitInfo?.countryId}</p>
             </div>
             
             <div className="bg-zinc-900/50 border border-zinc-800 p-6 flex items-center justify-center rounded-sm">
