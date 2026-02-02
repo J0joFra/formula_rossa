@@ -52,67 +52,78 @@ export default function HeroSection() {
   }, []);
 
   const statsConfig = [
-    { icon: Trophy, value: dynamicStats.wins, label: 'Vittorie GP', color: 'from-ferrari-red to-red-700' },
-    { icon: Star, value: dynamicStats.podiums, label: 'Podi Totali', color: 'from-ferrari-yellow to-yellow-600' },
-    { icon: Timer, value: dynamicStats.poles, label: 'Pole Positions', color: 'from-ferrari-red to-red-700' },
-    { icon: Zap, value: dynamicStats.fastestLaps, label: 'Giri Veloci', color: 'from-ferrari-yellow to-yellow-600' },
-    { icon: Gauge, value: dynamicStats.totalPoints.toLocaleString(), label: 'Punti Storici', color: 'from-ferrari-red to-red-700' },
-    { icon: Award, value: dynamicStats.grandSlams, label: 'Grand Slams', color: 'from-ferrari-yellow to-yellow-600' },
+    { icon: Trophy, value: dynamicStats.wins, label: 'Vittorie GP', color: 'from-red-600 to-red-800' },
+    { icon: Star, value: dynamicStats.podiums, label: 'Podi Totali', color: 'from-yellow-400 to-yellow-600' },
+    { icon: Timer, value: dynamicStats.poles, label: 'Pole Positions', color: 'from-red-600 to-red-800' },
+    { icon: Zap, value: dynamicStats.fastestLaps, label: 'Giri Veloci', color: 'from-yellow-400 to-yellow-600' },
+    { icon: Gauge, value: dynamicStats.totalPoints.toLocaleString(), label: 'Punti Storici', color: 'from-red-600 to-red-800' },
+    { icon: Award, value: dynamicStats.grandSlams, label: 'Grand Slams', color: 'from-yellow-400 to-yellow-600' },
   ];
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-black via-gray-900 to-black pt-20">
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-black via-gray-900 to-black pt-32 pb-20">
       {/* Sfondo animato */}
       <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-ferrari-red/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-ferrari-yellow/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-600/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-yellow-500/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
       </div>
 
       <div className="relative z-10 text-center px-4 max-w-7xl mx-auto flex flex-col items-center">
-        {/* Logo Ferrari */}
+        {/* Logo Ferrari e Titolo */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
-          className="mb-10"
+          className="mb-16"
         >
-          <div className="inline-flex items-center justify-center w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-ferrari-yellow to-yellow-600 rounded-3xl shadow-2xl shadow-yellow-500/30 mb-8">
+          <div className="inline-flex items-center justify-center w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-3xl shadow-2xl shadow-yellow-500/20 mb-8">
             <span className="text-6xl md:text-7xl font-black text-black tracking-tighter">SF</span>
           </div>
           
-          <h1 className="text-5xl md:text-8xl font-black mb-6 tracking-tighter leading-tight">
-            <span className="bg-gradient-to-r from-white via-ferrari-red to-ferrari-yellow bg-clip-text text-transparent">
+          <h1 className="text-6xl md:text-9xl font-black mb-6 tracking-tighter leading-tight uppercase">
+            <span className="bg-gradient-to-r from-white via-red-600 to-yellow-500 bg-clip-text text-transparent">
               SCUDERIA<br />FERRARI
             </span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-12 font-light italic">
+          <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto font-light italic">
             "Datemi una macchina che sia veloce in rettilineo e che stia in strada in curva."
           </p>
         </motion.div>
 
-        {/* Stats Grid Dinamica */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 w-full">
+        {/* Stats Grid Dinamica - 3x3 Layout (2 righe da 3) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl mb-32">
           {statsConfig.map((stat, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 + 0.5 }}
-              className="group bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-xl p-4 hover:border-ferrari-red/40 hover:bg-zinc-900/60 transition-all duration-500 shadow-xl"
+              className="group bg-zinc-900/30 backdrop-blur-xl border border-white/5 rounded-2xl p-10 hover:border-red-600/40 hover:bg-zinc-900/60 transition-all duration-500 shadow-2xl flex flex-col items-center"
             >
-              <div className={`inline-flex p-2.5 rounded-lg bg-gradient-to-br ${stat.color} mb-3 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                <stat.icon className="w-5 h-5 text-white" />
+              <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${stat.color} mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                <stat.icon className="w-8 h-8 text-white" />
               </div>
-              <div className="text-xl md:text-2xl font-black text-white mb-0.5 tabular-nums">
-                {loading ? <span className="animate-pulse">---</span> : stat.value}
+              <div className="text-4xl md:text-5xl font-black text-white mb-2 tabular-nums">
+                {loading ? <span className="animate-pulse opacity-30">---</span> : stat.value}
               </div>
-              <div className="text-gray-500 text-[9px] uppercase font-black tracking-widest leading-tight">
+              <div className="text-gray-500 text-xs md:text-sm uppercase font-black tracking-[0.2em] leading-tight">
                 {stat.label}
               </div>
             </motion.div>
           ))}
         </div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+          className="cursor-pointer"
+          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+        >
+          <div className="text-gray-500 text-[10px] uppercase font-black tracking-[0.4em] mb-2">Scroll to Explore</div>
+          <ChevronDown className="w-6 h-6 text-red-600 mx-auto" />
+        </motion.div>
       </div>
     </section>
   );
