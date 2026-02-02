@@ -39,20 +39,18 @@ const circuitToCountry = {
   'istanbul': 'tr', 'istanbul-park': 'tr', 'sochi': 'ru', 'sochi-autodrom': 'ru', 'kyalami': 'za',
   'midrand': 'za', 'george': 'za', 'prince-george': 'za', 'adelaide': 'au', 'albert-park': 'au',
   'melbourne': 'au', 'ain-diab': 'ma', 'casablanca': 'ma',
-
-  'albert_park': 'au', 'marina_bay': 'sg', 'yas_marina': 'ae', 'paul_ricard': 'fr', 'watkins_glen': 'us',
-  'long_beach': 'us', 'las_vegas': 'us', 'jose_carlos_pace': 'br', 'hermanos_rodriguez': 'mx', 'mexico_city': 'mx',
-  'red_bull_ring': 'at', 'silverstone_circuit': 'gb', 'spa_francorchamps': 'be', 'circuit_de_monaco': 'mc', 'fuji_speedway': 'jp'
 };
 
 const getFlagCodeFromCircuit = (circuitName) => {
   if (!circuitName) return '';
-  const normalized = circuitName.toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '') 
-    .replace(/\s+/g, '-') 
-    .replace(/-+/g, '-') 
-    .trim();
-  
+  const normalized = circuitName.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+  if (circuitToCountry[normalized]) return circuitToCountry[normalized];
+  for (const [circuit, code] of Object.entries(circuitToCountry)) {
+    if (normalized.includes(circuit) || circuit.includes(normalized)) return code;
+  }
+  return '';
+};
+
   if (circuitToCountry[normalized]) {
     return circuitToCountry[normalized];
   }
@@ -62,7 +60,7 @@ const getFlagCodeFromCircuit = (circuitName) => {
       return code;
     }
   }
-  
+
 const lowerName = circuitName.toLowerCase();
 if (lowerName.includes('abu dhabi') || lowerName.includes('yas marina') || lowerName.includes('dubai') || lowerName.includes('emirates')) {
   return 'ae';
@@ -162,66 +160,33 @@ if (lowerName.includes('sochi') || lowerName.includes('russian') || lowerName.in
 }
 
 return '';
-};
 
 const getPositionBackground = (position) => {
   const pos = parseInt(position);
-  
   switch(pos) {
-    case 1:
-      return 'bg-gradient-to-r from-yellow-500/50 to-yellow-600/10 border-l-4 border-yellow-500';
-    case 2:
-      return 'bg-gradient-to-r from-gray-300/50 to-gray-400/50 border-l-4 border-gray-300';
-    case 3:
-      return 'bg-gradient-to-r from-amber-700/50 to-amber-800/50 border-l-4 border-amber-700';
-    case 4:
-      return 'bg-gradient-to-r from-gray-500/25 to-gray-600/25 border-l-4 border-gray-500';
-    case 5:
-      return 'bg-gradient-to-r from-gray-500/25 to-gray-600/25 border-l-4 border-gray-500';
-    case 6:
-      return 'bg-gradient-to-r from-gray-500/25 to-gray-600/25 border-l-4 border-gray-500';
-    case 7:
-      return 'bg-gradient-to-r from-gray-500/25 to-gray-600/25 border-l-4 border-gray-500';
-    case 8:
-      return 'bg-gradient-to-r from-gray-500/25 to-gray-600/25 border-l-4 border-gray-500';
-    case 9:
-      return 'bg-gradient-to-r from-gray-500/25 to-gray-600/25 border-l-4 border-gray-500';
-    case 10:
-      return 'bg-gradient-to-r from-amber-900/25 to-amber-950/25 border-l-4 border-amber-900';
-    default:
-      return 'bg-gradient-to-r from-zinc-900/15 to-zinc-900/15 border-l-4 border-zinc-800';
+    case 1: return 'bg-gradient-to-r from-yellow-500/40 to-transparent border-l-4 border-yellow-500';
+    case 2: return 'bg-gradient-to-r from-gray-300/30 to-transparent border-l-4 border-gray-300';
+    case 3: return 'bg-gradient-to-r from-amber-700/30 to-transparent border-l-4 border-amber-700';
+    default: return 'border-l-4 border-zinc-800 hover:bg-white/5';
   }
 };
 
 const getPositionTextColor = (position) => {
   const pos = parseInt(position);
-  
-  switch(pos) {
-    case 1:
-      return 'text-yellow-500';
-    case 2:
-      return 'text-gray-300';
-    case 3:
-      return 'text-amber-700';
-    case 10:
-      return 'text-amber-900';
-    default:
-      return 'text-zinc-500';
-  }
+  if (pos === 1) return 'text-yellow-500';
+  if (pos === 2) return 'text-gray-300';
+  if (pos === 3) return 'text-amber-700';
+  return 'text-zinc-500';
 };
 
 const calculateBoundingBox = (lat, lon, radiusKm = 2) => {
-  const latPerKm = 1 / 111.32; // 1 grado latitudine ≈ 111.32 km
-  const lonPerKm = 1 / (111.32 * Math.cos(lat * Math.PI / 180)); 
-  
-  const latDelta = radiusKm * latPerKm;
-  const lonDelta = radiusKm * lonPerKm;
-  
+  const latPerKm = 1 / 111.32;
+  const lonPerKm = 1 / (111.32 * Math.cos(lat * Math.PI / 180));
   return {
-    minLon: lon - lonDelta,
-    minLat: lat - latDelta,
-    maxLon: lon + lonDelta,
-    maxLat: lat + latDelta
+    minLon: lon - radiusKm * lonPerKm,
+    minLat: lat - radiusKm * latPerKm,
+    maxLon: lon + radiusKm * lonPerKm,
+    maxLat: lat + radiusKm * latPerKm
   };
 };
 
@@ -261,13 +226,10 @@ export default function RaceDetailsPage() {
       const currentRace = racesData?.find(r => r.id === parseInt(id));
       if (currentRace) {
         setRaceInfo(currentRace);
-        const circuit = circuitsData?.find(c => c.id === currentRace.circuitId);
-        setCircuitInfo(circuit);
-        
+        setCircuitInfo(circuitsData?.find(c => c.id === currentRace.circuitId));
         const dMap = {}; drData?.forEach(d => dMap[d.id] = d);
         const cMap = {}; coData?.forEach(c => cMap[c.id] = c);
         setDrivers(dMap); setConstructors(cMap);
-
         setDriverStandings(drStData?.filter(s => s.raceId === currentRace.id).sort((a, b) => a.positionDisplayOrder - b.positionDisplayOrder));
         setConstructorStandings(coStData?.filter(s => s.raceId === currentRace.id).sort((a, b) => a.positionDisplayOrder - b.positionDisplayOrder));
       }
@@ -276,30 +238,19 @@ export default function RaceDetailsPage() {
     loadRaceData();
   }, [id]);
 
-  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-red-600 font-black tracking-widest">LOADING...</div>;
-  if (!raceInfo) return <div className="min-h-screen bg-black text-white p-20 text-center font-bold">RACE NOT FOUND</div>;
+  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-red-600 font-black tracking-widest uppercase">Loading Race Data...</div>;
+  if (!raceInfo) return <div className="min-h-screen bg-black text-white p-20 text-center font-bold uppercase">Race Not Found</div>;
 
+  const visibleDrivers = showFullDrivers ? driverStandings : driverStandings.slice(0, 10);
   const flagCode = getFlagCodeFromCircuit(circuitInfo?.name);
-  const visibleResults = showAll ? results : results.slice(0, 10);
-
+  
   let mapUrl = '';
   if (circuitInfo?.latitude && circuitInfo?.longitude) {
-    const bbox = calculateBoundingBox(
-      parseFloat(circuitInfo.latitude),
-      parseFloat(circuitInfo.longitude)
-    );
+    const bbox = calculateBoundingBox(parseFloat(circuitInfo.latitude), parseFloat(circuitInfo.longitude));
     mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox.minLon}%2C${bbox.minLat}%2C${bbox.maxLon}%2C${bbox.maxLat}&layer=mapnik&marker=${circuitInfo.latitude}%2C${circuitInfo.longitude}`;
   }
 
-  // Funzione per controllare se è un pilota/scuderia Ferrari
-  const isFerrari = (constructorId) => {
-    const constructorName = constructors[constructorId]?.name?.toLowerCase();
-    return constructorName?.includes('ferrari') || false;
-  };
-
-  const getConstructorName = (constructorId) => {
-    return constructors[constructorId]?.name || '';
-  };
+  const isFerrari = (constructorId) => constructors[constructorId]?.name?.toLowerCase().includes('ferrari') || false;
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -314,134 +265,80 @@ export default function RaceDetailsPage() {
           <div className="text-red-600 font-black uppercase text-xs mb-2 tracking-[0.2em]">
             Round {raceInfo.round} • {raceInfo.year}
           </div>
-
-          {/* Nuovo Layout Header a 3 Blocchi */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            
-            {/* Blocco 1: Info Circuito (Occupa 2 colonne) */}
             <div className="md:col-span-2 bg-zinc-900/50 border-l-4 border-red-600 p-6 flex flex-col justify-center">
               <p className="text-[10px] text-zinc-500 font-black uppercase mb-1 tracking-widest">Circuit</p>
               <p className="text-3xl font-black uppercase italic leading-none mb-2">{circuitInfo?.name}</p>
               <p className="text-sm text-zinc-400 font-bold uppercase">{circuitInfo?.placeName}, {circuitInfo?.countryId}</p>
             </div>
-
-            {/* Blocco 2: Bandiera */}
             <div className="bg-zinc-900/50 border border-zinc-800 p-6 flex items-center justify-center rounded-sm">
-              {flagCode ? (
-                <img 
-                  src={`https://flagcdn.com/h80/${flagCode}.png`} 
-                  className="h-16 w-auto shadow-2xl rounded-sm object-contain" 
-                  alt={circuitInfo?.countryId}
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    // Fallback al paese se la bandiera non viene trovata
-                    const country = circuitInfo?.countryId || '';
-                    let fallback = 'xx';
-                    
-                    if (country.includes('ARAB') || country.includes('UAE') || country.includes('EMIRATES')) {
-                      fallback = 'ae';
-                    } else if (country.length === 2) {
-                      fallback = country.toLowerCase();
-                    } else if (country.length >= 2) {
-                      fallback = country.slice(0, 2).toLowerCase();
-                    }
-                    
-                    e.target.src = `https://flagcdn.com/h80/${fallback}.png`;
-                  }}
-                />
-              ) : (
-                <div className="text-zinc-500 text-sm font-bold">
-                  No Flag for: {circuitInfo?.name}
-                </div>
-              )}
+              {flagCode && <img src={`https://flagcdn.com/h80/${flagCode}.png`} className="h-16 w-auto shadow-2xl rounded-sm object-contain" alt="flag" />}
             </div>
-
-            {/* Mappa Piccola Quadrata */}
             <div className="bg-zinc-900/50 border border-zinc-800 aspect-square overflow-hidden rounded-sm relative group">
               {mapUrl ? (
-                <iframe 
-                  width="100%" 
-                  height="100%" 
-                  frameBorder="0" 
-                  scrolling="no" 
-                  src={mapUrl}
-                  className="grayscale invert opacity-50 group-hover:opacity-100 transition-opacity duration-500"
-                  title={`Map of ${circuitInfo?.name}`}
-                ></iframe>
+                <iframe width="100%" height="100%" frameBorder="0" src={mapUrl} className="grayscale invert opacity-50 group-hover:opacity-100 transition-opacity duration-500"></iframe>
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-zinc-500 text-sm font-bold">Map Not Available</div>
-                </div>
+                <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-xs font-bold">Map N/A</div>
               )}
-              <div className="absolute inset-0 pointer-events-none border border-white/5"></div>
             </div>
-
           </div>
         </header>
 
-               {/* (Race Results) */}
-                <section className="bg-zinc-900/40 border border-zinc-800 rounded-sm overflow-hidden">
-                    <div className="p-4 border-b border-zinc-800 bg-zinc-900/80">
-                        <h2 className="font-black uppercase text-sm text-white tracking-widest">Race Results</h2>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm border-collapse">
-                            <thead>
-                                <tr className="bg-zinc-950 text-zinc-500 text-[10px] font-black uppercase tracking-widest border-b border-zinc-800">
-                                    <th className="p-4 w-12 text-center">Pos</th>
-                                    <th className="p-4">Driver</th>
-                                    <th className="p-4">Team</th>
-                                    <th className="p-4 text-center">Grid</th>
-                                    <th className="p-4 text-center">Laps</th>
-                                    <th className="p-4 text-center">Points</th>
-                                    <th className="p-4 text-right">Time/Retired</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {visibleResults.map((s, i) => {
-                                    const isFerrariItem = isFerrari(s.constructorId);
-                                    const position = s.positionText;
-                                    const driver = drivers[s.driverId];
+        {/* CLASSIFICA RISULTATI GARA */}
+        <section className="bg-zinc-900/40 border border-zinc-800 rounded-sm overflow-hidden mb-12 shadow-2xl">
+          <div className="p-4 border-b border-zinc-800 bg-zinc-900/80 flex justify-between items-center">
+            <h2 className="font-black uppercase text-xs text-red-600 tracking-widest">Race Results</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="bg-zinc-950 text-zinc-500 text-[10px] font-black uppercase tracking-widest border-b border-zinc-800">
+                  <th className="p-4 w-12 text-center">Pos</th>
+                  <th className="p-4">Driver</th>
+                  <th className="p-4">Team</th>
+                  <th className="p-4 text-center">Grid</th>
+                  <th className="p-4 text-center">Points</th>
+                  <th className="p-4 text-center">Laps</th>
+                  <th className="p-4 text-right">Time/Retired</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visibleDrivers.map((s, i) => {
+                  const isFerrariItem = isFerrari(s.constructorId);
+                  const driver = drivers[s.driverId];
+                  return (
+                    <tr key={i} className={`${getPositionBackground(s.positionText)} transition-all duration-300 border-b border-zinc-800/30 group`}>
+                      <td className={`p-4 text-center font-black italic ${getPositionTextColor(s.positionText)}`}>{s.positionText}</td>
+                      <td className="p-4">
+                        <div className={`font-bold uppercase tracking-tight ${isFerrariItem ? 'text-[#ff2800]' : 'text-white'}`}>
+                          <span className="opacity-40 font-medium mr-1 hidden sm:inline">{driver?.firstName}</span>
+                          <span>{driver?.lastName}</span>
+                        </div>
+                      </td>
+                      <td className={`p-4 text-xs font-bold uppercase ${isFerrariItem ? 'text-[#ff2800]' : 'text-zinc-400 group-hover:text-zinc-200'}`}>
+                        {constructors[s.constructorId]?.name}
+                      </td>
+                      <td className="p-4 text-center text-zinc-500 font-mono">{s.grid || '-'}</td>
+                      <td className="p-4 text-center font-black text-white">{s.points}</td>
+                      <td className="p-4 text-center text-zinc-400">{s.laps || raceInfo.laps}</td>
+                      <td className="p-4 text-right font-mono text-xs text-zinc-300 whitespace-nowrap">
+                        {s.time || s.status || (s.positionText === 'R' ? 'Retired' : 'Finished')}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          {driverStandings.length > 10 && (
+            <button onClick={() => setShowFullDrivers(!showFullDrivers)} className="w-full py-4 bg-zinc-800/30 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all text-zinc-500">
+              {showFullDrivers ? "↑ Show Top 10" : `↓ Show All ${driverStandings.length} Results`}
+            </button>
+          )}
+        </section>
 
-                                    return (
-                                        <tr key={i} className={`border-b border-zinc-800/30 hover:bg-white/5 transition-colors group ${isFerrariItem ? 'bg-red-900/10' : ''}`}>
-                                            <td className={`p-4 text-center font-black italic ${getPositionTextColor(position)}`}>
-                                                {position}
-                                            </td>
-                                            <td className="p-4">
-                                                <div className={`font-bold uppercase tracking-tight ${isFerrariItem ? 'text-[#ff2800]' : 'text-white'}`}>
-                                                    <span className="opacity-50 font-medium mr-1 hidden sm:inline">{driver?.firstName}</span>
-                                                    <span>{driver?.lastName}</span>
-                                                </div>
-                                            </td>
-                                            <td className={`p-4 text-xs font-bold uppercase ${isFerrariItem ? 'text-[#ff2800]' : 'text-zinc-400'}`}>
-                                                {constructors[s.constructorId]?.name}
-                                            </td>
-                                            <td className="p-4 text-center text-zinc-500 font-mono">{s.grid || '-'}</td>
-                                            <td className="p-4 text-center text-zinc-300">{raceInfo.laps}</td>
-                                            <td className="p-4 text-center font-black text-white">{s.points}</td>
-                                            <td className="p-4 text-right font-mono text-xs text-zinc-300 whitespace-nowrap">
-                                                {/* Qui mostriamo il tempo se disponibile, altrimenti lo stato (es. Accident) */}
-                                                {s.time || s.status || (s.positionText === 'R' ? 'Retired' : 'Finished')}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {driverResults.length > 10 && (
-                        <button
-                            onClick={() => setShowFullResults(!showFullResults)}
-                            className="w-full py-4 bg-zinc-800/30 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all text-zinc-500"
-                        >
-                            {showFullResults ? "↑ Show Top 10" : `↓ Show All ${driverResults.length} Results`}
-                        </button>
-                    )}
-                </section>
-
-          {/* Constructor Standings */}
+        {/* CLASSIFICA COSTRUTTORI (Sotto i risultati) */}
+        <div className="max-w-2xl">
           <section className="bg-zinc-900/40 border border-zinc-800 rounded-sm h-fit">
             <div className="p-4 border-b border-zinc-800 bg-zinc-900/80">
               <h2 className="font-black uppercase text-xs text-red-600 tracking-widest">Constructor Standings</h2>
@@ -450,17 +347,9 @@ export default function RaceDetailsPage() {
               <tbody>
                 {constructorStandings.map((s, i) => {
                   const isFerrariConstructor = isFerrari(s.constructorId);
-                  const position = s.positionText;
-                  const bgClass = getPositionBackground(position);
-                  const textClass = getPositionTextColor(position);
-                  
                   return (
-                    <tr key={i} className={`${bgClass} hover:bg-white/10 transition-all duration-300`}>
-                      <td className="p-4 w-12 font-black italic">
-                        <div className={`${textClass} group-hover:text-white transition-colors`}>
-                          {position}
-                        </div>
-                      </td>
+                    <tr key={i} className={`${getPositionBackground(s.positionText)} hover:bg-white/5 transition-all duration-300`}>
+                      <td className={`p-4 w-12 font-black italic ${getPositionTextColor(s.positionText)}`}>{s.positionText}</td>
                       <td className={`p-4 font-bold uppercase tracking-tight ${isFerrariConstructor ? 'text-[#ff2800]' : 'text-white'}`}>
                         {constructors[s.constructorId]?.name}
                       </td>
@@ -471,7 +360,9 @@ export default function RaceDetailsPage() {
               </tbody>
             </table>
           </section>
+        </div>
       </main>
+
       <Footer />
     </div>
   );
