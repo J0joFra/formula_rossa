@@ -91,7 +91,7 @@ export default function HeroSection() {
           </p>
         </motion.div>
 
-      {/* Stats Grid Dinamica Migliorata */}
+        {/* Stats Grid Dinamica */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-7xl mx-auto px-4">
         {statsConfig.map((stat, index) => (
           <motion.div
@@ -113,8 +113,6 @@ export default function HeroSection() {
           </motion.div>
         ))}
       </div>
-
-      {/* ... (resto del Hero rimane uguale) ... */}
     </section>
   );
 }
