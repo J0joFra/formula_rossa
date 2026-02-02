@@ -379,56 +379,87 @@ export default function RaceDetailsPage() {
           </div>
         </header>
 
-        {/* Sezione Classifiche */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Driver Standings con Tendina */}
-          <section className="bg-zinc-900/40 border border-zinc-800 rounded-sm overflow-hidden h-fit">
-            <div className="p-4 border-b border-zinc-800 bg-zinc-900/80 flex justify-between items-center">
-              <h2 className="font-black uppercase text-xs text-red-600 tracking-widest">Driver Standings</h2>
-            </div>
-            <table className="w-full text-left text-sm">
-              <tbody>
-                {visibleDrivers.map((s, i) => {
-                  const isFerrariDriver = isFerrari(s.constructorId);
-                  const constructorName = getConstructorName(s.constructorId);
-                  const position = s.positionText;
-                  const bgClass = getPositionBackground(position);
-                  const textClass = getPositionTextColor(position);
-                  
-                  return (
-                    <tr key={i} className={`${bgClass} hover:bg-white/10 transition-all duration-300`}>
-                      <td className="p-4 w-12 font-black italic">
-                        <div className={`${textClass} group-hover:text-white transition-colors`}>
-                          {position}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex flex-col">
-                          <div className={`font-bold uppercase tracking-tight ${isFerrariDriver ? 'text-[#ff2800]' : 'text-white'}`}>
-                            {drivers[s.driverId]?.firstName} <span className={`${isFerrariDriver ? 'text-[#ff2800]' : 'text-red-600'}`}>
-                              {drivers[s.driverId]?.lastName}
-                            </span>
-                          </div>
-                          <div className={`text-xs font-bold uppercase mt-1 ${isFerrariDriver ? 'text-[#ff2800]' : 'text-zinc-400'}`}>
-                            {constructorName}
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            
-            {driverStandings.length > 10 && (
-              <button 
-                onClick={() => setShowFullDrivers(!showFullDrivers)}
-                className="w-full py-4 bg-zinc-800/50 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all"
-              >
-                {showFullDrivers ? "↑ Show Top 10" : `↓ Show All ${driverStandings.length} Drivers`}
-              </button>
-            )}
-          </section>
+{/* Sezione Race Results */}
+<section className="bg-zinc-900/40 border border-zinc-800 rounded-sm overflow-hidden h-fit lg:col-span-2">
+  <div className="p-4 border-b border-zinc-800 bg-zinc-900/80">
+    <h2 className="font-black uppercase text-sm text-white tracking-widest text-center">Race Results</h2>
+  </div>
+  <div className="overflow-x-auto">
+    <table className="w-full text-left text-sm border-collapse">
+      <thead>
+        <tr className="bg-zinc-950 text-zinc-500 text-[10px] font-black uppercase tracking-widest border-b border-zinc-800">
+          <th className="p-4 w-12 text-center">Pos</th>
+          <th className="p-4">Driver</th>
+          <th className="p-4">Team</th>
+          <th className="p-4 text-center">Grid</th>
+          <th className="p-4 text-center">Points</th>
+          <th className="p-4 text-center">Laps</th>
+          <th className="p-4 text-right">Time/Retired</th>
+        </tr>
+      </thead>
+      <tbody>
+        {visibleDrivers.map((s, i) => {
+          const isFerrariDriver = isFerrari(s.constructorId);
+          const constructorName = getConstructorName(s.constructorId);
+          const position = s.positionText;
+          
+          // Definiamo il colore della scuderia (opzionale: potresti creare una mappa colori per scuderia)
+          const teamColor = isFerrariDriver ? 'border-red-600' : 'border-zinc-700';
+
+          return (
+            <tr key={i} className="border-b border-zinc-800/50 hover:bg-white/5 transition-all duration-200 group">
+              {/* Posizione con indicatore colore scuderia sulla sinistra */}
+              <td className={`p-4 text-center font-black italic border-l-4 ${teamColor} ${getPositionTextColor(position)}`}>
+                {position}
+              </td>
+              
+              {/* Pilota */}
+              <td className="p-4">
+                <div className={`font-bold uppercase tracking-tight ${isFerrariDriver ? 'text-[#ff2800]' : 'text-white'}`}>
+                  <span className="hidden md:inline">{drivers[s.driverId]?.firstName}</span> <strong>{drivers[s.driverId]?.lastName}</strong>
+                </div>
+              </td>
+
+              {/* Scuderia (Colonna aggiunta) */}
+              <td className="p-4 text-xs font-bold uppercase text-zinc-400 group-hover:text-white transition-colors">
+                {constructorName}
+              </td>
+
+              {/* Griglia (Grid) */}
+              <td className="p-4 text-center text-zinc-400 font-mono">
+                {s.grid || '-'}
+              </td>
+
+              {/* Punti */}
+              <td className="p-4 text-center font-black text-white">
+                {s.points}
+              </td>
+
+              {/* Giri (Laps) */}
+              <td className="p-4 text-center text-zinc-300">
+                {s.laps || raceInfo.laps}
+              </td>
+
+              {/* Tempo/Ritiro (Colonna aggiunta) */}
+              <td className="p-4 text-right font-mono text-zinc-300 text-xs">
+                {s.time || s.status || (s.positionText === 'R' ? 'Retired' : 'n/a')}
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+  
+  {driverStandings.length > 10 && (
+    <button 
+      onClick={() => setShowFullDrivers(!showFullDrivers)}
+      className="w-full py-4 bg-zinc-800/50 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all text-zinc-400"
+    >
+      {showFullDrivers ? "↑ Show Top 10" : `↓ Show All ${driverStandings.length} Results`}
+    </button>
+  )}
+</section>
 
           {/* Constructor Standings */}
           <section className="bg-zinc-900/40 border border-zinc-800 rounded-sm h-fit">
