@@ -68,7 +68,7 @@ export default function HeroSection() {
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-ferrari-yellow/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
       </div>
 
-      <div className="relative z-10 text-center px-4 max-w-6xl mx-auto">
+      <div className="relative z-10 text-center px-4 max-w-7xl mx-auto flex flex-col items-center">
         {/* Logo Ferrari */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
@@ -90,28 +90,29 @@ export default function HeroSection() {
             "Datemi una macchina che sia veloce in rettilineo e che stia in strada in curva."
           </p>
         </motion.div>
-      </div>
+
         {/* Stats Grid Dinamica */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-7xl mx-auto px-4">
-        {statsConfig.map((stat, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 + 0.5 }}
-            className="group bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-xl p-4 hover:border-ferrari-red/40 hover:bg-zinc-900/60 transition-all duration-500 shadow-xl"
-          >
-            <div className={`inline-flex p-2.5 rounded-lg bg-gradient-to-br ${stat.color} mb-3 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-              <stat.icon className="w-5 h-5 text-white" />
-            </div>
-            <div className="text-xl md:text-2xl font-black text-white mb-0.5 tabular-nums">
-              {loading ? <span className="animate-pulse">---</span> : stat.value}
-            </div>
-            <div className="text-gray-500 text-[9px] uppercase font-black tracking-widest leading-tight">
-              {stat.label}
-            </div>
-          </motion.div>
-        ))}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 w-full">
+          {statsConfig.map((stat, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 + 0.5 }}
+              className="group bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-xl p-4 hover:border-ferrari-red/40 hover:bg-zinc-900/60 transition-all duration-500 shadow-xl"
+            >
+              <div className={`inline-flex p-2.5 rounded-lg bg-gradient-to-br ${stat.color} mb-3 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                <stat.icon className="w-5 h-5 text-white" />
+              </div>
+              <div className="text-xl md:text-2xl font-black text-white mb-0.5 tabular-nums">
+                {loading ? <span className="animate-pulse">---</span> : stat.value}
+              </div>
+              <div className="text-gray-500 text-[9px] uppercase font-black tracking-widest leading-tight">
+                {stat.label}
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
