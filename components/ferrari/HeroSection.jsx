@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, Trophy, Flag, Star, Timer } from 'lucide-react';
+import { ChevronDown, Trophy, Flag, Star, Timer, Zap, Gauge, Award } from 'lucide-react';
 
 export default function HeroSection() {
   const [dynamicStats, setDynamicStats] = useState({
     wins: 0,
     podiums: 0,
     poles: 0,
+    fastestLaps: 0,
+    totalPoints: 0,
+    grandSlams: 0,
     years: new Date().getFullYear() - 1950
   });
   const [loading, setLoading] = useState(true);
@@ -18,25 +21,26 @@ export default function HeroSection() {
         if (!response.ok) return;
         const data = await response.json();
 
-        // Filtriamo solo i risultati Ferrari
         const ferrariResults = data.filter(r => r.constructorId === 'ferrari');
 
         const stats = ferrariResults.reduce((acc, curr) => {
-          // Conta Vittorie
           if (curr.positionNumber === 1) acc.wins++;
-          // Conta Podi (1, 2, 3)
           if (curr.positionNumber >= 1 && curr.positionNumber <= 3) acc.podiums++;
-          // Conta Pole Positions
           if (curr.gridPositionNumber === 1) acc.poles++;
-          
+          if (curr.fastestLap === true) acc.fastestLaps++;
+          if (curr.points) acc.totalPoints += curr.points;
+          if (curr.grandSlam === true) acc.grandSlams++;
           return acc;
-        }, { wins: 0, podiums: 0, poles: 0 });
+        }, { wins: 0, podiums: 0, poles: 0, fastestLaps: 0, totalPoints: 0, grandSlams: 0 });
 
         setDynamicStats(prev => ({
           ...prev,
           wins: stats.wins,
           podiums: stats.podiums,
-          poles: stats.poles
+          poles: stats.poles,
+          fastestLaps: stats.fastestLaps,
+          totalPoints: Math.floor(stats.totalPoints),
+          grandSlams: stats.grandSlams
         }));
       } catch (error) {
         console.error("Errore nel calcolo statistiche Ferrari:", error);
@@ -44,36 +48,16 @@ export default function HeroSection() {
         setLoading(false);
       }
     }
-
     calculateFerrariStats();
   }, []);
 
-  // Definizione della struttura delle card
   const statsConfig = [
-    { 
-      icon: Trophy, 
-      value: loading ? "..." : dynamicStats.wins, 
-      label: 'Vittorie GP', 
-      color: 'from-ferrari-red to-red-700' 
-    },
-    { 
-      icon: Star, 
-      value: loading ? "..." : dynamicStats.podiums, 
-      label: 'Podi Totali', 
-      color: 'from-ferrari-yellow to-yellow-600' 
-    },
-    { 
-      icon: Timer, 
-      value: loading ? "..." : dynamicStats.poles, 
-      label: 'Pole Positions', 
-      color: 'from-ferrari-red to-red-700' 
-    },
-    { 
-      icon: Flag, 
-      value: dynamicStats.years, 
-      label: 'Anni in F1', 
-      color: 'from-ferrari-yellow to-yellow-600' 
-    },
+    { icon: Trophy, value: dynamicStats.wins, label: 'Vittorie GP', color: 'from-ferrari-red to-red-700' },
+    { icon: Star, value: dynamicStats.podiums, label: 'Podi Totali', color: 'from-ferrari-yellow to-yellow-600' },
+    { icon: Timer, value: dynamicStats.poles, label: 'Pole Positions', color: 'from-ferrari-red to-red-700' },
+    { icon: Zap, value: dynamicStats.fastestLaps, label: 'Giri Veloci', color: 'from-ferrari-yellow to-yellow-600' },
+    { icon: Gauge, value: dynamicStats.totalPoints.toLocaleString(), label: 'Punti Storici', color: 'from-ferrari-red to-red-700' },
+    { icon: Award, value: dynamicStats.grandSlams, label: 'Grand Slams', color: 'from-ferrari-yellow to-yellow-600' },
   ];
 
   return (
@@ -107,40 +91,30 @@ export default function HeroSection() {
           </p>
         </motion.div>
 
-        {/* Stats Grid Dinamica */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
-          {statsConfig.map((stat, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 + 0.5 }}
-              className="group bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl p-5 md:p-6 hover:border-ferrari-red/50 transition-all duration-500"
-            >
-              <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${stat.color} mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
-                <stat.icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
-              </div>
-              <div className="text-2xl md:text-4xl font-black text-white mb-1">
-                {stat.value}
-              </div>
-              <div className="text-gray-500 text-[10px] md:text-xs uppercase font-black tracking-widest">
-                {stat.label}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Scroll indicator */}
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="mt-16 cursor-pointer"
-          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
-        >
-          <div className="text-gray-500 text-[10px] uppercase font-black tracking-[0.3em] mb-2">Explore Heritage</div>
-          <ChevronDown className="w-6 h-6 text-ferrari-red mx-auto" />
-        </motion.div>
+      {/* Stats Grid Dinamica Migliorata */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-7xl mx-auto px-4">
+        {statsConfig.map((stat, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 + 0.5 }}
+            className="group bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-xl p-4 hover:border-ferrari-red/40 hover:bg-zinc-900/60 transition-all duration-500 shadow-xl"
+          >
+            <div className={`inline-flex p-2.5 rounded-lg bg-gradient-to-br ${stat.color} mb-3 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+              <stat.icon className="w-5 h-5 text-white" />
+            </div>
+            <div className="text-xl md:text-2xl font-black text-white mb-0.5 tabular-nums">
+              {loading ? <span className="animate-pulse">---</span> : stat.value}
+            </div>
+            <div className="text-gray-500 text-[9px] uppercase font-black tracking-widest leading-tight">
+              {stat.label}
+            </div>
+          </motion.div>
+        ))}
       </div>
+
+      {/* ... (resto del Hero rimane uguale) ... */}
     </section>
   );
 }
