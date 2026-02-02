@@ -280,7 +280,7 @@ export default function RaceDetailsPage() {
   if (!raceInfo) return <div className="min-h-screen bg-black text-white p-20 text-center font-bold">RACE NOT FOUND</div>;
 
   const flagCode = getFlagCodeFromCircuit(circuitInfo?.name);
-  const visibleDrivers = showFullDrivers ? driverStandings : driverStandings.slice(0, 10);
+  const visibleResults = showAll ? results : results.slice(0, 10);
 
   let mapUrl = '';
   if (circuitInfo?.latitude && circuitInfo?.longitude) {
