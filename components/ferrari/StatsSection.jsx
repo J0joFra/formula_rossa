@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { 
   Trophy, Gauge, Cpu, Zap, Activity, ChevronRight, 
-  Settings, Weight, CircleDot, Shield, ZapOff
+  Settings, Weight, Shield, BarChart3, LineChart as LineChartIcon
 } from 'lucide-react';
 
 export default function StatsSection() {
@@ -103,12 +103,12 @@ export default function StatsSection() {
         </motion.div>
 
         {/* SCHEDA TECNICA DETTAGLIATA */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
           
           {/* CATEGORIA: VETTURA */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-            className="bg-zinc-900/40 border border-white/5 p-8 rounded-3xl backdrop-blur-sm"
+            className="bg-zinc-900/40 border border-white/5 p-8 rounded-3xl backdrop-blur-sm shadow-xl"
           >
             <div className="flex items-center gap-3 mb-8 border-b border-red-600/30 pb-4">
               <Shield className="text-red-600 w-6 h-6" />
@@ -126,7 +126,7 @@ export default function StatsSection() {
           {/* CATEGORIA: POWER UNIT */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="bg-zinc-900/60 border border-red-600/20 p-8 rounded-3xl backdrop-blur-sm relative"
+            className="bg-zinc-900/60 border border-red-600/20 p-8 rounded-3xl backdrop-blur-sm relative shadow-xl"
           >
             <div className="absolute top-4 right-4"><Activity className="text-red-600 w-4 h-4 animate-pulse" /></div>
             <div className="flex items-center gap-3 mb-8 border-b border-red-600/30 pb-4">
@@ -145,7 +145,7 @@ export default function StatsSection() {
           {/* CATEGORIA: ERS (SISTEMA IBRIDO) */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="bg-zinc-900/40 border border-white/5 p-8 rounded-3xl backdrop-blur-sm"
+            className="bg-zinc-900/40 border border-white/5 p-8 rounded-3xl backdrop-blur-sm shadow-xl"
           >
             <div className="flex items-center gap-3 mb-8 border-b border-red-600/30 pb-4">
               <Zap className="text-yellow-500 w-6 h-6" />
@@ -161,66 +161,77 @@ export default function StatsSection() {
           </motion.div>
         </div>
 
-        {/* GRAFICI ANALITICI (SOTTO) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
-          
-          {/* Top Vincitori Ferrari */}
-          <motion.div 
-            initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }}
-            className="bg-zinc-900/30 border border-white/5 rounded-3xl p-8 shadow-xl"
-          >
-            <div className="flex items-center justify-between mb-8">
-              <h4 className="text-xl font-black uppercase italic tracking-tighter flex items-center gap-3">
-                <Trophy className="text-yellow-500 w-6 h-6" /> Win contribution
-              </h4>
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">All-Time Database</span>
+        {/* AREA DATA ANALYTICS - SPAZIO DEDICATO AI GRAFICI */}
+        <div className="mt-40">
+            <div className="flex items-center gap-4 mb-12">
+                <div className="h-[2px] flex-1 bg-gradient-to-r from-transparent to-zinc-800"></div>
+                <div className="flex items-center gap-2 px-6 py-2 bg-zinc-900 border border-zinc-800 rounded-full">
+                    <BarChart3 className="w-4 h-4 text-red-600" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">Historical Performance Analytics</span>
+                </div>
+                <div className="h-[2px] flex-1 bg-gradient-to-l from-transparent to-zinc-800"></div>
             </div>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={pilotWins} layout="vertical" margin={{ left: 20 }}>
-                  <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" stroke="#888" fontSize={11} width={90} tick={{fontWeight: '900'}} />
-                  <Tooltip cursor={{ fill: 'rgba(220, 0, 0, 0.05)' }} contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '8px' }} />
-                  <Bar dataKey="wins" fill="#DC0000" radius={[0, 4, 4, 0]} barSize={20} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </motion.div>
 
-          {/* Performance Punti */}
-          <motion.div 
-            initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }}
-            className="bg-zinc-900/30 border border-white/5 rounded-3xl p-8 shadow-xl"
-          >
-            <div className="flex items-center justify-between mb-8">
-              <h4 className="text-xl font-black uppercase italic tracking-tighter flex items-center gap-3">
-                <Activity className="text-red-600 w-6 h-6" /> Season Points History
-              </h4>
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Last 12 Years</span>
-            </div>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={pointsHistory}>
-                  <defs>
-                    <linearGradient id="colorPts" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#DC0000" stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor="#DC0000" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
-                  <XAxis dataKey="year" stroke="#444" fontSize={10} tickMargin={10} />
-                  <YAxis stroke="#444" fontSize={10} />
-                  <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '8px' }} />
-                  <Area type="monotone" dataKey="points" stroke="#DC0000" strokeWidth={3} fillOpacity={1} fill="url(#colorPts)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </motion.div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
+            
+            {/* Top Vincitori Ferrari */}
+            <motion.div 
+                initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }}
+                className="bg-zinc-900/20 border border-white/5 rounded-3xl p-8 shadow-inner"
+            >
+                <div className="flex items-center justify-between mb-8">
+                <h4 className="text-xl font-black uppercase italic tracking-tighter flex items-center gap-3">
+                    <Trophy className="text-yellow-500 w-5 h-5" /> Win contribution
+                </h4>
+                <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Ferrari Legends</span>
+                </div>
+                <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={pilotWins} layout="vertical" margin={{ left: 20 }}>
+                    <XAxis type="number" hide />
+                    <YAxis dataKey="name" type="category" stroke="#666" fontSize={11} width={90} tick={{fontWeight: '900'}} />
+                    <Tooltip cursor={{ fill: 'rgba(220, 0, 0, 0.05)' }} contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '8px' }} />
+                    <Bar dataKey="wins" fill="#DC0000" radius={[0, 4, 4, 0]} barSize={20} />
+                    </BarChart>
+                </ResponsiveContainer>
+                </div>
+            </motion.div>
 
+            {/* Performance Punti */}
+            <motion.div 
+                initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }}
+                className="bg-zinc-900/20 border border-white/5 rounded-3xl p-8 shadow-inner"
+            >
+                <div className="flex items-center justify-between mb-8">
+                <h4 className="text-xl font-black uppercase italic tracking-tighter flex items-center gap-3">
+                    <LineChartIcon className="text-red-600 w-5 h-5" /> Season Points History
+                </h4>
+                <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Last 12 Years</span>
+                </div>
+                <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={pointsHistory}>
+                    <defs>
+                        <linearGradient id="colorPts" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#DC0000" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#DC0000" stopOpacity={0}/>
+                        </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
+                    <XAxis dataKey="year" stroke="#444" fontSize={10} tickMargin={10} />
+                    <YAxis stroke="#444" fontSize={10} />
+                    <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '8px' }} />
+                    <Area type="monotone" dataKey="points" stroke="#DC0000" strokeWidth={3} fillOpacity={1} fill="url(#colorPts)" />
+                    </AreaChart>
+                </ResponsiveContainer>
+                </div>
+            </motion.div>
+
+            </div>
         </div>
 
         {/* Credit Link */}
-        <div className="text-center">
+        <div className="text-center mt-12">
           <a 
             href="https://it.motorsport.com/f1/news/f1-ferrari-la-scheda-tecnica-della-sf-26-di-leclerc-e-hamilton/10792203/"
             target="_blank" rel="noopener noreferrer"
@@ -234,14 +245,14 @@ export default function StatsSection() {
   );
 }
 
-// Componente Helper per le righe della scheda tecnica
 function TechItem({ label, value, sub }) {
   return (
     <li className="flex flex-col border-l border-white/10 pl-4 group hover:border-red-600 transition-colors">
-      <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest mb-1">{label}</span>
+      <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">{label}</span>
       <div className="flex items-baseline gap-2">
-        <span className="text-lg font-black text-white tracking-tight">{value}</span>
-        <span className="text-[10px] text-zinc-500 italic font-medium">{sub}</span>
+        <span className="text-xl font-black text-white tracking-tight">{value}</span>
+        {/* text-[12px] e text-zinc-400  */}
+        <span className="text-[12px] text-zinc-400 italic font-medium">{sub}</span>
       </div>
     </li>
   );
