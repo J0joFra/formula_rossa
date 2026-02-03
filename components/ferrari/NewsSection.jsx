@@ -7,12 +7,9 @@ export default function NewsSection() {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchRealNews = async () => {
-    // Evita di eseguire il fetch sul server durante il build di Vercel
     if (typeof window === 'undefined') return;
 
     setIsLoading(true);
-    
-    // AbortController: se l'API non risponde entro 5 secondi, annulla tutto
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
@@ -28,7 +25,6 @@ export default function NewsSection() {
       clearTimeout(timeoutId);
 
       if (data.status === 'ok') {
-        // LIMITIAMO A 3 NOTIZIE per velocità e pulizia
         const formattedNews = data.items.slice(0, 3).map((item, index) => {
           let category = "F1 NEWS";
           if (item.title.toLowerCase().includes("ferrari")) category = "SCUDERIA";
@@ -47,7 +43,7 @@ export default function NewsSection() {
       }
     } catch (error) {
       console.error("Errore rapido o timeout:", error);
-      // Fallback: se fallisce, carichiamo un array vuoto o news di cortesia
+      // Fallback
     } finally {
       setIsLoading(false);
     }
@@ -60,7 +56,7 @@ export default function NewsSection() {
   }, []);
 
   return (
-    <section className="py-24 px-4 bg-black">
+    <section className="py-24 px-4 bg-gradient-to-b from-black via-zinc-900 to-black">
       <div className="max-w-6xl mx-auto">
         
         <motion.div
