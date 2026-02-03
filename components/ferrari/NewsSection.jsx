@@ -1,158 +1,135 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Newspaper, Clock, ExternalLink, Twitter } from 'lucide-react';
-
-const CAROUSEL_SPEED = 8000; // 8 sec
-const REFRESH_DATA_INTERVAL = 30 * 60 * 1000; // 30 min
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Newspaper, ExternalLink, Clock, Loader2, RefreshCw } from 'lucide-react';
 
 export default function NewsSection() {
-  const [tweetIds, setTweetIds] = useState([
-    "1886008691515220265", // Ferrari Tweet 1
-    "1886000000000000000", // F1 Tweet 1
-    "1885950000000000000", // Ferrari Tweet 2
-    "1885900000000000000", // F1 Tweet 2
-    "1885850000000000000", // Ferrari Tweet 3
-    "1885800000000000000", // F1 Tweet 3
-  ]);
+  const [news, setNews] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [skyNews, setSkyNews] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isLoadingSky, setIsLoadingSky] = useState(true);
-
-  // 1. Caricamento Script Twitter
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://platform.twitter.com/widgets.js";
-    script.async = true;
-    document.body.appendChild(script);
-    return () => {
-        const existingScript = document.querySelector('script[src="https://platform.twitter.com/widgets.js"]');
-        if (existingScript) document.body.removeChild(existingScript);
-    };
-  }, []);
-
-  // 2. Forza il ricaricamento del widget quando cambia l'indice
-  useEffect(() => {
-    if (window.twttr && window.twttr.widgets) {
-      window.twttr.widgets.load();
-    }
-  }, [currentIndex]);
-
-  // 3. Fetch Sky News
-  const fetchSkyNews = async () => {
+  const fetchRealNews = async () => {
+    setIsLoading(true);
     try {
-      const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://sport.sky.it/rss/formula1.xml`);
-      const data = await res.json();
-      if (data.status === 'ok') setSkyNews(data.items.slice(0, 3));
-    } catch (e) { console.error(e); }
-    setIsLoadingSky(false);
+      const rssUrl = "https://it.motorsport.com/rss/f1/news/";
+      const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+      const data = await response.json();
+
+      if (data.status === 'ok') {
+        // Formattiamo i dati per adattarli al tuo componente
+        const formattedNews = data.items.slice(0, 6).map((item, index) => {
+          // Proviamo a estrarre una categoria o mettiamo "F1"
+          let category = "F1 NEWS";
+          if (item.title.toLowerCase().includes("ferrari")) category = "SCUDERIA";
+          if (item.title.toLowerCase().includes("tecnica")) category = "TECNICA";
+          if (item.title.toLowerCase().includes("mercat")) category = "MERCATO";
+
+          return {
+            id: index,
+            title: item.title,
+            description: item.description.replace(/<[^>]*>?/gm, '').slice(0, 120) + "...", // Rimuove tag HTML e taglia
+            category: category,
+            date: new Date(item.pubDate).toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' }),
+            readTime: "3 min", // Stimato
+            url: item.link
+          };
+        });
+        setNews(formattedNews);
+      }
+    } catch (error) {
+      console.error("Errore nel recupero delle notizie:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Check aggiornamenti ogni 30 minuti (simulazione fetch nuovi ID)
   useEffect(() => {
-    fetchSkyNews();
-    const interval = setInterval(() => {
-      fetchSkyNews();
-      // Qui aggiungeresti la logica per recuperare i nuovi Tweet ID dall'API di X
-      console.log("Check aggiornamenti ogni 30 min...");
-    }, REFRESH_DATA_INTERVAL);
+    fetchRealNews();
+
+    // Check automatico ogni 30 minuti
+    const interval = setInterval(fetchRealNews, 30 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // Timer Carosello
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % tweetIds.length);
-    }, CAROUSEL_SPEED);
-    return () => clearInterval(timer);
-  }, [tweetIds]);
-
   return (
-    <section className="py-24 px-4 bg-black relative">
-      <div className="max-w-6xl mx-auto">
-        
-        {/* CAROSELLO TWEET DINAMICO */}
-        <div className="mb-24 flex flex-col items-center">
-          <div className="flex items-center gap-3 mb-8">
-            <Twitter className="w-5 h-5 text-sky-400" />
-            <h2 className="text-sm font-black uppercase tracking-[0.3em] text-zinc-500">Live from X.com</h2>
+    <section className="py-20 px-4 bg-zinc-950">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
+        >
+          <div className="inline-flex items-center gap-3 mb-4">
+            <div className="p-2 bg-red-600 rounded-lg">
+              <Newspaper className="w-6 h-6 text-white" />
+            </div>
+            <h2 className="text-4xl font-black uppercase italic tracking-tighter">Global <span className="text-red-600">News</span> Feed</h2>
           </div>
+          <p className="text-zinc-400 max-w-2xl mx-auto font-medium">
+            Notizie reali in tempo reale dai circuiti di tutto il mondo. Aggiornamento automatico ogni 30 minuti.
+          </p>
+        </motion.div>
 
-          <div className="w-full max-w-[550px] min-h-[500px] flex justify-center">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentIndex}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4 }}
-                className="w-full"
+        {/* Content */}
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="w-12 h-12 text-red-600 animate-spin mb-4" />
+            <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">Sincronizzazione muretto box...</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {news.map((item, index) => (
+              <motion.article
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="group bg-zinc-900/50 rounded-2xl p-6 border border-white/5 hover:border-red-600/30 transition-all shadow-xl flex flex-col justify-between"
               >
-                {/* Il blockquote originale che si aggiorna con l'ID */}
-                <blockquote 
-                  className="twitter-tweet" 
-                  data-theme="dark" 
-                  data-align="center"
-                  data-conversation="none"
-                >
-                  <a href={`https://twitter.com/x/status/${tweetIds[currentIndex]}`}></a>
-                </blockquote>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {/* Indicatori carosello */}
-          <div className="flex gap-2 mt-4">
-            {tweetIds.map((_, i) => (
-              <div 
-                key={i} 
-                className={`h-1 rounded-full transition-all duration-500 ${i === currentIndex ? 'w-8 bg-red-600' : 'w-2 bg-zinc-800'}`} 
-              />
+                <div>
+                  <div className="flex justify-between items-start mb-4">
+                    <span className="px-2 py-1 rounded bg-red-600/10 text-red-500 text-[10px] font-black uppercase tracking-widest">
+                      {item.category}
+                    </span>
+                    <span className="text-zinc-600 text-[10px] font-bold flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {item.readTime}
+                    </span>
+                  </div>
+                  
+                  <h3 className="text-lg font-bold mb-3 leading-tight group-hover:text-red-500 transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="text-zinc-500 text-sm mb-4 line-clamp-3">
+                    {item.description}
+                  </p>
+                </div>
+                
+                <div className="flex justify-between items-center pt-4 border-t border-white/5">
+                  <span className="text-zinc-600 text-xs font-mono">{item.date}</span>
+                  <a 
+                    href={item.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-white hover:text-red-600 transition-colors"
+                  >
+                    Full Story <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </motion.article>
             ))}
           </div>
+        )}
+
+        {/* Refresh Button */}
+        <div className="text-center">
+          <button
+            onClick={fetchRealNews}
+            disabled={isLoading}
+            className="inline-flex items-center px-6 py-3 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-red-600 rounded-full text-xs font-black uppercase tracking-[0.2em] transition-all disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh Feed
+          </button>
         </div>
-
-        {/* SKY NEWS SECTION (FISSA SOTTO) */}
-        <div>
-          <div className="flex items-center gap-3 mb-10">
-            <Newspaper className="w-6 h-6 text-red-600" />
-            <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white">
-              Sky Sport <span className="text-zinc-600 font-bold">Latest</span>
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {isLoadingSky ? (
-              [1, 2, 3].map(i => <div key={i} className="h-64 bg-zinc-900 animate-pulse rounded-2xl" />)
-            ) : (
-              skyNews.map((article, index) => (
-                <motion.a
-                  key={index}
-                  href={article.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group bg-zinc-900/40 border border-white/5 p-6 rounded-2xl hover:bg-zinc-800 transition-all flex flex-col justify-between"
-                  whileHover={{ y: -5 }}
-                >
-                  <div>
-                    <span className="text-[10px] font-black text-red-600 uppercase tracking-widest mb-4 block">F1 News</span>
-                    <h3 className="text-lg font-bold text-white leading-tight group-hover:text-red-500 transition-colors">
-                      {article.title}
-                    </h3>
-                  </div>
-                  <div className="mt-8 flex items-center justify-between text-zinc-600">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-3 h-3" />
-                      <span className="text-[10px] font-bold uppercase">Sky Sport</span>
-                    </div>
-                    <ExternalLink className="w-4 h-4 group-hover:text-white transition-colors" />
-                  </div>
-                </motion.a>
-              ))
-            )}
-          </div>
-        </div>
-
       </div>
     </section>
   );
