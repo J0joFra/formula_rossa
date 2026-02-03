@@ -1,700 +1,248 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { 
-  Trophy, TrendingUp, Users, Calendar, 
-  Award, Target, Zap, Clock, 
-  BarChart as BarChartIcon, PieChart as PieChartIcon,
-  Activity, GitCompare, Heart, Star
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
+  AreaChart, Area, CartesianGrid 
+} from 'recharts';
+import { 
+  Trophy, Gauge, Cpu, Zap, Activity, ChevronRight, 
+  Settings, Weight, CircleDot, Shield, ZapOff
 } from 'lucide-react';
-import { getFerrariData } from '@/lib/openf1/client';  
-import useFerrariData from '@/hooks/useFerrariData';
-
-// Componente per le statistiche real-time
-const LiveStatsComponent = ({ sessionKey }) => {
-  const { data: ferrariData, loading, error } = useFerrariData(sessionKey, 10000);
-  
-  if (loading || !ferrariData) {
-    return (
-      <div className="animate-pulse bg-gray-800/30 rounded-xl p-6 border border-gray-700">
-        <div className="h-6 bg-gray-700 rounded w-1/2 mb-4"></div>
-        <div className="space-y-3">
-          <div className="h-4 bg-gray-700 rounded"></div>
-          <div className="h-4 bg-gray-700 rounded w-2/3"></div>
-        </div>
-      </div>
-    );
-  }
-
-  // Calcola statistiche dai dati real-time
-  const calculateLiveStats = () => {
-    const stats = {
-      avgSpeed: 0,
-      maxSpeed: 0,
-      throttleAvg: 0,
-      reliability: 100,
-      lapsCompleted: 0,
-      pitStops: 0
-    };
-
-    // Processa dati telemetria se disponibili
-    if (ferrariData.carData) {
-      const speeds = ferrariData.carData
-        .filter(d => d.speed > 0)
-        .map(d => d.speed);
-      
-      if (speeds.length > 0) {
-        stats.avgSpeed = Math.round(speeds.reduce((a, b) => a + b, 0) / speeds.length);
-        stats.maxSpeed = Math.max(...speeds);
-      }
-    }
-
-    return stats;
-  };
-
-  const liveStats = calculateLiveStats();
-
-  return (
-    <div className="bg-gradient-to-br from-gray-900/50 to-red-900/10 rounded-xl p-6 border border-red-500/20">
-      <div className="flex items-center gap-3 mb-6">
-        <Activity className="w-6 h-6 text-red-500 animate-pulse" />
-        <h3 className="text-xl font-bold text-white">Statistiche Live</h3>
-        <span className="ml-auto text-xs px-2 py-1 bg-red-500/20 text-red-400 rounded-full animate-pulse">
-          LIVE
-        </span>
-      </div>
-      
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gray-800/30 p-4 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <Zap className="w-4 h-4 text-yellow-500" />
-            <span className="text-sm text-gray-400">Velocità Media</span>
-          </div>
-          <div className="text-2xl font-bold text-white">{liveStats.avgSpeed} km/h</div>
-        </div>
-        
-        <div className="bg-gray-800/30 p-4 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <Target className="w-4 h-4 text-green-500" />
-            <span className="text-sm text-gray-400">Velocità Max</span>
-          </div>
-          <div className="text-2xl font-bold text-white">{liveStats.maxSpeed} km/h</div>
-        </div>
-      </div>
-      
-      {ferrariData.weather && ferrariData.weather.length > 0 && (
-        <div className="mt-4 p-3 bg-gray-800/20 rounded-lg">
-          <div className="text-sm text-gray-400 mb-1">Condizioni Attuali</div>
-          <div className="flex items-center gap-4 text-sm">
-            <span>🌡️ {ferrariData.weather[0].air_temperature?.toFixed(1)}°C</span>
-            <span>💧 {ferrariData.weather[0].humidity?.toFixed(0)}%</span>
-            {ferrariData.weather[0].rainfall ? (
-              <span className="text-blue-400">🌧️ Pioggia</span>
-            ) : (
-              <span className="text-yellow-400">☀️ Asciutto</span>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Componente per i dati del campionato
-const ChampionshipStats = ({ sessionKey }) => {
-  const [championshipData, setChampionshipData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchChampionshipData = async () => {
-      try {
-        const client = new OpenF1Client();
-        const [driversData, teamsData] = await Promise.all([
-          client.getDriversChampionship(sessionKey, [16, 55]),
-          client.getTeamsChampionship(sessionKey, 'Ferrari')
-        ]);
-        
-        setChampionshipData({
-          drivers: driversData || [],
-          team: teamsData?.[0] || null
-        });
-      } catch (error) {
-        console.error('Error fetching championship data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchChampionshipData();
-  }, [sessionKey]);
-
-  if (loading) {
-    return (
-      <div className="animate-pulse bg-gray-800/30 rounded-xl p-6 border border-gray-700">
-        <div className="h-6 bg-gray-700 rounded w-1/2 mb-4"></div>
-        <div className="space-y-3">
-          <div className="h-4 bg-gray-700 rounded"></div>
-          <div className="h-4 bg-gray-700 rounded w-2/3"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!championshipData) return null;
-
-  const leclerc = championshipData.drivers?.find(d => d.driver_number === 16);
-  const sainz = championshipData.drivers?.find(d => d.driver_number === 55);
-
-  return (
-    <div className="bg-gradient-to-br from-gray-900/50 to-yellow-900/10 rounded-xl p-6 border border-yellow-500/20">
-      <div className="flex items-center gap-3 mb-6">
-        <Trophy className="w-6 h-6 text-yellow-500" />
-        <h3 className="text-xl font-bold text-white">Campionato 2024</h3>
-      </div>
-      
-      {championshipData.team && (
-        <div className="mb-6 p-4 bg-yellow-500/10 rounded-lg">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-gray-400">Scuderia Ferrari</span>
-            <span className="text-2xl font-bold text-yellow-500">
-              P{championshipData.team.position_current}
-            </span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-400">Punti</span>
-            <span className="font-bold text-white">
-              {championshipData.team.points_current || 0}
-            </span>
-          </div>
-        </div>
-      )}
-      
-      <div className="space-y-4">
-        {leclerc && (
-          <div className="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center">
-                <span className="font-bold text-red-400">16</span>
-              </div>
-              <div>
-                <div className="font-medium text-white">C. Leclerc</div>
-                <div className="text-xs text-gray-400">P{leclerc.position_current || '-'}</div>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-lg font-bold text-white">{leclerc.points_current || 0}</div>
-              <div className="text-xs text-gray-400">punti</div>
-            </div>
-          </div>
-        )}
-        
-        {sainz && (
-          <div className="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                <span className="font-bold text-yellow-400">55</span>
-              </div>
-              <div>
-                <div className="font-medium text-white">C. Sainz</div>
-                <div className="text-xs text-gray-400">P{sainz.position_current || '-'}</div>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-lg font-bold text-white">{sainz.points_current || 0}</div>
-              <div className="text-xs text-gray-400">punti</div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Componente per le statistiche storiche con dati reali
-const HistoricalStatsWithRealData = ({ sessionKey }) => {
-  const [lapData, setLapData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchLapData = async () => {
-      try {
-        const client = new OpenF1Client();
-        const [leclercLaps, sainzLaps] = await Promise.all([
-          client.getLaps(16, sessionKey),
-          client.getLaps(55, sessionKey)
-        ]);
-
-        // Processa i dati per grafico
-        const processedData = [];
-        const maxLaps = Math.max(
-          leclercLaps?.length || 0,
-          sainzLaps?.length || 0
-        );
-
-        for (let i = 0; i < Math.min(maxLaps, 20); i++) {
-          const leclercLap = leclercLaps?.[i];
-          const sainzLap = sainzLaps?.[i];
-          
-          if (leclercLap || sainzLap) {
-            processedData.push({
-              lap: i + 1,
-              leclerc: leclercLap?.lap_duration || null,
-              sainz: sainzLap?.lap_duration || null,
-              leclercS1: leclercLap?.sector1_session_time || null,
-              leclercS2: leclercLap?.sector2_session_time || null,
-              leclercS3: leclercLap?.sector3_session_time || null,
-            });
-          }
-        }
-
-        setLapData(processedData);
-      } catch (error) {
-        console.error('Error fetching lap data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLapData();
-  }, [sessionKey]);
-
-  // Dati storici Ferrari (recenti)
-  const historicalData = [
-    { year: 2019, wins: 3, podiums: 19, points: 504, position: 2, driver1: 'Vettel', driver2: 'Leclerc' },
-    { year: 2020, wins: 0, podiums: 3, points: 131, position: 6, driver1: 'Vettel', driver2: 'Leclerc' },
-    { year: 2021, wins: 0, podiums: 5, points: 323, position: 3, driver1: 'Sainz', driver2: 'Leclerc' },
-    { year: 2022, wins: 4, podiums: 20, points: 554, position: 2, driver1: 'Sainz', driver2: 'Leclerc' },
-    { year: 2023, wins: 1, podiums: 12, points: 406, position: 3, driver1: 'Sainz', driver2: 'Leclerc' },
-    { year: 2024, wins: 7, podiums: 27, points: 663, position: 2, driver1: 'Leclerc', driver2: 'Sainz/Hamilton' },
-  ];
-
-  // Leggende Ferrari (attualizzate)
-  const legendsData = [
-    { name: 'M. Schumacher', wins: 72, titles: 5, years: '1996-2006', currentTeam: false },
-    { name: 'C. Leclerc', wins: 11, titles: 0, years: '2019-presente', currentTeam: true },
-    { name: 'S. Vettel', wins: 14, titles: 0, years: '2015-2020', currentTeam: false },
-    { name: 'C. Sainz', wins: 3, titles: 0, years: '2021-2024', currentTeam: false },
-    { name: 'K. Räikkönen', wins: 10, titles: 1, years: '2007-2009, 2014-2018', currentTeam: false },
-    { name: 'L. Hamilton', wins: 0, titles: 0, years: '2025-presente', currentTeam: true },
-  ];
-
-  const COLORS = ['#DC0000', '#FF2800', '#FF5A36', '#FF8C6B', '#FFBDA1', '#FFEFD6'];
-
-  return (
-    <div className="space-y-8">
-      {/* Grafico tempi per giro */}
-      <div className="bg-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-800 p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <Clock className="w-6 h-6 text-blue-500" />
-          <h3 className="text-xl font-bold text-white">Analisi Tempi per Giro</h3>
-        </div>
-        
-        {loading ? (
-          <div className="h-64 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
-          </div>
-        ) : lapData && lapData.length > 0 ? (
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={lapData}>
-                <XAxis dataKey="lap" stroke="#666" />
-                <YAxis stroke="#666" domain={['dataMin - 2', 'dataMax + 2']} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: 'white' }}
-                  formatter={(value) => value ? `${value.toFixed(3)}s` : 'N/A'}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="leclerc" 
-                  stroke="#DC0000" 
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                  name="Leclerc"
-                  isAnimationActive={false}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="sainz" 
-                  stroke="#FFD700" 
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                  name="Sainz"
-                  isAnimationActive={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        ) : (
-          <div className="h-64 flex items-center justify-center text-gray-500">
-            Dati tempi giro non disponibili
-          </div>
-        )}
-      </div>
-
-      {/* Grafico storici */}
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="bg-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-800 p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <TrendingUp className="w-6 h-6 text-green-500" />
-            <h3 className="text-xl font-bold text-white">Performance 2019-2024</h3>
-          </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={historicalData}>
-                <XAxis dataKey="year" stroke="#666" />
-                <YAxis stroke="#666" />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: 'white' }}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="points" 
-                  stroke="#DC0000" 
-                  fill="#DC0000" 
-                  fillOpacity={0.3}
-                  strokeWidth={2}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="wins" 
-                  stroke="#FFD700" 
-                  fill="#FFD700" 
-                  fillOpacity={0.2}
-                  strokeWidth={2}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="bg-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-800 p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <Award className="w-6 h-6 text-purple-500" />
-            <h3 className="text-xl font-bold text-white">Leggende Ferrari</h3>
-          </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={legendsData}>
-                <XAxis dataKey="name" stroke="#666" angle={-45} textAnchor="end" height={80} />
-                <YAxis stroke="#666" />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: 'white' }}
-                />
-                <Bar dataKey="wins" fill="#DC0000" name="Vittorie" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default function StatsSection() {
-  const [activeTab, setActiveTab] = useState('live');
-  const [selectedSession, setSelectedSession] = useState(9601); // Monza session key
-  const [circuitStats, setCircuitStats] = useState(null);
-
-  const sessions = [
-    { key: 9601, name: 'Monza', circuit: 'Italian GP', date: '2025-09-07' },
-    { key: 9602, name: 'Monaco', circuit: 'Monaco GP', date: '2025-05-25' },
-    { key: 9603, name: 'Silverstone', circuit: 'British GP', date: '2025-07-06' },
-    { key: 9604, name: 'Spa', circuit: 'Belgian GP', date: '2025-08-31' },
-    { key: 9605, name: 'Suzuka', circuit: 'Japanese GP', date: '2025-10-05' },
-  ];
+  const [pilotWins, setPilotWins] = useState([]);
+  const [pointsHistory, setPointsHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCircuitStats = async () => {
+    async function loadData() {
       try {
-        const client = new OpenF1Client();
-        // Potresti aggiungere chiamate per statistiche specifiche del circuito
-        setCircuitStats({
-          monza: { laps: 53, length: 5.793, record: '1:21.046' },
-          monaco: { laps: 78, length: 3.337, record: '1:10.166' },
-          silverstone: { laps: 52, length: 5.891, record: '1:27.097' },
-          spa: { laps: 44, length: 7.004, record: '1:41.252' },
-          suzuka: { laps: 53, length: 5.807, record: '1:30.983' },
-        });
-      } catch (error) {
-        console.error('Error fetching circuit stats:', error);
-      }
-    };
+        const [resultsRes, driversRes] = await Promise.all([
+          fetch('/data/f1db-races-race-results.json'),
+          fetch('/data/f1db-drivers.json')
+        ]);
+        const results = await resultsRes.json();
+        const drivers = await driversRes.json();
 
-    fetchCircuitStats();
+        const driverMap = {};
+        drivers.forEach(d => driverMap[d.id] = d.lastName);
+
+        const ferrariWins = results.filter(r => r.constructorId === 'ferrari' && r.positionNumber === 1);
+        const winsCount = ferrariWins.reduce((acc, curr) => {
+          const name = driverMap[curr.driverId] || curr.driverId;
+          acc[name] = (acc[name] || 0) + 1;
+          return acc;
+        }, {});
+
+        const winsData = Object.entries(winsCount)
+          .map(([name, wins]) => ({ name, wins }))
+          .sort((a, b) => b.wins - a.wins)
+          .slice(0, 8);
+
+        setPilotWins(winsData);
+
+        const currentYear = new Date().getFullYear();
+        const pointsByYear = results
+          .filter(r => r.constructorId === 'ferrari' && r.year > currentYear - 12)
+          .reduce((acc, curr) => {
+            acc[curr.year] = (acc[curr.year] || 0) + (curr.points || 0);
+            return acc;
+          }, {});
+
+        const historyData = Object.entries(pointsByYear)
+          .map(([year, points]) => ({ year: year.toString(), points: Math.floor(points) }))
+          .sort((a, b) => a.year - b.year);
+
+        setPointsHistory(historyData);
+      } catch (err) {
+        console.error("Errore caricamento dati:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
   }, []);
 
-  // Statistiche aggregate
-  const aggregateStats = [
-    { 
-      value: '7', 
-      label: 'Vittorie 2024', 
-      icon: Trophy, 
-      color: 'bg-red-500/20',
-      description: 'Stagione record dal 2019',
-      trend: '+250% vs 2023'
-    },
-    { 
-      value: '27', 
-      label: 'Podi 2024', 
-      icon: Award, 
-      color: 'bg-yellow-500/20',
-      description: 'Miglior risultato dal 2018',
-      trend: '+125% vs 2023'
-    },
-    { 
-      value: '663', 
-      label: 'Punti 2024', 
-      icon: BarChartIcon, 
-      color: 'bg-red-500/20',
-      description: 'Record punti in stagione',
-      trend: '+63% vs 2023'
-    },
-    { 
-      value: '2°', 
-      label: 'Posizione Costruttori', 
-      icon: Target, 
-      color: 'bg-yellow-500/20',
-      description: 'Miglior piazzamento dal 2022',
-      trend: 'Salita di 1 posizione'
-    },
-  ];
-
   return (
-    <section className="py-20 px-4 bg-gradient-to-b from-black via-gray-900 to-black">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+    <section className="py-24 bg-black text-white overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4">
+        
+        {/* TITOLO SEZIONE */}
+        <div className="text-center mb-16">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            whileInView={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-600/10 border border-red-600/20 text-red-500 text-xs font-black uppercase tracking-[0.3em] mb-6"
+          >
+            <Settings className="w-4 h-4 animate-spin-slow" /> Technical Blueprint 2026
+          </motion.div>
+          <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter">
+            Engineering <span className="text-red-600">Legend</span>
+          </h2>
+        </div>
+
+        {/* SF-26 SHOWCASE IMAGE */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          className="relative w-full aspect-[21/9] rounded-3xl overflow-hidden border border-white/10 shadow-2xl mb-12 group"
         >
-          <div className="inline-flex items-center gap-3 mb-4">
-            <Activity className="w-8 h-8 text-red-500" />
-            <h2 className="text-4xl font-bold text-white">Statistiche Ferrari</h2>
-          </div>
-          <p className="text-gray-300 max-w-2xl mx-auto mb-6">
-            Dati live, storici e analisi avanzate della Scuderia Ferrari
-          </p>
-          
-          {/* Session Selector */}
-          <div className="inline-flex items-center gap-2 bg-gray-900/50 backdrop-blur-sm rounded-full px-4 py-2 border border-gray-700">
-            <span className="text-gray-400 text-sm">Sessione:</span>
-            <select 
-              value={selectedSession}
-              onChange={(e) => setSelectedSession(parseInt(e.target.value))}
-              className="bg-transparent text-white border-none outline-none text-sm"
-            >
-              {sessions.map(session => (
-                <option key={session.key} value={session.key}>
-                  {session.circuit} ({session.date})
-                </option>
-              ))}
-            </select>
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10"></div>
+          <img 
+            src="/data/images/sf26.jpg" 
+            alt="Ferrari SF-26" 
+            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+          />
+          <div className="absolute bottom-8 left-8 z-20">
+            <h3 className="text-5xl md:text-8xl font-black italic uppercase tracking-tighter leading-none">SF-26</h3>
+            <div className="flex items-center gap-4 mt-2">
+                <span className="bg-red-600 px-3 py-1 text-xs font-black tracking-widest uppercase">New Era</span>
+                <p className="text-zinc-400 font-bold tracking-[0.3em] uppercase text-sm">Project Code: 677</p>
+            </div>
           </div>
         </motion.div>
 
-        {/* Aggregate Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {aggregateStats.map((stat, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-gradient-to-br from-gray-900/50 to-gray-900/30 backdrop-blur-sm border border-gray-800 rounded-2xl p-6"
-            >
-              <div className={`inline-flex p-3 rounded-xl ${stat.color} mb-4`}>
-                <stat.icon className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-3xl font-bold text-white mb-2">{stat.value}</div>
-              <div className="text-gray-300 font-medium mb-2">{stat.label}</div>
-              <div className="text-sm text-gray-400 mb-1">{stat.description}</div>
-              <div className="text-xs text-green-400">{stat.trend}</div>
-            </motion.div>
-          ))}
+        {/* SCHEDA TECNICA DETTAGLIATA */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
+          
+          {/* CATEGORIA: VETTURA */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+            className="bg-zinc-900/40 border border-white/5 p-8 rounded-3xl backdrop-blur-sm"
+          >
+            <div className="flex items-center gap-3 mb-8 border-b border-red-600/30 pb-4">
+              <Shield className="text-red-600 w-6 h-6" />
+              <h4 className="text-xl font-black uppercase italic">Vettura</h4>
+            </div>
+            <ul className="space-y-6">
+              <TechItem label="Peso Totale" value="770 KG" sub="Con pilota e liquidi" />
+              <TechItem label="Telaio" value="Composito" sub="Carbonio a nido d'ape" />
+              <TechItem label="Cambio" value="8 Marce + RM" sub="Longitudinale Ferrari" />
+              <TechItem label="Freni" value="Brembo" sub="Carbonio autoventilanti" />
+              <TechItem label="Ruote" value="18 Pollici" sub="Anteriore & Posteriore" />
+            </ul>
+          </motion.div>
+
+          {/* CATEGORIA: POWER UNIT */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+            className="bg-zinc-900/60 border border-red-600/20 p-8 rounded-3xl backdrop-blur-sm relative"
+          >
+            <div className="absolute top-4 right-4"><Activity className="text-red-600 w-4 h-4 animate-pulse" /></div>
+            <div className="flex items-center gap-3 mb-8 border-b border-red-600/30 pb-4">
+              <Cpu className="text-red-600 w-6 h-6" />
+              <h4 className="text-xl font-black uppercase italic">Power Unit</h4>
+            </div>
+            <ul className="space-y-6">
+              <TechItem label="Nome Modello" value="067/6" sub="V6 90° Supercharged" />
+              <TechItem label="Cilindrata" value="1.600 CC" sub="Max 15.000 RPM" />
+              <TechItem label="Iniezione" value="350 BAR" sub="Diretta High-Pressure" />
+              <TechItem label="Turbo" value="Singolo" sub="150.000 RPM Max" />
+              <TechItem label="Energia" value="3.000 MJ/h" sub="Portata energetica benzina" />
+            </ul>
+          </motion.div>
+
+          {/* CATEGORIA: ERS (SISTEMA IBRIDO) */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+            className="bg-zinc-900/40 border border-white/5 p-8 rounded-3xl backdrop-blur-sm"
+          >
+            <div className="flex items-center gap-3 mb-8 border-b border-red-600/30 pb-4">
+              <Zap className="text-yellow-500 w-6 h-6" />
+              <h4 className="text-xl font-black uppercase italic">ERS System</h4>
+            </div>
+            <ul className="space-y-6">
+              <TechItem label="Potenza MGU-K" value="350 KW" sub="Recupero Energia Singolo" />
+              <TechItem label="Tensione Max" value="1.000 V" sub="Elettronica di controllo" />
+              <TechItem label="Batteria" value="4 MJ" sub="Ioni di litio (35kg)" />
+              <TechItem label="MGU-K RPM" value="60.000" sub="Giri minuto massimi" />
+              <TechItem label="Ricarica" value="9 MJ Max" sub="Energia in ricarica" />
+            </ul>
+          </motion.div>
         </div>
 
-        {/* Tabs */}
-        <div className="bg-gray-900/30 backdrop-blur-sm rounded-2xl border border-gray-800 p-6 mb-8">
-          <div className="flex flex-wrap gap-2 border-b border-gray-800 pb-4 mb-6">
-            {[
-              { id: 'live', label: 'Live Data', icon: Activity },
-              { id: 'championship', label: 'Campionato', icon: Trophy },
-              { id: 'historical', label: 'Storici', icon: TrendingUp },
-              { id: 'comparison', label: 'Confronto', icon: GitCompare },
-              { id: 'circuits', label: 'Circuiti', icon: Target },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${
-                  activeTab === tab.id
-                    ? 'bg-gradient-to-r from-red-600 to-red-700 text-white'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                }`}
-              >
-                <tab.icon className="w-4 h-4" />
-                {tab.label}
-              </button>
-            ))}
-          </div>
+        {/* GRAFICI ANALITICI (SOTTO) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
+          
+          {/* Top Vincitori Ferrari */}
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }}
+            className="bg-zinc-900/30 border border-white/5 rounded-3xl p-8 shadow-xl"
+          >
+            <div className="flex items-center justify-between mb-8">
+              <h4 className="text-xl font-black uppercase italic tracking-tighter flex items-center gap-3">
+                <Trophy className="text-yellow-500 w-6 h-6" /> Win contribution
+              </h4>
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">All-Time Database</span>
+            </div>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={pilotWins} layout="vertical" margin={{ left: 20 }}>
+                  <XAxis type="number" hide />
+                  <YAxis dataKey="name" type="category" stroke="#888" fontSize={11} width={90} tick={{fontWeight: '900'}} />
+                  <Tooltip cursor={{ fill: 'rgba(220, 0, 0, 0.05)' }} contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '8px' }} />
+                  <Bar dataKey="wins" fill="#DC0000" radius={[0, 4, 4, 0]} barSize={20} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
 
-          {/* Tab Content */}
-          <div className="min-h-[500px]">
-            {activeTab === 'live' && (
-              <div className="grid md:grid-cols-2 gap-8">
-                <LiveStatsComponent sessionKey={selectedSession} />
-                <ChampionshipStats sessionKey={selectedSession} />
-                
-                {/* Additional Live Data */}
-                <div className="md:col-span-2 bg-gray-900/50 rounded-xl p-6 border border-gray-700">
-                  <h3 className="text-xl font-bold text-white mb-6">Telemetria Dettagliata</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-gray-800/30 p-4 rounded-lg">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Zap className="w-4 h-4 text-yellow-500" />
-                        <span className="font-medium text-gray-300">Performance Engine</span>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Power Unit</span>
-                          <span className="text-white font-medium">066/7</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Stato</span>
-                          <span className="text-green-400 font-medium">Ottimale</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gray-800/30 p-4 rounded-lg">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Heart className="w-4 h-4 text-red-500" />
-                        <span className="font-medium text-gray-300">Affidabilità</span>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Componenti Usati</span>
-                          <span className="text-white font-medium">2/4</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Problemi</span>
-                          <span className="text-green-400 font-medium">Nessuno</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gray-800/30 p-4 rounded-lg">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Star className="w-4 h-4 text-blue-500" />
-                        <span className="font-medium text-gray-300">Sviluppo</span>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Aggiornamenti</span>
-                          <span className="text-white font-medium">+3</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Performance</span>
-                          <span className="text-green-400 font-medium">+0.4s/giro</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+          {/* Performance Punti */}
+          <motion.div 
+            initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }}
+            className="bg-zinc-900/30 border border-white/5 rounded-3xl p-8 shadow-xl"
+          >
+            <div className="flex items-center justify-between mb-8">
+              <h4 className="text-xl font-black uppercase italic tracking-tighter flex items-center gap-3">
+                <Activity className="text-red-600 w-6 h-6" /> Season Points History
+              </h4>
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Last 12 Years</span>
+            </div>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={pointsHistory}>
+                  <defs>
+                    <linearGradient id="colorPts" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#DC0000" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="#DC0000" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
+                  <XAxis dataKey="year" stroke="#444" fontSize={10} tickMargin={10} />
+                  <YAxis stroke="#444" fontSize={10} />
+                  <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '8px' }} />
+                  <Area type="monotone" dataKey="points" stroke="#DC0000" strokeWidth={3} fillOpacity={1} fill="url(#colorPts)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
 
-            {activeTab === 'championship' && (
-              <ChampionshipStats sessionKey={selectedSession} />
-            )}
-
-            {activeTab === 'historical' && (
-              <HistoricalStatsWithRealData sessionKey={selectedSession} />
-            )}
-
-            {activeTab === 'comparison' && (
-              <div className="space-y-8">
-                <div className="bg-gray-900/50 rounded-2xl p-6 border border-gray-800">
-                  <h3 className="text-xl font-bold text-white mb-6">Confronto Piloti 2024</h3>
-                  <div className="grid md:grid-cols-2 gap-8">
-                    <div>
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                        <span className="font-bold text-white">Charles Leclerc</span>
-                      </div>
-                      <div className="space-y-3">
-                        <StatRow label="Vittorie" value="5" color="text-green-400" />
-                        <StatRow label="Pole Position" value="4" color="text-yellow-400" />
-                        <StatRow label="Giri Veloci" value="8" color="text-blue-400" />
-                        <StatRow label="Punti" value="325" color="text-red-400" />
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                        <span className="font-bold text-white">Carlos Sainz</span>
-                      </div>
-                      <div className="space-y-3">
-                        <StatRow label="Vittorie" value="2" color="text-green-400" />
-                        <StatRow label="Pole Position" value="1" color="text-yellow-400" />
-                        <StatRow label="Giri Veloci" value="5" color="text-blue-400" />
-                        <StatRow label="Punti" value="305" color="text-red-400" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'circuits' && circuitStats && (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Object.entries(circuitStats).map(([circuit, stats]) => (
-                  <div key={circuit} className="bg-gray-900/50 rounded-xl p-6 border border-gray-700">
-                    <h4 className="font-bold text-white mb-4 capitalize">{circuit}</h4>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Lunghezza</span>
-                        <span className="text-white">{stats.length} km</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Giri</span>
-                        <span className="text-white">{stats.laps}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Record Giro</span>
-                        <span className="text-yellow-400">{stats.record}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
 
-        {/* Footer Note */}
+        {/* Credit Link */}
         <div className="text-center">
-          <p className="text-sm text-gray-500">
-            📊 Dati aggiornati in tempo reale da 
-            <a href="https://openf1.org" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 ml-1">
-              OpenF1.org
-            </a>
-            . Le statistiche live sono disponibili durante le sessioni F1.
-          </p>
+          <a 
+            href="https://it.motorsport.com/f1/news/f1-ferrari-la-scheda-tecnica-della-sf-26-di-leclerc-e-hamilton/10792203/"
+            target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-zinc-600 hover:text-red-500 font-bold uppercase text-[9px] tracking-[0.4em] transition-colors"
+          >
+            Technical Reference: Motorsport.com <ChevronRight className="w-3 h-3" />
+          </a>
         </div>
       </div>
     </section>
   );
 }
 
-// Componente helper per righe di statistica
-function StatRow({ label, value, color }) {
+// Componente Helper per le righe della scheda tecnica
+function TechItem({ label, value, sub }) {
   return (
-    <div className="flex justify-between items-center p-2 bg-gray-800/30 rounded-lg">
-      <span className="text-gray-400">{label}</span>
-      <span className={`font-bold ${color}`}>{value}</span>
-    </div>
+    <li className="flex flex-col border-l border-white/10 pl-4 group hover:border-red-600 transition-colors">
+      <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest mb-1">{label}</span>
+      <div className="flex items-baseline gap-2">
+        <span className="text-lg font-black text-white tracking-tight">{value}</span>
+        <span className="text-[10px] text-zinc-500 italic font-medium">{sub}</span>
+      </div>
+    </li>
   );
 }
