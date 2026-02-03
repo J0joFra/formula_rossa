@@ -7,7 +7,7 @@ import FanZoneSection from '../components/ferrari/FanZoneSection';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import {   ChevronDown, Trophy, Flag, Star, Timer, Zap, Gauge, Award, Sparkles, ArrowRight, Cpu  } from 'lucide-react';
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState('home');
@@ -96,7 +96,7 @@ export default function Home() {
                   </div>
 
                   <div className="absolute bottom-8 right-10 text-zinc-600 text-xs tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
-                    × ⊙ ∆
+                    X ⊙ ∆
                   </div>
 
                   {/* Scan line */}
