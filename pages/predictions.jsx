@@ -22,7 +22,7 @@ export default function PredictionsPage() {
             </h2>
           </motion.div>
 
-          {/* Qui inserisci il tuo componente PredictorSection completo */}
+          {/* componente PredictorSection*/}
           <div className="bg-zinc-900/50 rounded-3xl border border-white/5 overflow-hidden">
             <PredictorSection />
           </div>
