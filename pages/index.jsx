@@ -68,7 +68,7 @@ export default function Home() {
           <div ref={statsRef}><StatsSection /></div>
           
           {/* CTA PREDITTORE */}
-          <div ref={predictorRef} className="py-24 px-4">
+          <div ref={predictorRef} className="py-28 px-4">
             <div className="max-w-6xl mx-auto">
               <Link href="/predictions">
                 <motion.div
@@ -79,51 +79,92 @@ export default function Home() {
                             border border-white/10 p-10 md:p-16 cursor-pointer"
                 >
 
-                  {/* subtle AI glow */}
+                  {/* AI glow */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(239,68,68,0.15),transparent_60%)]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,rgba(255,255,255,0.06),transparent_60%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(239,68,68,0.18),transparent_60%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_75%,rgba(255,255,255,0.06),transparent_55%)]" />
                   </div>
 
-                  {/* grid hint */}
+                  {/* Neural grid */}
                   <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),
                                                 linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)]
-                                  bg-[size:40px_40px] opacity-20" />
+                                  bg-[size:48px_48px] opacity-20" />
 
-                  <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+                  {/* Floating AI symbols */}
+                  <div className="absolute top-8 left-8 text-zinc-600 text-xs tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                    ⊙ ∆ ⊡
+                  </div>
+
+                  <div className="absolute bottom-8 right-10 text-zinc-600 text-xs tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                    × ⊙ ∆
+                  </div>
+
+                  {/* Scan line */}
+                  <motion.div
+                    initial={{ x: "-100%" }}
+                    animate={{ x: "200%" }}
+                    transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+                    className="absolute top-0 left-0 w-1/3 h-px bg-gradient-to-r from-transparent via-red-600/60 to-transparent opacity-40"
+                  />
+
+                  <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-14">
 
                     {/* TEXT */}
                     <div className="flex-1 text-center md:text-left">
-                      <span className="inline-block mb-6 text-[11px] tracking-[0.35em] uppercase text-zinc-400">
-                        AI Oracle
+                      <span className="inline-flex items-center gap-2 mb-6 text-[11px] tracking-[0.35em] uppercase text-zinc-400">
+                        <Cpu className="w-4 h-4 text-red-600" />
+                        AI Oracle System
                       </span>
 
                       <h2 className="text-4xl md:text-6xl font-black leading-tight tracking-tight text-white">
-                        Prevedi <br />
+                        Anticipa <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-700">
                           il prossimo GP
                         </span>
                       </h2>
 
                       <p className="mt-6 text-zinc-400 max-w-md text-lg">
-                        Usa intuito e strategia. L’AI osserva, tu decidi.
+                        L’algoritmo analizza. Tu fai la chiamata.
                       </p>
+
+                      {/* Fake AI confidence */}
+                      <div className="mt-8 max-w-xs">
+                        <div className="flex justify-between text-[10px] tracking-widest uppercase text-zinc-500 mb-2">
+                          <span>Prediction Confidence</span>
+                          <span className="text-red-500">82%</span>
+                        </div>
+                        <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: "82%" }}
+                            transition={{ duration: 1.2 }}
+                            className="h-full bg-gradient-to-r from-red-600 to-red-500"
+                          />
+                        </div>
+                      </div>
                     </div>
 
                     {/* CTA */}
                     <div className="flex flex-col items-center gap-5">
                       <motion.div
-                        animate={{ boxShadow: ["0 0 0 rgba(239,68,68,0)", "0 0 40px rgba(239,68,68,0.35)", "0 0 0 rgba(239,68,68,0)"] }}
-                        transition={{ duration: 3, repeat: Infinity }}
-                        className="w-20 h-20 rounded-full 
+                        animate={{
+                          boxShadow: [
+                            "0 0 0 rgba(239,68,68,0)",
+                            "0 0 45px rgba(239,68,68,0.4)",
+                            "0 0 0 rgba(239,68,68,0)"
+                          ]
+                        }}
+                        transition={{ duration: 3.2, repeat: Infinity }}
+                        className="relative w-20 h-20 rounded-full 
                                   bg-gradient-to-br from-red-600 to-red-700 
                                   flex items-center justify-center"
                       >
                         <ArrowRight className="w-9 h-9 text-white" />
+                        <span className="absolute -top-2 -right-2 w-2 h-2 rounded-full bg-red-500 animate-ping" />
                       </motion.div>
 
-                      <span className="text-[10px] tracking-[0.4em] uppercase text-zinc-400 group-hover:text-white transition-colors">
-                        Start Prediction
+                      <span className="text-[10px] tracking-[0.45em] uppercase text-zinc-400 group-hover:text-white transition-colors">
+                        Enter Oracle
                       </span>
                     </div>
 
