@@ -56,7 +56,7 @@ export default function NewsSection() {
   }, []);
 
   return (
-    <section className="py-24 px-4 bg-gradient-to-b from-black via-zinc-900 to-black">
+      <section className="py-24 px-4 bg-gradient-to-b from-[#1a1a1a] via-[#333333] to-[#1a1a1a] border-y border-white/5">
       <div className="max-w-6xl mx-auto">
         
         <motion.div
@@ -92,7 +92,7 @@ export default function NewsSection() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.1 }}
-                className="group bg-zinc-900/30 rounded-2xl p-6 border border-white/5 hover:border-red-600/40 transition-all flex flex-col justify-between h-full shadow-xl"
+                className="group bg-black/40 backdrop-blur-md rounded-2xl p-6 border border-white/10 hover:border-red-600/50 transition-all flex flex-col justify-between h-full shadow-2xl"
               >
                 <div>
                   <span className="text-red-600 text-[9px] font-black uppercase tracking-[0.2em] mb-3 block">
