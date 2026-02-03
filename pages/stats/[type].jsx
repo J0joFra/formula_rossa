@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Navigation from '../../components/ferrari/Navigation';
 import Footer from '../../components/ferrari/Footer';
 import { motion } from 'framer-motion';
-import { User } from 'lucide-react'; 
+import { User } from 'lucide-react';
 
 export default function StatDetail() {
   const router = useRouter();
@@ -113,7 +113,7 @@ export default function StatDetail() {
     processStats();
   }, [type]);
 
-  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-red-600 font-black tracking-widest uppercase">Analisi Dati Maranello...</div>;
+  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-red-600 font-black tracking-widest uppercase italic">Loading Ferrari History...</div>;
 
   return (
     <div className="min-h-screen bg-black text-white font-sans">
@@ -122,21 +122,23 @@ export default function StatDetail() {
         
         <header className="mb-12">
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                <h1 className="text-red-600 font-black text-xs uppercase tracking-[0.3em] mb-2">Scuderia Ferrari Hall of Fame</h1>
-                <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter mb-4">
+                <h1 className="text-red-600 font-black text-xs uppercase tracking-[0.3em] mb-2 font-mono italic">Scuderia Ferrari Hall of Fame</h1>
+                <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter mb-6">
                     {config[type]?.title}
                 </h2>
-                {/* BREVE DESCRIZIONE AGGIUNTA */}
-                <p className="text-zinc-400 text-lg max-w-2xl border-l-2 border-red-600 pl-4 italic">
-                  {config[type]?.description}
-                </p>
+                <div className="max-w-3xl border-l-4 border-red-600 pl-6 py-2 bg-zinc-900/30 rounded-r-xl">
+                  <p className="text-zinc-300 text-lg leading-relaxed font-medium italic">
+                    {config[type]?.description}
+                  </p>
+                </div>
             </motion.div>
         </header>
 
-        <div className="bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
+        <div className="bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-sm">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-white/10 bg-white/5 text-[10px] uppercase font-black tracking-widest text-zinc-500">
+                <th className="p-8 w-24">Rank</th>
                 <th className="p-8">Pilota</th>
                 <th className="p-8">Cronologia Anni</th>
                 <th className="p-8 text-right">Totale</th>
@@ -146,27 +148,28 @@ export default function StatDetail() {
               {data.map((driver, index) => (
                 <tr key={index} className="border-b border-white/5 hover:bg-white/5 transition-all group">
                   <td className="p-8">
+                    <span className="text-zinc-700 font-mono text-2xl font-black italic">{index + 1}</span>
+                  </td>
+                  <td className="p-8">
                     <div className="flex items-center">
-                        <span className="text-zinc-700 font-mono text-lg mr-6 w-6">{index + 1}</span>
-                        
-                        {/* IMMAGINE PILOTA */}
-                        <div className="relative w-14 h-14 mr-6 rounded-full overflow-hidden bg-zinc-800 border-2 border-zinc-700 group-hover:border-red-600 transition-colors">
+                        {/* IMMAGINE PILOTA CARICATA DAL TUO PERCORSO */}
+                        <div className="relative w-16 h-16 mr-6 rounded-2xl overflow-hidden bg-zinc-800 border-2 border-zinc-700 group-hover:border-red-600 group-hover:scale-105 transition-all duration-300 shadow-lg">
                           <img 
-                            src={`/images/drivers/${driver.id}.jpg`} 
+                            src={`/data/ferrari-drivers/${driver.id}.jpg`} 
                             alt={driver.name}
                             className="w-full h-full object-cover"
                             onError={(e) => {
-                              // Se l'immagine non esiste, nascondi l'immagine e mostra il fallback
+                              // Nasconde l'immagine rotta e mostra il div con l'icona
                               e.target.style.display = 'none';
                               e.target.nextSibling.style.display = 'flex';
                             }}
                           />
                           <div className="hidden absolute inset-0 items-center justify-center bg-zinc-800" style={{display: 'none'}}>
-                            <User className="text-zinc-600 w-6 h-6" />
+                            <User className="text-zinc-600 w-8 h-8" />
                           </div>
                         </div>
 
-                        <div className="font-black uppercase text-xl tracking-tight group-hover:text-red-600 transition-colors">
+                        <div className="font-black uppercase text-2xl tracking-tighter group-hover:text-red-500 transition-colors">
                             {driver.name}
                         </div>
                     </div>
@@ -176,7 +179,7 @@ export default function StatDetail() {
                       {driver.years.sort((a,b) => b-a).map((year, yi) => (
                         <span 
                           key={yi} 
-                          className={`px-3 py-1 rounded-md text-[10px] font-black text-black shadow-sm ${config[type].color}`}
+                          className={`px-3 py-1 rounded-md text-[10px] font-black text-black shadow-md transform group-hover:scale-110 transition-transform ${config[type].color}`}
                         >
                           {year}
                         </span>
@@ -184,7 +187,7 @@ export default function StatDetail() {
                     </div>
                   </td>
                   <td className="p-8 text-right">
-                    <div className="text-3xl font-black text-white group-hover:scale-110 transition-transform origin-right">
+                    <div className="text-4xl font-black text-white group-hover:text-red-600 transition-colors tabular-nums">
                         {config[type].isSum ? Math.floor(driver.count).toLocaleString() : driver.count}
                     </div>
                   </td>
