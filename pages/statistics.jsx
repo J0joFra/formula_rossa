@@ -116,61 +116,19 @@ export default function StatisticsPage() {
         );
 
         // 3. Process Circuits
-        const circuitDetailsMap = {};
-        circuitsData.forEach(c => {
-        circuitDetailsMap[c.id] = c;
-        });
-
-        const raceToCircuitMap = {};
-        racesData.forEach(r => {
-        raceToCircuitMap[r.id] = r.circuitId;
-        });
-
+        const raceMap = {}; racesData.forEach(r => raceMap[r.id] = r.grandPrixId);
         const circAgg = ferrariWins.reduce((acc, curr) => {
-        const circuitId = raceToCircuitMap[curr.raceId];
-        if (circuitId) {
-            acc[circuitId] = (acc[circuitId] || 0) + 1;
-        }
-        return acc;
+          const cId = raceMap[curr.raceId] || "Unknown";
+          acc[cId] = (acc[cId] || 0) + 1;
+          return acc;
         }, {});
-
-        const getFlagByCountryId = (countryId) => {
-            const mapping = {
-                'united-kingdom': 'gb', 'italy': 'it',
-                'germany': 'de', 'belgium': 'be',
-                'france': 'fr', 'netherlands': 'nl',
-                'austria': 'at', 'hungary': 'hu',
-                'finland': 'fi', 'argentina': 'ar',
-                'brazil': 'br', 'chile': 'cl', 'china': 'cn',
-                'japan': 'jp', 'russia': 'ru', 'australia': 'au',
-                'mexico': 'mx',
-                'spain': 'es',
-                'united-states-of-america': 'us',
-                'united-arab-emirates': 'ae',
-                'south-africa': 'za',
-                'south-korea': 'kr',
-                'new-zealand': 'nz',
-                'czech-republic': 'cz',
-                'saudi-arabia': 'sa',
-                'hong-kong': 'hk'
-            };
-            return mapping[countryId] || countryId.slice(0, 2).toLowerCase();
-        };
-
         setCircuits(Object.entries(circAgg)
-        .map(([id, wins]) => {
-            const details = circuitDetailsMap[id];
-            return {
-            id,
-            wins,
-            fullName: details?.fullName || id,
-            shortName: details?.name || id,
-            country: details?.countryId || 'un',
-            flag: getFlagByCountryId(details?.countryId || '')
-            };
-        })
-        .sort((a, b) => b.wins - a.wins)
-        .slice(0, 8)
+            .map(([name, wins]) => ({ 
+                name: name.replace(/-/g, ' ').toUpperCase(), 
+                wins 
+            }))
+            .sort((a,b) => b.wins - a.wins)
+            .slice(0, 8)
         );
 
         setHistory(historical.filter(h => h.points !== null));
@@ -376,83 +334,34 @@ export default function StatisticsPage() {
             </AccordionSection>
 
           {/* --- SEZIONE 4: FORTRESS MARANELLO (CIRCUITI) --- */}
-            <AccordionSection 
+          <AccordionSection 
             id="circuits" 
             title="Fortress Maranello" 
-            subtitle="I circuiti dove la leggenda è diventata realtà"
+            subtitle="I circuiti con il maggior numero di vittorie"
             icon={Landmark}
             isOpen={openSection === 'circuits'}
             onToggle={() => toggleSection('circuits')}
             color="yellow"
-            >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 p-4">
-                {circuits.map((c, index) => (
-                <motion.div 
-                    key={c.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="relative group bg-white/5 border border-white/5 rounded-2xl p-5 hover:bg-zinc-800/50 hover:border-red-600/30 transition-all flex items-center gap-6 overflow-hidden"
-                >
-                    {/* Posizione in Background */}
-                    <div className="absolute right-4 -bottom-4 text-7xl font-black italic text-white/5 pointer-events-none group-hover:text-red-600/10 transition-colors">
-                        {index + 1}
-                    </div>
-
-                    {/* Bandiera e Rank */}
-                    <div className="relative flex flex-col items-center gap-2">
-                        <div className="w-12 h-8 overflow-hidden rounded shadow-lg border border-white/10">
-                            <img 
-                            src={`https://flagcdn.com/w80/${c.flag}.png`} 
-                            className="w-full h-full object-cover" 
-                            alt={c.country}
-                            />
-                        </div>
-                        <span className="font-mono text-[10px] font-black text-zinc-500 uppercase">P{index + 1}</span>
-                    </div>
-
-                    {/* Dettagli Circuito */}
-                    <div className="flex-1 min-w-0">
-                    <h4 className="text-[10px] font-black text-red-500 uppercase tracking-[0.2em] mb-1">
-                        {c.country.replace(/-/g, ' ')}
-                    </h4>
-                    <p className="text-lg font-black text-white uppercase italic truncate tracking-tighter leading-none mb-2">
-                        {c.shortName}
-                    </p>
-                    <p className="text-[10px] text-zinc-500 font-bold truncate uppercase opacity-60 group-hover:opacity-100 transition-opacity">
-                        {c.fullName}
-                    </p>
-                    </div>
-
-                    {/* Numero Vittorie con Effetto Glow */}
-                    <div className="text-right z-10">
-                    <div className="flex items-baseline justify-end gap-1">
-                            <span className="text-3xl font-black text-white italic group-hover:text-yellow-500 transition-colors">
-                                {c.wins}
-                            </span>
-                            <Trophy className="w-3 h-3 text-yellow-500" />
-                    </div>
-                    <p className="text-[8px] font-black uppercase text-zinc-600 tracking-widest">Wins</p>
-                    </div>
-
-                    {/* Barra di potenza inferiore (stile telemetria) */}
-                    <div className="absolute bottom-0 left-0 h-1 bg-zinc-800 w-full">
-                        <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${(c.wins / circuits[0].wins) * 100}%` }}
-                            className="h-full bg-red-600 shadow-[0_0_10px_#ff0000]"
-                        />
-                    </div>
-                </motion.div>
-                ))}
-            </div>
-            
-            <div className="mt-12 p-6 bg-zinc-900/50 rounded-2xl border border-white/5 text-center">
-                <p className="text-zinc-500 text-xs font-medium italic">
-                "Non c'è tracciato al mondo dove un motore Ferrari non abbia fatto tremare l'asfalto."
-                </p>
-            </div>
-            </AccordionSection>
+          >
+             <div className="h-[450px] w-full p-8">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={circuits} layout="vertical" margin={{ left: 100 }}>
+                    <XAxis type="number" hide />
+                    <YAxis 
+                        dataKey="name" 
+                        type="category" 
+                        stroke="#666" 
+                        fontSize={10} 
+                        width={120} 
+                        tick={{fontWeight: '900', fill: '#ccc'}} 
+                        axisLine={false} 
+                    />
+                    <Tooltip cursor={{ fill: 'rgba(255, 215, 0, 0.05)' }} contentStyle={{ backgroundColor: '#000', border: '1px solid #333' }} />
+                    <Bar dataKey="wins" fill={GOLD} radius={[0, 10, 10, 0]} barSize={25} />
+                  </BarChart>
+                </ResponsiveContainer>
+             </div>
+          </AccordionSection>
 
         </div>
       </main>
