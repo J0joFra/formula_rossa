@@ -331,8 +331,7 @@ const getFlagCodeFromCircuit = (circuitName) => {
         lowerName.includes('aintree') || lowerName.includes('british') || lowerName.includes('england') || 
         lowerName.includes('great britain') || lowerName.includes('uk')) return 'gb';
     if (lowerName.includes('monza') || lowerName.includes('imola') || lowerName.includes('mugello') || 
-        lowerName.includes('pescara') || lowerName.includes('italian') || lowerName.includes('autodromo-nazionale-di-monza') ||
-        lowerName.includes('milan') || lowerName.includes('enzo-e-dino-ferrari') || lowerName.includes('bologna')) return 'it';
+        lowerName.includes('pescara') || lowerName.includes('italian') || lowerName.includes('italy')) return 'it';
     if (lowerName.includes('monaco') || lowerName.includes('monte carlo')) return 'mc';
     if (lowerName.includes('spa') || lowerName.includes('francorchamps') || lowerName.includes('zolder') || lowerName.includes('nivelles') ||
         lowerName.includes('belgian') || lowerName.includes('belgium')) return 'be';
