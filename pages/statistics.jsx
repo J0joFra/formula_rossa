@@ -24,6 +24,14 @@ const normalizeDriverName = (name) => {
 const FERRARI_COLORS = ['#DC0000', '#FF2800', '#8a0000', '#4a0000', '#333333'];
 const GOLD = "#FFD700";
 
+function TrophySVG({ size, color }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill={color}>
+      <path d="M3 2h10v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V2zm3 10h4v1H6v-1zm1-4v4m2-4v4M2 3h1v2H2V3zm12 0h-1v2h1V3z" />
+    </svg>
+  );
+}
+
 // Mappa dei colori per le bandiere
 const countryConfig = {
   'germany': { code: 'de', color: '#FFCE00' },
@@ -462,26 +470,6 @@ export default function StatisticsPage() {
         return acc;
         }, {});
 
-        // Mappa dei codici ISO per flagcdn
-        const countryConfig = {
-        'germany': { code: 'de', color: '#FFCE00' }, // Giallo bandiera
-        'italy': { code: 'it', color: '#008C45' },   // Verde bandiera
-        'united-kingdom': { code: 'gb', color: '#00247D' }, // Blu Union Jack
-        'france': { code: 'fr', color: '#0055A4' },  // Blu Francia
-        'brazil': { code: 'br', color: '#26D701' },  // Verde Brasile
-        'spain': { code: 'es', color: '#AA151B' },   // Rosso Spagna
-        'united-states-of-america': { code: 'us', color: '#B22234' },
-        'finland': { code: 'fi', color: '#003580' },
-        'austria': { code: 'at', color: '#ED2939' },
-        'monaco': { code: 'mc', color: '#E20919' },
-        'argentina': { code: 'ar', color: '#75AADB' },
-        'switzerland': { code: 'ch', color: '#D52B1E' },
-        'belgium': { code: 'be', color: '#000014' },
-        'south-africa': { code: 'za', color: '#007A4D' },
-        'mexico': {code:'mx', color: '#006847'},
-        'unknown': { code: 'un', color: '#333' }
-        };
-
         setNationalities(Object.entries(natAgg)
         .map(([id, value]) => ({ 
             id,
@@ -891,12 +879,4 @@ function AccordionSection({ id, title, subtitle, icon: Icon, children, isOpen, o
       </AnimatePresence>
     </div>
   );
-}
-
-function TrophySVG({ size, color }) {
-    return (
-      <svg width={size} height={size} viewBox="0 0 16 16" fill={color}>
-        <path d="M3 2h10v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V2zm3 10h4v1H6v-1zm1-4v4m2-4v4M2 3h1v2H2V3zm12 0h-1v2h1V3z" />
-      </svg>
-    );
 }
