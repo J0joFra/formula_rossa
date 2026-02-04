@@ -724,7 +724,7 @@ export default function StatisticsPage() {
                 </div>
             </div>
             </AccordionSection>
-            
+
             {/* --- SEZIONE 4: Fortress Maranello --- */}
             <AccordionSection 
             id="circuits" 
@@ -757,6 +757,7 @@ export default function StatisticsPage() {
                         const { x, y, payload } = props;
                         const circuit = circuits.find(c => c.name === payload.value);
                         const flagCode = getFlagCodeFromCircuit(circuit?.originalName || payload.value);
+                        const countryColor = getCountryColor(circuit?.originalName || payload.value);
                         
                         return (
                         <g>
@@ -825,14 +826,18 @@ export default function StatisticsPage() {
                                     </div>
                                 </div>
                                 
-                                {/* BARRA COLORATA */}
-                                <div className="w-full h-3 bg-zinc-800 rounded-full overflow-hidden">
+                                {/* BARRA COLORATA CON SFONDO GRIGIO VISIBILE */}
+                                <div className="w-full h-3 bg-zinc-800 rounded-full overflow-hidden relative">
+                                    {/* SFONDO GRIGIO */}
+                                    <div className="absolute inset-0 bg-zinc-800 rounded-full" />
+                                    
+                                    {/* BARRA COLORATA */}
                                     <div 
-                                    className="h-full rounded-full transition-all duration-700"
+                                    className="h-full rounded-full relative z-10 transition-all duration-700"
                                     style={{ 
                                         width: `${percentage}%`,
-                                        background: `linear-gradient(90deg, ${countryColor} 0%, ${countryColor}80 100%)`,
-                                        boxShadow: `0 0 10px ${countryColor}80`
+                                        backgroundColor: countryColor,
+                                        boxShadow: `0 0 12px ${countryColor}80`
                                     }}
                                     />
                                 </div>
@@ -851,10 +856,13 @@ export default function StatisticsPage() {
                                 <div className="pt-3 border-t border-white/10">
                                 <div className="flex items-center justify-between">
                                     <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">PERCENTUALE</span>
-                                    <div className="flex items-center gap-1">
+                                    <div className="flex items-center gap-2">
                                     <div 
-                                        className="w-3 h-3 rounded-full"
-                                        style={{ backgroundColor: countryColor }}
+                                        className="w-4 h-4 rounded-full shadow-lg"
+                                        style={{ 
+                                        backgroundColor: countryColor,
+                                        boxShadow: `0 0 8px ${countryColor}`
+                                        }}
                                     />
                                     <span className="text-xl font-black text-white">{percentage.toFixed(1)}%</span>
                                     </div>
