@@ -757,7 +757,6 @@ export default function StatisticsPage() {
                         const { x, y, payload } = props;
                         const circuit = circuits.find(c => c.name === payload.value);
                         const flagCode = getFlagCodeFromCircuit(circuit?.originalName || payload.value);
-                        const countryColor = getCountryColor(circuit?.originalName || payload.value);
                         
                         return (
                         <g>
@@ -786,12 +785,26 @@ export default function StatisticsPage() {
                     content={({ active, payload }) => {
                         if (active && payload && payload.length) {
                         const circuit = payload[0].payload;
-                        const flagCode = getFlagCodeFromCircuit(circuit.originalName || circuit.name);
-                        const countryColor = getCountryColor(circuit.originalName || circuit.name);
+                        const circuitName = circuit.originalName || circuit.name;
+                        const flagCode = getFlagCodeFromCircuit(circuitName);
+                        const countryColor = getCountryColor(circuitName);
+                        
+                        // DEBUG: Controlla i valori
+                        console.log('DEBUG Tooltip:', {
+                            circuitName,
+                            flagCode,
+                            countryColor,
+                            wins: circuit.wins
+                        });
                         
                         // Calcola la percentuale massima per la barra
                         const maxWins = Math.max(...circuits.map(c => c.wins));
                         const percentage = (circuit.wins / maxWins) * 100;
+                        
+                        // Fallback color se countryColor non è valido
+                        const barColor = countryColor && countryColor !== '#FFD700' 
+                            ? countryColor 
+                            : '#FFCE00'; // Colore della Germania di default
                         
                         return (
                             <div className="bg-black/95 border border-yellow-500/30 p-4 rounded-lg shadow-2xl backdrop-blur-sm min-w-[250px]">
@@ -799,7 +812,7 @@ export default function StatisticsPage() {
                                 {flagCode && (
                                 <div 
                                     className="w-10 h-7 overflow-hidden rounded-sm flex-shrink-0 border-2"
-                                    style={{ borderColor: countryColor }}
+                                    style={{ borderColor: barColor }}
                                 >
                                     <img 
                                     src={`https://flagcdn.com/w80/${flagCode}.png`}
@@ -810,7 +823,7 @@ export default function StatisticsPage() {
                                 )}
                                 <div>
                                 <p className="text-[9px] font-black uppercase text-zinc-400 tracking-widest mb-1">CIRCUITO</p>
-                                <p className="text-lg font-black text-white leading-tight">{circuit.originalName || circuit.name}</p>
+                                <p className="text-lg font-black text-white leading-tight">{circuitName}</p>
                                 </div>
                             </div>
                             
@@ -820,55 +833,88 @@ export default function StatisticsPage() {
                                     <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">VITTORIE</span>
                                     <div className="flex items-center gap-2">
                                     <TrophySVG size={16} color={GOLD} />
-                                    <span className="text-2xl font-black italic" style={{ color: countryColor }}>
+                                    <span className="text-2xl font-black italic" style={{ color: barColor }}>
                                         {circuit.wins}
                                     </span>
                                     </div>
                                 </div>
                                 
-                                {/* BARRA COLORATA CON SFONDO GRIGIO VISIBILE */}
-                                <div className="w-full h-3 bg-zinc-800 rounded-full overflow-hidden relative">
-                                    {/* SFONDO GRIGIO */}
-                                    <div className="absolute inset-0 bg-zinc-800 rounded-full" />
-                                    
-                                    {/* BARRA COLORATA */}
+                                {/* BARRA COLORATA - VERSIONE SEMPLIFICATA PER DEBUG */}
+                                <div className="relative">
+                                    {/* SFONDO DELLA BARRA (grigio) */}
+                                    <div className="w-full h-3 bg-zinc-800 rounded-full overflow-hidden">
+                                    {/* BARRA COLORATA - USIAMO UN COLORE FISSO PER TEST */}
                                     <div 
-                                    className="h-full rounded-full relative z-10 transition-all duration-700"
-                                    style={{ 
-                                        width: `${percentage}%`,
-                                        backgroundColor: countryColor,
-                                        boxShadow: `0 0 12px ${countryColor}80`
-                                    }}
-                                    />
-                                </div>
-                                
-                                {/* INDICATORI NUMERICI SOTTO LA BARRA */}
-                                <div className="flex justify-between mt-1">
-                                    <span className="text-[8px] text-zinc-500 font-bold">0</span>
-                                    <div className="flex items-center gap-1">
-                                    <span className="text-[8px] text-zinc-400 font-bold">Max:</span>
-                                    <span className="text-[9px] text-white font-black">{maxWins}</span>
-                                    </div>
-                                </div>
-                                </div>
-                                
-                                {/* INDICATORE DI PROGRESSO NUMERICO */}
-                                <div className="pt-3 border-t border-white/10">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">PERCENTUALE</span>
-                                    <div className="flex items-center gap-2">
-                                    <div 
-                                        className="w-4 h-4 rounded-full shadow-lg"
+                                        className="h-full rounded-full transition-all duration-700"
                                         style={{ 
-                                        backgroundColor: countryColor,
-                                        boxShadow: `0 0 8px ${countryColor}`
+                                        width: `${percentage}%`,
+                                        backgroundColor: barColor,
+                                        boxShadow: `0 0 15px ${barColor}`
                                         }}
                                     />
-                                    <span className="text-xl font-black text-white">{percentage.toFixed(1)}%</span>
+                                    </div>
+                                    
+                                    {/* SCALA VISIVA SOTTO LA BARRA */}
+                                    <div className="flex justify-between mt-1 px-1">
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-[1px] h-2 bg-zinc-600" />
+                                        <span className="text-[8px] text-zinc-500 font-bold mt-1">0</span>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-[1px] h-2 bg-zinc-600" />
+                                        <span className="text-[8px] text-zinc-500 font-bold mt-1">{Math.round(maxWins * 0.25)}</span>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-[1px] h-2 bg-zinc-600" />
+                                        <span className="text-[8px] text-zinc-500 font-bold mt-1">{Math.round(maxWins * 0.5)}</span>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-[1px] h-2 bg-zinc-600" />
+                                        <span className="text-[8px] text-zinc-500 font-bold mt-1">{Math.round(maxWins * 0.75)}</span>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-[1px] h-2 bg-zinc-600" />
+                                        <span className="text-[8px] text-zinc-500 font-bold mt-1">{maxWins}</span>
+                                    </div>
                                     </div>
                                 </div>
-                                <div className="mt-2 text-[9px] text-zinc-500">
-                                    {circuit.wins} vittorie su {maxWins} possibili
+                                </div>
+                                
+                                {/* SEZIONE INFERIORE CON INDICATORI */}
+                                <div className="pt-3 border-t border-white/10">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="flex flex-col">
+                                    <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1">STATUS</span>
+                                    <div className="flex items-center gap-2">
+                                        <div 
+                                        className="w-3 h-3 rounded-full animate-pulse"
+                                        style={{ backgroundColor: barColor }}
+                                        />
+                                        <span className="text-sm font-black text-white">
+                                        {percentage === 100 ? 'DOMINANTE' : percentage > 70 ? 'ECCELLENTE' : percentage > 40 ? 'BUONO' : 'MEDIO'}
+                                        </span>
+                                    </div>
+                                    </div>
+                                    
+                                    <div className="flex flex-col items-end">
+                                    <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-1">PERCENTUALE</span>
+                                    <div className="flex items-center gap-2">
+                                        <div 
+                                        className="w-4 h-4 rounded-full shadow-lg"
+                                        style={{ 
+                                            backgroundColor: barColor,
+                                            boxShadow: `0 0 12px ${barColor}`
+                                        }}
+                                        />
+                                        <span className="text-2xl font-black text-white">{percentage.toFixed(1)}%</span>
+                                    </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-4 p-3 bg-zinc-900/50 rounded-lg">
+                                    <div className="text-center text-[10px] font-bold text-zinc-400">
+                                    <span style={{ color: barColor }} className="font-black">{circuit.wins}</span> vittorie su un massimo di <span className="text-white font-black">{maxWins}</span>
+                                    </div>
                                 </div>
                                 </div>
                             </div>
@@ -888,6 +934,7 @@ export default function StatisticsPage() {
                         const circuit = circuits.find(c => c.name === entry.name);
                         const circuitName = circuit?.originalName || entry.name;
                         const color = getCountryColor(circuitName);
+                        console.log('Bar Chart - Circuit:', circuitName, 'Color:', color); // Debug
                         return color;
                     }}
                     />
