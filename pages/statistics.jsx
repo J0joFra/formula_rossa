@@ -416,20 +416,37 @@ export default function StatisticsPage() {
     return '#DC0000'; 
   };
 
-  const CircuitTick = ({ x, y, payload }) => {
-    const circuit = circuits.find(c => c.name === payload.value);
+    const CircuitTick = ({ x, y, payload }) => {
+    const circuit = circuits[payload.index];
     if (!circuit) return null;
-    return (
-      <g transform={`translate(${x},${y})`}>
-        <image x="-165" y="-12" width="24" height="16" href={`https://flagcdn.com/w40/${circuit.flag}.png`} />
-        <text x="-135" y="4" fill="#eee" fontSize={10} fontWeight="900" textAnchor="start" className="uppercase italic">
-          {payload.value}
-        </text>
-      </g>
-    );
-  };
 
-  useEffect(() => {
+    return (
+        <g transform={`translate(${x},${y})`}>
+        {/* BANDIERA */}
+        <image
+            x="-175" 
+            y="-10" 
+            width="26" 
+            height="18"
+            href={`https://flagcdn.com/w80/${circuit.flag}.png`}
+        />
+        {/* NOME STATO*/}
+        <text 
+            x="-140" 
+            y="4" 
+            fill="#ffffff" 
+            fontSize={11} 
+            fontWeight="900" 
+            textAnchor="start" 
+            className="uppercase italic tracking-tight"
+        >
+            {circuit.name}
+        </text>
+        </g>
+    );
+};
+
+useEffect(() => {
     async function loadData() {
       try {
         const [resultsRes, driversRes, historicalRes, racesRes] = await Promise.all([
@@ -733,7 +750,11 @@ export default function StatisticsPage() {
             >
             <div className="h-[880px] w-full p-8">
                 <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={circuits} layout="vertical" margin={{ left: 200, right: 40 }}>
+                <BarChart 
+                data={circuits} 
+                layout="vertical" 
+                margin={{ left: 180, right: 60, top: 20, bottom: 20 }} // Aumentato left a 180
+                >
                     <XAxis 
                         type="number" 
                         stroke="#666" 
@@ -770,24 +791,18 @@ export default function StatisticsPage() {
                         interval={0}
                     />
                     <Tooltip 
-                    cursor={{ fill: 'rgba(255, 255, 255, 0.12)' }} 
-                    content={({ active, payload }) => {
+                        cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} 
+                        content={({ active, payload }) => {
                         if (active && payload && payload.length) {
-                            const circuit = payload[0].payload;
-                            const circuitName = circuit.originalName || circuit.name;
-                            const flagCode = getFlagCodeFromCircuit(circuitName);
-                            const barColor = getCountryColor(circuitName);
-                            
+                            const data = payload[0].payload;
                             return (
-                            <div className="bg-zinc-800 border border-white/10 p-4  rounded-lg shadow-2xl backdrop-blur-sm min-w-[220px]">
-                                <div className="flex items-center gap-3 mb-3">
-                                <img src={`https://flagcdn.com/w80/${flagCode}.png`} className="w-8 h-5 object-cover rounded-sm" />
-                                <p className="text-lg font-black text-white italic">{circuitName}</p>
+                            // SFONDO GRIGIO SCURO (zinc-800)
+                            <div className="bg-zinc-800 border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-md">
+                                <div className="flex items-center gap-3 mb-2">
+                                <img src={`https://flagcdn.com/w80/${data.flag}.png`} className="w-6 h-4 object-cover" />
+                                <p className="text-sm font-black text-white uppercase italic">{data.name}</p>
                                 </div>
-                                <div className="flex justify-between items-end border-t border-white/10 pt-3">
-                                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Vittorie</span>
-                                <span className="text-2xl font-black italic" style={{ color: barColor }}>{circuit.wins}</span>
-                                </div>
+                                <p className="text-2xl font-black text-red-500">{data.wins} <span className="text-xs text-zinc-400 uppercase">Wins</span></p>
                             </div>
                             );
                         }
