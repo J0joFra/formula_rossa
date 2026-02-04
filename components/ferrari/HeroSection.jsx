@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, Trophy, Flag, Star, Timer, Zap, Gauge, Award } from 'lucide-react';
+import { ChevronDown, Trophy, Flag, Star, Timer, Zap, Gauge, Award, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function HeroSection() {
