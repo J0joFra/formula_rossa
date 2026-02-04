@@ -487,6 +487,7 @@ export default function StatisticsPage() {
             flag: countryConfig[id]?.code || 'un'
         }))
         .sort((a, b) => b.value - a.value)
+        .slice(0, 10)
         );
 
         // 3. Process Circuits
@@ -514,7 +515,7 @@ export default function StatisticsPage() {
         return acc;
         }, {});
 
-        setCircuits(Object.values(circAgg).sort((a, b) => b.wins - a.wins));
+        setCircuits(Object.values(circAgg).sort((a, b) => b.wins - a.wins).slice(0, 10));
 
         setHistory(historical.filter(h => h.points !== null));
 
