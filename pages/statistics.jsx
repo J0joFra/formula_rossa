@@ -730,7 +730,7 @@ export default function StatisticsPage() {
             onToggle={() => toggleSection('circuits')}
             color="yellow"
             >
-            <div className="h-[450px] w-full p-8">
+            <div className="h-auto w-full p-8">
                 <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={circuits} layout="vertical" margin={{ left: 200, right: 40 }}>
                     <XAxis 
