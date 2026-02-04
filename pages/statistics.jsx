@@ -13,91 +13,377 @@ import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
 
 // --- HELPERS ---
-const normalizeDriverName = (name) => {
-  if (!name) return "";
-  return name.toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, '-')
-    .replace(/[^\w-]/g, '');
+// Aggiungi queste funzioni dopo le altre funzioni helper:
+
+// Mappa dei colori per le bandiere
+const countryConfig = {
+  'germany': { code: 'de', color: '#FFCE00' },
+  'italy': { code: 'it', color: '#008C45' },
+  'united-kingdom': { code: 'gb', color: '#00247D' },
+  'france': { code: 'fr', color: '#0055A4' },
+  'brazil': { code: 'br', color: '#26D701' },
+  'spain': { code: 'es', color: '#AA151B' },
+  'united-states-of-america': { code: 'us', color: '#B22234' },
+  'united-states': { code: 'us', color: '#B22234' },
+  'usa': { code: 'us', color: '#B22234' },
+  'finland': { code: 'fi', color: '#003580' },
+  'austria': { code: 'at', color: '#ED2939' },
+  'monaco': { code: 'mc', color: '#E20919' },
+  'argentina': { code: 'ar', color: '#75AADB' },
+  'switzerland': { code: 'ch', color: '#D52B1E' },
+  'belgium': { code: 'be', color: '#000014' },
+  'south-africa': { code: 'za', color: '#007A4D' },
+  'mexico': { code: 'mx', color: '#006847' },
+  'netherlands': { code: 'nl', color: '#21468B' },
+  'hungary': { code: 'hu', color: '#436F4D' },
+  'portugal': { code: 'pt', color: '#006600' },
+  'turkey': { code: 'tr', color: '#E30A17' },
+  'japan': { code: 'jp', color: '#BC002D' },
+  'australia': { code: 'au', color: '#00008B' },
+  'canada': { code: 'ca', color: '#D80621' },
+  'china': { code: 'cn', color: '#DE2910' },
+  'bahrain': { code: 'bh', color: '#C8102E' },
+  'saudi-arabia': { code: 'sa', color: '#006C35' },
+  'azerbaijan': { code: 'az', color: '#00B5E2' },
+  'singapore': { code: 'sg', color: '#ED2939' },
+  'qatar': { code: 'qa', color: '#8D1B3D' },
+  'abu-dhabi': { code: 'ae', color: '#00732F' },
+  'united-arab-emirates': { code: 'ae', color: '#00732F' },
+  'malaysia': { code: 'my', color: '#006233' },
+  'korea': { code: 'kr', color: '#CD2E3A' },
+  'india': { code: 'in', color: '#FF9933' },
+  'russia': { code: 'ru', color: '#D52B1E' },
+  'morocco': { code: 'ma', color: '#C1272D' },
+  'unknown': { code: 'un', color: '#333' }
+};
+
+// Mappatura circuiti->paesi (aggiornata)
+const circuitToCountry = {
+  // Italia
+  'monza': 'italy', 
+  'autodromo-nazionale-di-monza': 'italy', 
+  'milan': 'italy', 
+  'imola': 'italy', 
+  'enzo-e-dino-ferrari': 'italy',
+  'mugello': 'italy', 
+  'bologna': 'italy', 
+  'pescara': 'italy',
+  
+  // Gran Bretagna/UK
+  'silverstone': 'united-kingdom', 
+  'silverstone-circuit': 'united-kingdom',
+  'northamptonshire': 'united-kingdom', 
+  'brands-hatch': 'united-kingdom', 
+  'kent': 'united-kingdom', 
+  'donington': 'united-kingdom', 
+  'aintree': 'united-kingdom',
+  'liverpool': 'united-kingdom',
+  'british-grand-prix': 'united-kingdom',
+  
+  // Belgio
+  'spa': 'belgium', 
+  'spa-francorchamps': 'belgium', 
+  'stavelot': 'belgium', 
+  'zolder': 'belgium',
+  'heusden-zolder': 'belgium', 
+  'nivelles': 'belgium', 
+  'brussels': 'belgium',
+  
+  // Spagna
+  'catalunya': 'spain', 
+  'barcelona': 'spain', 
+  'montmelo': 'spain', 
+  'jerez': 'spain', 
+  'valencia': 'spain',
+  'valencia-street-circuit': 'spain', 
+  'pedralbes': 'spain', 
+  'montjuic': 'spain', 
+  'madrid': 'spain', 
+  'jarama': 'spain',
+  
+  // Ungheria
+  'hungaroring': 'hungary', 
+  'budapest': 'hungary', 
+  'mogyorod': 'hungary',
+  
+  // Austria
+  'red-bull-ring': 'austria', 
+  'spielberg': 'austria',
+  'zeltweg': 'austria', 
+  'oesterreichring': 'austria', 
+  'styria': 'austria',
+  
+  // Francia
+  'magny-cours': 'france', 
+  'nevers': 'france',
+  'paul-ricard': 'france', 
+  'le-castellet': 'france', 
+  'ricard': 'france', 
+  'reims': 'france', 
+  'dijon': 'france',
+  'dijon-prenois': 'france', 
+  'rouen': 'france', 
+  'essarts': 'france', 
+  'charade': 'france', 
+  'clermont-ferrand': 'france',
+  'lemans': 'france',
+  
+  // Germania
+  'nurburgring': 'germany', 
+  'nurburg': 'germany', 
+  'hockenheimring': 'germany', 
+  'hockenheim': 'germany',
+  'avus': 'germany', 
+  'berlin': 'germany',
+  
+  // Portogallo
+  'estoril': 'portugal', 
+  'cascais': 'portugal', 
+  'portimao': 'portugal',
+  'algarve': 'portugal', 
+  'boavista': 'portugal', 
+  'oporto': 'portugal', 
+  'monsanto': 'portugal', 
+  'lisbon': 'portugal',
+  
+  // Svizzera
+  'bremgarten': 'switzerland', 
+  'bern': 'switzerland',
+  
+  // Svezia
+  'anderstorp': 'sweden', 
+  'scandinavian-raceway': 'sweden',
+  
+  // Monaco
+  'monaco': 'monaco',
+  'monte-carlo': 'monaco', 
+  'circuit-de-monaco': 'monaco',
+  
+  // Azerbaijan
+  'baku': 'azerbaijan', 
+  'azerbaijan': 'azerbaijan',
+  
+  // USA
+  'americas': 'united-states', 
+  'cota': 'united-states', 
+  'austin': 'united-states', 
+  'circuit-of-the-americas': 'united-states', 
+  'miami': 'united-states',
+  'miami-international-autodrome': 'united-states', 
+  'vegas': 'united-states', 
+  'las-vegas': 'united-states', 
+  'las-vegas-strip': 'united-states', 
+  'caesars-palace': 'united-states',
+  'indianapolis': 'united-states', 
+  'indianapolis-motor-speedway': 'united-states', 
+  'watkins-glen': 'united-states', 
+  'long-beach': 'united-states', 
+  'phoenix': 'united-states',
+  'detroit': 'united-states', 
+  'dallas': 'united-states', 
+  'sebring': 'united-states', 
+  'riverside': 'united-states',
+  
+  // Canada
+  'villeneuve': 'canada',
+  'montreal': 'canada', 
+  'circuit-gilles-villeneuve': 'canada', 
+  'mosport': 'canada', 
+  'bowmanville': 'canada', 
+  'tremblant': 'canada',
+  'st-jovite': 'canada',
+  
+  // Brasile
+  'interlagos': 'brazil', 
+  'sao-paulo': 'brazil', 
+  'são-paulo': 'brazil', 
+  'jose-carlos-pace': 'brazil',
+  'jacarepagua': 'brazil', 
+  'rio-de-janeiro': 'brazil',
+  
+  // Messico
+  'rodriguez': 'mexico', 
+  'hermanos-rodriguez': 'mexico', 
+  'mexico-city': 'mexico',
+  
+  // Argentina
+  'galvez': 'argentina', 
+  'buenos-aires': 'argentina', 
+  'oscar-galvez': 'argentina',
+  'juan-y-oscar-galvez': 'argentina', 
+  'juan-y-ignacio-cobos': 'argentina', 
+  'carlos-pace': 'brazil',
+  
+  // Giappone
+  'suzuka': 'japan', 
+  'suzuka-circuit': 'japan', 
+  'mie': 'japan', 
+  'fuji': 'japan', 
+  'fuji-speedway': 'japan',
+  'oyama': 'japan', 
+  'okayama': 'japan', 
+  'ti-circuit': 'japan',
+  
+  // Cina
+  'shanghai': 'china', 
+  'shanghai-international-circuit': 'china',
+  
+  // Singapore
+  'marina-bay': 'singapore', 
+  'singapore': 'singapore',
+  
+  // Malesia
+  'sepang': 'malaysia', 
+  'kuala-lumpur': 'malaysia',
+  
+  // Corea
+  'yeongam': 'korea', 
+  'korea-international-circuit': 'korea',
+  
+  // India
+  'buddh': 'india', 
+  'greater-noida': 'india',
+  
+  // Bahrain
+  'bahrain': 'bahrain', 
+  'sakhir': 'bahrain',
+  'manama': 'bahrain', 
+  'bahrain-international-circuit': 'bahrain',
+  
+  // Qatar
+  'losail': 'qatar', 
+  'lusail': 'qatar', 
+  'lusail-international-circuit': 'qatar',
+  
+  // Arabia Saudita
+  'jeddah': 'saudi-arabia', 
+  'jeddah-corniche-circuit': 'saudi-arabia',
+  
+  // Emirati Arabi
+  'yas-marina': 'united-arab-emirates', 
+  'abu-dhabi': 'united-arab-emirates', 
+  'yas-marina-circuit': 'united-arab-emirates',
+  
+  // Turchia
+  'istanbul': 'turkey', 
+  'istanbul-park': 'turkey',
+  
+  // Russia
+  'sochi': 'russia', 
+  'sochi-autodrom': 'russia',
+  
+  // Sudafrica
+  'kyalami': 'south-africa',
+  'midrand': 'south-africa', 
+  'george': 'south-africa', 
+  'prince-george': 'south-africa',
+  
+  // Australia
+  'adelaide': 'australia', 
+  'albert-park': 'australia',
+  'melbourne': 'australia',
+  
+  // Marocco
+  'ain-diab': 'morocco', 
+  'casablanca': 'morocco',
+  
+  // Paesi Bassi
+  'zandvoort': 'netherlands', 
+  'circuit-zandvoort': 'netherlands',
 };
 
 const getFlagCodeFromCircuit = (circuitName) => {
   if (!circuitName) return '';
-  const normalized = circuitName.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+  const normalized = circuitName.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
   
-  if (circuitToCountry[normalized]) return circuitToCountry[normalized];
+  // Cerca nella mappatura diretta
+  if (circuitToCountry[normalized]) {
+    const country = circuitToCountry[normalized];
+    return countryConfig[country]?.code || '';
+  }
 
   const lowerName = circuitName.toLowerCase();
-  if (lowerName.includes('abu dhabi') || lowerName.includes('yas marina') || lowerName.includes('dubai') || lowerName.includes('emirates')) return 'ae';
-  if (lowerName.includes('silverstone') || lowerName.includes('brands') || lowerName.includes('donington') || lowerName.includes('aintree') || lowerName.includes('british') || lowerName.includes('england') || lowerName.includes('uk')) return 'gb';
-  if (lowerName.includes('monza') || lowerName.includes('imola') || lowerName.includes('mugello') || lowerName.includes('pescara') || lowerName.includes('italian') || lowerName.includes('italy')) return 'it';
+  
+  // Logica di fallback
+  if (lowerName.includes('abu dhabi') || lowerName.includes('yas marina') || lowerName.includes('emirates')) return 'ae';
+  if (lowerName.includes('silverstone') || lowerName.includes('brands') || lowerName.includes('donington') || 
+      lowerName.includes('aintree') || lowerName.includes('british') || lowerName.includes('england') || 
+      lowerName.includes('great britain') || lowerName.includes('uk')) return 'gb';
+  if (lowerName.includes('monza') || lowerName.includes('imola') || lowerName.includes('mugello') || 
+      lowerName.includes('pescara') || lowerName.includes('italian')) return 'it';
   if (lowerName.includes('monaco') || lowerName.includes('monte carlo')) return 'mc';
-  if (lowerName.includes('spa') || lowerName.includes('francorchamps') || lowerName.includes('zolder') || lowerName.includes('nivelles') || lowerName.includes('belgian') || lowerName.includes('belgium')) return 'be';
-  if (lowerName.includes('nürburgring') || lowerName.includes('nurburgring') || lowerName.includes('hockenheim') || lowerName.includes('avus') || lowerName.includes('german') || lowerName.includes('germany')) return 'de';
-  if (lowerName.includes('montreal') || lowerName.includes('villeneuve') || lowerName.includes('bowmanville') || lowerName.includes('canadian') || lowerName.includes('canada')) return 'ca';
-  if (lowerName.includes('melbourne') || lowerName.includes('adelaide') || lowerName.includes('albert park') || lowerName.includes('australian') || lowerName.includes('australia')) return 'au';
-  if (lowerName.includes('interlagos') || lowerName.includes('jacarepagua') || lowerName.includes('galvez') || lowerName.includes('brazilian') || lowerName.includes('brazil') || lowerName.includes('são paulo') || lowerName.includes('sao paulo')) return 'br';
+  if (lowerName.includes('spa') || lowerName.includes('francorchamps') || lowerName.includes('zolder') || 
+      lowerName.includes('belgian')) return 'be';
+  if (lowerName.includes('nürburgring') || lowerName.includes('nurburgring') || lowerName.includes('hockenheim') || 
+      lowerName.includes('avus') || lowerName.includes('german')) return 'de';
+  if (lowerName.includes('montreal') || lowerName.includes('villeneuve') || lowerName.includes('canadian')) return 'ca';
+  if (lowerName.includes('melbourne') || lowerName.includes('adelaide') || lowerName.includes('albert park') || 
+      lowerName.includes('australian')) return 'au';
+  if (lowerName.includes('interlagos') || lowerName.includes('jacarepagua') || lowerName.includes('galvez') || 
+      lowerName.includes('brazilian') || lowerName.includes('são paulo') || lowerName.includes('sao paulo')) return 'br';
   if (lowerName.includes('mexico') || lowerName.includes('rodriguez') || lowerName.includes('mexican')) return 'mx';
-  if (lowerName.includes('shanghai') || lowerName.includes('chinese') || lowerName.includes('china')) return 'cn';
-  if (lowerName.includes('suzuka') || lowerName.includes('fuji') || lowerName.includes('okayama') || lowerName.includes('japanese') || lowerName.includes('japan')) return 'jp';
+  if (lowerName.includes('shanghai') || lowerName.includes('chinese')) return 'cn';
+  if (lowerName.includes('suzuka') || lowerName.includes('fuji') || lowerName.includes('okayama') || 
+      lowerName.includes('japanese')) return 'jp';
   if (lowerName.includes('bahrain') || lowerName.includes('sakhir')) return 'bh';
-  if (lowerName.includes('jeddah') || lowerName.includes('saudi') || lowerName.includes('ksa')) return 'sa';
-  if (lowerName.includes('miami') || lowerName.includes('austin') || lowerName.includes('americas') || lowerName.includes('cota') || lowerName.includes('indianapolis') || lowerName.includes('sebring') || lowerName.includes('riverside') || lowerName.includes('watkins glen') || lowerName.includes('long beach') || lowerName.includes('phoenix') || lowerName.includes('detroit') || lowerName.includes('dallas') || lowerName.includes('caesars palace') || lowerName.includes('monterey') || lowerName.includes('laguna seca') || lowerName.includes('las vegas') || lowerName.includes('vegas') || lowerName.includes('united states') || lowerName.includes('usa') || lowerName.includes('us')) return 'us';
-  if (lowerName.includes('catalunya') || lowerName.includes('barcelona') || lowerName.includes('valencia') || lowerName.includes('jarama') || lowerName.includes('montjuic') || lowerName.includes('pedralbes') || lowerName.includes('spanish')) return 'es';
-  if (lowerName.includes('red bull ring') || lowerName.includes('spielberg') || lowerName.includes('zeltweg') || lowerName.includes('österreichring') || lowerName.includes('austrian') || lowerName.includes('austria')) return 'at';
-  if (lowerName.includes('hungaroring') || lowerName.includes('hungarian') || lowerName.includes('hungary')) return 'hu';
-  if (lowerName.includes('zandvoort') || lowerName.includes('dutch') || lowerName.includes('netherlands') || lowerName.includes('holland')) return 'nl';
+  if (lowerName.includes('jeddah') || lowerName.includes('saudi')) return 'sa';
+  if (lowerName.includes('miami') || lowerName.includes('austin') || lowerName.includes('americas') || 
+      lowerName.includes('cota') || lowerName.includes('indianapolis') || lowerName.includes('sebring') || 
+      lowerName.includes('riverside') || lowerName.includes('watkins glen') || lowerName.includes('long beach') || 
+      lowerName.includes('phoenix') || lowerName.includes('detroit') || lowerName.includes('dallas') || 
+      lowerName.includes('caesars palace') || lowerName.includes('monterey') || lowerName.includes('laguna seca') || 
+      lowerName.includes('las vegas') || lowerName.includes('vegas') || lowerName.includes('united states') || 
+      lowerName.includes('usa') || lowerName.includes('us grand prix')) return 'us';
+  if (lowerName.includes('catalunya') || lowerName.includes('barcelona') || lowerName.includes('valencia') || 
+      lowerName.includes('jarama') || lowerName.includes('montjuic') || lowerName.includes('pedralbes') || 
+      lowerName.includes('spanish')) return 'es';
+  if (lowerName.includes('red bull ring') || lowerName.includes('spielberg') || lowerName.includes('zeltweg') || 
+      lowerName.includes('österreichring') || lowerName.includes('austrian')) return 'at';
+  if (lowerName.includes('hungaroring') || lowerName.includes('hungarian')) return 'hu';
+  if (lowerName.includes('zandvoort') || lowerName.includes('dutch') || lowerName.includes('netherlands') || 
+      lowerName.includes('holland')) return 'nl';
   if (lowerName.includes('baku') || lowerName.includes('azerbaijan')) return 'az';
   if (lowerName.includes('marina bay') || lowerName.includes('singapore')) return 'sg';
   if (lowerName.includes('losail') || lowerName.includes('lusail') || lowerName.includes('qatar')) return 'qa';
-  if (lowerName.includes('le castellet') || lowerName.includes('paul ricard') || lowerName.includes('ricard') || lowerName.includes('rouen') || lowerName.includes('essarts') || lowerName.includes('reims') || lowerName.includes('charade') || lowerName.includes('dijon') || lowerName.includes('magny-cours') || lowerName.includes('lemans') || lowerName.includes('louvre') || lowerName.includes('french') || lowerName.includes('france')) return 'fr';
-  if (lowerName.includes('bremgarten') || lowerName.includes('swiss') || lowerName.includes('switzerland')) return 'ch';
-  if (lowerName.includes('boavista') || lowerName.includes('monsanto') || lowerName.includes('estoril') || lowerName.includes('portimao') || lowerName.includes('portuguese') || lowerName.includes('portugal')) return 'pt';
-  if (lowerName.includes('ain-diab') || lowerName.includes('ain diab') || lowerName.includes('moroccan') || lowerName.includes('morocco')) return 'ma';  
-  if (lowerName.includes('george') || lowerName.includes('kyalami') || lowerName.includes('south african') || lowerName.includes('south africa')) return 'za';
-  if (lowerName.includes('sepang') || lowerName.includes('malaysian') || lowerName.includes('malaysia')) return 'my';
-  if (lowerName.includes('buddh') || lowerName.includes('indian') || lowerName.includes('india')) return 'in';
-  if (lowerName.includes('yeongam') || lowerName.includes('korean') || lowerName.includes('korea')) return 'kr';
-  if (lowerName.includes('istanbul') || lowerName.includes('turkish') || lowerName.includes('turkey')) return 'tr';
-  if (lowerName.includes('sochi') || lowerName.includes('russian') || lowerName.includes('russia')) return 'ru';  
+  if (lowerName.includes('le castellet') || lowerName.includes('paul ricard') || lowerName.includes('ricard') || 
+      lowerName.includes('rouen') || lowerName.includes('essarts') || lowerName.includes('reims') || 
+      lowerName.includes('charade') || lowerName.includes('dijon') || lowerName.includes('magny-cours') || 
+      lowerName.includes('lemans') || lowerName.includes('french')) return 'fr';
+  if (lowerName.includes('bremgarten') || lowerName.includes('swiss')) return 'ch';
+  if (lowerName.includes('boavista') || lowerName.includes('monsanto') || lowerName.includes('estoril') || 
+      lowerName.includes('portimao') || lowerName.includes('portuguese')) return 'pt';
+  if (lowerName.includes('ain-diab') || lowerName.includes('ain diab') || lowerName.includes('moroccan')) return 'ma';  
+  if (lowerName.includes('george') || lowerName.includes('kyalami') || lowerName.includes('south african')) return 'za';
+  if (lowerName.includes('sepang') || lowerName.includes('malaysian')) return 'my';
+  if (lowerName.includes('buddh') || lowerName.includes('indian')) return 'in';
+  if (lowerName.includes('yeongam') || lowerName.includes('korean')) return 'kr';
+  if (lowerName.includes('istanbul') || lowerName.includes('turkish')) return 'tr';
+  if (lowerName.includes('sochi') || lowerName.includes('russian')) return 'ru';
+  
   return '';
-}; 
+};
 
-const circuitToCountry = {
-  'monza': 'it', 'autodromo-nazionale-di-monza': 'it', 'milan': 'it', 'imola': 'it', 'enzo-e-dino-ferrari': 'it',
-  'mugello': 'it', 'bologna': 'it', 'pescara': 'it', 'silverstone': 'gb', 'silverstone-circuit': 'gb',
-  'northamptonshire': 'gb', 'brands-hatch': 'gb', 'kent': 'gb', 'donington': 'gb', 'aintree': 'gb',
-  'liverpool': 'gb', 'spa': 'be', 'spa-francorchamps': 'be', 'stavelot': 'be', 'zolder': 'be',
-  'heusden-zolder': 'be', 'nivelles': 'be', 'brussels': 'be', 'zandvoort': 'nl', 'circuit-zandvoort': 'nl',
-  'catalunya': 'es', 'barcelona': 'es', 'montmelo': 'es', 'jerez': 'es', 'valencia': 'es',
-  'valencia-street-circuit': 'es', 'pedralbes': 'es', 'montjuic': 'es', 'madrid': 'es', 'jarama': 'es',
-  'hungaroring': 'hu', 'budapest': 'hu', 'mogyorod': 'hu', 'red-bull-ring': 'at', 'spielberg': 'at',
-  'zeltweg': 'at', 'oesterreichring': 'at', 'styria': 'at', 'magny-cours': 'fr', 'nevers': 'fr',
-  'paul-ricard': 'fr', 'le-castellet': 'fr', 'ricard': 'fr', 'reims': 'fr', 'dijon': 'fr',
-  'dijon-prenois': 'fr', 'rouen': 'fr', 'essarts': 'fr', 'charade': 'fr', 'clermont-ferrand': 'fr',
-  'lemans': 'fr', 'nurburgring': 'de', 'nurburg': 'de', 'hockenheimring': 'de', 'hockenheim': 'de',
-  'avus': 'de', 'berlin': 'de', 'estoril': 'pt', 'cascais': 'pt', 'portimao': 'pt',
-  'algarve': 'pt', 'boavista': 'pt', 'oporto': 'pt', 'monsanto': 'pt', 'lisbon': 'pt',
-  'bremgarten': 'ch', 'bern': 'ch', 'anderstorp': 'se', 'scandinavian-raceway': 'se', 'monaco': 'mc',
-  'monte-carlo': 'mc', 'circuit-de-monaco': 'mc', 'bakú': 'az', 'baku': 'az', 'azerbaijan': 'az',
-  'americas': 'us', 'cota': 'us', 'austin': 'us', 'circuit-of-the-americas': 'us', 'miami': 'us',
-  'miami-international-autodrome': 'us', 'vegas': 'us', 'las-vegas': 'us', 'las-vegas-strip': 'us', 'caesars-palace': 'us',
-  'indianapolis': 'us', 'indianapolis-motor-speedway': 'us', 'watkins-glen': 'us', 'long-beach': 'us', 'phoenix': 'us',
-  'detroit': 'us', 'dallas': 'us', 'sebring': 'us', 'riverside': 'us', 'villeneuve': 'ca',
-  'montreal': 'ca', 'circuit-gilles-villeneuve': 'ca', 'mosport': 'ca', 'bowmanville': 'ca', 'tremblant': 'ca',
-  'st-jovite': 'ca', 'interlagos': 'br', 'sao-paulo': 'br', 'são-paulo': 'br', 'jose-carlos-pace': 'br',
-  'jacarepagua': 'br', 'rio-de-janeiro': 'br', 'rodriguez': 'mx', 'hermanos-rodriguez': 'mx', 'mexico-city': 'mx',
-  'galvez': 'ar', 'buenos-aires': 'ar', 'oscar-galvez': 'ar',
-  'juan-y-oscar-galvez': 'ar', 'juan-y-ignacio-cobos': 'ar', 'carlos-pace': 'br', 'juan-y-ignacio-cobos': 'ar',
-  'suzuka': 'jp', 'suzuka-circuit': 'jp', 'mie': 'jp', 'fuji': 'jp', 'fuji-speedway': 'jp',
-  'oyama': 'jp', 'okayama': 'jp', 'ti-circuit': 'jp', 'shanghai': 'cn', 'shanghai-international-circuit': 'cn',
-  'marina-bay': 'sg', 'singapore': 'sg', 'sepang': 'my', 'kuala-lumpur': 'my', 'yeongam': 'kr',
-  'korea-international-circuit': 'kr', 'buddh': 'in', 'greater-noida': 'in', 'bahrain': 'bh', 'sakhir': 'bh',
-  'manama': 'bh', 'bahrain-international-circuit': 'bh', 'losail': 'qa', 'lusail': 'qa', 'lusail-international-circuit': 'qa',
-  'jeddah': 'sa', 'jeddah-corniche-circuit': 'sa', 'yas-marina': 'ae', 'abu-dhabi': 'ae', 'yas-marina-circuit': 'ae',
-  'istanbul': 'tr', 'istanbul-park': 'tr', 'sochi': 'ru', 'sochi-autodrom': 'ru', 'kyalami': 'za',
-  'midrand': 'za', 'george': 'za', 'prince-george': 'za', 'adelaide': 'au', 'albert-park': 'au',
-  'melbourne': 'au', 'ain-diab': 'ma', 'casablanca': 'ma',
+// Funzione per ottenere il colore dalla bandiera
+const getCountryColor = (circuitName) => {
+  const normalized = circuitName?.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+  
+  if (circuitToCountry[normalized]) {
+    const country = circuitToCountry[normalized];
+    return countryConfig[country]?.color || '#666';
+  }
+  
+  // Default color per circuiti sconosciuti
+  return '#666';
 };
 
 const FERRARI_COLORS = ['#DC0000', '#FF2800', '#8a0000', '#4a0000', '#333333'];
@@ -483,40 +769,53 @@ export default function StatisticsPage() {
                     }}
                     />
                     <Tooltip 
-                    cursor={{ fill: 'rgba(255, 215, 0, 0.05)' }}
-                    content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                        const circuit = payload[0].payload;
-                        const flagCode = getFlagCodeFromCircuit(circuit.originalName || circuit.name);
-                        return (
-                            <div className="bg-black/95 border border-yellow-500/30 p-4 rounded-lg shadow-2xl backdrop-blur-sm min-w-[200px]">
-                            <div className="flex items-center gap-3 mb-3">
-                                {flagCode && (
-                                <div className="w-8 h-6 overflow-hidden rounded-sm flex-shrink-0">
-                                    <img 
-                                    src={`https://flagcdn.com/w80/${flagCode}.png`}
-                                    alt=""
-                                    className="w-full h-full object-cover"
+                        cursor={{ fill: 'rgba(255, 215, 0, 0.05)' }}
+                        content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                            const circuit = payload[0].payload;
+                            const flagCode = getFlagCodeFromCircuit(circuit.originalName || circuit.name);
+                            const countryColor = getCountryColor(circuit.originalName || circuit.name);
+                            
+                            return (
+                                <div className="bg-black/95 border border-yellow-500/30 p-4 rounded-lg shadow-2xl backdrop-blur-sm min-w-[200px]">
+                                <div className="flex items-center gap-3 mb-3">
+                                    {flagCode && (
+                                    <div 
+                                        className="w-8 h-6 overflow-hidden rounded-sm flex-shrink-0 border"
+                                        style={{ borderColor: `${countryColor}50` }}
+                                    >
+                                        <img 
+                                        src={`https://flagcdn.com/w80/${flagCode}.png`}
+                                        alt=""
+                                        className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    )}
+                                    <div>
+                                    <p className="text-[10px] font-black uppercase text-zinc-500 tracking-widest mb-1">CIRCUITO</p>
+                                    <p className="text-lg font-black text-white">{circuit.originalName || circuit.name}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                    <p className="text-[8px] font-black uppercase text-zinc-500 tracking-widest">VITTORIE</p>
+                                    <p className="text-2xl font-black italic" style={{ color: countryColor }}>
+                                        {circuit.wins}
+                                    </p>
+                                    </div>
+                                    <div className="relative">
+                                    <TrophySVG size={24} color={GOLD} />
+                                    <div 
+                                        className="absolute -inset-1 rounded-full blur-sm opacity-20"
+                                        style={{ backgroundColor: countryColor }}
                                     />
+                                    </div>
                                 </div>
-                                )}
-                                <div>
-                                <p className="text-[10px] font-black uppercase text-zinc-500 tracking-widest mb-1">CIRCUITO</p>
-                                <p className="text-lg font-black text-white">{circuit.originalName || circuit.name}</p>
                                 </div>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                <p className="text-[8px] font-black uppercase text-zinc-500 tracking-widest">VITTORIE</p>
-                                <p className="text-2xl font-black italic text-yellow-500">{circuit.wins}</p>
-                                </div>
-                                <TrophySVG size={24} color={GOLD} />
-                            </div>
-                            </div>
-                        );
-                        }
-                        return null;
-                    }}
+                            );
+                            }
+                            return null;
+                        }}
                     />
                     <Bar 
                     dataKey="wins" 
