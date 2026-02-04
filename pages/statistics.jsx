@@ -21,6 +21,25 @@ const normalizeDriverName = (name) => {
     .replace(/[^\w-]/g, '');
 };
 
+const countryConfig = {
+    'germany': { code: 'de', color: '#FFCE00' }, // Giallo bandiera
+    'italy': { code: 'it', color: '#008C45' },   // Verde bandiera
+    'united-kingdom': { code: 'gb', color: '#00247D' }, // Blu Union Jack
+    'france': { code: 'fr', color: '#0055A4' },  // Blu Francia
+    'brazil': { code: 'br', color: '#26D701' },  // Verde Brasile
+    'spain': { code: 'es', color: '#AA151B' },   // Rosso Spagna
+    'united-states-of-america': { code: 'us', color: '#B22234' },
+    'finland': { code: 'fi', color: '#003580' },
+    'austria': { code: 'at', color: '#ED2939' },
+    'monaco': { code: 'mc', color: '#E20919' },
+    'argentina': { code: 'ar', color: '#75AADB' },
+    'switzerland': { code: 'ch', color: '#D52B1E' },
+    'belgium': { code: 'be', color: '#000014' },
+    'south-africa': { code: 'za', color: '#007A4D' },
+    'mexico': {code:'mx', color: '#006847'},
+    'unknown': { code: 'un', color: '#333' }
+};
+
 const FERRARI_COLORS = ['#DC0000', '#FF2800', '#8a0000', '#4a0000', '#333333'];
 const GOLD = "#FFD700";
 
@@ -84,26 +103,6 @@ export default function StatisticsPage() {
         return acc;
         }, {});
 
-        // Mappa dei codici ISO per flagcdn
-        const countryConfig = {
-        'germany': { code: 'de', color: '#FFCE00' }, // Giallo bandiera
-        'italy': { code: 'it', color: '#008C45' },   // Verde bandiera
-        'united-kingdom': { code: 'gb', color: '#00247D' }, // Blu Union Jack
-        'france': { code: 'fr', color: '#0055A4' },  // Blu Francia
-        'brazil': { code: 'br', color: '#26D701' },  // Verde Brasile
-        'spain': { code: 'es', color: '#AA151B' },   // Rosso Spagna
-        'united-states-of-america': { code: 'us', color: '#B22234' },
-        'finland': { code: 'fi', color: '#003580' },
-        'austria': { code: 'at', color: '#ED2939' },
-        'monaco': { code: 'mc', color: '#E20919' },
-        'argentina': { code: 'ar', color: '#75AADB' },
-        'switzerland': { code: 'ch', color: '#D52B1E' },
-        'belgium': { code: 'be', color: '#000014' },
-        'south-africa': { code: 'za', color: '#007A4D' },
-        'mexico': {code:'mx', color: '#006847'},
-        'unknown': { code: 'un', color: '#333' }
-        };
-
         setNationalities(Object.entries(natAgg)
         .map(([id, value]) => ({ 
             id,
@@ -115,21 +114,30 @@ export default function StatisticsPage() {
         .sort((a, b) => b.value - a.value)
         );
 
-        // 3. Process Circuits
-        const raceMap = {}; racesData.forEach(r => raceMap[r.id] = r.grandPrixId);
+        // 3. Process Circuits (Wins per Circuit)
+        const circDetailsMap = {};
+        circuitsData.forEach(c => circDetailsMap[c.id] = c);
+        
+        const raceToCircuit = {};
+        racesData.forEach(r => raceToCircuit[r.id] = r.circuitId);
+
         const circAgg = ferrariWins.reduce((acc, curr) => {
-          const cId = raceMap[curr.raceId] || "Unknown";
-          acc[cId] = (acc[cId] || 0) + 1;
+          const cId = raceToCircuit[curr.raceId];
+          if (cId) acc[cId] = (acc[cId] || 0) + 1;
           return acc;
         }, {});
-        setCircuits(Object.entries(circAgg)
-            .map(([name, wins]) => ({ 
-                name: name.replace(/-/g, ' ').toUpperCase(), 
-                wins 
-            }))
-            .sort((a,b) => b.wins - a.wins)
-            .slice(0, 8)
-        );
+
+        setCircuits(Object.entries(circAgg).map(([id, wins]) => {
+            const countryId = circDetailsMap[id]?.countryId || 'unknown';
+            return {
+                id,
+                wins,
+                name: circDetailsMap[id]?.name || id.toUpperCase(),
+                flag: countryConfig[countryId]?.code || 'un',
+                color: countryConfig[countryId]?.color || '#DC0000',
+                fullInfo: { name: circDetailsMap[id]?.name || id, flag: countryConfig[countryId]?.code || 'un' }
+            };
+        }).sort((a,b) => b.wins - a.wins).slice(0, 10));
 
         setHistory(historical.filter(h => h.points !== null));
 
@@ -334,30 +342,28 @@ export default function StatisticsPage() {
             </AccordionSection>
 
           {/* --- SEZIONE 4: FORTRESS MARANELLO (CIRCUITI) --- */}
-          <AccordionSection 
-            id="circuits" 
-            title="Fortress Maranello" 
-            subtitle="I circuiti con il maggior numero di vittorie"
-            icon={Landmark}
-            isOpen={openSection === 'circuits'}
-            onToggle={() => toggleSection('circuits')}
-            color="yellow"
-          >
-             <div className="h-[450px] w-full p-8">
+          <AccordionSection id="circuits" title="Fortress Maranello" subtitle="I tracciati con più vittorie Ferrari" icon={Landmark} isOpen={openSection === 'circuits'} onToggle={() => toggleSection('circuits')} color="yellow">
+             <div className="h-[500px] w-full p-4">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={circuits} layout="vertical" margin={{ left: 100 }}>
+                  <BarChart data={circuits} layout="vertical" margin={{ left: 140, right: 40 }}>
                     <XAxis type="number" hide />
                     <YAxis 
-                        dataKey="name" 
+                        dataKey="fullInfo" 
                         type="category" 
-                        stroke="#666" 
-                        fontSize={10} 
-                        width={120} 
-                        tick={{fontWeight: '900', fill: '#ccc'}} 
+                        tick={<CircuitTick />} 
+                        width={1}
                         axisLine={false} 
                     />
-                    <Tooltip cursor={{ fill: 'rgba(255, 215, 0, 0.05)' }} contentStyle={{ backgroundColor: '#000', border: '1px solid #333' }} />
-                    <Bar dataKey="wins" fill={GOLD} radius={[0, 10, 10, 0]} barSize={25} />
+                    <Tooltip 
+                        cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} 
+                        contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '12px' }}
+                        formatter={(value) => [`${value} Vittorie`, 'Wins']}
+                    />
+                    <Bar dataKey="wins" radius={[0, 10, 10, 0]} barSize={25}>
+                        {circuits.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
              </div>
