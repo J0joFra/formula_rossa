@@ -13,7 +13,16 @@ import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
 
 // --- HELPERS ---
-// Aggiungi queste funzioni dopo le altre funzioni helper:
+const normalizeDriverName = (name) => {
+  if (!name) return "";
+  return name.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]/g, '');
+};
+
+const FERRARI_COLORS = ['#DC0000', '#FF2800', '#8a0000', '#4a0000', '#333333'];
+const GOLD = "#FFD700";
 
 // Mappa dei colori per le bandiere
 const countryConfig = {
@@ -211,8 +220,7 @@ const circuitToCountry = {
   'buenos-aires': 'argentina', 
   'oscar-galvez': 'argentina',
   'juan-y-oscar-galvez': 'argentina', 
-  'juan-y-ignacio-cobos': 'argentina', 
-  'carlos-pace': 'brazil',
+  'juan-y-ignacio-cobos': 'argentina',
   
   // Giappone
   'suzuka': 'japan', 
@@ -386,8 +394,13 @@ const getCountryColor = (circuitName) => {
   return '#666';
 };
 
-const FERRARI_COLORS = ['#DC0000', '#FF2800', '#8a0000', '#4a0000', '#333333'];
-const GOLD = "#FFD700";
+function TrophySVG({ size, color }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill={color}>
+      <path d="M3 2h10v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V2zm3 10h4v1H6v-1zm1-4v4m2-4v4M2 3h1v2H2V3zm12 0h-1v2h1V3z" />
+    </svg>
+  );
+}
 
 // --- MAIN PAGE ---
 export default function StatisticsPage() {
