@@ -402,14 +402,6 @@ const getCountryColor = (circuitName) => {
   return '#666';
 };
 
-function TrophySVG({ size, color }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill={color}>
-      <path d="M3 2h10v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V2zm3 10h4v1H6v-1zm1-4v4m2-4v4M2 3h1v2H2V3zm12 0h-1v2h1V3z" />
-    </svg>
-  );
-}
-
 // --- MAIN PAGE ---
 export default function StatisticsPage() {
   const [loading, setLoading] = useState(true);
