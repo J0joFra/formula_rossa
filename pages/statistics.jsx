@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Activity, ChevronLeft, Star, ShieldCheck } from 'lucide-react';
+import { 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
+} from 'recharts';
+import { Trophy, Activity, ChevronLeft, Star, User, ShieldCheck } from 'lucide-react';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
 
-// Helper 
+// Helper per i nomi file immagini
 const normalizeDriverName = (name) => {
   return name.toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -76,134 +79,139 @@ export default function StatisticsPage() {
         <header className="mb-24 relative px-6">
           <div className="absolute left-0 top-0 w-2 h-full bg-red-600 shadow-[0_0_20px_rgba(220,0,0,0.5)]" />
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <h1 className="text-red-600 font-black text-xs uppercase tracking-[0.6em] mb-4">Historical Intelligence</h1>
+            <h1 className="text-red-600 font-black text-xs uppercase tracking-[0.6em] mb-4 font-mono">Historical Intelligence</h1>
             <h2 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter leading-none mb-4">
-              Winners <span className="text-zinc-800">&</span> <br />Legacy
+              Winners <span className="text-zinc-800">&</span> <br />Archive
             </h2>
           </motion.div>
         </header>
 
-        {/* TABELLA WINNERS CUSTOM */}
-        <section className="mb-40">
-          <div className="flex items-center gap-6 mb-12">
-            <div className="w-16 h-16 bg-yellow-500 rounded-2xl flex items-center justify-center rotate-3 shadow-lg shadow-yellow-600/20">
-              <Trophy className="text-black w-8 h-8" />
-            </div>
-            <div>
-              <h3 className="text-3xl font-black uppercase italic">Winners Circle</h3>
-              <p className="text-zinc-500 text-sm font-bold uppercase tracking-widest">Analisi vittorie e cronologia per pilota</p>
-            </div>
-          </div>
-
-          <div className="bg-zinc-900/20 border border-white/5 rounded-[40px] overflow-hidden shadow-2xl backdrop-blur-3xl">
-            {/* Header Tabella */}
-            <div className="grid grid-cols-12 gap-4 p-8 border-b border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
-              <div className="col-span-1 text-center italic">Pos</div>
-              <div className="col-span-2 pl-10">Driver</div>
-              <div className="col-span-5">Trophies</div>
-              <div className="col-span-4">Years</div>
+        <div className="space-y-40">
+          
+          {/* TABELLA WINNERS CUSTOM */}
+          <section>
+            <div className="flex items-center gap-6 mb-12">
+              <div className="w-16 h-16 bg-yellow-500 rounded-2xl flex items-center justify-center rotate-3 shadow-lg shadow-yellow-500/20">
+                <Trophy className="text-black w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-3xl font-black uppercase italic">Winners Circle</h3>
+                <p className="text-zinc-500 text-sm font-bold uppercase tracking-widest">Analisi vittorie e cronologia per pilota</p>
+              </div>
             </div>
 
-            {/* Righe Tabella */}
-            <div className="divide-y divide-white/5">
-              {pilotWins.map((driver, index) => (
-                <div key={driver.id} className="grid grid-cols-12 gap-4 p-8 hover:bg-white/5 transition-all items-center group">
-                  
-                  {/* Posizione */}
-                  <div className="col-span-1 text-center">
-                    <span className="text-3xl font-black italic text-zinc-700 group-hover:text-red-600 transition-colors">
-                      {index + 1}
-                    </span>
-                  </div>
+            <div className="bg-zinc-900/20 border border-white/5 rounded-[40px] overflow-hidden shadow-2xl backdrop-blur-3xl">
+              {/* Header Tabella */}
+              <div className="grid grid-cols-12 gap-4 p-8 border-b border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
+                <div className="col-span-1 text-center italic">Pos</div>
+                <div className="col-span-2 text-center">Driver</div>
+                <div className="col-span-5 pl-4">Trophies</div>
+                <div className="col-span-4 pl-4">Years</div>
+              </div>
 
-                  {/* Pilota: Immagine e Nome sotto */}
-                  <div className="col-span-2 flex flex-col items-center gap-3">
-                    <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-zinc-800 group-hover:border-red-600 transition-all shadow-xl">
-                      <img 
-                        src={`/data/ferrari-drivers/${normalizeDriverName(driver.name)}.jpg`} 
-                        alt={driver.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => { e.target.src = "/images/driver-placeholder.jpg"; }}
-                      />
+              {/* Righe Tabella */}
+              <div className="divide-y divide-white/5">
+                {pilotWins.map((driver, index) => (
+                  <div key={driver.id} className="grid grid-cols-12 gap-4 p-8 hover:bg-white/5 transition-all items-center group">
+                    
+                    {/* Posizione */}
+                    <div className="col-span-1 text-center">
+                      <span className="text-3xl font-black italic text-zinc-700 group-hover:text-red-600 transition-colors">
+                        {index + 1}
+                      </span>
                     </div>
-                    <span className="font-black uppercase italic text-xs tracking-tighter text-white">
-                      {driver.name.split(' ').pop()}
-                    </span>
-                  </div>
 
-                  {/* Trofei: Logica 10 per fila */}
-                  <div className="col-span-5 flex flex-col gap-4">
-                    {/* Prima Riga: Decine */}
-                    <div className="flex items-center gap-1.5">
-                      {[...Array(driver.wins >= 10 ? 10 : driver.wins)].map((_, i) => (
-                        <TrophySVG key={i} size={22} color="#FFD700" />
-                      ))}
-                      {driver.wins >= 10 && (
-                        <span className="text-xl font-black italic text-yellow-500 ml-2">
-                          x{Math.floor(driver.wins / 10)}
-                        </span>
+                    {/* Pilota: Immagine centrata e Nome sotto */}
+                    <div className="col-span-2 flex flex-col items-center gap-3">
+                      <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-zinc-800 group-hover:border-red-600 transition-all shadow-xl bg-zinc-800">
+                        <img 
+                          src={`/data/ferrari-drivers/${normalizeDriverName(driver.name)}.jpg`} 
+                          alt={driver.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.target.src = "https://www.formula1.com/etc/designs/f1om/images/driver-listing-face-placeholder.png"; }}
+                        />
+                      </div>
+                      <span className="font-black uppercase italic text-xs tracking-tighter text-white">
+                        {driver.name.split(' ').pop()}
+                      </span>
+                    </div>
+
+                    {/* Trofei Gialli: Logica 10 per fila */}
+                    <div className="col-span-5 flex flex-col gap-4 pl-4">
+                      <div className="flex items-center flex-wrap gap-1.5">
+                        {[...Array(driver.wins >= 10 ? 10 : driver.wins)].map((_, i) => (
+                          <TrophySVG key={i} size={20} color="#FFD700" />
+                        ))}
+                        {driver.wins >= 10 && (
+                          <span className="text-xl font-black italic text-yellow-500 ml-2">
+                            x{Math.floor(driver.wins / 10)}
+                          </span>
+                        )}
+                      </div>
+                      {driver.wins > 10 && driver.wins % 10 > 0 && (
+                        <div className="flex items-center flex-wrap gap-1.5">
+                          {[...Array(driver.wins % 10)].map((_, i) => (
+                            <TrophySVG key={i} size={20} color="#FFD700" />
+                          ))}
+                        </div>
                       )}
                     </div>
-                    {/* Seconda Riga: Unità */}
-                    {driver.wins > 10 && driver.wins % 10 > 0 && (
-                      <div className="flex items-center gap-1.5">
-                        {[...Array(driver.wins % 10)].map((_, i) => (
-                          <TrophySVG key={i} size={22} color="#FFD700" />
-                        ))}
-                      </div>
-                    )}
+
+                    {/* Annate: Quadratini Rossi */}
+                    <div className="col-span-4 flex flex-wrap gap-2 pr-4 pl-4">
+                      {driver.yearsList.map((year) => (
+                        <span key={year} className="px-3 py-1 bg-red-600 rounded-md text-[11px] font-black text-white shadow-lg border border-red-500/30">
+                          {year}
+                        </span>
+                      ))}
+                    </div>
+
                   </div>
-
-                  {/* Annate: Quadratini Rossi */}
-                  <div className="col-span-4 flex flex-wrap gap-2 pr-4">
-                    {driver.yearsList.map((year) => (
-                      <span key={year} className="px-3 py-1 bg-red-600 rounded-md text-[11px] font-black text-white shadow-lg border border-red-500/30">
-                        {year}
-                      </span>
-                    ))}
-                  </div>
-
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* PERFORMANCE HISTORY */}
-        <section>
-        <div className="flex items-center gap-6 mb-16 px-4">
-            <Activity className="text-red-600 w-12 h-12" />
-            <h3 className="text-4xl font-black uppercase italic tracking-tight text-zinc-100">Performance Timeline</h3>
-        </div>
-
-        <div className="bg-zinc-950 border border-white/5 rounded-[40px] p-12 shadow-2xl">
-            <div className="h-[450px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={history}>
-                <defs>
-                    <linearGradient id="ferrariGlow" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#DC0000" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#DC0000" stopOpacity={0}/>
-                    </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
-                <XAxis dataKey="year" stroke="#444" fontSize={11} tickMargin={15} axisLine={false} />
-                <YAxis stroke="#444" fontSize={11} axisLine={false} />
-                <Tooltip contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid #333', borderRadius: '12px' }} />
-                <Area type="monotone" dataKey="points" stroke="#DC0000" strokeWidth={3} fillOpacity={1} fill="url(#ferrariGlow)" />
-                </AreaChart>
-            </ResponsiveContainer>
+          {/* PERFORMANCE HISTORY (AREA CHART) */}
+          <section>
+            <div className="flex items-center gap-6 mb-12">
+              <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center -rotate-3 shadow-lg shadow-red-600/20">
+                <Activity className="text-white w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-3xl font-black uppercase italic">Performance Timeline</h3>
+                <p className="text-zinc-500 text-sm font-bold uppercase tracking-widest">Evoluzione del punteggio annuale costruttori</p>
+              </div>
             </div>
-        </div>
-        </section>        
 
+            <div className="bg-zinc-900/20 border border-white/5 rounded-[40px] p-12 shadow-2xl">
+              <div className="h-[450px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={history}>
+                    <defs>
+                      <linearGradient id="ferrariGlow" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#DC0000" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#DC0000" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
+                    <XAxis dataKey="year" stroke="#444" fontSize={11} tickMargin={15} axisLine={false} />
+                    <YAxis stroke="#444" fontSize={11} axisLine={false} />
+                    <Tooltip contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid #333', borderRadius: '12px' }} />
+                    <Area type="monotone" dataKey="points" stroke="#DC0000" strokeWidth={3} fillOpacity={1} fill="url(#ferrariGlow)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </section>
+
+        </div>
       </main>
       <Footer />
     </div>
   );
 }
 
-// Icona SVG Trofeo per le righe
 function TrophySVG({ size, color }) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill={color}>
