@@ -12,6 +12,32 @@ import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
 
+// --- CONFIGURAZIONE COLORI E BANDIERE ---
+const countryConfig = {
+  'germany': { code: 'de', color: '#FFCE00' },
+  'italy': { code: 'it', color: '#008C45' },
+  'united-kingdom': { code: 'gb', color: '#00247D' },
+  'france': { code: 'fr', color: '#0055A4' },
+  'brazil': { code: 'br', color: '#26D701' },
+  'spain': { code: 'es', color: '#AA151B' },
+  'united-states-of-america': { code: 'us', color: '#B22234' },
+  'finland': { code: 'fi', color: '#003580' },
+  'austria': { code: 'at', color: '#ED2939' },
+  'monaco': { code: 'mc', color: '#E20919' },
+  'argentina': { code: 'ar', color: '#75AADB' },
+  'switzerland': { code: 'ch', color: '#D52B1E' },
+  'belgium': { code: 'be', color: '#222222' },
+  'south-africa': { code: 'za', color: '#007A4D' },
+  'mexico': { code: 'mx', color: '#006847' },
+  'canada': { code: 'ca', color: '#FF0000' },
+  'japan': { code: 'jp', color: '#BC002D' },
+  'netherlands': { code: 'nl', color: '#21468B' },
+  'unknown': { code: 'un', color: '#333' }
+};
+
+const FERRARI_COLORS = ['#DC0000', '#FF2800', '#8a0000', '#4a0000', '#333333'];
+const GOLD = "#FFD700";
+
 // --- HELPERS ---
 const normalizeDriverName = (name) => {
   if (!name) return "";
@@ -21,27 +47,30 @@ const normalizeDriverName = (name) => {
     .replace(/[^\w-]/g, '');
 };
 
-const countryConfig = {
-    'germany': { code: 'de', color: '#FFCE00' }, // Giallo bandiera
-    'italy': { code: 'it', color: '#008C45' },   // Verde bandiera
-    'united-kingdom': { code: 'gb', color: '#00247D' }, // Blu Union Jack
-    'france': { code: 'fr', color: '#0055A4' },  // Blu Francia
-    'brazil': { code: 'br', color: '#26D701' },  // Verde Brasile
-    'spain': { code: 'es', color: '#AA151B' },   // Rosso Spagna
-    'united-states-of-america': { code: 'us', color: '#B22234' },
-    'finland': { code: 'fi', color: '#003580' },
-    'austria': { code: 'at', color: '#ED2939' },
-    'monaco': { code: 'mc', color: '#E20919' },
-    'argentina': { code: 'ar', color: '#75AADB' },
-    'switzerland': { code: 'ch', color: '#D52B1E' },
-    'belgium': { code: 'be', color: '#000014' },
-    'south-africa': { code: 'za', color: '#007A4D' },
-    'mexico': {code:'mx', color: '#006847'},
-    'unknown': { code: 'un', color: '#333' }
+// Componente per le bandiere nel grafico dei circuiti
+const CircuitTick = ({ x, y, payload }) => {
+  const data = payload.value; 
+  if (!data || !data.flag) return null;
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <image
+        x="-140" y="-12" width="24" height="16"
+        href={`https://flagcdn.com/w40/${data.flag}.png`}
+      />
+      <text x="-110" y="2" fill="#999" fontSize={10} fontWeight="900" textAnchor="start" className="uppercase italic">
+        {data.name}
+      </text>
+    </g>
+  );
 };
 
-const FERRARI_COLORS = ['#DC0000', '#FF2800', '#8a0000', '#4a0000', '#333333'];
-const GOLD = "#FFD700";
+function TrophySVG({ size, color }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill={color}>
+      <path d="M3 2h10v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V2zm3 10h4v1H6v-1zm1-4v4m2-4v4M2 3h1v2H2V3zm12 0h-1v2h1V3z" />
+    </svg>
+  );
+}
 
 // --- MAIN PAGE ---
 export default function StatisticsPage() {
@@ -50,31 +79,31 @@ export default function StatisticsPage() {
   const [history, setHistory] = useState([]);
   const [nationalities, setNationalities] = useState([]);
   const [circuits, setCircuits] = useState([]);
-  
-  // Stato per gestire quale sezione è aperta
   const [openSection, setOpenSection] = useState('winners');
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [resultsRes, driversRes, historicalRes, racesRes] = await Promise.all([
+        const [resultsRes, driversRes, historicalRes, racesRes, circuitsRes] = await Promise.all([
           fetch('/data/f1db-races-race-results.json'),
           fetch('/data/f1db-drivers.json'),
           fetch('/data/ferrari_historical.json'),
-          fetch('/data/f1db-races.json')
+          fetch('/data/f1db-races.json'),
+          fetch('/data/f1db-circuits.json')
         ]);
         
         const results = await resultsRes.json();
         const driversData = await driversRes.json();
         const historical = await historicalRes.json();
         const racesData = await racesRes.json();
+        const circuitsDataRaw = await circuitsRes.json();
 
         const driverMap = {};
         driversData.forEach(d => driverMap[d.id] = d);
 
         const ferrariWins = results.filter(r => r.constructorId === 'ferrari' && r.positionNumber === 1);
 
-        // 1. Process Winners
+        // 1. Winners logic
         const winnersAgg = ferrariWins.reduce((acc, curr) => {
           const d = driverMap[curr.driverId];
           const name = d ? `${d.firstName} ${d.lastName}` : curr.driverId;
@@ -83,41 +112,24 @@ export default function StatisticsPage() {
           acc[name].years.add(curr.year);
           return acc;
         }, {});
+        setPilotWins(Object.values(winnersAgg).map(item => ({...item, yearsArray: Array.from(item.years).sort((a,b) => b-a)}))
+          .sort((a,b) => b.count - a.count).slice(0, 10));
 
-        setPilotWins(Object.values(winnersAgg)
-          .map(item => ({
-            ...item,
-            yearsArray: Array.from(item.years).sort((a,b) => b-a) // Trasformiamo qui il Set in Array
-          }))
-          .sort((a,b) => b.count - a.count)
-          .slice(0, 10)
-        );
-
-        // 2. Process Nationalities
+        // 2. Nationalities logic
         const ferrariDriverIds = [...new Set(results.filter(r => r.constructorId === 'ferrari').map(r => r.driverId))];
-
         const natAgg = ferrariDriverIds.reduce((acc, dId) => {
-        const driver = driverMap[dId];
-        const natId = driver?.nationalityCountryId || 'unknown';
-        acc[natId] = (acc[natId] || 0) + 1;
-        return acc;
+          const natId = driverMap[dId]?.nationalityCountryId || 'unknown';
+          acc[natId] = (acc[natId] || 0) + 1;
+          return acc;
         }, {});
+        setNationalities(Object.entries(natAgg).map(([id, value]) => ({ 
+            id, name: id.replace(/-/g, ' ').toUpperCase(), value,
+            color: countryConfig[id]?.color || '#555', flag: countryConfig[id]?.code || 'un'
+        })).sort((a, b) => b.value - a.value));
 
-        setNationalities(Object.entries(natAgg)
-        .map(([id, value]) => ({ 
-            id,
-            name: id.replace(/-/g, ' ').toUpperCase(), 
-            value,
-            color: countryConfig[id]?.color || '#555',
-            flag: countryConfig[id]?.code || 'un'
-        }))
-        .sort((a, b) => b.value - a.value)
-        );
-
-        // 3. Process Circuits (Wins per Circuit)
+        // 3. Circuits logic
         const circDetailsMap = {};
-        circuitsData.forEach(c => circDetailsMap[c.id] = c);
-        
+        circuitsDataRaw.forEach(c => circDetailsMap[c.id] = c);
         const raceToCircuit = {};
         racesData.forEach(r => raceToCircuit[r.id] = r.circuitId);
 
@@ -132,15 +144,12 @@ export default function StatisticsPage() {
             return {
                 id,
                 wins,
-                name: circDetailsMap[id]?.name || id.toUpperCase(),
-                flag: countryConfig[countryId]?.code || 'un',
                 color: countryConfig[countryId]?.color || '#DC0000',
                 fullInfo: { name: circDetailsMap[id]?.name || id, flag: countryConfig[countryId]?.code || 'un' }
             };
         }).sort((a,b) => b.wins - a.wins).slice(0, 10));
 
         setHistory(historical.filter(h => h.points !== null));
-
       } catch (err) { console.error(err); }
       setLoading(false);
     }
@@ -154,35 +163,19 @@ export default function StatisticsPage() {
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-red-600">
       <Navigation />
-      
       <main className="max-w-7xl mx-auto px-4 pt-32 pb-20">
-        <Link href="/" className="group inline-flex items-center gap-2 text-zinc-600 hover:text-red-500 transition-all mb-12">
-          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-[10px] font-black uppercase tracking-widest italic font-mono">Back to HQ</span>
-        </Link>
-
-        <header className="mb-24 relative px-6">
-          <div className="absolute left-0 top-0 w-2 h-full bg-red-600 shadow-[0_0_25px_rgba(220,0,0,0.6)]" />
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <h1 className="text-red-600 font-black text-xs uppercase tracking-[0.6em] mb-4">Intelligence & Performance</h1>
+        
+        <header className="mb-24 relative px-6 text-center">
+            <h1 className="text-red-600 font-black text-xs uppercase tracking-[0.6em] mb-4 italic">Historical Intelligence</h1>
             <h2 className="text-6xl md:text-9xl font-black uppercase italic tracking-tighter leading-[0.85]">
               Scuderia <br /><span className="text-zinc-800">Data Vault</span>
             </h2>
-          </motion.div>
         </header>
 
         <div className="flex flex-col gap-8">
           
-          {/* --- SEZIONE 1: WINNERS CIRCLE --- */}
-          <AccordionSection 
-            id="winners" 
-            title="Winners Circle" 
-            subtitle="Classifica vittorie e cronologia per pilota"
-            icon={Trophy}
-            isOpen={openSection === 'winners'}
-            onToggle={() => toggleSection('winners')}
-            color="yellow"
-          >
+          {/* WINNERS CIRCLE */}
+          <AccordionSection id="winners" title="Winners Circle" subtitle="Classifica vittorie e cronologia per pilota" icon={Trophy} isOpen={openSection === 'winners'} onToggle={() => toggleSection('winners')} color="yellow">
             <div className="overflow-x-auto">
               <div className="min-w-[800px]">
                 <div className="grid grid-cols-12 gap-4 p-6 border-b border-white/10 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
@@ -193,15 +186,11 @@ export default function StatisticsPage() {
                 </div>
                 <div className="divide-y divide-white/5">
                   {pilotWins.map((driver, index) => (
-                    <div key={driver.id} className="grid grid-cols-12 gap-4 p-8 hover:bg-white/5 transition-all items-center">
+                    <div key={driver.id} className="grid grid-cols-12 gap-4 p-8 hover:bg-white/5 transition-all items-center group">
                       <div className="col-span-1 text-center text-3xl font-black italic text-zinc-800">{index + 1}</div>
                       <div className="col-span-2 flex flex-col items-center gap-2">
                         <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-zinc-800 shadow-xl bg-zinc-800">
-                          <img 
-                            src={`/data/ferrari-drivers/${normalizeDriverName(driver.name)}.jpg`} 
-                            className="w-full h-full object-cover" 
-                            onError={(e) => { e.target.src = "https://www.formula1.com/etc/designs/f1om/images/driver-listing-face-placeholder.png"; }}
-                          />
+                          <img src={`/data/ferrari-drivers/${normalizeDriverName(driver.name)}.jpg`} className="w-full h-full object-cover" onError={(e) => { e.target.src = "https://www.formula1.com/etc/designs/f1om/images/driver-listing-face-placeholder.png"; }} />
                         </div>
                         <span className="font-black uppercase italic text-[10px] text-white">{driver.name.split(' ').pop()}</span>
                       </div>
@@ -228,121 +217,39 @@ export default function StatisticsPage() {
             </div>
           </AccordionSection>
 
-          {/* --- SEZIONE 2: PERFORMANCE TIMELINE --- */}
-          <AccordionSection 
-            id="timeline" 
-            title="Performance Timeline" 
-            subtitle="Evoluzione punti costruttori annuali"
-            icon={Activity}
-            isOpen={openSection === 'timeline'}
-            onToggle={() => toggleSection('timeline')}
-            color="red"
-          >
-            <div className="h-[450px] w-full p-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={history}>
-                  <defs>
-                    <linearGradient id="ferrariGlow" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#DC0000" stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor="#DC0000" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
-                  <XAxis dataKey="year" stroke="#444" fontSize={11} tickMargin={15} axisLine={false} />
-                  <YAxis stroke="#444" fontSize={11} axisLine={false} />
-                  <Tooltip contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid #333', borderRadius: '12px' }} />
-                  <Area type="monotone" dataKey="points" stroke="#DC0000" strokeWidth={3} fillOpacity={1} fill="url(#ferrariGlow)" />
-                </AreaChart>
-              </ResponsiveContainer>
+          {/* GLOBAL DNA */}
+          <AccordionSection id="dna" title="Global DNA" subtitle="Provenienza dei piloti Ferrari" icon={Globe2} isOpen={openSection === 'dna'} onToggle={() => toggleSection('dna')} color="red">
+            <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12 p-4">
+                <div className="h-[400px] relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie data={nationalities} innerRadius={90} outerRadius={140} paddingAngle={3} dataKey="value" nameKey="name" stroke="none">
+                                {nationalities.map((entry, index) => <Cell key={index} fill={entry.color} />)}
+                            </Pie>
+                            <Tooltip contentStyle={{backgroundColor: '#000', borderRadius: '10px', border: 'none'}} />
+                        </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                        <span className="text-4xl font-black italic text-white">{nationalities.reduce((a, b) => a + b.value, 0)}</span>
+                        <span className="text-[8px] font-black uppercase text-red-600 tracking-widest">Drivers</span>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {nationalities.slice(0, 12).map((n) => (
+                        <div key={n.id} className="flex items-center gap-4 bg-zinc-900/40 border border-white/5 p-4 rounded-2xl group hover:border-red-600/30 transition-all">
+                            <img src={`https://flagcdn.com/w80/${n.flag}.png`} className="w-8 h-5 object-cover rounded-sm shadow-sm border border-white/10" alt={n.name} />
+                            <div className="flex flex-col">
+                                <span className="font-black uppercase text-[10px] text-zinc-400 group-hover:text-white">{n.name}</span>
+                                <span className="font-mono text-xs text-white font-bold">{n.value} Piloti</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
           </AccordionSection>
 
-          {/* --- SEZIONE 3: GLOBAL DNA (NAZIONALITA') --- */}
-            <AccordionSection 
-            id="dna" 
-            title="Global DNA" 
-            subtitle="Distribuzione geografica dei piloti della Scuderia"
-            icon={Globe2}
-            isOpen={openSection === 'dna'}
-            onToggle={() => toggleSection('dna')}
-            color="red"
-            >
-            <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12 p-4">
-                {/* Grafico a Torta */}
-                <div className="h-[400px] relative">
-                <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                    <Pie 
-                        data={nationalities} 
-                        innerRadius={90} 
-                        outerRadius={140} 
-                        paddingAngle={3} 
-                        dataKey="value" 
-                        nameKey="name"
-                        stroke="none"
-                    >
-                        {nationalities.map((entry, index) => (
-                        <Cell 
-                            key={`cell-${index}`} 
-                            fill={entry.color} 
-                            className="hover:opacity-80 transition-opacity cursor-pointer outline-none"
-                        />
-                        ))}
-                    </Pie>
-                    <Tooltip 
-                        content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                            return (
-                            <div className="bg-black/90 border border-white/10 p-3 rounded-lg shadow-2xl backdrop-blur-md">
-                                <p className="text-[10px] font-black text-zinc-500 uppercase mb-1">{payload[0].name}</p>
-                                <p className="text-xl font-black text-white">{payload[0].value} <span className="text-xs font-medium text-zinc-400">Piloti</span></p>
-                            </div>
-                            );
-                        }
-                        return null;
-                        }}
-                    />
-                    </PieChart>
-                </ResponsiveContainer>
-                {/* Contatore Centrale */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-4xl font-black italic tracking-tighter text-white">
-                        {nationalities.reduce((a, b) => a + b.value, 0)}
-                    </span>
-                    <span className="text-[8px] font-black uppercase tracking-widest text-red-600">Total Drivers</span>
-                </div>
-                </div>
-                
-                {/* Legenda con Bandierine */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {nationalities.slice(0, 12).map((n) => (
-                    <div key={n.id} className="flex items-center gap-4 bg-zinc-900/40 border border-white/5 p-4 rounded-2xl group hover:border-red-600/30 transition-all">
-                    <div className="relative w-8 h-6 overflow-hidden rounded-sm shadow-sm">
-                        <img 
-                        src={`https://flagcdn.com/w80/${n.flag}.png`} 
-                        alt={n.name}
-                        className="w-full h-full object-cover"
-                        />
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="font-black uppercase text-[10px] tracking-tight text-zinc-400 group-hover:text-white transition-colors">
-                            {n.name}
-                        </span>
-                        <div className="flex items-center gap-2">
-                            <div className="h-1 w-12 rounded-full bg-zinc-800 overflow-hidden">
-                                <div className="h-full bg-current" style={{ width: `${(n.value / nationalities[0].value) * 100}%`, color: n.color }} />
-                            </div>
-                            <span className="font-mono text-xs text-white font-bold">{n.value}</span>
-                        </div>
-                    </div>
-                    </div>
-                ))}
-                </div>
-            </div>
-            </AccordionSection>
-
-          {/* --- SEZIONE 4: FORTRESS MARANELLO (CIRCUITI) --- */}
-          <AccordionSection id="circuits" title="Fortress Maranello" subtitle="I tracciati con più vittorie Ferrari" icon={Landmark} isOpen={openSection === 'circuits'} onToggle={() => toggleSection('circuits')} color="yellow">
+          {/* FORTRESS MARANELLO */}
+          <AccordionSection id="circuits" title="Fortress Maranello" subtitle="I tracciati con più vittorie" icon={Landmark} isOpen={openSection === 'circuits'} onToggle={() => toggleSection('circuits')} color="yellow">
              <div className="h-[500px] w-full p-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={circuits} layout="vertical" margin={{ left: 140, right: 40 }}>
@@ -353,6 +260,7 @@ export default function StatisticsPage() {
                         tick={<CircuitTick />} 
                         width={1}
                         axisLine={false} 
+                        interval={0}
                     />
                     <Tooltip 
                         cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} 
@@ -376,53 +284,28 @@ export default function StatisticsPage() {
   );
 }
 
-// --- HELPER COMPONENT: ACCORDION SECTION ---
-function AccordionSection({ id, title, subtitle, icon: Icon, children, isOpen, onToggle, color }) {
+// --- ACCORDION COMPONENT ---
+function AccordionSection({ title, subtitle, icon: Icon, children, isOpen, onToggle, color }) {
   const iconColor = color === 'yellow' ? 'bg-yellow-500 text-black' : 'bg-red-600 text-white';
-  const borderColor = isOpen ? 'border-red-600/50 shadow-[0_0_40px_rgba(220,0,0,0.1)]' : 'border-white/5';
-
   return (
-    <div className={`transition-all duration-700 border ${borderColor} rounded-[32px] overflow-hidden bg-zinc-900/30 backdrop-blur-xl shadow-2xl`}>
-      <button 
-        onClick={onToggle}
-        className={`w-full flex items-center justify-between p-6 md:p-8 text-left transition-all duration-500 ${isOpen ? 'bg-white/5' : 'hover:bg-white/5'}`}
-      >
+    <div className={`transition-all duration-700 border ${isOpen ? 'border-red-600/50' : 'border-white/5'} rounded-[32px] overflow-hidden bg-zinc-900/30 backdrop-blur-xl shadow-2xl`}>
+      <button onClick={onToggle} className="w-full flex items-center justify-between p-6 md:p-8 text-left hover:bg-white/5 transition-colors">
         <div className="flex items-center gap-6">
-          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform duration-500 ${isOpen ? 'scale-110' : ''} ${iconColor}`}>
-            <Icon className="w-7 h-7" />
-          </div>
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg ${iconColor}`}><Icon className="w-7 h-7" /></div>
           <div>
             <h3 className="text-2xl font-black uppercase italic leading-none mb-1 tracking-tight">{title}</h3>
             <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">{subtitle}</p>
           </div>
         </div>
-        <div className={`transition-transform duration-500 ${isOpen ? 'rotate-180' : 'rotate-0'}`}>
-          <ChevronDown className={`w-6 h-6 ${isOpen ? 'text-red-500' : 'text-zinc-700'}`} />
-        </div>
+        <motion.div animate={{ rotate: isOpen ? 180 : 0 }}><ChevronDown className="w-6 h-6 text-zinc-700" /></motion.div>
       </button>
-
-      <AnimatePresence initial={false}>
+      <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.6, ease: [0.04, 0.62, 0.23, 0.98] }}
-          >
-            <div className="p-4 md:p-10 border-t border-white/5 bg-black/20">
-              {children}
-            </div>
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.5, ease: "circOut" }}>
+            <div className="p-4 md:p-10 border-t border-white/5 bg-black/20">{children}</div>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
   );
-}
-
-function TrophySVG({ size, color }) {
-    return (
-      <svg width={size} height={size} viewBox="0 0 16 16" fill={color}>
-        <path d="M3 2h10v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V2zm3 10h4v1H6v-1zm1-4v4m2-4v4M2 3h1v2H2V3zm12 0h-1v2h1V3z" />
-      </svg>
-    );
 }
