@@ -724,8 +724,8 @@ export default function StatisticsPage() {
                 </div>
             </div>
             </AccordionSection>
-
-          {/* --- SEZIONE 4: Fortress Maranello --- */}
+            
+            {/* --- SEZIONE 4: Fortress Maranello --- */}
             <AccordionSection 
             id="circuits" 
             title="Fortress Maranello" 
@@ -781,53 +781,94 @@ export default function StatisticsPage() {
                     }}
                     />
                     <Tooltip 
-                        cursor={{ fill: 'rgba(255, 215, 0, 0.05)' }}
-                        content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                            const circuit = payload[0].payload;
-                            const flagCode = getFlagCodeFromCircuit(circuit.originalName || circuit.name);
-                            const countryColor = getCountryColor(circuit.originalName || circuit.name);
+                    cursor={{ fill: 'rgba(255, 215, 0, 0.05)' }}
+                    content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                        const circuit = payload[0].payload;
+                        const flagCode = getFlagCodeFromCircuit(circuit.originalName || circuit.name);
+                        const countryColor = getCountryColor(circuit.originalName || circuit.name);
+                        
+                        // Calcola la percentuale massima per la barra
+                        const maxWins = Math.max(...circuits.map(c => c.wins));
+                        const percentage = (circuit.wins / maxWins) * 100;
+                        
+                        return (
+                            <div className="bg-black/95 border border-yellow-500/30 p-4 rounded-lg shadow-2xl backdrop-blur-sm min-w-[250px]">
+                            <div className="flex items-center gap-3 mb-4">
+                                {flagCode && (
+                                <div 
+                                    className="w-10 h-7 overflow-hidden rounded-sm flex-shrink-0 border-2"
+                                    style={{ borderColor: countryColor }}
+                                >
+                                    <img 
+                                    src={`https://flagcdn.com/w80/${flagCode}.png`}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                )}
+                                <div>
+                                <p className="text-[9px] font-black uppercase text-zinc-400 tracking-widest mb-1">CIRCUITO</p>
+                                <p className="text-lg font-black text-white leading-tight">{circuit.originalName || circuit.name}</p>
+                                </div>
+                            </div>
                             
-                            return (
-                                <div className="bg-black/95 border border-yellow-500/30 p-4 rounded-lg shadow-2xl backdrop-blur-sm min-w-[200px]">
-                                <div className="flex items-center gap-3 mb-3">
-                                    {flagCode && (
-                                    <div 
-                                        className="w-8 h-6 overflow-hidden rounded-sm flex-shrink-0 border"
-                                        style={{ borderColor: `${countryColor}50` }}
-                                    >
-                                        <img 
-                                        src={`https://flagcdn.com/w80/${flagCode}.png`}
-                                        alt=""
-                                        className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                    )}
-                                    <div>
-                                    <p className="text-[10px] font-black uppercase text-zinc-500 tracking-widest mb-1">CIRCUITO</p>
-                                    <p className="text-lg font-black text-white">{circuit.originalName || circuit.name}</p>
+                            <div className="space-y-4">
+                                <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">VITTORIE</span>
+                                    <div className="flex items-center gap-2">
+                                    <TrophySVG size={16} color={GOLD} />
+                                    <span className="text-2xl font-black italic" style={{ color: countryColor }}>
+                                        {circuit.wins}
+                                    </span>
                                     </div>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                    <p className="text-[8px] font-black uppercase text-zinc-500 tracking-widest">VITTORIE</p>
-                                    <p className="text-2xl font-black italic" style={{ color: countryColor }}>
-                                        {circuit.wins}
-                                    </p>
-                                    </div>
-                                    <div className="relative">
-                                    <TrophySVG size={24} color={GOLD} />
+                                
+                                {/* BARRA COLORATA */}
+                                <div className="w-full h-3 bg-zinc-800 rounded-full overflow-hidden">
                                     <div 
-                                        className="absolute -inset-1 rounded-full blur-sm opacity-20"
+                                    className="h-full rounded-full transition-all duration-700"
+                                    style={{ 
+                                        width: `${percentage}%`,
+                                        background: `linear-gradient(90deg, ${countryColor} 0%, ${countryColor}80 100%)`,
+                                        boxShadow: `0 0 10px ${countryColor}80`
+                                    }}
+                                    />
+                                </div>
+                                
+                                {/* INDICATORI NUMERICI SOTTO LA BARRA */}
+                                <div className="flex justify-between mt-1">
+                                    <span className="text-[8px] text-zinc-500 font-bold">0</span>
+                                    <div className="flex items-center gap-1">
+                                    <span className="text-[8px] text-zinc-400 font-bold">Max:</span>
+                                    <span className="text-[9px] text-white font-black">{maxWins}</span>
+                                    </div>
+                                </div>
+                                </div>
+                                
+                                {/* INDICATORE DI PROGRESSO NUMERICO */}
+                                <div className="pt-3 border-t border-white/10">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">PERCENTUALE</span>
+                                    <div className="flex items-center gap-1">
+                                    <div 
+                                        className="w-3 h-3 rounded-full"
                                         style={{ backgroundColor: countryColor }}
                                     />
+                                    <span className="text-xl font-black text-white">{percentage.toFixed(1)}%</span>
                                     </div>
                                 </div>
+                                <div className="mt-2 text-[9px] text-zinc-500">
+                                    {circuit.wins} vittorie su {maxWins} possibili
                                 </div>
-                            );
-                            }
-                            return null;
-                        }}
+                                </div>
+                            </div>
+                            </div>
+                        );
+                        }
+                        return null;
+                    }}
                     />
                     <Bar 
                     dataKey="wins" 
@@ -839,7 +880,6 @@ export default function StatisticsPage() {
                         const circuit = circuits.find(c => c.name === entry.name);
                         const circuitName = circuit?.originalName || entry.name;
                         const color = getCountryColor(circuitName);
-                        console.log('Circuit:', circuitName, 'Color:', color); // Debug
                         return color;
                     }}
                     />
