@@ -417,6 +417,7 @@ export default function StatisticsPage() {
   };
 
     const CircuitTick = ({ x, y, payload }) => {
+    // Recuperiamo i dati del circuito usando l'indice della riga attuale
     const circuit = circuits[payload.index];
     if (!circuit) return null;
 
@@ -430,7 +431,7 @@ export default function StatisticsPage() {
             height="18"
             href={`https://flagcdn.com/w80/${circuit.flag}.png`}
         />
-        {/* NOME STATO*/}
+        {/* NOME STATO */}
         <text 
             x="-140" 
             y="4" 
@@ -753,7 +754,7 @@ useEffect(() => {
                 <BarChart 
                 data={circuits} 
                 layout="vertical" 
-                margin={{ left: 180, right: 60, top: 20, bottom: 20 }} // Aumentato left a 180
+                margin={{ left: 180, right: 60, top: 20, bottom: 20 }} 
                 >
                     <XAxis 
                         type="number" 
@@ -779,7 +780,7 @@ useEffect(() => {
                                 <img src={`https://flagcdn.com/w40/${flagCode}.png`} className="w-full h-full object-cover" />
                                 </div>
                             </foreignObject>
-                            {/* Spostiamo il testo più a sinistra (x - 100) per dare spazio alla barra */}
+                            {/* */}
                             <text x={x - 100} y={y + 4} fill="#eee" fontSize={11} fontWeight="900" textAnchor="start" className="uppercase italic">
                                 {payload.value}
                             </text>
@@ -791,24 +792,18 @@ useEffect(() => {
                         interval={0}
                     />
                     <Tooltip 
-                    cursor={{ fill: 'rgba(255, 255, 255, 0.12)' }} 
-                    content={({ active, payload }) => {
+                        cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} 
+                        content={({ active, payload }) => {
                         if (active && payload && payload.length) {
-                            const circuit = payload[0].payload;
-                            const circuitName = circuit.originalName || circuit.name;
-                            const flagCode = getFlagCodeFromCircuit(circuitName);
-                            const barColor = getCountryColor(circuitName);
-                            
+                            const data = payload[0].payload;
                             return (
-                            <div className="bg-zinc-800 border border-white/10 p-4  rounded-lg shadow-2xl backdrop-blur-sm min-w-[220px]">
-                                <div className="flex items-center gap-3 mb-3">
-                                <img src={`https://flagcdn.com/w80/${flagCode}.png`} className="w-8 h-5 object-cover rounded-sm" />
-                                <p className="text-lg font-black text-white italic">{circuitName}</p>
+                            // SFONDO GRIGIO SCURO (zinc-800)
+                            <div className="bg-zinc-800 border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-md">
+                                <div className="flex items-center gap-3 mb-2">
+                                <img src={`https://flagcdn.com/w80/${data.flag}.png`} className="w-6 h-4 object-cover" />
+                                <p className="text-sm font-black text-white uppercase italic">{data.name}</p>
                                 </div>
-                                <div className="flex justify-between items-end border-t border-white/10 pt-3">
-                                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Vittorie</span>
-                                <span className="text-2xl font-black italic" style={{ color: barColor }}>{circuit.wins}</span>
-                                </div>
+                                <p className="text-2xl font-black text-red-500">{data.wins} <span className="text-xs text-zinc-400 uppercase">Wins</span></p>
                             </div>
                             );
                         }
@@ -816,7 +811,7 @@ useEffect(() => {
                         }}
                     />
                     
-                    {/* LOGICA PER COLORARE LE BARRE IN BASE ALLO STATO */}
+                    {/* */}
                     <Bar dataKey="wins" radius={[0, 10, 10, 0]} barSize={25}>
                         {circuits.map((entry, index) => {
                         const circuitName = entry.originalName || entry.name;
