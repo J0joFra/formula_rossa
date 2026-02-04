@@ -813,11 +813,14 @@ export default function StatisticsPage() {
                     />
                     <Bar 
                     dataKey="wins" 
-                    fill={GOLD} 
                     radius={[0, 10, 10, 0]} 
                     barSize={25}
                     animationDuration={1500}
                     animationBegin={300}
+                    fill={(entry) => {
+                        const circuit = circuits.find(c => c.name === entry.name);
+                        return getCountryColor(circuit?.originalName || entry.name);
+                    }}
                     />
                 </BarChart>
                 </ResponsiveContainer>
