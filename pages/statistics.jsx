@@ -819,7 +819,10 @@ export default function StatisticsPage() {
                     animationBegin={300}
                     fill={(entry) => {
                         const circuit = circuits.find(c => c.name === entry.name);
-                        return getCountryColor(circuit?.originalName || entry.name);
+                        const circuitName = circuit?.originalName || entry.name;
+                        const color = getCountryColor(circuitName);
+                        console.log('Circuit:', circuitName, 'Color:', color); // Debug
+                        return color;
                     }}
                     />
                 </BarChart>
