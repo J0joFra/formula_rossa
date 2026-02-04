@@ -98,8 +98,9 @@ export default function StatisticsPage() {
         'monaco': { code: 'mc', color: '#E20919' },
         'argentina': { code: 'ar', color: '#75AADB' },
         'switzerland': { code: 'ch', color: '#D52B1E' },
-        'belgium': { code: 'be', color: '#000000' },
+        'belgium': { code: 'be', color: '#000014' },
         'south-africa': { code: 'za', color: '#007A4D' },
+        'mexico': {code:'mx', color: '#006847'},
         'unknown': { code: 'un', color: '#333' }
         };
 
