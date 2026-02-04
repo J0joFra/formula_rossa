@@ -387,7 +387,9 @@ const getFlagCodeFromCircuit = (circuitName) => {
 
 // Funzione per ottenere il colore dalla bandiera
 const getCountryColor = (circuitName) => {
-  const normalized = circuitName?.toLowerCase()
+  if (!circuitName) return '#FFD700'; // Fallback a oro
+  
+  const normalized = circuitName.toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
@@ -396,11 +398,27 @@ const getCountryColor = (circuitName) => {
   
   if (circuitToCountry[normalized]) {
     const country = circuitToCountry[normalized];
-    return countryConfig[country]?.color || '#666';
+    return countryConfig[country]?.color || '#FFD700';
   }
   
-  // Default color per circuiti sconosciuti
-  return '#666';
+  const flagCode = getFlagCodeFromCircuit(circuitName);
+  if (flagCode) {
+    const countryEntry = Object.entries(countryConfig).find(([key, value]) => value.code === flagCode);
+    if (countryEntry) {
+      return countryEntry[1].color;
+    }
+  }
+  
+  const circuitIndex = circuits.findIndex(c => 
+    c.originalName === circuitName || c.name === circuitName
+  );
+  if (circuitIndex >= 0) {
+    // Usa una gradiente di rosso Ferrari
+    const redShades = ['#DC0000', '#FF2800', '#FF5E5E', '#FF8C8C'];
+    return redShades[circuitIndex % redShades.length];
+  }
+  
+  return '#FFD700'; // Fallback gold
 };
 
 // --- MAIN PAGE ---
