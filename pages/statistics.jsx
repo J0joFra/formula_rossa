@@ -48,7 +48,7 @@ const countryConfig = {
   'monaco': { code: 'mc', color: '#E20919' },
   'argentina': { code: 'ar', color: '#75AADB' },
   'switzerland': { code: 'ch', color: '#D52B1E' },
-  'belgium': { code: 'be', color: '#000014' },
+  'belgium': { code: 'be', color: '#F1BF00' },
   'south-africa': { code: 'za', color: '#007A4D' },
   'mexico': { code: 'mx', color: '#006847' },
   'netherlands': { code: 'nl', color: '#21468B' },
@@ -494,10 +494,7 @@ export default function StatisticsPage() {
         return acc;
         }, {});
 
-        setCircuits(
-        Object.values(circAgg)
-            .sort((a, b) => b.wins - a.wins)
-        );
+        setCircuits(Object.values(circAgg).sort((a, b) => b.wins - a.wins));
 
         setHistory(historical.filter(h => h.points !== null));
 
@@ -713,7 +710,7 @@ export default function StatisticsPage() {
             >
             <div className="h-[450px] w-full p-8">
                 <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={circuits} layout="vertical" margin={{ left: 140, right: 180 }}>
+                <BarChart data={circuits} layout="vertical" margin={{ left: 200, right: 40 }}>
                     <XAxis 
                         type="number" 
                         stroke="#666" 
@@ -732,8 +729,8 @@ export default function StatisticsPage() {
                         
                         return (
                             <g>
-                            {/* Spostiamo la bandiera più a sinistra (x - 130) */}
-                            <foreignObject x={x - 130} y={y - 12} width={24} height={16}>
+                            {/*  */}
+                            <foreignObject x={x - 190} y={y - 12} width={24} height={16}>
                                 <div className="w-6 h-4 overflow-hidden rounded-sm shadow-sm">
                                 <img src={`https://flagcdn.com/w40/${flagCode}.png`} className="w-full h-full object-cover" />
                                 </div>
@@ -759,7 +756,7 @@ export default function StatisticsPage() {
                             const barColor = getCountryColor(circuitName);
                             
                             return (
-                            <div className="bg-black/95 border border-white/10 p-4 rounded-lg shadow-2xl backdrop-blur-sm min-w-[220px]">
+                            <div className="bg-zinc-800 border border-white/10 p-4  rounded-lg shadow-2xl backdrop-blur-sm min-w-[220px]">
                                 <div className="flex items-center gap-3 mb-3">
                                 <img src={`https://flagcdn.com/w80/${flagCode}.png`} className="w-8 h-5 object-cover rounded-sm" />
                                 <p className="text-lg font-black text-white italic">{circuitName}</p>
