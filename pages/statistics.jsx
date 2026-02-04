@@ -405,9 +405,29 @@ export default function StatisticsPage() {
   const [history, setHistory] = useState([]);
   const [nationalities, setNationalities] = useState([]);
   const [circuits, setCircuits] = useState([]);
-  
-  // Stato per gestire quale sezione è aperta
   const [openSection, setOpenSection] = useState('winners');
+
+  const getCountryColor = (circuitName) => {
+    if (!circuitName) return '#FFD700';
+    const lowerName = circuitName.toLowerCase();
+    const flagCode = getFlagCodeFromCircuit(circuitName);
+    const countryEntry = Object.entries(countryConfig).find(([key, value]) => value.code === flagCode);
+    if (countryEntry) return countryEntry[1].color;
+    return '#DC0000'; 
+  };
+
+  const CircuitTick = ({ x, y, payload }) => {
+    const circuit = circuits.find(c => c.name === payload.value);
+    if (!circuit) return null;
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <image x="-165" y="-12" width="24" height="16" href={`https://flagcdn.com/w40/${circuit.flag}.png`} />
+        <text x="-135" y="4" fill="#eee" fontSize={10} fontWeight="900" textAnchor="start" className="uppercase italic">
+          {payload.value}
+        </text>
+      </g>
+    );
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -647,17 +667,19 @@ export default function StatisticsPage() {
                         ))}
                     </Pie>
                     <Tooltip 
-                        content={({ active, payload }) => {
+                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} 
+                    content={({ active, payload }) => {
                         if (active && payload && payload.length) {
-                            return (
-                            <div className="bg-black/90 border border-white/10 p-3 rounded-lg shadow-2xl backdrop-blur-md">
-                                <p className="text-[10px] font-black text-zinc-500 uppercase mb-1">{payload[0].name}</p>
-                                <p className="text-xl font-black text-white">{payload[0].value} <span className="text-xs font-medium text-zinc-400">Piloti</span></p>
+                        return (
+                            // CAMBIA bg-black in bg-zinc-800
+                            <div className="bg-zinc-800 border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-md">
+                            <p className="text-[10px] font-black text-zinc-400 uppercase mb-1">{payload[0].payload.name}</p>
+                            <p className="text-2xl font-black text-white italic">{payload[0].value} <span className="text-xs uppercase text-zinc-500">Wins</span></p>
                             </div>
-                            );
+                        );
                         }
                         return null;
-                        }}
+                    }}
                     />
                     </PieChart>
                 </ResponsiveContainer>
