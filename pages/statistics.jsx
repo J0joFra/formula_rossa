@@ -791,18 +791,24 @@ useEffect(() => {
                         interval={0}
                     />
                     <Tooltip 
-                        cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} 
-                        content={({ active, payload }) => {
+                    cursor={{ fill: 'rgba(255, 255, 255, 0.12)' }} 
+                    content={({ active, payload }) => {
                         if (active && payload && payload.length) {
-                            const data = payload[0].payload;
+                            const circuit = payload[0].payload;
+                            const circuitName = circuit.originalName || circuit.name;
+                            const flagCode = getFlagCodeFromCircuit(circuitName);
+                            const barColor = getCountryColor(circuitName);
+                            
                             return (
-                            // SFONDO GRIGIO SCURO (zinc-800)
-                            <div className="bg-zinc-800 border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-md">
-                                <div className="flex items-center gap-3 mb-2">
-                                <img src={`https://flagcdn.com/w80/${data.flag}.png`} className="w-6 h-4 object-cover" />
-                                <p className="text-sm font-black text-white uppercase italic">{data.name}</p>
+                            <div className="bg-zinc-800 border border-white/10 p-4  rounded-lg shadow-2xl backdrop-blur-sm min-w-[220px]">
+                                <div className="flex items-center gap-3 mb-3">
+                                <img src={`https://flagcdn.com/w80/${flagCode}.png`} className="w-8 h-5 object-cover rounded-sm" />
+                                <p className="text-lg font-black text-white italic">{circuitName}</p>
                                 </div>
-                                <p className="text-2xl font-black text-red-500">{data.wins} <span className="text-xs text-zinc-400 uppercase">Wins</span></p>
+                                <div className="flex justify-between items-end border-t border-white/10 pt-3">
+                                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Vittorie</span>
+                                <span className="text-2xl font-black italic" style={{ color: barColor }}>{circuit.wins}</span>
+                                </div>
                             </div>
                             );
                         }
