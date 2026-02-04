@@ -118,13 +118,23 @@ export default function HeroSection() {
 
         {/* Scroll indicator */}
         <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="cursor-pointer"
-          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+          className="mt-20"
         >
-          <div className="text-gray-500 text-[10px] uppercase font-black tracking-[0.4em] mb-2">Scroll to Explore</div>
-          <ChevronDown className="w-6 h-6 text-red-600 mx-auto" />
+          <Link href="/statistics">
+            <div className="group relative inline-flex flex-col items-center cursor-pointer">
+              <div className="text-zinc-500 text-[10px] uppercase font-black tracking-[0.4em] mb-4 group-hover:text-red-600 transition-colors">
+                View Full Analytics
+              </div>
+              <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center group-hover:border-red-600 group-hover:bg-red-600/10 transition-all duration-300">
+                <BarChart3 className="w-5 h-5 text-red-600" />
+              </div>
+              {/* Effetto alone */}
+              <div className="absolute -bottom-4 w-12 h-4 bg-red-600/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </Link>
         </motion.div>
       </div>
     </section>
