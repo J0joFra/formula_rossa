@@ -21,6 +21,85 @@ const normalizeDriverName = (name) => {
     .replace(/[^\w-]/g, '');
 };
 
+const getFlagCodeFromCircuit = (circuitName) => {
+  if (!circuitName) return '';
+  const normalized = circuitName.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+  
+  if (circuitToCountry[normalized]) return circuitToCountry[normalized];
+
+  const lowerName = circuitName.toLowerCase();
+  if (lowerName.includes('abu dhabi') || lowerName.includes('yas marina') || lowerName.includes('dubai') || lowerName.includes('emirates')) return 'ae';
+  if (lowerName.includes('silverstone') || lowerName.includes('brands') || lowerName.includes('donington') || lowerName.includes('aintree') || lowerName.includes('british') || lowerName.includes('england') || lowerName.includes('uk')) return 'gb';
+  if (lowerName.includes('monza') || lowerName.includes('imola') || lowerName.includes('mugello') || lowerName.includes('pescara') || lowerName.includes('italian') || lowerName.includes('italy')) return 'it';
+  if (lowerName.includes('monaco') || lowerName.includes('monte carlo')) return 'mc';
+  if (lowerName.includes('spa') || lowerName.includes('francorchamps') || lowerName.includes('zolder') || lowerName.includes('nivelles') || lowerName.includes('belgian') || lowerName.includes('belgium')) return 'be';
+  if (lowerName.includes('nürburgring') || lowerName.includes('nurburgring') || lowerName.includes('hockenheim') || lowerName.includes('avus') || lowerName.includes('german') || lowerName.includes('germany')) return 'de';
+  if (lowerName.includes('montreal') || lowerName.includes('villeneuve') || lowerName.includes('bowmanville') || lowerName.includes('canadian') || lowerName.includes('canada')) return 'ca';
+  if (lowerName.includes('melbourne') || lowerName.includes('adelaide') || lowerName.includes('albert park') || lowerName.includes('australian') || lowerName.includes('australia')) return 'au';
+  if (lowerName.includes('interlagos') || lowerName.includes('jacarepagua') || lowerName.includes('galvez') || lowerName.includes('brazilian') || lowerName.includes('brazil') || lowerName.includes('são paulo') || lowerName.includes('sao paulo')) return 'br';
+  if (lowerName.includes('mexico') || lowerName.includes('rodriguez') || lowerName.includes('mexican')) return 'mx';
+  if (lowerName.includes('shanghai') || lowerName.includes('chinese') || lowerName.includes('china')) return 'cn';
+  if (lowerName.includes('suzuka') || lowerName.includes('fuji') || lowerName.includes('okayama') || lowerName.includes('japanese') || lowerName.includes('japan')) return 'jp';
+  if (lowerName.includes('bahrain') || lowerName.includes('sakhir')) return 'bh';
+  if (lowerName.includes('jeddah') || lowerName.includes('saudi') || lowerName.includes('ksa')) return 'sa';
+  if (lowerName.includes('miami') || lowerName.includes('austin') || lowerName.includes('americas') || lowerName.includes('cota') || lowerName.includes('indianapolis') || lowerName.includes('sebring') || lowerName.includes('riverside') || lowerName.includes('watkins glen') || lowerName.includes('long beach') || lowerName.includes('phoenix') || lowerName.includes('detroit') || lowerName.includes('dallas') || lowerName.includes('caesars palace') || lowerName.includes('monterey') || lowerName.includes('laguna seca') || lowerName.includes('las vegas') || lowerName.includes('vegas') || lowerName.includes('united states') || lowerName.includes('usa') || lowerName.includes('us')) return 'us';
+  if (lowerName.includes('catalunya') || lowerName.includes('barcelona') || lowerName.includes('valencia') || lowerName.includes('jarama') || lowerName.includes('montjuic') || lowerName.includes('pedralbes') || lowerName.includes('spanish')) return 'es';
+  if (lowerName.includes('red bull ring') || lowerName.includes('spielberg') || lowerName.includes('zeltweg') || lowerName.includes('österreichring') || lowerName.includes('austrian') || lowerName.includes('austria')) return 'at';
+  if (lowerName.includes('hungaroring') || lowerName.includes('hungarian') || lowerName.includes('hungary')) return 'hu';
+  if (lowerName.includes('zandvoort') || lowerName.includes('dutch') || lowerName.includes('netherlands') || lowerName.includes('holland')) return 'nl';
+  if (lowerName.includes('baku') || lowerName.includes('azerbaijan')) return 'az';
+  if (lowerName.includes('marina bay') || lowerName.includes('singapore')) return 'sg';
+  if (lowerName.includes('losail') || lowerName.includes('lusail') || lowerName.includes('qatar')) return 'qa';
+  if (lowerName.includes('le castellet') || lowerName.includes('paul ricard') || lowerName.includes('ricard') || lowerName.includes('rouen') || lowerName.includes('essarts') || lowerName.includes('reims') || lowerName.includes('charade') || lowerName.includes('dijon') || lowerName.includes('magny-cours') || lowerName.includes('lemans') || lowerName.includes('louvre') || lowerName.includes('french') || lowerName.includes('france')) return 'fr';
+  if (lowerName.includes('bremgarten') || lowerName.includes('swiss') || lowerName.includes('switzerland')) return 'ch';
+  if (lowerName.includes('boavista') || lowerName.includes('monsanto') || lowerName.includes('estoril') || lowerName.includes('portimao') || lowerName.includes('portuguese') || lowerName.includes('portugal')) return 'pt';
+  if (lowerName.includes('ain-diab') || lowerName.includes('ain diab') || lowerName.includes('moroccan') || lowerName.includes('morocco')) return 'ma';  
+  if (lowerName.includes('george') || lowerName.includes('kyalami') || lowerName.includes('south african') || lowerName.includes('south africa')) return 'za';
+  if (lowerName.includes('sepang') || lowerName.includes('malaysian') || lowerName.includes('malaysia')) return 'my';
+  if (lowerName.includes('buddh') || lowerName.includes('indian') || lowerName.includes('india')) return 'in';
+  if (lowerName.includes('yeongam') || lowerName.includes('korean') || lowerName.includes('korea')) return 'kr';
+  if (lowerName.includes('istanbul') || lowerName.includes('turkish') || lowerName.includes('turkey')) return 'tr';
+  if (lowerName.includes('sochi') || lowerName.includes('russian') || lowerName.includes('russia')) return 'ru';  
+  return '';
+}; 
+
+const circuitToCountry = {
+  'monza': 'it', 'autodromo-nazionale-di-monza': 'it', 'milan': 'it', 'imola': 'it', 'enzo-e-dino-ferrari': 'it',
+  'mugello': 'it', 'bologna': 'it', 'pescara': 'it', 'silverstone': 'gb', 'silverstone-circuit': 'gb',
+  'northamptonshire': 'gb', 'brands-hatch': 'gb', 'kent': 'gb', 'donington': 'gb', 'aintree': 'gb',
+  'liverpool': 'gb', 'spa': 'be', 'spa-francorchamps': 'be', 'stavelot': 'be', 'zolder': 'be',
+  'heusden-zolder': 'be', 'nivelles': 'be', 'brussels': 'be', 'zandvoort': 'nl', 'circuit-zandvoort': 'nl',
+  'catalunya': 'es', 'barcelona': 'es', 'montmelo': 'es', 'jerez': 'es', 'valencia': 'es',
+  'valencia-street-circuit': 'es', 'pedralbes': 'es', 'montjuic': 'es', 'madrid': 'es', 'jarama': 'es',
+  'hungaroring': 'hu', 'budapest': 'hu', 'mogyorod': 'hu', 'red-bull-ring': 'at', 'spielberg': 'at',
+  'zeltweg': 'at', 'oesterreichring': 'at', 'styria': 'at', 'magny-cours': 'fr', 'nevers': 'fr',
+  'paul-ricard': 'fr', 'le-castellet': 'fr', 'ricard': 'fr', 'reims': 'fr', 'dijon': 'fr',
+  'dijon-prenois': 'fr', 'rouen': 'fr', 'essarts': 'fr', 'charade': 'fr', 'clermont-ferrand': 'fr',
+  'lemans': 'fr', 'nurburgring': 'de', 'nurburg': 'de', 'hockenheimring': 'de', 'hockenheim': 'de',
+  'avus': 'de', 'berlin': 'de', 'estoril': 'pt', 'cascais': 'pt', 'portimao': 'pt',
+  'algarve': 'pt', 'boavista': 'pt', 'oporto': 'pt', 'monsanto': 'pt', 'lisbon': 'pt',
+  'bremgarten': 'ch', 'bern': 'ch', 'anderstorp': 'se', 'scandinavian-raceway': 'se', 'monaco': 'mc',
+  'monte-carlo': 'mc', 'circuit-de-monaco': 'mc', 'bakú': 'az', 'baku': 'az', 'azerbaijan': 'az',
+  'americas': 'us', 'cota': 'us', 'austin': 'us', 'circuit-of-the-americas': 'us', 'miami': 'us',
+  'miami-international-autodrome': 'us', 'vegas': 'us', 'las-vegas': 'us', 'las-vegas-strip': 'us', 'caesars-palace': 'us',
+  'indianapolis': 'us', 'indianapolis-motor-speedway': 'us', 'watkins-glen': 'us', 'long-beach': 'us', 'phoenix': 'us',
+  'detroit': 'us', 'dallas': 'us', 'sebring': 'us', 'riverside': 'us', 'villeneuve': 'ca',
+  'montreal': 'ca', 'circuit-gilles-villeneuve': 'ca', 'mosport': 'ca', 'bowmanville': 'ca', 'tremblant': 'ca',
+  'st-jovite': 'ca', 'interlagos': 'br', 'sao-paulo': 'br', 'são-paulo': 'br', 'jose-carlos-pace': 'br',
+  'jacarepagua': 'br', 'rio-de-janeiro': 'br', 'rodriguez': 'mx', 'hermanos-rodriguez': 'mx', 'mexico-city': 'mx',
+  'galvez': 'ar', 'buenos-aires': 'ar', 'oscar-galvez': 'ar',
+  'juan-y-oscar-galvez': 'ar', 'juan-y-ignacio-cobos': 'ar', 'carlos-pace': 'br', 'juan-y-ignacio-cobos': 'ar',
+  'suzuka': 'jp', 'suzuka-circuit': 'jp', 'mie': 'jp', 'fuji': 'jp', 'fuji-speedway': 'jp',
+  'oyama': 'jp', 'okayama': 'jp', 'ti-circuit': 'jp', 'shanghai': 'cn', 'shanghai-international-circuit': 'cn',
+  'marina-bay': 'sg', 'singapore': 'sg', 'sepang': 'my', 'kuala-lumpur': 'my', 'yeongam': 'kr',
+  'korea-international-circuit': 'kr', 'buddh': 'in', 'greater-noida': 'in', 'bahrain': 'bh', 'sakhir': 'bh',
+  'manama': 'bh', 'bahrain-international-circuit': 'bh', 'losail': 'qa', 'lusail': 'qa', 'lusail-international-circuit': 'qa',
+  'jeddah': 'sa', 'jeddah-corniche-circuit': 'sa', 'yas-marina': 'ae', 'abu-dhabi': 'ae', 'yas-marina-circuit': 'ae',
+  'istanbul': 'tr', 'istanbul-park': 'tr', 'sochi': 'ru', 'sochi-autodrom': 'ru', 'kyalami': 'za',
+  'midrand': 'za', 'george': 'za', 'prince-george': 'za', 'adelaide': 'au', 'albert-park': 'au',
+  'melbourne': 'au', 'ain-diab': 'ma', 'casablanca': 'ma',
+};
+
 const FERRARI_COLORS = ['#DC0000', '#FF2800', '#8a0000', '#4a0000', '#333333'];
 const GOLD = "#FFD700";
 
@@ -116,18 +195,33 @@ export default function StatisticsPage() {
         );
 
         // 3. Process Circuits
-        const raceMap = {}; racesData.forEach(r => raceMap[r.id] = r.grandPrixId);
+        const raceMap = {};
+        racesData.forEach(r => {
+        raceMap[r.id] = {
+            grandPrixId: r.grandPrixId,
+            circuitName: r.circuitName || r.grandPrixName
+        };
+        });
+
         const circAgg = ferrariWins.reduce((acc, curr) => {
-          const cId = raceMap[curr.raceId] || "Unknown";
-          acc[cId] = (acc[cId] || 0) + 1;
-          return acc;
+        const circuitData = raceMap[curr.raceId];
+        if (!circuitData) return acc;
+        
+        const cId = circuitData.grandPrixId || "Unknown";
+        if (!acc[cId]) {
+            acc[cId] = {
+            name: cId.replace(/-/g, ' ').toUpperCase(),
+            originalName: circuitData.circuitName,
+            wins: 0
+            };
+        }
+        acc[cId].wins += 1;
+        return acc;
         }, {});
-        setCircuits(Object.entries(circAgg)
-            .map(([name, wins]) => ({ 
-                name: name.replace(/-/g, ' ').toUpperCase(), 
-                wins 
-            }))
-            .sort((a,b) => b.wins - a.wins)
+
+        setCircuits(
+        Object.values(circAgg)
+            .sort((a, b) => b.wins - a.wins)
             .slice(0, 8)
         );
 
@@ -333,8 +427,8 @@ export default function StatisticsPage() {
             </div>
             </AccordionSection>
 
-          {/* --- SEZIONE 4: FORTRESS MARANELLO (CIRCUITI) --- */}
-          <AccordionSection 
+          {/* --- SEZIONE 4: Fortress Maranello --- */}
+            <AccordionSection 
             id="circuits" 
             title="Fortress Maranello" 
             subtitle="I circuiti con il maggior numero di vittorie"
@@ -342,26 +436,100 @@ export default function StatisticsPage() {
             isOpen={openSection === 'circuits'}
             onToggle={() => toggleSection('circuits')}
             color="yellow"
-          >
-             <div className="h-[450px] w-full p-8">
+            >
+            <div className="h-[450px] w-full p-8">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={circuits} layout="vertical" margin={{ left: 100 }}>
-                    <XAxis type="number" hide />
-                    <YAxis 
-                        dataKey="name" 
-                        type="category" 
-                        stroke="#666" 
-                        fontSize={10} 
-                        width={120} 
-                        tick={{fontWeight: '900', fill: '#ccc'}} 
-                        axisLine={false} 
+                <BarChart data={circuits} layout="vertical" margin={{ left: 120, right: 40 }}>
+                    <XAxis 
+                    type="number" 
+                    stroke="#666" 
+                    fontSize={11}
+                    axisLine={false}
+                    tick={{fill: '#ccc', fontWeight: '900'}}
+                    tickFormatter={(value) => `${value} vittorie`}
                     />
-                    <Tooltip cursor={{ fill: 'rgba(255, 215, 0, 0.05)' }} contentStyle={{ backgroundColor: '#000', border: '1px solid #333' }} />
-                    <Bar dataKey="wins" fill={GOLD} radius={[0, 10, 10, 0]} barSize={25} />
-                  </BarChart>
+                    <YAxis 
+                    dataKey="name" 
+                    type="category" 
+                    stroke="#666" 
+                    fontSize={11}
+                    width={100}
+                    axisLine={false}
+                    tick={(props) => {
+                        const { x, y, payload } = props;
+                        const circuit = circuits.find(c => c.name === payload.value);
+                        const flagCode = getFlagCodeFromCircuit(circuit?.originalName || payload.value);
+                        
+                        return (
+                        <g>
+                            <foreignObject x={x - 90} y={y - 12} width={24} height={16}>
+                            <div className="w-6 h-4 overflow-hidden rounded-sm">
+                                {flagCode ? (
+                                <img 
+                                    src={`https://flagcdn.com/w40/${flagCode}.png`} 
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                />
+                                ) : (
+                                <div className="w-full h-full bg-zinc-800" />
+                                )}
+                            </div>
+                            </foreignObject>
+                            <text x={x - 60} y={y} fill="#ccc" fontSize={11} fontWeight="900" textAnchor="start">
+                            {payload.value}
+                            </text>
+                        </g>
+                        );
+                    }}
+                    />
+                    <Tooltip 
+                    cursor={{ fill: 'rgba(255, 215, 0, 0.05)' }}
+                    content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                        const circuit = payload[0].payload;
+                        const flagCode = getFlagCodeFromCircuit(circuit.originalName || circuit.name);
+                        return (
+                            <div className="bg-black/95 border border-yellow-500/30 p-4 rounded-lg shadow-2xl backdrop-blur-sm min-w-[200px]">
+                            <div className="flex items-center gap-3 mb-3">
+                                {flagCode && (
+                                <div className="w-8 h-6 overflow-hidden rounded-sm flex-shrink-0">
+                                    <img 
+                                    src={`https://flagcdn.com/w80/${flagCode}.png`}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                )}
+                                <div>
+                                <p className="text-[10px] font-black uppercase text-zinc-500 tracking-widest mb-1">CIRCUITO</p>
+                                <p className="text-lg font-black text-white">{circuit.originalName || circuit.name}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                <p className="text-[8px] font-black uppercase text-zinc-500 tracking-widest">VITTORIE</p>
+                                <p className="text-2xl font-black italic text-yellow-500">{circuit.wins}</p>
+                                </div>
+                                <TrophySVG size={24} color={GOLD} />
+                            </div>
+                            </div>
+                        );
+                        }
+                        return null;
+                    }}
+                    />
+                    <Bar 
+                    dataKey="wins" 
+                    fill={GOLD} 
+                    radius={[0, 10, 10, 0]} 
+                    barSize={25}
+                    animationDuration={1500}
+                    animationBegin={300}
+                    />
+                </BarChart>
                 </ResponsiveContainer>
-             </div>
-          </AccordionSection>
+            </div>
+            </AccordionSection>
 
         </div>
       </main>
