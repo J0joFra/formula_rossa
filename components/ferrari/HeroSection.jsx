@@ -117,22 +117,86 @@ export default function HeroSection() {
         </div>
 
         {/* Scroll indicator */}
+        {/* SEZIONE CALL TO ACTION - PERFORMANCE ARCHIVE */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
-          className="mt-20"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mt-24 w-full max-w-5xl mx-auto px-4"
         >
           <Link href="/statistics">
-            <div className="group relative inline-flex flex-col items-center cursor-pointer">
-              <div className="text-zinc-500 text-[10px] uppercase font-black tracking-[0.4em] mb-4 group-hover:text-red-600 transition-colors">
-                View Full Analytics
+            <div className="group relative overflow-hidden bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 md:p-12 cursor-pointer hover:border-red-600/50 transition-all duration-500 shadow-2xl">
+              
+              {/* Sfondo Decorativo: Linee di telemetria animate */}
+              <div className="absolute inset-0 opacity-10 pointer-events-none">
+                <svg className="w-full h-full" viewBox="0 0 800 200">
+                  <motion.path
+                    d="M0 100 Q 100 50, 200 120 T 400 80 T 600 150 T 800 100"
+                    fill="none"
+                    stroke="#DC0000"
+                    strokeWidth="2"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  />
+                  <motion.path
+                    d="M0 120 Q 150 180, 300 100 T 500 50 T 800 130"
+                    fill="none"
+                    stroke="#ffffff"
+                    strokeWidth="1"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 6, repeat: Infinity, ease: "linear", delay: 1 }}
+                  />
+                </svg>
               </div>
-              <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center group-hover:border-red-600 group-hover:bg-red-600/10 transition-all duration-300">
-                <BarChart3 className="w-5 h-5 text-red-600" />
+        
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+                
+                {/* Sinistra: Grafico Stilizzato Miniaturizzato */}
+                <div className="flex gap-2 items-end h-24">
+                  {[40, 70, 45, 90, 65, 80, 50, 95, 75].map((height, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ height: 0 }}
+                      whileInView={{ height: `${height}%` }}
+                      transition={{ duration: 1, delay: i * 0.1 }}
+                      className="w-2 md:w-3 bg-gradient-to-t from-red-600 to-red-400 rounded-t-sm"
+                    />
+                  ))}
+                </div>
+        
+                {/* Centro: Testo */}
+                <div className="flex-1 text-center md:text-left">
+                  <div className="inline-flex items-center gap-2 mb-3">
+                    <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500">System Status: Online</span>
+                  </div>
+                  <h3 className="text-3xl md:text-5xl font-black uppercase italic tracking-tighter text-white leading-none">
+                    Deep <span className="text-red-600">Analytics</span> <br />
+                    <span className="text-zinc-400">Archive</span>
+                  </h3>
+                  <p className="mt-4 text-zinc-500 text-sm font-medium max-w-sm">
+                    Esplora 75 anni di telemetria, vittorie e dati tecnici. Ogni sorpasso, ogni millesimo, ogni leggenda.
+                  </p>
+                </div>
+        
+                {/* Destra: Bottone d'azione */}
+                <div className="flex flex-col items-center gap-4">
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    className="w-20 h-20 rounded-full bg-red-600 flex items-center justify-center shadow-[0_0_30px_rgba(220,0,0,0.4)] group-hover:bg-white transition-colors duration-300"
+                  >
+                    <BarChart3 className="w-10 h-10 text-white group-hover:text-red-600 transition-colors" />
+                  </motion.div>
+                  <span className="text-[9px] font-black uppercase tracking-[0.5em] text-red-600">Enter Vault</span>
+                </div>
+        
               </div>
-              {/* Effetto alone */}
-              <div className="absolute -bottom-4 w-12 h-4 bg-red-600/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+        
+              {/* Overlay di luce al passaggio del mouse */}
+              <div className="absolute -inset-x-20 -inset-y-20 bg-gradient-to-r from-transparent via-red-600/5 to-transparent skew-x-12 translate-x-[-150%] group-hover:translate-x-[150%] transition-transform duration-1000" />
             </div>
           </Link>
         </motion.div>
