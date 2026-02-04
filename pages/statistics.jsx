@@ -96,6 +96,9 @@ const circuitToCountry = {
   'aintree': 'united-kingdom',
   'liverpool': 'united-kingdom',
   'british-grand-prix': 'united-kingdom',
+  'england': 'united-kingdom',
+  'uk': 'united-kingdom',
+  'great-britain': 'united-kingdom',
   
   // Belgio
   'spa': 'belgium', 
@@ -117,6 +120,8 @@ const circuitToCountry = {
   'montjuic': 'spain', 
   'madrid': 'spain', 
   'jarama': 'spain',
+  'circuito-del-jarama': 'spain',
+  'spanish-grand-prix': 'spain',
   
   // Ungheria
   'hungaroring': 'hungary', 
@@ -308,6 +313,7 @@ const circuitToCountry = {
   'circuit-zandvoort': 'netherlands',
 };
 
+// Funzione per ottenere il codice bandiera da un circuito
 const getFlagCodeFromCircuit = (circuitName) => {
   if (!circuitName) return '';
   const normalized = circuitName.toLowerCase()
@@ -364,38 +370,18 @@ const getFlagCodeFromCircuit = (circuitName) => {
 
 // Funzione per ottenere il colore dalla bandiera
 const getCountryColor = (circuitName) => {
-  if (!circuitName) return '#FFD700'; // Fallback a oro
-  
-  const normalized = circuitName.toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim();
-  
-  if (circuitToCountry[normalized]) {
-    const country = circuitToCountry[normalized];
-    return countryConfig[country]?.color || '#FFD700';
-  }
+  if (!circuitName) return '#DC0000';
   
   const flagCode = getFlagCodeFromCircuit(circuitName);
-  if (flagCode) {
-    const countryEntry = Object.entries(countryConfig).find(([key, value]) => value.code === flagCode);
-    if (countryEntry) {
-      return countryEntry[1].color;
-    }
+  if (!flagCode) return '#DC0000';
+  
+  // Trova il colore dalla configurazione
+  const countryEntry = Object.entries(countryConfig).find(([key, value]) => value.code === flagCode);
+  if (countryEntry) {
+    return countryEntry[1].color;
   }
   
-  const circuitIndex = circuits.findIndex(c => 
-    c.originalName === circuitName || c.name === circuitName
-  );
-  if (circuitIndex >= 0) {
-    // Usa una gradiente di rosso Ferrari
-    const redShades = ['#DC0000', '#FF2800', '#FF5E5E', '#FF8C8C'];
-    return redShades[circuitIndex % redShades.length];
-  }
-  
-  return '#FFD700'; // Fallback gold
+  return '#DC0000';
 };
 
 // --- MAIN PAGE ---
@@ -407,47 +393,7 @@ export default function StatisticsPage() {
   const [circuits, setCircuits] = useState([]);
   const [openSection, setOpenSection] = useState('winners');
 
-  const getCountryColor = (circuitName) => {
-    if (!circuitName) return '#FFD700';
-    const lowerName = circuitName.toLowerCase();
-    const flagCode = getFlagCodeFromCircuit(circuitName);
-    const countryEntry = Object.entries(countryConfig).find(([key, value]) => value.code === flagCode);
-    if (countryEntry) return countryEntry[1].color;
-    return '#DC0000'; 
-  };
-
-    const CircuitTick = ({ x, y, payload }) => {
-    // Recuperiamo i dati del circuito usando l'indice della riga attuale
-    const circuit = circuits[payload.index];
-    if (!circuit) return null;
-
-    return (
-        <g transform={`translate(${x},${y})`}>
-        {/* BANDIERA */}
-        <image
-            x="-175" 
-            y="-10" 
-            width="26" 
-            height="18"
-            href={`https://flagcdn.com/w80/${circuit.flag}.png`}
-        />
-        {/* NOME STATO */}
-        <text 
-            x="-140" 
-            y="4" 
-            fill="#ffffff" 
-            fontSize={11} 
-            fontWeight="900" 
-            textAnchor="start" 
-            className="uppercase italic tracking-tight"
-        >
-            {circuit.name}
-        </text>
-        </g>
-    );
-};
-
-useEffect(() => {
+  useEffect(() => {
     async function loadData() {
       try {
         const [resultsRes, driversRes, historicalRes, racesRes] = await Promise.all([
@@ -480,7 +426,7 @@ useEffect(() => {
         setPilotWins(Object.values(winnersAgg)
           .map(item => ({
             ...item,
-            yearsArray: Array.from(item.years).sort((a,b) => b-a) // Trasformiamo qui il Set in Array
+            yearsArray: Array.from(item.years).sort((a,b) => b-a)
           }))
           .sort((a,b) => b.count - a.count)
           .slice(0, 10)
@@ -490,55 +436,62 @@ useEffect(() => {
         const ferrariDriverIds = [...new Set(results.filter(r => r.constructorId === 'ferrari').map(r => r.driverId))];
 
         const natAgg = ferrariDriverIds.reduce((acc, dId) => {
-        const driver = driverMap[dId];
-        const natId = driver?.nationalityCountryId || 'unknown';
-        acc[natId] = (acc[natId] || 0) + 1;
-        return acc;
+          const driver = driverMap[dId];
+          const natId = driver?.nationalityCountryId || 'unknown';
+          acc[natId] = (acc[natId] || 0) + 1;
+          return acc;
         }, {});
 
         setNationalities(Object.entries(natAgg)
-        .map(([id, value]) => ({ 
+          .map(([id, value]) => ({ 
             id,
             name: id.replace(/-/g, ' ').toUpperCase(), 
             value,
             color: countryConfig[id]?.color || '#555',
             flag: countryConfig[id]?.code || 'un'
-        }))
-        .sort((a, b) => b.value - a.value)
-        .slice(0, 10)
+          }))
+          .sort((a, b) => b.value - a.value)
+          .slice(0, 10)
         );
 
-        // 3. Process Circuits
+        // 3. Process Circuits con bandiere
         const raceMap = {};
         racesData.forEach(r => {
-        raceMap[r.id] = {
+          raceMap[r.id] = {
             grandPrixId: r.grandPrixId,
             circuitName: r.circuitName || r.grandPrixName
-        };
+          };
         });
 
         const circAgg = ferrariWins.reduce((acc, curr) => {
-        const circuitData = raceMap[curr.raceId];
-        if (!circuitData) return acc;
-        
-        const cId = circuitData.grandPrixId || "Unknown";
-        if (!acc[cId]) {
+          const circuitData = raceMap[curr.raceId];
+          if (!circuitData) return acc;
+          
+          const cId = circuitData.grandPrixId || "Unknown";
+          const circuitName = circuitData.circuitName || cId;
+          
+          if (!acc[cId]) {
             acc[cId] = {
-            name: cId.replace(/-/g, ' ').toUpperCase(),
-            originalName: circuitData.circuitName,
-            wins: 0
+              name: cId.replace(/-/g, ' ').toUpperCase(),
+              originalName: circuitName,
+              wins: 0,
+              flag: getFlagCodeFromCircuit(circuitName)
             };
-        }
-        acc[cId].wins += 1;
-        return acc;
+          }
+          acc[cId].wins += 1;
+          return acc;
         }, {});
 
-        setCircuits(Object.values(circAgg).sort((a, b) => b.wins - a.wins).slice(0, 10));
+        const sortedCircuits = Object.values(circAgg).sort((a, b) => b.wins - a.wins).slice(0, 10);
+        setCircuits(sortedCircuits);
 
         setHistory(historical.filter(h => h.points !== null));
 
-      } catch (err) { console.error(err); }
-      setLoading(false);
+      } catch (err) { 
+        console.error('Error loading data:', err); 
+      } finally {
+        setLoading(false);
+      }
     }
     loadData();
   }, []);
@@ -597,13 +550,16 @@ useEffect(() => {
                             src={`/data/ferrari-drivers/${normalizeDriverName(driver.name)}.jpg`} 
                             className="w-full h-full object-cover" 
                             onError={(e) => { e.target.src = "https://www.formula1.com/etc/designs/f1om/images/driver-listing-face-placeholder.png"; }}
+                            alt={driver.name}
                           />
                         </div>
                         <span className="font-black uppercase italic text-[10px] text-white">{driver.name.split(' ').pop()}</span>
                       </div>
                       <div className="col-span-5 flex flex-col gap-3 pl-4">
                         <div className="flex items-center flex-wrap gap-1.5">
-                          {[...Array(driver.count >= 10 ? 10 : driver.count)].map((_, i) => <TrophySVG key={i} size={20} color={GOLD} />)}
+                          {[...Array(driver.count >= 10 ? 10 : driver.count)].map((_, i) => (
+                            <TrophySVG key={i} size={20} color={GOLD} />
+                          ))}
                           {driver.count >= 10 && <span className="text-xl font-black italic text-yellow-500 ml-2">x{Math.floor(driver.count / 10)}</span>}
                         </div>
                         {driver.count > 10 && driver.count % 10 > 0 && (
@@ -646,7 +602,15 @@ useEffect(() => {
                   <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
                   <XAxis dataKey="year" stroke="#444" fontSize={11} tickMargin={15} axisLine={false} />
                   <YAxis stroke="#444" fontSize={11} axisLine={false} />
-                  <Tooltip contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid #333', borderRadius: '12px' }} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#0a0a0a', 
+                      border: '1px solid #333', 
+                      borderRadius: '12px',
+                      color: '#fff'
+                    }} 
+                    labelStyle={{ color: '#fff' }}
+                  />
                   <Area type="monotone" dataKey="points" stroke="#DC0000" strokeWidth={3} fillOpacity={1} fill="url(#ferrariGlow)" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -654,7 +618,7 @@ useEffect(() => {
           </AccordionSection>
 
           {/* --- SEZIONE 3: GLOBAL DNA (NAZIONALITA') --- */}
-            <AccordionSection 
+          <AccordionSection 
             id="dna" 
             title="Global DNA" 
             subtitle="Distribuzione geografica dei piloti della Scuderia"
@@ -662,85 +626,87 @@ useEffect(() => {
             isOpen={openSection === 'dna'}
             onToggle={() => toggleSection('dna')}
             color="red"
-            >
+          >
             <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12 p-4">
-                {/* Grafico a Torta */}
-                <div className="h-[400px] relative">
+              {/* Grafico a Torta */}
+              <div className="h-[400px] relative">
                 <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
+                  <PieChart>
                     <Pie 
-                        data={nationalities} 
-                        innerRadius={90} 
-                        outerRadius={140} 
-                        paddingAngle={3} 
-                        dataKey="value" 
-                        nameKey="name"
-                        stroke="none"
+                      data={nationalities} 
+                      innerRadius={90} 
+                      outerRadius={140} 
+                      paddingAngle={3} 
+                      dataKey="value" 
+                      nameKey="name"
+                      stroke="none"
                     >
-                        {nationalities.map((entry, index) => (
+                      {nationalities.map((entry, index) => (
                         <Cell 
-                            key={`cell-${index}`} 
-                            fill={entry.color} 
-                            className="hover:opacity-80 transition-opacity cursor-pointer outline-none"
+                          key={`cell-${index}`} 
+                          fill={entry.color} 
+                          className="hover:opacity-80 transition-opacity cursor-pointer outline-none"
                         />
-                        ))}
+                      ))}
                     </Pie>
                     <Tooltip 
-                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} 
-                    content={({ active, payload }) => {
+                      cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} 
+                      content={({ active, payload }) => {
                         if (active && payload && payload.length) {
-                        return (
-                            // CAMBIA bg-black in bg-zinc-800
+                          return (
                             <div className="bg-zinc-800 border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-md">
-                            <p className="text-[10px] font-black text-zinc-400 uppercase mb-1">{payload[0].payload.name}</p>
-                            <p className="text-2xl font-black text-white italic">{payload[0].value} <span className="text-xs uppercase text-zinc-500">Wins</span></p>
+                              <p className="text-[10px] font-black text-zinc-400 uppercase mb-1">{payload[0].payload.name}</p>
+                              <p className="text-2xl font-black text-white italic">{payload[0].value} <span className="text-xs uppercase text-zinc-500">Drivers</span></p>
                             </div>
-                        );
+                          );
                         }
                         return null;
-                    }}
+                      }}
                     />
-                    </PieChart>
+                  </PieChart>
                 </ResponsiveContainer>
                 {/* Contatore Centrale */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-4xl font-black italic tracking-tighter text-white">
-                        {nationalities.reduce((a, b) => a + b.value, 0)}
-                    </span>
-                    <span className="text-[8px] font-black uppercase tracking-widest text-red-600">Total Drivers</span>
+                  <span className="text-4xl font-black italic tracking-tighter text-white">
+                    {nationalities.reduce((a, b) => a + b.value, 0)}
+                  </span>
+                  <span className="text-[8px] font-black uppercase tracking-widest text-red-600">Total Drivers</span>
                 </div>
-                </div>
-                
-                {/* Legenda con Bandierine */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              </div>
+              
+              {/* Legenda con Bandierine */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {nationalities.slice(0, 12).map((n) => (
-                    <div key={n.id} className="flex items-center gap-4 bg-zinc-900/40 border border-white/5 p-4 rounded-2xl group hover:border-red-600/30 transition-all">
+                  <div key={n.id} className="flex items-center gap-4 bg-zinc-900/40 border border-white/5 p-4 rounded-2xl group hover:border-red-600/30 transition-all">
                     <div className="relative w-8 h-6 overflow-hidden rounded-sm shadow-sm">
-                        <img 
+                      <img 
                         src={`https://flagcdn.com/w80/${n.flag}.png`} 
                         alt={n.name}
                         className="w-full h-full object-cover"
-                        />
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
                     </div>
                     <div className="flex flex-col">
-                        <span className="font-black uppercase text-[10px] tracking-tight text-zinc-400 group-hover:text-white transition-colors">
-                            {n.name}
-                        </span>
-                        <div className="flex items-center gap-2">
-                            <div className="h-1 w-12 rounded-full bg-zinc-800 overflow-hidden">
-                                <div className="h-full bg-current" style={{ width: `${(n.value / nationalities[0].value) * 100}%`, color: n.color }} />
-                            </div>
-                            <span className="font-mono text-xs text-white font-bold">{n.value}</span>
+                      <span className="font-black uppercase text-[10px] tracking-tight text-zinc-400 group-hover:text-white transition-colors">
+                        {n.name}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <div className="h-1 w-12 rounded-full bg-zinc-800 overflow-hidden">
+                          <div className="h-full bg-current" style={{ width: `${(n.value / nationalities[0].value) * 100}%`, color: n.color }} />
                         </div>
+                        <span className="font-mono text-xs text-white font-bold">{n.value}</span>
+                      </div>
                     </div>
-                    </div>
+                  </div>
                 ))}
-                </div>
+              </div>
             </div>
-            </AccordionSection>
+          </AccordionSection>
 
-            {/* --- SEZIONE 4: Fortress Maranello --- */}
-            <AccordionSection 
+          {/* --- SEZIONE 4: Fortress Maranello --- */}
+          <AccordionSection 
             id="circuits" 
             title="Fortress Maranello" 
             subtitle="I circuiti con il maggior numero di vittorie"
@@ -748,95 +714,109 @@ useEffect(() => {
             isOpen={openSection === 'circuits'}
             onToggle={() => toggleSection('circuits')}
             color="yellow"
-            >
-            <div className="h-[880px] w-full p-8">
+          >
+            <div className="space-y-8">
+              {/* Legenda con bandiere sopra il grafico */}
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {circuits.map((circuit) => {
+                  const flagCode = circuit.flag || getFlagCodeFromCircuit(circuit.originalName);
+                  return (
+                    <div key={circuit.name} className="flex items-center gap-3 bg-zinc-900/40 p-3 rounded-lg hover:bg-zinc-900/60 transition-colors">
+                      {flagCode && (
+                        <img 
+                          src={`https://flagcdn.com/w40/${flagCode}.png`} 
+                          className="w-6 h-4 object-cover rounded-sm" 
+                          alt="Flag"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-black uppercase text-white truncate">{circuit.name}</div>
+                        <div className="text-[10px] text-zinc-500">{circuit.wins} vittorie</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Grafico a barre */}
+              <div className="h-[600px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                <BarChart 
-                data={circuits} 
-                layout="vertical" 
-                margin={{ left: 180, right: 60, top: 20, bottom: 20 }} 
-                >
+                  <BarChart 
+                    data={circuits} 
+                    layout="vertical" 
+                    margin={{ left: 20, right: 60, top: 20, bottom: 20 }} 
+                  >
                     <XAxis 
-                        type="number" 
-                        stroke="#666" 
-                        fontSize={11}
-                        axisLine={false}
-                        tick={{fill: '#ccc', fontWeight: '900'}}
-                        tickFormatter={(value) => `${value} vittorie`}
+                      type="number" 
+                      stroke="#666" 
+                      fontSize={11}
+                      axisLine={false}
+                      tick={{fill: '#ccc', fontWeight: '900'}}
+                      tickFormatter={(value) => `${value} vittorie`}
                     />
                     <YAxis 
-                        dataKey="fullInfo" 
-                        type="category" 
-                        tick={(props) => {
-                        const { x, y, payload } = props;
-                        const circuit = payload[0].payload;
-                        const circuitName = circuit.originalName || circuit.name;
-                        const flagCode = getFlagCodeFromCircuit(circuitName);
-                        
-                        return (
-                            <g>
-                            {/*  */}
-                            <foreignObject x={x - 190} y={y - 12} width={24} height={16}>
-                                <div className="w-6 h-4 overflow-hidden rounded-sm shadow-sm">
-                                <img src={`https://flagcdn.com/w80/${flagCode}.png`} className="w-full h-full object-cover rounded-sm" />
-                                </div>
-                            </foreignObject>
-                            {/* */}
-                            <text x={x - 100} y={y + 4} fill="#eee" fontSize={11} fontWeight="900" textAnchor="start" className="uppercase italic">
-                                {payload.value}
-                            </text>
-                            </g>
-                        );
-                        }} 
-                        width={1} 
-                        axisLine={false} 
-                        interval={0}
+                      dataKey="name" 
+                      type="category" 
+                      stroke="#666"
+                      fontSize={11}
+                      width={180}
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#fff', fontWeight: '900' }}
                     />
                     <Tooltip 
-                    cursor={{ fill: 'rgba(255, 255, 255, 0.12)' }} 
-                    content={({ active, payload }) => {
+                      cursor={{ fill: 'rgba(255, 255, 255, 0.12)' }} 
+                      content={({ active, payload }) => {
                         if (active && payload && payload.length) {
-                            const circuit = payload[0].payload;
-                            const circuitName = circuit.originalName || circuit.name;
-                            const flagCode = getFlagCodeFromCircuit(circuitName);
-                            const barColor = getCountryColor(circuitName);
-                            
-                            return (
-                            <div className="bg-zinc-800 border border-white/10 p-4  rounded-lg shadow-2xl backdrop-blur-sm min-w-[220px]">
-                                <div className="flex items-center gap-3 mb-3">
-                                <img src={`https://flagcdn.com/w80/${flagCode}.png`} className="w-8 h-5 object-cover rounded-sm" />
+                          const circuit = payload[0].payload;
+                          const circuitName = circuit.originalName || circuit.name;
+                          const flagCode = circuit.flag || getFlagCodeFromCircuit(circuitName);
+                          const barColor = getCountryColor(circuitName);
+                          
+                          return (
+                            <div className="bg-zinc-800 border border-white/10 p-4 rounded-lg shadow-2xl backdrop-blur-sm min-w-[220px]">
+                              <div className="flex items-center gap-3 mb-3">
+                                {flagCode && (
+                                  <img 
+                                    src={`https://flagcdn.com/w80/${flagCode}.png`} 
+                                    className="w-8 h-5 object-cover rounded-sm" 
+                                    alt="Flag"
+                                  />
+                                )}
                                 <p className="text-lg font-black text-white italic">{circuitName}</p>
-                                </div>
-                                <div className="flex justify-between items-end border-t border-white/10 pt-3">
+                              </div>
+                              <div className="flex justify-between items-end border-t border-white/10 pt-3">
                                 <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Vittorie</span>
                                 <span className="text-2xl font-black italic" style={{ color: barColor }}>{circuit.wins}</span>
-                                </div>
+                              </div>
                             </div>
-                            );
+                          );
                         }
                         return null;
-                        }}
+                      }}
                     />
                     
-                    {/* */}
                     <Bar dataKey="wins" radius={[0, 10, 10, 0]} barSize={25}>
-                        {circuits.map((entry, index) => {
+                      {circuits.map((entry, index) => {
                         const circuitName = entry.originalName || entry.name;
                         const barColor = getCountryColor(circuitName);
                         return (
-                            <Cell 
+                          <Cell 
                             key={`cell-${index}`} 
                             fill={barColor} 
                             style={{ filter: `drop-shadow(0 0 8px ${barColor}44)` }} 
-                            />
+                          />
                         );
-                        })}
+                      })}
                     </Bar>
-                    </BarChart>
+                  </BarChart>
                 </ResponsiveContainer>
+              </div>
             </div>
-            </AccordionSection>
-
+          </AccordionSection>
         </div>
       </main>
       <Footer />
@@ -854,6 +834,8 @@ function AccordionSection({ id, title, subtitle, icon: Icon, children, isOpen, o
       <button 
         onClick={onToggle}
         className={`w-full flex items-center justify-between p-6 md:p-8 text-left transition-all duration-500 ${isOpen ? 'bg-white/5' : 'hover:bg-white/5'}`}
+        aria-expanded={isOpen}
+        aria-controls={`section-${id}`}
       >
         <div className="flex items-center gap-6">
           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform duration-500 ${isOpen ? 'scale-110' : ''} ${iconColor}`}>
@@ -876,6 +858,7 @@ function AccordionSection({ id, title, subtitle, icon: Icon, children, isOpen, o
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.6, ease: [0.04, 0.62, 0.23, 0.98] }}
+            id={`section-${id}`}
           >
             <div className="p-4 md:p-10 border-t border-white/5 bg-black/20">
               {children}
