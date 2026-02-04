@@ -326,61 +326,38 @@ const getFlagCodeFromCircuit = (circuitName) => {
   const lowerName = circuitName.toLowerCase();
   
   // Logica di fallback
-    if (lowerName.includes('abu dhabi') || lowerName.includes('yas marina') || lowerName.includes('emirates')) return 'ae';
-    if (lowerName.includes('silverstone') || lowerName.includes('brands') || lowerName.includes('donington') || 
-        lowerName.includes('aintree') || lowerName.includes('british') || lowerName.includes('england') || 
-        lowerName.includes('great britain') || lowerName.includes('uk')) return 'gb';
-    if (lowerName.includes('monza') || lowerName.includes('imola') || lowerName.includes('mugello') || 
-        lowerName.includes('pescara') || lowerName.includes('italian') || lowerName.includes('italy')) return 'it';
-    if (lowerName.includes('monaco') || lowerName.includes('monte carlo')) return 'mc';
-    if (lowerName.includes('spa') || lowerName.includes('francorchamps') || lowerName.includes('zolder') || lowerName.includes('nivelles') ||
-        lowerName.includes('belgian') || lowerName.includes('belgium')) return 'be';
-    if (lowerName.includes('nürburgring') || lowerName.includes('nurburgring') || lowerName.includes('hockenheim') || 
-        lowerName.includes('avus') || lowerName.includes('german')) return 'de';
-    if (lowerName.includes('montreal') || lowerName.includes('villeneuve') || lowerName.includes('bowmanville') || 
-        lowerName.includes('canadian') || lowerName.includes('canada')) return 'ca';
-    if (lowerName.includes('melbourne') || lowerName.includes('adelaide') || lowerName.includes('albert park') || 
-        lowerName.includes('australian')) return 'au';
-    if (lowerName.includes('interlagos') || lowerName.includes('jacarepagua') || lowerName.includes('galvez') || 
-        lowerName.includes('brazilian') || lowerName.includes('são paulo') || lowerName.includes('sao paulo')) return 'br';
-    if (lowerName.includes('mexico') || lowerName.includes('rodriguez') || lowerName.includes('mexican')) return 'mx';
-    if (lowerName.includes('shanghai') || lowerName.includes('chinese')) return 'cn';
-    if (lowerName.includes('suzuka') || lowerName.includes('fuji') || lowerName.includes('okayama') || 
-        lowerName.includes('japanese')) return 'jp';
-    if (lowerName.includes('bahrain') || lowerName.includes('sakhir')) return 'bh';
-    if (lowerName.includes('jeddah') || lowerName.includes('saudi')) return 'sa';
-    if (lowerName.includes('miami') || lowerName.includes('austin') || lowerName.includes('americas') || 
-        lowerName.includes('cota') || lowerName.includes('indianapolis') || lowerName.includes('sebring') || 
-        lowerName.includes('riverside') || lowerName.includes('watkins glen') || lowerName.includes('long beach') || 
-        lowerName.includes('phoenix') || lowerName.includes('detroit') || lowerName.includes('dallas') || 
-        lowerName.includes('caesars palace') || lowerName.includes('monterey') || lowerName.includes('laguna seca') || 
-        lowerName.includes('las vegas') || lowerName.includes('vegas') || lowerName.includes('united states') || 
-        lowerName.includes('usa') || lowerName.includes('us grand prix')) return 'us';
-    if (lowerName.includes('catalunya') || lowerName.includes('barcelona') || lowerName.includes('valencia') || 
-        lowerName.includes('jarama') || lowerName.includes('montjuic') || lowerName.includes('pedralbes') || 
-        lowerName.includes('spanish')) return 'es';
-    if (lowerName.includes('red bull ring') || lowerName.includes('spielberg') || lowerName.includes('zeltweg') || 
-        lowerName.includes('österreichring') || lowerName.includes('austrian')) return 'at';
-    if (lowerName.includes('hungaroring') || lowerName.includes('hungarian')) return 'hu';
-    if (lowerName.includes('zandvoort') || lowerName.includes('dutch') || lowerName.includes('netherlands') || 
-        lowerName.includes('holland')) return 'nl';
-    if (lowerName.includes('baku') || lowerName.includes('azerbaijan')) return 'az';
-    if (lowerName.includes('marina bay') || lowerName.includes('singapore')) return 'sg';
-    if (lowerName.includes('losail') || lowerName.includes('lusail') || lowerName.includes('qatar')) return 'qa';
-    if (lowerName.includes('le castellet') || lowerName.includes('paul ricard') || lowerName.includes('ricard') || 
-        lowerName.includes('rouen') || lowerName.includes('essarts') || lowerName.includes('reims') || lowerName.includes('charade') ||
-        lowerName.includes('dijon') || lowerName.includes('magny-cours') || lowerName.includes('lemans') || lowerName.includes('louvre') || 
-        lowerName.includes('french') || lowerName.includes('france')) return 'fr'; 
-    if (lowerName.includes('bremgarten') || lowerName.includes('swiss')) return 'ch';
-    if (lowerName.includes('boavista') || lowerName.includes('monsanto') || lowerName.includes('estoril') || 
-        lowerName.includes('portimao') || lowerName.includes('portuguese')) return 'pt';   
-    if (lowerName.includes('ain-diab') || lowerName.includes('ain diab') || lowerName.includes('moroccan')) return 'ma';  
-    if (lowerName.includes('george') || lowerName.includes('kyalami') || lowerName.includes('south african')) return 'za';
-    if (lowerName.includes('sepang') || lowerName.includes('malaysian')) return 'my';
-    if (lowerName.includes('buddh') || lowerName.includes('indian')) return 'in';
-    if (lowerName.includes('yeongam') || lowerName.includes('korean')) return 'kr';
-    if (lowerName.includes('istanbul') || lowerName.includes('turkish')) return 'tr';
-    if (lowerName.includes('sochi') || lowerName.includes('russian')) return 'ru';
+  if (lowerName.includes('abu dhabi') || lowerName.includes('yas marina') || lowerName.includes('dubai') || lowerName.includes('emirates')) return 'ae';
+  if (lowerName.includes('silverstone') || lowerName.includes('brands') || lowerName.includes('donington') || lowerName.includes('aintree') || lowerName.includes('british') || lowerName.includes('england') || lowerName.includes('uk')) return 'gb';
+  if (lowerName.includes('monza') || lowerName.includes('imola') || lowerName.includes('mugello') || lowerName.includes('pescara') || lowerName.includes('italian') || lowerName.includes('italy')) return 'it';
+  if (lowerName.includes('monaco') || lowerName.includes('monte carlo')) return 'mc';
+  if (lowerName.includes('spa') || lowerName.includes('francorchamps') || lowerName.includes('zolder') || lowerName.includes('nivelles') || lowerName.includes('belgian') || lowerName.includes('belgium')) return 'be';
+  if (lowerName.includes('nürburgring') || lowerName.includes('nurburgring') || lowerName.includes('hockenheim') || lowerName.includes('avus') || lowerName.includes('german') || lowerName.includes('germany')) return 'de';
+  if (lowerName.includes('montreal') || lowerName.includes('villeneuve') || lowerName.includes('bowmanville') || lowerName.includes('canadian') || lowerName.includes('canada')) return 'ca';
+  if (lowerName.includes('melbourne') || lowerName.includes('adelaide') || lowerName.includes('albert park') || lowerName.includes('australian') || lowerName.includes('australia')) return 'au';
+  if (lowerName.includes('interlagos') || lowerName.includes('jacarepagua') || lowerName.includes('galvez') || lowerName.includes('brazilian') || lowerName.includes('brazil') || lowerName.includes('são paulo') || lowerName.includes('sao paulo')) return 'br';
+  if (lowerName.includes('mexico') || lowerName.includes('rodriguez') || lowerName.includes('mexican')) return 'mx';
+  if (lowerName.includes('shanghai') || lowerName.includes('chinese') || lowerName.includes('china')) return 'cn';
+  if (lowerName.includes('suzuka') || lowerName.includes('fuji') || lowerName.includes('okayama') || lowerName.includes('japanese') || lowerName.includes('japan')) return 'jp';
+  if (lowerName.includes('bahrain') || lowerName.includes('sakhir')) return 'bh';
+  if (lowerName.includes('jeddah') || lowerName.includes('saudi') || lowerName.includes('ksa')) return 'sa';
+  if (lowerName.includes('miami') || lowerName.includes('austin') || lowerName.includes('americas') || lowerName.includes('cota') || lowerName.includes('indianapolis') || lowerName.includes('sebring') || lowerName.includes('riverside') || lowerName.includes('watkins glen') || lowerName.includes('long beach') || lowerName.includes('phoenix') || lowerName.includes('detroit') || lowerName.includes('dallas') || lowerName.includes('caesars palace') || lowerName.includes('monterey') || lowerName.includes('laguna seca') || lowerName.includes('las vegas') || lowerName.includes('vegas') || lowerName.includes('united states') || lowerName.includes('usa') || lowerName.includes('us')) return 'us';
+  if (lowerName.includes('catalunya') || lowerName.includes('barcelona') || lowerName.includes('valencia') || lowerName.includes('jarama') || lowerName.includes('montjuic') || lowerName.includes('pedralbes') || lowerName.includes('spanish')) return 'es';
+  if (lowerName.includes('red bull ring') || lowerName.includes('spielberg') || lowerName.includes('zeltweg') || lowerName.includes('österreichring') || lowerName.includes('austrian') || lowerName.includes('austria')) return 'at';
+  if (lowerName.includes('hungaroring') || lowerName.includes('hungarian') || lowerName.includes('hungary')) return 'hu';
+  if (lowerName.includes('zandvoort') || lowerName.includes('dutch') || lowerName.includes('netherlands') || lowerName.includes('holland')) return 'nl';
+  if (lowerName.includes('baku') || lowerName.includes('azerbaijan')) return 'az';
+  if (lowerName.includes('marina bay') || lowerName.includes('singapore')) return 'sg';
+  if (lowerName.includes('losail') || lowerName.includes('lusail') || lowerName.includes('qatar')) return 'qa';
+  if (lowerName.includes('le castellet') || lowerName.includes('paul ricard') || lowerName.includes('ricard') || lowerName.includes('rouen') || lowerName.includes('essarts') || lowerName.includes('reims') || lowerName.includes('charade') || lowerName.includes('dijon') || lowerName.includes('magny-cours') || lowerName.includes('lemans') || lowerName.includes('louvre') || lowerName.includes('french') || lowerName.includes('france')) return 'fr';
+  if (lowerName.includes('bremgarten') || lowerName.includes('swiss') || lowerName.includes('switzerland')) return 'ch';
+  if (lowerName.includes('boavista') || lowerName.includes('monsanto') || lowerName.includes('estoril') || lowerName.includes('portimao') || lowerName.includes('portuguese') || lowerName.includes('portugal')) return 'pt';
+  if (lowerName.includes('ain-diab') || lowerName.includes('ain diab') || lowerName.includes('moroccan') || lowerName.includes('morocco')) return 'ma';  
+  if (lowerName.includes('george') || lowerName.includes('kyalami') || lowerName.includes('south african') || lowerName.includes('south africa')) return 'za';
+  if (lowerName.includes('sepang') || lowerName.includes('malaysian') || lowerName.includes('malaysia')) return 'my';
+  if (lowerName.includes('buddh') || lowerName.includes('indian') || lowerName.includes('india')) return 'in';
+  if (lowerName.includes('yeongam') || lowerName.includes('korean') || lowerName.includes('korea')) return 'kr';
+  if (lowerName.includes('istanbul') || lowerName.includes('turkish') || lowerName.includes('turkey')) return 'tr';
+  if (lowerName.includes('sochi') || lowerName.includes('russian') || lowerName.includes('russia')) return 'ru'; 
   
   return '';
 };
@@ -520,7 +497,6 @@ export default function StatisticsPage() {
         setCircuits(
         Object.values(circAgg)
             .sort((a, b) => b.wins - a.wins)
-            .slice(0, 8)
         );
 
         setHistory(historical.filter(h => h.points !== null));
@@ -737,7 +713,7 @@ export default function StatisticsPage() {
             >
             <div className="h-[450px] w-full p-8">
                 <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={circuits} layout="vertical" margin={{ left: 120, right: 40 }}>
+                <BarChart data={circuits} layout="vertical" margin={{ left: 140, right: 180 }}>
                     <XAxis 
                         type="number" 
                         stroke="#666" 
@@ -747,12 +723,8 @@ export default function StatisticsPage() {
                         tickFormatter={(value) => `${value} vittorie`}
                     />
                     <YAxis 
-                        dataKey="name" 
+                        dataKey="fullInfo" 
                         type="category" 
-                        stroke="#666" 
-                        fontSize={11}
-                        width={100}
-                        axisLine={false}
                         tick={(props) => {
                         const { x, y, payload } = props;
                         const circuit = circuits.find(c => c.name === payload.value);
@@ -760,29 +732,26 @@ export default function StatisticsPage() {
                         
                         return (
                             <g>
-                            <foreignObject x={x - 90} y={y - 12} width={24} height={16}>
-                                <div className="w-6 h-4 overflow-hidden rounded-sm">
-                                {flagCode ? (
-                                    <img 
-                                    src={`https://flagcdn.com/w40/${flagCode}.png`} 
-                                    alt=""
-                                    className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full bg-zinc-800" />
-                                )}
+                            {/* Spostiamo la bandiera più a sinistra (x - 130) */}
+                            <foreignObject x={x - 130} y={y - 12} width={24} height={16}>
+                                <div className="w-6 h-4 overflow-hidden rounded-sm shadow-sm">
+                                <img src={`https://flagcdn.com/w40/${flagCode}.png`} className="w-full h-full object-cover" />
                                 </div>
                             </foreignObject>
-                            <text x={x - 60} y={y + 4} fill="#ccc" fontSize={11} fontWeight="900" textAnchor="start">
+                            {/* Spostiamo il testo più a sinistra (x - 100) per dare spazio alla barra */}
+                            <text x={x - 100} y={y + 4} fill="#eee" fontSize={11} fontWeight="900" textAnchor="start" className="uppercase italic">
                                 {payload.value}
                             </text>
                             </g>
                         );
-                        }}
+                        }} 
+                        width={1} 
+                        axisLine={false} 
+                        interval={0}
                     />
                     <Tooltip 
-                        cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
-                        content={({ active, payload }) => {
+                    cursor={{ fill: 'rgba(255, 255, 255, 0.12)' }} 
+                    content={({ active, payload }) => {
                         if (active && payload && payload.length) {
                             const circuit = payload[0].payload;
                             const circuitName = circuit.originalName || circuit.name;
