@@ -75,17 +75,41 @@ export default function StatisticsPage() {
         );
 
         // 2. Process Nationalities
-        const natAgg = ferrariWins.reduce((acc, curr) => {
-        const driver = driverMap[curr.driverId];
+        const ferrariDriverIds = [...new Set(results.filter(r => r.constructorId === 'ferrari').map(r => r.driverId))];
+
+        const natAgg = ferrariDriverIds.reduce((acc, dId) => {
+        const driver = driverMap[dId];
         const natId = driver?.nationalityCountryId || 'unknown';
         acc[natId] = (acc[natId] || 0) + 1;
         return acc;
         }, {});
 
+        // Mappa dei codici ISO per flagcdn
+        const countryConfig = {
+        'germany': { code: 'de', color: '#FFCE00' }, // Giallo bandiera
+        'italy': { code: 'it', color: '#008C45' },   // Verde bandiera
+        'united-kingdom': { code: 'gb', color: '#00247D' }, // Blu Union Jack
+        'france': { code: 'fr', color: '#0055A4' },  // Blu Francia
+        'brazil': { code: 'br', color: '#26D701' },  // Verde Brasile
+        'spain': { code: 'es', color: '#AA151B' },   // Rosso Spagna
+        'united-states-of-america': { code: 'us', color: '#B22234' },
+        'finland': { code: 'fi', color: '#003580' },
+        'austria': { code: 'at', color: '#ED2939' },
+        'monaco': { code: 'mc', color: '#E20919' },
+        'argentina': { code: 'ar', color: '#75AADB' },
+        'switzerland': { code: 'ch', color: '#D52B1E' },
+        'belgium': { code: 'be', color: '#000000' },
+        'south-africa': { code: 'za', color: '#007A4D' },
+        'unknown': { code: 'un', color: '#333' }
+        };
+
         setNationalities(Object.entries(natAgg)
-        .map(([name, value]) => ({ 
-            name: name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, ' '), 
-            value 
+        .map(([id, value]) => ({ 
+            id,
+            name: id.replace(/-/g, ' ').toUpperCase(), 
+            value,
+            color: countryConfig[id]?.color || '#555',
+            flag: countryConfig[id]?.code || 'un'
         }))
         .sort((a, b) => b.value - a.value)
         );
@@ -228,47 +252,80 @@ export default function StatisticsPage() {
             <AccordionSection 
             id="dna" 
             title="Global DNA" 
-            subtitle="Origine geografica dei piloti vincenti"
+            subtitle="Distribuzione geografica dei piloti della Scuderia"
             icon={Globe2}
             isOpen={openSection === 'dna'}
             onToggle={() => toggleSection('dna')}
             color="red"
             >
-            <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-8 p-4">
-                <div className="h-[350px]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12 p-4">
+                {/* Grafico a Torta */}
+                <div className="h-[400px] relative">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                     <Pie 
                         data={nationalities} 
-                        innerRadius={80} 
-                        outerRadius={120} 
-                        paddingAngle={5} 
+                        innerRadius={90} 
+                        outerRadius={140} 
+                        paddingAngle={3} 
                         dataKey="value" 
                         nameKey="name"
+                        stroke="none"
                     >
                         {nationalities.map((entry, index) => (
                         <Cell 
                             key={`cell-${index}`} 
-                            fill={FERRARI_COLORS[index % FERRARI_COLORS.length]} 
-                            stroke="none" 
+                            fill={entry.color} 
+                            className="hover:opacity-80 transition-opacity cursor-pointer outline-none"
                         />
                         ))}
                     </Pie>
                     <Tooltip 
-                        contentStyle={{backgroundColor: '#000', borderRadius: '10px', border: '1px solid #333'}} 
-                        itemStyle={{textTransform: 'uppercase', fontWeight: 'bold'}}
+                        content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                            return (
+                            <div className="bg-black/90 border border-white/10 p-3 rounded-lg shadow-2xl backdrop-blur-md">
+                                <p className="text-[10px] font-black text-zinc-500 uppercase mb-1">{payload[0].name}</p>
+                                <p className="text-xl font-black text-white">{payload[0].value} <span className="text-xs font-medium text-zinc-400">Piloti</span></p>
+                            </div>
+                            );
+                        }
+                        return null;
+                        }}
                     />
                     </PieChart>
                 </ResponsiveContainer>
+                {/* Contatore Centrale */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-4xl font-black italic tracking-tighter text-white">
+                        {nationalities.reduce((a, b) => a + b.value, 0)}
+                    </span>
+                    <span className="text-[8px] font-black uppercase tracking-widest text-red-600">Total Drivers</span>
+                </div>
                 </div>
                 
-                {/* Legenda laterale */}
-                <div className="grid grid-cols-2 gap-3">
-                {nationalities.slice(0, 10).map((n, i) => (
-                    <div key={n.name} className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5 group hover:border-red-600/50 transition-colors">
-                    <div className="w-2 h-2 rounded-full" style={{backgroundColor: FERRARI_COLORS[i % FERRARI_COLORS.length]}} />
-                    <span className="font-black uppercase text-[10px] italic text-zinc-400 group-hover:text-white">{n.name}</span>
-                    <span className="ml-auto font-mono text-red-500 font-bold text-xs">{n.value}</span>
+                {/* Legenda con Bandierine */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {nationalities.slice(0, 12).map((n) => (
+                    <div key={n.id} className="flex items-center gap-4 bg-zinc-900/40 border border-white/5 p-4 rounded-2xl group hover:border-red-600/30 transition-all">
+                    <div className="relative w-8 h-6 overflow-hidden rounded-sm shadow-sm">
+                        <img 
+                        src={`https://flagcdn.com/w80/${n.flag}.png`} 
+                        alt={n.name}
+                        className="w-full h-full object-cover"
+                        />
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="font-black uppercase text-[10px] tracking-tight text-zinc-400 group-hover:text-white transition-colors">
+                            {n.name}
+                        </span>
+                        <div className="flex items-center gap-2">
+                            <div className="h-1 w-12 rounded-full bg-zinc-800 overflow-hidden">
+                                <div className="h-full bg-current" style={{ width: `${(n.value / nationalities[0].value) * 100}%`, color: n.color }} />
+                            </div>
+                            <span className="font-mono text-xs text-white font-bold">{n.value}</span>
+                        </div>
+                    </div>
                     </div>
                 ))}
                 </div>
