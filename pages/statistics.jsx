@@ -769,15 +769,16 @@ useEffect(() => {
                         type="category" 
                         tick={(props) => {
                         const { x, y, payload } = props;
-                        const circuit = circuits.find(c => c.name === payload.value);
-                        const flagCode = getFlagCodeFromCircuit(circuit?.originalName || payload.value);
+                        const circuit = payload[0].payload;
+                        const circuitName = circuit.originalName || circuit.name;
+                        const flagCode = getFlagCodeFromCircuit(circuitName);
                         
                         return (
                             <g>
                             {/*  */}
                             <foreignObject x={x - 190} y={y - 12} width={24} height={16}>
                                 <div className="w-6 h-4 overflow-hidden rounded-sm shadow-sm">
-                                <img src={`https://flagcdn.com/w40/${flagCode}.png`} className="w-full h-full object-cover" />
+                                <img src={`https://flagcdn.com/w80/${flagCode}.png`} className="w-full h-full object-cover rounded-sm" />
                                 </div>
                             </foreignObject>
                             {/* */}
