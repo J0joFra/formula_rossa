@@ -76,11 +76,19 @@ export default function StatisticsPage() {
 
         // 2. Process Nationalities
         const natAgg = ferrariWins.reduce((acc, curr) => {
-          const nat = driverMap[curr.driverId]?.nationality || 'Altro';
-          acc[nat] = (acc[nat] || 0) + 1;
-          return acc;
+        const driver = driverMap[curr.driverId];
+        const natId = driver?.nationalityCountryId || 'unknown';
+        acc[natId] = (acc[natId] || 0) + 1;
+        return acc;
         }, {});
-        setNationalities(Object.entries(natAgg).map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value));
+
+        setNationalities(Object.entries(natAgg)
+        .map(([name, value]) => ({ 
+            name: name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, ' '), 
+            value 
+        }))
+        .sort((a, b) => b.value - a.value)
+        );
 
         // 3. Process Circuits
         const raceMap = {}; racesData.forEach(r => raceMap[r.id] = r.grandPrixId);
@@ -217,7 +225,7 @@ export default function StatisticsPage() {
           </AccordionSection>
 
           {/* --- SEZIONE 3: GLOBAL DNA (NAZIONALITA') --- */}
-          <AccordionSection 
+            <AccordionSection 
             id="dna" 
             title="Global DNA" 
             subtitle="Origine geografica dei piloti vincenti"
@@ -225,31 +233,47 @@ export default function StatisticsPage() {
             isOpen={openSection === 'dna'}
             onToggle={() => toggleSection('dna')}
             color="red"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-8 p-8">
-              <div className="h-[350px]">
+            >
+            <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-8 p-4">
+                <div className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={nationalities} innerRadius={80} outerRadius={120} paddingAngle={5} dataKey="value" nameKey="name">
-                      {nationalities.map((entry, index) => (
-                        <Cell key={index} fill={FERRARI_COLORS[index % FERRARI_COLORS.length]} stroke="none" />
-                      ))}
+                    <PieChart>
+                    <Pie 
+                        data={nationalities} 
+                        innerRadius={80} 
+                        outerRadius={120} 
+                        paddingAngle={5} 
+                        dataKey="value" 
+                        nameKey="name"
+                    >
+                        {nationalities.map((entry, index) => (
+                        <Cell 
+                            key={`cell-${index}`} 
+                            fill={FERRARI_COLORS[index % FERRARI_COLORS.length]} 
+                            stroke="none" 
+                        />
+                        ))}
                     </Pie>
-                    <Tooltip contentStyle={{backgroundColor: '#000', borderRadius: '10px', border: 'none'}} />
-                  </PieChart>
+                    <Tooltip 
+                        contentStyle={{backgroundColor: '#000', borderRadius: '10px', border: '1px solid #333'}} 
+                        itemStyle={{textTransform: 'uppercase', fontWeight: 'bold'}}
+                    />
+                    </PieChart>
                 </ResponsiveContainer>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                {nationalities.slice(0, 8).map((n, i) => (
-                  <div key={n.name} className="flex items-center gap-3 bg-white/5 p-4 rounded-2xl border border-white/5">
-                    <div className="w-3 h-3 rounded-full" style={{backgroundColor: FERRARI_COLORS[i % FERRARI_COLORS.length]}} />
-                    <span className="font-black uppercase text-[10px] italic text-zinc-300">{n.name}</span>
-                    <span className="ml-auto font-mono text-red-500 font-bold">{n.value}</span>
-                  </div>
+                </div>
+                
+                {/* Legenda laterale */}
+                <div className="grid grid-cols-2 gap-3">
+                {nationalities.slice(0, 10).map((n, i) => (
+                    <div key={n.name} className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5 group hover:border-red-600/50 transition-colors">
+                    <div className="w-2 h-2 rounded-full" style={{backgroundColor: FERRARI_COLORS[i % FERRARI_COLORS.length]}} />
+                    <span className="font-black uppercase text-[10px] italic text-zinc-400 group-hover:text-white">{n.name}</span>
+                    <span className="ml-auto font-mono text-red-500 font-bold text-xs">{n.value}</span>
+                    </div>
                 ))}
-              </div>
+                </div>
             </div>
-          </AccordionSection>
+            </AccordionSection>
 
           {/* --- SEZIONE 4: FORTRESS MARANELLO (CIRCUITI) --- */}
           <AccordionSection 
