@@ -32,7 +32,7 @@ function TrophySVG({ size, color }) {
   );
 }
 
-// Mappa dei colori per le bandiere - AGGIORNATA con tutte le nazionalità
+// Mappa dei colori per le bandiere 
 const countryConfig = {
   'germany': { code: 'de', color: '#FFCE00', name: 'GERMANY' },
   'italy': { code: 'it', color: '#008C45', name: 'ITALY' },
@@ -40,9 +40,21 @@ const countryConfig = {
   'france': { code: 'fr', color: '#0055A4', name: 'FRANCE' },
   'brazil': { code: 'br', color: '#26D701', name: 'BRAZIL' },
   'spain': { code: 'es', color: '#AA151B', name: 'SPAIN' },
-  'spagna': { code: 'es', color: '#AA151B', name: 'SPAIN' }, // AGGIUNTO
+  'spagna': { code: 'es', color: '#AA151B', name: 'SPAIN' }, 
+  'united-kingdom': { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
+  'united kingdom': { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
+  'great-britain': { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
+  'great britain': { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
+  'england': { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
+  'britain': { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
+  'uk': { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
   'united-states-of-america': { code: 'us', color: '#B22234', name: 'UNITED STATES' },
   'united-states': { code: 'us', color: '#B22234', name: 'UNITED STATES' },
+  'united states of america': { code: 'us', color: '#B22234', name: 'UNITED STATES' },
+  'united states': { code: 'us', color: '#B22234', name: 'UNITED STATES' },
+  'usa': { code: 'us', color: '#B22234', name: 'UNITED STATES' },
+  'america': { code: 'us', color: '#B22234', name: 'UNITED STATES' },
+  'us': { code: 'us', color: '#B22234', name: 'UNITED STATES' },
   'usa': { code: 'us', color: '#B22234', name: 'UNITED STATES' },
   'finland': { code: 'fi', color: '#003580', name: 'FINLAND' },
   'austria': { code: 'at', color: '#ED2939', name: 'AUSTRIA' },
