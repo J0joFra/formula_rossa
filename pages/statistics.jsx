@@ -74,7 +74,7 @@ const countryConfig = {
   'unknown': { code: 'un', color: '#333' }
 };
 
-// Mappatura circuiti->paesi (aggiornata)
+// Mappatura circuiti 
 const circuitToCountry = {
   // Italia
   'monza': 'italy', 
@@ -326,60 +326,62 @@ const getFlagCodeFromCircuit = (circuitName) => {
   const lowerName = circuitName.toLowerCase();
   
   // Logica di fallback
-  if (lowerName.includes('abu dhabi') || lowerName.includes('yas marina') || lowerName.includes('emirates')) return 'ae';
-  if (lowerName.includes('silverstone') || lowerName.includes('brands') || lowerName.includes('donington') || 
-      lowerName.includes('aintree') || lowerName.includes('british') || lowerName.includes('england') || 
-      lowerName.includes('great britain') || lowerName.includes('uk')) return 'gb';
-  if (lowerName.includes('monza') || lowerName.includes('imola') || lowerName.includes('mugello') || 
-      lowerName.includes('pescara') || lowerName.includes('italian')) return 'it';
-  if (lowerName.includes('monaco') || lowerName.includes('monte carlo')) return 'mc';
-  if (lowerName.includes('spa') || lowerName.includes('francorchamps') || lowerName.includes('zolder') || 
-      lowerName.includes('belgian')) return 'be';
-  if (lowerName.includes('nürburgring') || lowerName.includes('nurburgring') || lowerName.includes('hockenheim') || 
-      lowerName.includes('avus') || lowerName.includes('german')) return 'de';
-  if (lowerName.includes('montreal') || lowerName.includes('villeneuve') || lowerName.includes('canadian')) return 'ca';
-  if (lowerName.includes('melbourne') || lowerName.includes('adelaide') || lowerName.includes('albert park') || 
-      lowerName.includes('australian')) return 'au';
-  if (lowerName.includes('interlagos') || lowerName.includes('jacarepagua') || lowerName.includes('galvez') || 
-      lowerName.includes('brazilian') || lowerName.includes('são paulo') || lowerName.includes('sao paulo')) return 'br';
-  if (lowerName.includes('mexico') || lowerName.includes('rodriguez') || lowerName.includes('mexican')) return 'mx';
-  if (lowerName.includes('shanghai') || lowerName.includes('chinese')) return 'cn';
-  if (lowerName.includes('suzuka') || lowerName.includes('fuji') || lowerName.includes('okayama') || 
-      lowerName.includes('japanese')) return 'jp';
-  if (lowerName.includes('bahrain') || lowerName.includes('sakhir')) return 'bh';
-  if (lowerName.includes('jeddah') || lowerName.includes('saudi')) return 'sa';
-  if (lowerName.includes('miami') || lowerName.includes('austin') || lowerName.includes('americas') || 
-      lowerName.includes('cota') || lowerName.includes('indianapolis') || lowerName.includes('sebring') || 
-      lowerName.includes('riverside') || lowerName.includes('watkins glen') || lowerName.includes('long beach') || 
-      lowerName.includes('phoenix') || lowerName.includes('detroit') || lowerName.includes('dallas') || 
-      lowerName.includes('caesars palace') || lowerName.includes('monterey') || lowerName.includes('laguna seca') || 
-      lowerName.includes('las vegas') || lowerName.includes('vegas') || lowerName.includes('united states') || 
-      lowerName.includes('usa') || lowerName.includes('us grand prix')) return 'us';
-  if (lowerName.includes('catalunya') || lowerName.includes('barcelona') || lowerName.includes('valencia') || 
-      lowerName.includes('jarama') || lowerName.includes('montjuic') || lowerName.includes('pedralbes') || 
-      lowerName.includes('spanish')) return 'es';
-  if (lowerName.includes('red bull ring') || lowerName.includes('spielberg') || lowerName.includes('zeltweg') || 
-      lowerName.includes('österreichring') || lowerName.includes('austrian')) return 'at';
-  if (lowerName.includes('hungaroring') || lowerName.includes('hungarian')) return 'hu';
-  if (lowerName.includes('zandvoort') || lowerName.includes('dutch') || lowerName.includes('netherlands') || 
-      lowerName.includes('holland')) return 'nl';
-  if (lowerName.includes('baku') || lowerName.includes('azerbaijan')) return 'az';
-  if (lowerName.includes('marina bay') || lowerName.includes('singapore')) return 'sg';
-  if (lowerName.includes('losail') || lowerName.includes('lusail') || lowerName.includes('qatar')) return 'qa';
-  if (lowerName.includes('le castellet') || lowerName.includes('paul ricard') || lowerName.includes('ricard') || 
-      lowerName.includes('rouen') || lowerName.includes('essarts') || lowerName.includes('reims') || 
-      lowerName.includes('charade') || lowerName.includes('dijon') || lowerName.includes('magny-cours') || 
-      lowerName.includes('lemans') || lowerName.includes('french')) return 'fr';
-  if (lowerName.includes('bremgarten') || lowerName.includes('swiss')) return 'ch';
-  if (lowerName.includes('boavista') || lowerName.includes('monsanto') || lowerName.includes('estoril') || 
-      lowerName.includes('portimao') || lowerName.includes('portuguese')) return 'pt';
-  if (lowerName.includes('ain-diab') || lowerName.includes('ain diab') || lowerName.includes('moroccan')) return 'ma';  
-  if (lowerName.includes('george') || lowerName.includes('kyalami') || lowerName.includes('south african')) return 'za';
-  if (lowerName.includes('sepang') || lowerName.includes('malaysian')) return 'my';
-  if (lowerName.includes('buddh') || lowerName.includes('indian')) return 'in';
-  if (lowerName.includes('yeongam') || lowerName.includes('korean')) return 'kr';
-  if (lowerName.includes('istanbul') || lowerName.includes('turkish')) return 'tr';
-  if (lowerName.includes('sochi') || lowerName.includes('russian')) return 'ru';
+    if (lowerName.includes('abu dhabi') || lowerName.includes('yas marina') || lowerName.includes('emirates')) return 'ae';
+    if (lowerName.includes('silverstone') || lowerName.includes('brands') || lowerName.includes('donington') || 
+        lowerName.includes('aintree') || lowerName.includes('british') || lowerName.includes('england') || 
+        lowerName.includes('great britain') || lowerName.includes('uk')) return 'gb';
+    if (lowerName.includes('monza') || lowerName.includes('imola') || lowerName.includes('mugello') || 
+        lowerName.includes('pescara') || lowerName.includes('italian') || lowerName.includes('autodromo-nazionale-di-monza') ||
+        lowerName.includes('milan') || lowerName.includes('enzo-e-dino-ferrari') || lowerName.includes('bologna')) return 'it';
+    if (lowerName.includes('monaco') || lowerName.includes('monte carlo')) return 'mc';
+    if (lowerName.includes('spa') || lowerName.includes('francorchamps') || lowerName.includes('zolder') || lowerName.includes('nivelles') ||
+        lowerName.includes('belgian') || lowerName.includes('belgium')) return 'be';
+    if (lowerName.includes('nürburgring') || lowerName.includes('nurburgring') || lowerName.includes('hockenheim') || 
+        lowerName.includes('avus') || lowerName.includes('german')) return 'de';
+    if (lowerName.includes('montreal') || lowerName.includes('villeneuve') || lowerName.includes('bowmanville') || 
+        lowerName.includes('canadian') || lowerName.includes('canada')) return 'ca';
+    if (lowerName.includes('melbourne') || lowerName.includes('adelaide') || lowerName.includes('albert park') || 
+        lowerName.includes('australian')) return 'au';
+    if (lowerName.includes('interlagos') || lowerName.includes('jacarepagua') || lowerName.includes('galvez') || 
+        lowerName.includes('brazilian') || lowerName.includes('são paulo') || lowerName.includes('sao paulo')) return 'br';
+    if (lowerName.includes('mexico') || lowerName.includes('rodriguez') || lowerName.includes('mexican')) return 'mx';
+    if (lowerName.includes('shanghai') || lowerName.includes('chinese')) return 'cn';
+    if (lowerName.includes('suzuka') || lowerName.includes('fuji') || lowerName.includes('okayama') || 
+        lowerName.includes('japanese')) return 'jp';
+    if (lowerName.includes('bahrain') || lowerName.includes('sakhir')) return 'bh';
+    if (lowerName.includes('jeddah') || lowerName.includes('saudi')) return 'sa';
+    if (lowerName.includes('miami') || lowerName.includes('austin') || lowerName.includes('americas') || 
+        lowerName.includes('cota') || lowerName.includes('indianapolis') || lowerName.includes('sebring') || 
+        lowerName.includes('riverside') || lowerName.includes('watkins glen') || lowerName.includes('long beach') || 
+        lowerName.includes('phoenix') || lowerName.includes('detroit') || lowerName.includes('dallas') || 
+        lowerName.includes('caesars palace') || lowerName.includes('monterey') || lowerName.includes('laguna seca') || 
+        lowerName.includes('las vegas') || lowerName.includes('vegas') || lowerName.includes('united states') || 
+        lowerName.includes('usa') || lowerName.includes('us grand prix')) return 'us';
+    if (lowerName.includes('catalunya') || lowerName.includes('barcelona') || lowerName.includes('valencia') || 
+        lowerName.includes('jarama') || lowerName.includes('montjuic') || lowerName.includes('pedralbes') || 
+        lowerName.includes('spanish')) return 'es';
+    if (lowerName.includes('red bull ring') || lowerName.includes('spielberg') || lowerName.includes('zeltweg') || 
+        lowerName.includes('österreichring') || lowerName.includes('austrian')) return 'at';
+    if (lowerName.includes('hungaroring') || lowerName.includes('hungarian')) return 'hu';
+    if (lowerName.includes('zandvoort') || lowerName.includes('dutch') || lowerName.includes('netherlands') || 
+        lowerName.includes('holland')) return 'nl';
+    if (lowerName.includes('baku') || lowerName.includes('azerbaijan')) return 'az';
+    if (lowerName.includes('marina bay') || lowerName.includes('singapore')) return 'sg';
+    if (lowerName.includes('losail') || lowerName.includes('lusail') || lowerName.includes('qatar')) return 'qa';
+    if (lowerName.includes('le castellet') || lowerName.includes('paul ricard') || lowerName.includes('ricard') || 
+        lowerName.includes('rouen') || lowerName.includes('essarts') || lowerName.includes('reims') || lowerName.includes('charade') ||
+        lowerName.includes('dijon') || lowerName.includes('magny-cours') || lowerName.includes('lemans') || lowerName.includes('louvre') || 
+        lowerName.includes('french') || lowerName.includes('france')) return 'fr'; 
+    if (lowerName.includes('bremgarten') || lowerName.includes('swiss')) return 'ch';
+    if (lowerName.includes('boavista') || lowerName.includes('monsanto') || lowerName.includes('estoril') || 
+        lowerName.includes('portimao') || lowerName.includes('portuguese')) return 'pt';   
+    if (lowerName.includes('ain-diab') || lowerName.includes('ain diab') || lowerName.includes('moroccan')) return 'ma';  
+    if (lowerName.includes('george') || lowerName.includes('kyalami') || lowerName.includes('south african')) return 'za';
+    if (lowerName.includes('sepang') || lowerName.includes('malaysian')) return 'my';
+    if (lowerName.includes('buddh') || lowerName.includes('indian')) return 'in';
+    if (lowerName.includes('yeongam') || lowerName.includes('korean')) return 'kr';
+    if (lowerName.includes('istanbul') || lowerName.includes('turkish')) return 'tr';
+    if (lowerName.includes('sochi') || lowerName.includes('russian')) return 'ru';
   
   return '';
 };
