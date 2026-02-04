@@ -842,14 +842,16 @@ export default function StatisticsPage() {
                                 {/* BARRA COLORATA - VERSIONE SEMPLIFICATA PER DEBUG */}
                                 <div className="relative">
                                     {/* SFONDO DELLA BARRA (grigio) */}
-                                    <div className="w-full h-3 bg-zinc-800 rounded-full overflow-hidden">
-                                    {/* BARRA COLORATA - USIAMO UN COLORE FISSO PER TEST */}
+                                    {/* BARRA COLORATA - VERSIONE ULTRA-SEMPLICE */}
+                                    <div className="w-full h-4 bg-zinc-900 rounded-full overflow-hidden border border-zinc-700">
                                     <div 
-                                        className="h-full rounded-full transition-all duration-700"
+                                        className="h-full rounded-full"
                                         style={{ 
                                         width: `${percentage}%`,
-                                        backgroundColor: barColor,
-                                        boxShadow: `0 0 15px ${barColor}`
+                                        backgroundColor: barColor || '#FFCE00', 
+                                        backgroundImage: barColor === '#FFCE00' 
+                                            ? 'linear-gradient(90deg, #FFCE00 0%, #FFE55C 100%)' // Gradiente dorato
+                                            : `linear-gradient(90deg, ${barColor} 0%, ${barColor}CC 100%)`
                                         }}
                                     />
                                     </div>
