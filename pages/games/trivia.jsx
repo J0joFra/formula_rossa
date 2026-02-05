@@ -14,7 +14,8 @@ import {
   RefreshCw,
   TrendingUp,
   Crown,
-  Loader2
+  Loader2,
+  AlertTriangle
 } from 'lucide-react';
 import { useSession } from "next-auth/react";
 
@@ -33,6 +34,7 @@ export default function F1TriviaQuiz() {
   const [answersHistory, setAnswersHistory] = useState([]);
   const [streak, setStreak] = useState(0);
   const [maxStreak, setMaxStreak] = useState(0);
+  const [timeExpired, setTimeExpired] = useState(false);
 
   // Carica le domande dal JSON
   useEffect(() => {
@@ -66,8 +68,11 @@ export default function F1TriviaQuiz() {
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-          handleAnswer(null); // Tempo scaduto
-          return 15;
+          // TEMPO SCADUTO - FINE QUIZ
+          clearInterval(timer);
+          setTimeExpired(true);
+          endGame();
+          return 0;
         }
         return prev - 1;
       });
@@ -77,11 +82,15 @@ export default function F1TriviaQuiz() {
   }, [gameStarted, showResult, currentQuestion, questions]);
 
   const handleAnswer = (optionIndex) => {
-    if (selectedAnswer !== null || questions.length === 0) return;
+    if (selectedAnswer !== null || questions.length === 0 || timeExpired) return;
     
     const question = questions[currentQuestion];
     const isCorrect = optionIndex === question.correct;
     const pointsEarned = isCorrect ? question.points : 0;
+    
+    // Bonus per risposta rapida 
+    const speedBonus = timeLeft > 10 ? Math.floor(question.points * 0.2) : 0;
+    const totalPoints = pointsEarned + speedBonus;
     
     // Aggiorna streak
     if (isCorrect) {
@@ -97,12 +106,13 @@ export default function F1TriviaQuiz() {
       questionId: question.id, 
       answer: optionIndex, 
       correct: isCorrect,
-      points: pointsEarned,
-      explanation: question.explanation
+      points: totalPoints,
+      explanation: question.explanation,
+      speedBonus: speedBonus > 0 ? speedBonus : 0
     }]);
     
     if (isCorrect) {
-      setScore(prev => prev + pointsEarned);
+      setScore(prev => prev + totalPoints);
     }
     
     setTimeout(() => {
@@ -123,15 +133,19 @@ export default function F1TriviaQuiz() {
     const streakBonus = Math.floor(maxStreak * 10);
     const finalScore = score + streakBonus;
     
+    // Penalità se il tempo è scaduto
+    const timePenalty = timeExpired ? Math.floor(finalScore * 0.3) : 0;
+    const adjustedScore = Math.max(0, finalScore - timePenalty);
+    
     // Aggiorna token utente (30 SFT base + punti/10)
-    const tokensEarned = 30 + Math.floor(finalScore / 10);
+    const tokensEarned = 30 + Math.floor(adjustedScore / 10);
     if (session) {
       const newTokens = userTokens + tokensEarned;
       setUserTokens(newTokens);
       localStorage.setItem(`tokens_${session.user?.email}`, newTokens.toString());
     }
     
-    setScore(finalScore);
+    setScore(adjustedScore);
   };
 
   const startGame = () => {
@@ -146,6 +160,7 @@ export default function F1TriviaQuiz() {
     setAnswersHistory([]);
     setStreak(0);
     setMaxStreak(0);
+    setTimeExpired(false);
   };
 
   const getAnswerColor = (optionIndex) => {
@@ -210,19 +225,19 @@ export default function F1TriviaQuiz() {
             className="text-center"
           >
             <div className="inline-flex items-center gap-3 mb-6">
-              <Trophy className="w-8 h-8 text-yellow-500" />
+              <Timer className="w-8 h-8 text-red-500" />
               <span className="text-red-600 font-black text-xs uppercase tracking-[0.3em] font-mono italic">
-                Scuderia Ferrari Trivia
+                Scuderia Ferrari Trivia • TIMED
               </span>
             </div>
             
             <h1 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter mb-6">
-              F1 <span className="text-red-600">Knowledge</span> Challenge
+              F1 <span className="text-red-600">Speed</span> Challenge
             </h1>
             
             <p className="text-zinc-400 max-w-2xl mx-auto text-lg italic">
-              Dimostra di essere il più grande tifoso Ferrari rispondendo a {questions.length} domande.
-              Più rispondi velocemente e correttamente, più punti guadagni!
+              <span className="text-red-500 font-bold">15 secondi totali per rispondere!</span><br/>
+              Rispondi velocemente e correttamente prima che il tempo scada.
             </p>
           </motion.div>
         </header>
@@ -242,32 +257,32 @@ export default function F1TriviaQuiz() {
           <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Streak Attuale</p>
-                <p className="text-3xl font-black text-white flex items-center gap-2">
-                  {streak}
-                  <TrendingUp className={`w-5 h-5 ${streak >= 3 ? 'text-green-500' : 'text-zinc-500'}`} />
-                </p>
-              </div>
-              <Zap className="text-red-500 w-8 h-8" />
-            </div>
-          </div>
-          
-          <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Tempo</p>
-                <p className={`text-3xl font-black ${timeLeft <= 5 ? 'text-red-500 animate-pulse' : 'text-white'}`}>
+                <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Tempo Restante</p>
+                <p className={`text-3xl font-black ${timeLeft <= 5 ? 'text-red-500 animate-pulse' : 
+                             timeLeft <= 10 ? 'text-yellow-500' : 'text-white'}`}>
                   {timeLeft}s
                 </p>
               </div>
-              <Timer className="text-yellow-500 w-8 h-8" />
+              <Timer className="text-red-500 w-8 h-8" />
             </div>
           </div>
           
           <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Token</p>
+                <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Domanda</p>
+                <p className="text-3xl font-black text-white">
+                  {currentQuestion + 1}<span className="text-zinc-500 text-lg">/{questions.length}</span>
+                </p>
+              </div>
+              <Zap className="text-yellow-500 w-8 h-8" />
+            </div>
+          </div>
+          
+          <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">SFT Totali</p>
                 <p className="text-3xl font-black text-white">{userTokens} SFT</p>
               </div>
               <div className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center">
@@ -289,25 +304,31 @@ export default function F1TriviaQuiz() {
                 className="text-center py-20"
               >
                 <div className="mb-10">
-                  <Crown className="w-24 h-24 text-yellow-500 mx-auto mb-8" />
-                  <h2 className="text-4xl font-black uppercase mb-4">Pronto per la sfida?</h2>
+                  <div className="relative w-32 h-32 mx-auto mb-8">
+                    <Timer className="w-32 h-32 text-red-500 absolute inset-0" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-4xl font-black text-white">15s</span>
+                    </div>
+                  </div>
+                  <h2 className="text-4xl font-black uppercase mb-4">Sfida a Tempo!</h2>
                   <p className="text-zinc-400 mb-10 max-w-md mx-auto">
-                    Rispondi a {questions.length} domande sulla storia Ferrari. Ogni risposta corretta ti dà punti, 
-                    il timer aggiunge pressione, e le streak moltiplicano il tuo punteggio!
+                    <span className="text-red-500 font-bold">SOLO 15 SECONDI TOTALI!</span><br/>
+                    Rispondi alle domande il più velocemente possibile prima che il tempo scada.
                   </p>
                   
+                  {/* REGOLE RAPIDE */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 max-w-2xl mx-auto">
-                    <div className="p-6 bg-zinc-800/50 rounded-2xl">
-                      <div className="text-green-500 text-sm font-bold mb-2">⭐ Facile: 30 punti</div>
-                      <p className="text-zinc-500 text-xs">Domande base sulla Ferrari</p>
+                    <div className="p-6 bg-zinc-800/50 rounded-2xl border border-red-500/20">
+                      <div className="text-red-500 text-sm font-bold mb-2">⏱️ 15s Totali</div>
+                      <p className="text-zinc-500 text-xs">Il timer parte quando inizi</p>
                     </div>
-                    <div className="p-6 bg-zinc-800/50 rounded-2xl">
-                      <div className="text-yellow-500 text-sm font-bold mb-2">⭐⭐ Medio: 50 punti</div>
-                      <p className="text-zinc-500 text-xs">Record e statistiche</p>
+                    <div className="p-6 bg-zinc-800/50 rounded-2xl border border-yellow-500/20">
+                      <div className="text-yellow-500 text-sm font-bold mb-2">⚡ Bonus Velocità</div>
+                      <p className="text-zinc-500 text-xs">+20% punti se rispondi in 5s</p>
                     </div>
-                    <div className="p-6 bg-zinc-800/50 rounded-2xl">
-                      <div className="text-red-500 text-sm font-bold mb-2">⭐⭐⭐ Difficile: 100 punti</div>
-                      <p className="text-zinc-500 text-xs">Curiosità e dettagli tecnici</p>
+                    <div className="p-6 bg-zinc-800/50 rounded-2xl border border-red-500/20">
+                      <div className="text-red-500 text-sm font-bold mb-2">⚠️ Fine Quiz</div>
+                      <p className="text-zinc-500 text-xs">Tempo scaduto = quiz finito</p>
                     </div>
                   </div>
                 </div>
@@ -316,7 +337,7 @@ export default function F1TriviaQuiz() {
                   onClick={startGame}
                   className="bg-gradient-to-r from-red-600 to-red-800 px-12 py-6 rounded-2xl text-xl font-black uppercase tracking-wider hover:scale-105 transition-transform shadow-2xl"
                 >
-                  Inizia il Quiz
+                  Accetta la Sfida
                 </button>
               </motion.div>
             ) : showResult ? (
@@ -327,25 +348,64 @@ export default function F1TriviaQuiz() {
                 className="text-center py-20"
               >
                 <div className="mb-12">
-                  <Trophy className="w-32 h-32 text-yellow-500 mx-auto mb-8" />
-                  <h2 className="text-5xl font-black uppercase mb-4">Quiz Completato!</h2>
+                  {timeExpired ? (
+                    <>
+                      <AlertTriangle className="w-32 h-32 text-red-500 mx-auto mb-8" />
+                      <h2 className="text-5xl font-black uppercase mb-4">Tempo Scaduto!</h2>
+                      <p className="text-zinc-400 text-xl mb-2">
+                        Il timer di 15 secondi è terminato. Il quiz è finito.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <Trophy className="w-32 h-32 text-yellow-500 mx-auto mb-8" />
+                      <h2 className="text-5xl font-black uppercase mb-4">Quiz Completato!</h2>
+                    </>
+                  )}
+                  
                   <p className="text-zinc-400 text-xl mb-2">Il tuo punteggio finale</p>
-                  <div className="text-7xl font-black text-yellow-500 mb-10">{score}</div>
+                  <div className={`text-7xl font-black mb-10 ${timeExpired ? 'text-red-500' : 'text-yellow-500'}`}>
+                    {score}
+                  </div>
+                  
+                  {timeExpired && (
+                    <div className="mb-8 p-6 bg-red-900/20 border border-red-500/30 rounded-2xl max-w-md mx-auto">
+                      <p className="text-red-300">
+                        <span className="font-bold">Penalità tempo:</span> -30% del punteggio
+                      </p>
+                    </div>
+                  )}
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto mb-12">
                     <div className="p-6 bg-zinc-800/50 rounded-2xl">
-                      <div className="text-2xl font-black mb-2">{answersHistory.filter(a => a.correct).length}/{questions.length}</div>
+                      <div className="text-2xl font-black mb-2">
+                        {answersHistory.filter(a => a.correct).length}/{answersHistory.length}
+                      </div>
                       <p className="text-zinc-500 text-sm">Risposte corrette</p>
                     </div>
                     <div className="p-6 bg-zinc-800/50 rounded-2xl">
-                      <div className="text-2xl font-black mb-2">{maxStreak}</div>
-                      <p className="text-zinc-500 text-sm">Streak massimo</p>
+                      <div className="text-2xl font-black mb-2">
+                        {timeExpired ? '0' : questions.length - answersHistory.length}
+                      </div>
+                      <p className="text-zinc-500 text-sm">Domande saltate</p>
                     </div>
                     <div className="p-6 bg-zinc-800/50 rounded-2xl">
                       <div className="text-2xl font-black mb-2">+{30 + Math.floor(score/10)}</div>
                       <p className="text-zinc-500 text-sm">SFT guadagnati</p>
                     </div>
                   </div>
+                  
+                  {/* BONUS VELOCITÀ */}
+                  {answersHistory.filter(a => a.speedBonus > 0).length > 0 && (
+                    <div className="mb-8 p-6 bg-yellow-900/20 border border-yellow-500/30 rounded-2xl max-w-md mx-auto">
+                      <h4 className="text-yellow-500 font-bold mb-2">⚡ Bonus Velocità</h4>
+                      <p className="text-zinc-300">
+                        Hai ottenuto <span className="text-yellow-500 font-bold">
+                          +{answersHistory.reduce((sum, a) => sum + (a.speedBonus || 0), 0)} punti
+                        </span> per risposte rapide!
+                      </p>
+                    </div>
+                  )}
                   
                   <div className="flex flex-col sm:flex-row gap-6 justify-center">
                     <button
@@ -372,35 +432,52 @@ export default function F1TriviaQuiz() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
               >
-                {/* PROGRESS BAR */}
+                {/* TIMER VISIVO GRANDE */}
                 <div className="mb-10">
-                  <div className="flex justify-between text-sm text-zinc-500 mb-2">
-                    <span>Domanda {currentQuestion + 1} di {questions.length}</span>
-                    <span className={`font-bold ${getDifficultyColor(questions[currentQuestion].difficulty)}`}>
-                      {questions[currentQuestion].difficulty} • {questions[currentQuestion].points} punti
-                    </span>
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="text-sm text-zinc-500">
+                      Tempo totale rimasto: <span className={`font-bold ${timeLeft <= 5 ? 'text-red-500' : 
+                                                           timeLeft <= 10 ? 'text-yellow-500' : 'text-green-500'}`}>
+                        {timeLeft}s
+                      </span>
+                    </div>
+                    <div className="text-sm text-zinc-500">
+                      Domanda: {currentQuestion + 1}/{questions.length}
+                    </div>
                   </div>
-                  <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                  
+                  {/* PROGRESS BAR DEL TEMPO TOTALE */}
+                  <div className="h-3 bg-zinc-800 rounded-full overflow-hidden mb-2">
                     <motion.div 
-                      className="h-full bg-gradient-to-r from-red-600 to-red-800"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-                      transition={{ duration: 0.5 }}
+                      className={`h-full ${timeLeft <= 5 ? 'bg-red-600' : 
+                                  timeLeft <= 10 ? 'bg-yellow-600' : 'bg-green-600'}`}
+                      initial={{ width: '100%' }}
+                      animate={{ width: `${(timeLeft / 15) * 100}%` }}
+                      transition={{ duration: 1, ease: "linear" }}
                     />
                   </div>
+                  
+                  {/* INDICATORI TEMPO */}
+                  <div className="flex justify-between text-[10px] text-zinc-600 font-bold">
+                    <span>15s</span>
+                    <span>10s</span>
+                    <span>5s</span>
+                    <span>0s</span>
+                  </div>
+                </div>
+
+                {/* DIFFICOLTÀ */}
+                <div className="flex justify-between text-sm text-zinc-500 mb-6">
+                  <span className={`font-bold ${getDifficultyColor(questions[currentQuestion].difficulty)}`}>
+                    {questions[currentQuestion].difficulty} • {questions[currentQuestion].points} punti
+                  </span>
+                  <span className="px-3 py-1 bg-zinc-800 rounded-full text-xs">
+                    {questions[currentQuestion].category}
+                  </span>
                 </div>
 
                 {/* QUESTION */}
                 <div className="mb-12">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="px-4 py-2 bg-zinc-800 rounded-full text-xs font-black uppercase tracking-wider">
-                      {questions[currentQuestion].category}
-                    </div>
-                    <div className="px-4 py-2 bg-red-900/30 border border-red-500/30 rounded-full text-xs font-black uppercase tracking-wider">
-                      Streak: {streak} {streak >= 3 && '🔥'}
-                    </div>
-                  </div>
-                  
                   <h3 className="text-3xl md:text-4xl font-black leading-tight mb-10">
                     {questions[currentQuestion].question}
                   </h3>
@@ -456,7 +533,14 @@ export default function F1TriviaQuiz() {
                           <CheckCircle className="w-8 h-8 text-green-500" />
                           <div>
                             <h4 className="text-xl font-black text-green-500">Esatto!</h4>
-                            <p className="text-zinc-300">+{questions[currentQuestion].points} punti</p>
+                            <p className="text-zinc-300">
+                              +{questions[currentQuestion].points} punti
+                              {answersHistory[answersHistory.length - 1]?.speedBonus > 0 && (
+                                <span className="text-yellow-500 ml-2">
+                                  (+{answersHistory[answersHistory.length - 1].speedBonus} bonus velocità!)
+                                </span>
+                              )}
+                            </p>
                             <p className="text-zinc-400 text-sm mt-2">{questions[currentQuestion].explanation}</p>
                           </div>
                         </>
@@ -482,41 +566,57 @@ export default function F1TriviaQuiz() {
           </AnimatePresence>
         </div>
 
+        {/* AVVISO TEMPO */}
+        {gameStarted && !showResult && timeLeft <= 5 && (
+          <motion.div 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="mt-8 p-6 bg-red-900/30 border border-red-500/50 rounded-2xl text-center"
+          >
+            <div className="flex items-center justify-center gap-3">
+              <AlertTriangle className="w-6 h-6 text-red-500 animate-pulse" />
+              <span className="text-red-300 font-bold">
+                ATTENZIONE! Solo {timeLeft} secondi rimasti!
+              </span>
+            </div>
+          </motion.div>
+        )}
+
         {/* RULES & INFO */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="p-6 bg-zinc-900/20 border border-white/5 rounded-2xl">
+          <div className="p-6 bg-zinc-900/20 border border-white/5 rounded-2xl border-red-500/20">
             <h4 className="text-lg font-black mb-3 flex items-center gap-2">
-              <Timer className="w-5 h-5 text-red-500" /> Regole del Gioco
+              <Timer className="w-5 h-5 text-red-500" /> Regole Tempo
             </h4>
             <ul className="text-zinc-400 text-sm space-y-2">
-              <li>• 15 secondi per ogni risposta</li>
-              <li>• Punti basati sulla difficoltà</li>
-              <li>• Streak bonus per risposte consecutive</li>
-              <li>• Tempo extra per risposte rapide</li>
+              <li>• <span className="text-red-500 font-bold">15 secondi TOTALI</span> per il quiz</li>
+              <li>• Tempo scaduto = quiz terminato</li>
+              <li>• Penalità -30% se il tempo scade</li>
+              <li>• Bonus +20% per risposte in &lt;5s</li>
             </ul>
           </div>
           
           <div className="p-6 bg-zinc-900/20 border border-white/5 rounded-2xl">
             <h4 className="text-lg font-black mb-3 flex items-center gap-2">
-              <Star className="w-5 h-5 text-yellow-500" /> Sistema Punti
+              <Zap className="w-5 h-5 text-yellow-500" /> Strategia
             </h4>
             <ul className="text-zinc-400 text-sm space-y-2">
-              <li>• Facile: 30 punti</li>
-              <li>• Medio: 50 punti</li>
-              <li>• Difficile: 100 punti</li>
-              <li>• Bonus streak: +10 punti per ogni risposta consecutiva</li>
+              <li>• Rispondi velocemente, non riflettere troppo</li>
+              <li>• Salta le domande difficili se necessario</li>
+              <li>• Concentrati su quelle che sai</li>
+              <li>• Il tempo non si ferma tra le domande</li>
             </ul>
           </div>
           
           <div className="p-6 bg-zinc-900/20 border border-white/5 rounded-2xl">
             <h4 className="text-lg font-black mb-3 flex items-center gap-2">
-              <Zap className="w-5 h-5 text-green-500" /> Ricompense SFT
+              <Trophy className="w-5 h-5 text-green-500" /> Ricompense
             </h4>
             <ul className="text-zinc-400 text-sm space-y-2">
-              <li>• Completamento quiz: 30 SFT</li>
+              <li>• Completamento: 30 SFT</li>
               <li>• +1 SFT ogni 10 punti</li>
-              <li>• Bonus streak massimo</li>
-              <li>• I SFT si salvano automaticamente</li>
+              <li>• Bonus velocità extra</li>
+              <li>• Penalità tempo: -30%</li>
             </ul>
           </div>
         </div>
