@@ -16,7 +16,9 @@ import {
   TrendingUp,
   Clock,
   Gauge,
-  Award
+  Award,
+  Play,
+  Pause
 } from 'lucide-react';
 import { useSession } from "next-auth/react";
 
@@ -37,8 +39,7 @@ export default function PitStopChallenge() {
   const [targetTime, setTargetTime] = useState(0);
   const [reactionTime, setReactionTime] = useState(0);
   const [gameTimer, setGameTimer] = useState(15);
-  const [timeStarted, setTimeStarted] = useState(null);
-  const [timeStopped, setTimeStopped] = useState(null);
+  const [currentTime, setCurrentTime] = useState(0); // Tempo corrente durante fase reaction
   
   // STATISTICHE
   const [attempts, setAttempts] = useState([]);
@@ -48,7 +49,9 @@ export default function PitStopChallenge() {
   
   // REF PER TIMER
   const timerRef = useRef(null);
+  const reactionTimerRef = useRef(null);
   const reactionStartRef = useRef(null);
+  const animationFrameRef = useRef(null);
   
   // Caricamento token utente
   useEffect(() => {
@@ -57,6 +60,15 @@ export default function PitStopChallenge() {
       setUserTokens(parseInt(saved));
     }
   }, [session]);
+
+  // PULIZIA TIMER
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (reactionTimerRef.current) clearInterval(reactionTimerRef.current);
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+    };
+  }, []);
 
   // GENERA TEMPO TARGET CASUALE (tra 2 e 5 secondi)
   const generateTargetTime = () => {
@@ -80,7 +92,7 @@ export default function PitStopChallenge() {
     
     return {
       totalMs,
-      display: `${seconds}.${hundredthsPart.toString().padStart(2, '0')}${thousandthsPart}s`
+      display: `${seconds}.${hundredthsPart.toString().padStart(2, '0')}${thousandthsPart}`
     };
   };
 
@@ -181,6 +193,7 @@ export default function PitStopChallenge() {
     setMaxConsecutive(0);
     setBestTime(null);
     setGameTimer(15);
+    setCurrentTime(0);
     
     // Genera primo target
     const target = generateTargetTime();
@@ -216,17 +229,36 @@ export default function PitStopChallenge() {
     }, 1000);
   };
 
-  // INIZIA FASE REAZIONE
+  // INIZIA FASE REAZIONE CON ANIMAZIONE SMOOTH
   const startReaction = () => {
     setGameState('waiting');
+    setCurrentTime(0);
     
     // Aspetta tempo random prima di dare il via (1-3 secondi)
     const waitTime = 1000 + Math.random() * 2000;
     
     setTimeout(() => {
       setGameState('reaction');
-      setTimeStarted(Date.now());
-      reactionStartRef.current = Date.now();
+      const startTime = Date.now();
+      reactionStartRef.current = startTime;
+      
+      // AVVIA ANIMAZIONE SMOOTH DEL TIMER
+      const updateTimer = () => {
+        const elapsed = Date.now() - startTime;
+        setCurrentTime(elapsed);
+        
+        // Continua l'animazione fino a 10 secondi (limite di sicurezza)
+        if (elapsed < 10000 && gameState === 'reaction') {
+          animationFrameRef.current = requestAnimationFrame(updateTimer);
+        }
+      };
+      
+      // Ferma eventuali animazioni precedenti
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      
+      animationFrameRef.current = requestAnimationFrame(updateTimer);
     }, waitTime);
   };
 
@@ -234,8 +266,13 @@ export default function PitStopChallenge() {
   const handleClick = () => {
     if (gameState !== 'reaction') {
       // Click prematuro - penalità
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      
       setGameState('result');
       setReactionTime(0);
+      setCurrentTime(0);
       setScore(-100);
       setTotalScore(prev => prev - 100);
       setConsecutiveHits(0);
@@ -246,9 +283,12 @@ export default function PitStopChallenge() {
       return;
     }
     
-    const endTime = Date.now();
-    const reactionMs = endTime - reactionStartRef.current;
+    // Ferma l'animazione
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
     
+    const reactionMs = currentTime;
     setReactionTime(reactionMs);
     setGameState('result');
     
@@ -312,12 +352,15 @@ export default function PitStopChallenge() {
     const newTarget = generateTargetTime();
     setTargetTime(newTarget);
     setGameState('ready');
+    setCurrentTime(0);
   };
 
   // TERMINA GIOCO
   const endGame = () => {
     if (timerRef.current) clearInterval(timerRef.current);
+    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     setGameState('finished');
+    setCurrentTime(0);
     
     // Calcola ricompensa SFT
     let tokensEarned = 50; // Base
@@ -348,24 +391,21 @@ export default function PitStopChallenge() {
     }
   };
 
-  // FORMATTA TEMPO
+  // FORMATTA TEMPO IN MILLISECONDI CON CENTESIMI E MILLESIMI
   const formatTime = (ms) => {
-    if (!ms) return "0.000s";
+    if (!ms && ms !== 0) return "0.000";
     const seconds = Math.floor(ms / 1000);
     const remainingMs = ms % 1000;
     const hundredths = Math.floor(remainingMs / 10);
     const thousandths = remainingMs % 10;
-    return `${seconds}.${hundredths.toString().padStart(2, '0')}${thousandths}s`;
+    return `${seconds}.${hundredths.toString().padStart(2, '0')}${thousandths}`;
   };
 
   // FORMATTA DIFFERENZA
   const formatDiff = (diffSeconds) => {
     const absDiff = Math.abs(diffSeconds);
-    if (absDiff < 0.001) return "0.000s";
-    const ms = absDiff * 1000;
-    const hundredths = Math.floor(ms / 10);
-    const thousandths = Math.floor(ms % 10);
-    return `${(absDiff).toFixed(3)}s`;
+    if (absDiff < 0.001) return "0.000";
+    return absDiff.toFixed(3);
   };
 
   // GET COLOR BASED ON RATING
@@ -400,6 +440,29 @@ export default function PitStopChallenge() {
     }
   };
 
+  // CALCOLA PROGRESSO VERSO TARGET (per barra di progresso)
+  const calculateProgress = () => {
+    if (!targetTime || currentTime === 0) return 0;
+    
+    // Progresso come percentuale (limite a 150% per overshoot)
+    const progress = (currentTime / targetTime.totalMs) * 100;
+    return Math.min(progress, 150);
+  };
+
+  // OTTIENE COLORE PROGRESS BAR IN BASE A DIFFERENZA
+  const getProgressColor = () => {
+    if (!targetTime) return 'bg-zinc-700';
+    
+    const diff = Math.abs(currentTime - targetTime.totalMs);
+    const diffSeconds = diff / 1000;
+    
+    if (diffSeconds <= 0.05) return 'bg-green-500';
+    if (diffSeconds <= 0.1) return 'bg-emerald-400';
+    if (diffSeconds <= 0.2) return 'bg-yellow-500';
+    if (diffSeconds <= 0.5) return 'bg-orange-500';
+    return 'bg-red-500';
+  };
+
   return (
     <div className="min-h-screen bg-black text-white font-sans">
       <Navigation />
@@ -423,7 +486,7 @@ export default function PitStopChallenge() {
             </h1>
             
             <p className="text-zinc-400 max-w-2xl mx-auto text-lg italic">
-              Sii veloce come i meccanici Ferrari! Clicca esattamente quando il timer raggiunge il tempo target.
+              Timer in tempo reale! Guarda i millisecondi scorrere e clicca quando raggiungi esattamente il target.
               Precisione al <span className="text-yellow-500 font-bold">millesimo di secondo</span>!
             </p>
           </motion.div>
@@ -502,24 +565,23 @@ export default function PitStopChallenge() {
                       
                       <h2 className="text-4xl font-black uppercase mb-4">Pit Stop Challenge</h2>
                       <p className="text-zinc-400 mb-10 max-w-md mx-auto">
-                        <span className="text-red-500 font-bold">15 secondi totali!</span><br/>
-                        Clicca quando il timer raggiunge esattamente il tempo target. 
-                        La precisione è tutto!
+                        <span className="text-red-500 font-bold">Timer in tempo reale!</span><br/>
+                        Guarda i millisecondi scorrere e clicca esattamente al momento giusto.
                       </p>
                       
-                      {/* DIFFICULTY INFO */}
+                      {/* FEATURES */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 max-w-2xl mx-auto">
                         <div className="p-6 bg-zinc-800/50 rounded-2xl border border-red-500/20">
-                          <div className="text-red-500 text-sm font-bold mb-2">🎯 Precisione Millesimi</div>
-                          <p className="text-zinc-500 text-xs">Bonus fino a 500 punti</p>
+                          <div className="text-red-500 text-sm font-bold mb-2">⚡ Timer Live</div>
+                          <p className="text-zinc-500 text-xs">Aggiornamento in tempo reale</p>
                         </div>
                         <div className="p-6 bg-zinc-800/50 rounded-2xl border border-yellow-500/20">
-                          <div className="text-yellow-500 text-sm font-bold mb-2">⚡ Malus Progressivo</div>
-                          <p className="text-zinc-500 text-xs">Fino a -300 per errori grossi</p>
+                          <div className="text-yellow-500 text-sm font-bold mb-2">🎯 Precisione Millesimi</div>
+                          <p className="text-zinc-500 text-xs">Bonus fino a +500 punti</p>
                         </div>
                         <div className="p-6 bg-zinc-800/50 rounded-2xl border border-green-500/20">
-                          <div className="text-green-500 text-sm font-bold mb-2">🏆 50 SFT Base</div>
-                          <p className="text-zinc-500 text-xs">+ bonus per performance</p>
+                          <div className="text-green-500 text-sm font-bold mb-2">⏱️ 15s Totali</div>
+                          <p className="text-zinc-500 text-xs">Sfida contro il tempo</p>
                         </div>
                       </div>
                     </div>
@@ -549,8 +611,11 @@ export default function PitStopChallenge() {
                         <p className="text-zinc-500 mb-4 text-sm uppercase tracking-widest">Tempo Target</p>
                         <div className="text-7xl font-black text-green-500 font-mono tracking-tighter">
                           {targetTime.display}
+                          <span className="text-2xl text-zinc-500">s</span>
                         </div>
-                        <p className="text-zinc-400 mt-4">Clicca quando il timer raggiunge questo tempo esatto</p>
+                        <p className="text-zinc-400 mt-4">
+                          Clicca quando il timer in basso raggiunge questo tempo esatto
+                        </p>
                       </div>
                       
                       {/* COUNTDOWN */}
@@ -617,7 +682,7 @@ export default function PitStopChallenge() {
                   </motion.div>
                 )}
 
-                {/* REACTION PHASE */}
+                {/* REACTION PHASE - TIMER LIVE! */}
                 {gameState === 'reaction' && (
                   <motion.div 
                     key="reaction"
@@ -636,17 +701,60 @@ export default function PitStopChallenge() {
                       </div>
                       
                       <div className="text-4xl font-black text-green-500 mb-6 animate-pulse">
-                        VIA! CLICCA ORA!
+                        VIA! CLICCA AL MOMENTO GIUSTO!
                       </div>
                       
-                      {/* REACTION TIMER */}
-                      <div className="text-7xl font-black font-mono text-white mb-10">
-                        {formatTime(Date.now() - reactionStartRef.current)}
+                      {/* LIVE TIMER - GRANDE E VISIBILE */}
+                      <div className="relative mb-12">
+                        <div className="text-8xl font-black font-mono text-white mb-4 tracking-tighter">
+                          {formatTime(currentTime)}
+                          <span className="text-4xl text-zinc-500">s</span>
+                        </div>
+                        
+                        {/* TARGET INDICATOR */}
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                          <div className="text-center">
+                            <div className="text-sm text-zinc-500 mb-1">Target</div>
+                            <div className="text-2xl font-mono text-green-500">
+                              {targetTime.display}
+                              <span className="text-lg text-zinc-500">s</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* PROGRESS BAR VISUALE */}
+                        <div className="mt-8">
+                          <div className="h-3 bg-zinc-800 rounded-full overflow-hidden relative">
+                            {/* TARGET MARKER */}
+                            <div 
+                              className="absolute top-1/2 transform -translate-y-1/2 w-1 h-6 bg-green-500"
+                              style={{ left: `${(targetTime.totalMs / 10000) * 100}%` }}
+                            >
+                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-green-500 font-bold">
+                                TARGET
+                              </div>
+                            </div>
+                            
+                            {/* CURRENT PROGRESS */}
+                            <motion.div 
+                              className={`h-full ${getProgressColor()}`}
+                              initial={{ width: 0 }}
+                              animate={{ width: `${calculateProgress()}%` }}
+                              transition={{ duration: 0.1 }}
+                            />
+                          </div>
+                          
+                          <div className="flex justify-between text-xs text-zinc-500 mt-2">
+                            <span>0.000s</span>
+                            <span>5.000s</span>
+                            <span>10.000s</span>
+                          </div>
+                        </div>
                       </div>
                       
                       <p className="text-zinc-400 max-w-md mx-auto">
-                        Target: <span className="text-green-500 font-bold">{targetTime.display}</span><br/>
-                        Clicca quando pensi di aver raggiunto il tempo esatto!
+                        <span className="text-yellow-500 font-bold">Timer live!</span> Guarda i millisecondi scorrere in tempo reale.<br/>
+                        Clicca quando pensi di aver raggiunto esattamente <span className="text-green-500 font-bold">{targetTime.display}s</span>
                       </p>
                     </div>
                     
@@ -654,7 +762,7 @@ export default function PitStopChallenge() {
                       onClick={handleClick}
                       className="w-full py-8 bg-gradient-to-r from-green-600 to-emerald-700 rounded-2xl text-2xl font-black uppercase tracking-wider hover:scale-105 transition-transform shadow-2xl"
                     >
-                      CLICCA!
+                      CLICCA ORA!
                     </button>
                   </motion.div>
                 )}
@@ -685,11 +793,17 @@ export default function PitStopChallenge() {
                         <div className="grid grid-cols-2 gap-8 max-w-md mx-auto">
                           <div className="text-center">
                             <p className="text-zinc-500 text-sm mb-2">Target</p>
-                            <p className="text-3xl font-mono text-green-500">{targetTime.display}</p>
+                            <p className="text-3xl font-mono text-green-500">
+                              {targetTime.display}
+                              <span className="text-lg text-zinc-500">s</span>
+                            </p>
                           </div>
                           <div className="text-center">
                             <p className="text-zinc-500 text-sm mb-2">Il tuo tempo</p>
-                            <p className="text-3xl font-mono text-white">{formatTime(reactionTime)}</p>
+                            <p className="text-3xl font-mono text-white">
+                              {formatTime(reactionTime)}
+                              <span className="text-lg text-zinc-500">s</span>
+                            </p>
                           </div>
                         </div>
                         
@@ -699,7 +813,7 @@ export default function PitStopChallenge() {
                           <p className={`text-2xl font-black font-mono ${
                             Math.abs(reactionTime - targetTime.totalMs) / 1000 <= 0.2 ? 'text-green-500' : 'text-red-500'
                           }`}>
-                            {formatDiff(Math.abs(reactionTime - targetTime.totalMs) / 1000)}
+                            {formatDiff(Math.abs(reactionTime - targetTime.totalMs) / 1000)}s
                           </p>
                         </div>
                       </div>
@@ -735,7 +849,7 @@ export default function PitStopChallenge() {
                         </div>
                         <div className="p-6 bg-zinc-800/50 rounded-2xl">
                           <div className="text-2xl font-black mb-2">
-                            {bestTime ? formatDiff(bestTime.time) : 'N/A'}
+                            {bestTime ? `${formatDiff(bestTime.time)}s` : 'N/A'}
                           </div>
                           <p className="text-zinc-500 text-sm">Miglior precisione</p>
                         </div>
@@ -780,7 +894,7 @@ export default function PitStopChallenge() {
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Media differenza:</span>
                   <span className="font-mono font-bold">
-                    {averageDiff > 0 ? formatDiff(averageDiff) : '0.000s'}
+                    {averageDiff > 0 ? `${formatDiff(averageDiff)}s` : '0.000s'}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -799,6 +913,44 @@ export default function PitStopChallenge() {
                 </div>
               </div>
             </div>
+
+            {/* LIVE TIMER INFO */}
+            {gameState === 'reaction' && (
+              <div className="bg-zinc-900/30 border border-white/5 rounded-2xl p-6 border-green-500/30">
+                <h3 className="text-lg font-black mb-4 flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-green-500" /> Timer Live
+                </h3>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-zinc-400">Tempo corrente:</span>
+                    <span className="font-mono font-bold text-green-500">
+                      {formatTime(currentTime)}s
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-zinc-400">Target:</span>
+                    <span className="font-mono font-bold text-yellow-500">
+                      {targetTime.display}s
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-zinc-400">Differenza:</span>
+                    <span className={`font-mono font-bold ${
+                      Math.abs(currentTime - targetTime.totalMs) / 1000 <= 0.2 ? 'text-green-500' : 'text-red-500'
+                    }`}>
+                      {formatDiff(Math.abs(currentTime - targetTime.totalMs) / 1000)}s
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="mt-4 p-3 bg-black/30 rounded-lg">
+                  <p className="text-xs text-zinc-400">
+                    <span className="text-yellow-500">💡 Suggerimento:</span> Guarda il timer e clicca quando i millisecondi corrispondono al target!
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* SCORING GUIDE */}
             <div className="bg-zinc-900/30 border border-white/5 rounded-2xl p-6">
@@ -863,7 +1015,7 @@ export default function PitStopChallenge() {
                         </span>
                       </div>
                       <div className="flex justify-between text-xs">
-                        <span className="text-zinc-400">Diff: {formatDiff(attempt.diff)}</span>
+                        <span className="text-zinc-400">Diff: {formatDiff(attempt.diff)}s</span>
                         <span className="text-zinc-500">{attempt.rating}</span>
                       </div>
                     </div>
