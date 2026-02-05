@@ -17,8 +17,9 @@ import {
   Clock,
   Gauge,
   Award,
-  Play,
-  Pause
+  Brain,
+  Eye,
+  Ear
 } from 'lucide-react';
 import { useSession } from "next-auth/react";
 
@@ -39,7 +40,7 @@ export default function PitStopChallenge() {
   const [targetTime, setTargetTime] = useState(0);
   const [reactionTime, setReactionTime] = useState(0);
   const [gameTimer, setGameTimer] = useState(15);
-  const [currentTime, setCurrentTime] = useState(0); // Tempo corrente durante fase reaction
+  const [waitingTime, setWaitingTime] = useState(0);
   
   // STATISTICHE
   const [attempts, setAttempts] = useState([]);
@@ -49,9 +50,7 @@ export default function PitStopChallenge() {
   
   // REF PER TIMER
   const timerRef = useRef(null);
-  const reactionTimerRef = useRef(null);
   const reactionStartRef = useRef(null);
-  const animationFrameRef = useRef(null);
   
   // Caricamento token utente
   useEffect(() => {
@@ -61,122 +60,118 @@ export default function PitStopChallenge() {
     }
   }, [session]);
 
-  // PULIZIA TIMER
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (reactionTimerRef.current) clearInterval(reactionTimerRef.current);
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-    };
-  }, []);
-
   // GENERA TEMPO TARGET CASUALE (tra 2 e 5 secondi)
   const generateTargetTime = () => {
-    // Tempo in millisecondi con centesimi e millesimi
+    // Tempo in millisecondi con centesimi
     const min = 2000; // 2 secondi
     const max = 5000; // 5 secondi
     const randomMs = Math.floor(Math.random() * (max - min + 1)) + min;
     
-    // Aggiungi centesimi e millesimi casuali
-    const hundredths = Math.floor(Math.random() * 100); // 0-99
-    const thousandths = Math.floor(Math.random() * 10); // 0-9
+    // Aggiungi centesimi casuali (0-99)
+    const hundredths = Math.floor(Math.random() * 100);
     
     // Calcola tempo totale in millisecondi
-    const totalMs = randomMs + (hundredths * 10) + thousandths;
+    const totalMs = randomMs + hundredths * 10;
     
     // Formatta per visualizzazione
     const seconds = Math.floor(totalMs / 1000);
-    const remainingMs = totalMs % 1000;
-    const hundredthsPart = Math.floor(remainingMs / 10);
-    const thousandthsPart = remainingMs % 10;
+    const hundredthsPart = Math.floor((totalMs % 1000) / 10);
     
     return {
       totalMs,
-      display: `${seconds}.${hundredthsPart.toString().padStart(2, '0')}${thousandthsPart}`
+      display: `${seconds}.${hundredthsPart.toString().padStart(2, '0')}`
     };
   };
 
-  // CALCOLA PUNTEGGIO BASATO SULLA DIFFERENZA
+  // CALCOLA PUNTEGGIO BASATO SULLA DIFFERENZA (fino a 2 secondi max)
   const calculateScore = (targetMs, reactionMs) => {
     const diffMs = Math.abs(reactionMs - targetMs);
     const diffSeconds = diffMs / 1000;
     
-    // SISTEMA A RANGE CON BONUS/MALUS ESPONENZIALE
+    // SISTEMA A RANGE CON BONUS/MALUS - fino a 2 secondi
     
-    if (diffSeconds <= 0.001) { // PERFEZIONE (entro 1 millesimo)
+    if (diffSeconds <= 0.01) { // PERFEZIONE (entro 10 millesimi)
       return {
         points: 1000,
         bonus: 500,
         multiplier: 3.0,
         message: "PERFEZIONE ASSOLUTA! ⭐⭐⭐",
-        rating: "legendary"
+        rating: "legendary",
+        emoji: "🎯"
       };
-    } else if (diffSeconds <= 0.01) { // FANTASTICO (entro 10 millesimi)
+    } else if (diffSeconds <= 0.05) { // FANTASTICO (entro 50 millesimi)
       return {
         points: 800,
-        bonus: Math.floor(400 * (1 - diffSeconds / 0.01)),
+        bonus: Math.floor(400 * (1 - diffSeconds / 0.05)),
         multiplier: 2.5,
-        message: "FANTASTICO! Riflessi da campione!",
-        rating: "perfect"
+        message: "FANTASTICO! Senso del tempo incredibile!",
+        rating: "perfect",
+        emoji: "🔥"
       };
-    } else if (diffSeconds <= 0.05) { // ECCELLENTE (entro 50 millesimi)
+    } else if (diffSeconds <= 0.1) { // ECCELLENTE (entro 100 millesimi)
       return {
         points: 600,
-        bonus: Math.floor(300 * (1 - diffSeconds / 0.05)),
+        bonus: Math.floor(300 * (1 - diffSeconds / 0.1)),
         multiplier: 2.0,
-        message: "ECCELLENTE! Precisione incredibile!",
-        rating: "excellent"
+        message: "ECCELLENTE! Precisione da campione!",
+        rating: "excellent",
+        emoji: "⭐"
       };
-    } else if (diffSeconds <= 0.1) { // OTTIMO (entro 100 millesimi)
+    } else if (diffSeconds <= 0.2) { // OTTIMO (entro 200 millesimi)
       return {
         points: 400,
-        bonus: Math.floor(200 * (1 - diffSeconds / 0.1)),
+        bonus: Math.floor(200 * (1 - diffSeconds / 0.2)),
         multiplier: 1.5,
         message: "OTTIMO! Sei nel mirino!",
-        rating: "great"
+        rating: "great",
+        emoji: "🎯"
       };
-    } else if (diffSeconds <= 0.2) { // BUONO (entro 200 millesimi)
+    } else if (diffSeconds <= 0.5) { // BUONO (entro 500 millesimi)
       return {
         points: 200,
-        bonus: Math.floor(100 * (1 - diffSeconds / 0.2)),
+        bonus: Math.floor(100 * (1 - diffSeconds / 0.5)),
         multiplier: 1.2,
         message: "BUONO! Continua così!",
-        rating: "good"
+        rating: "good",
+        emoji: "👍"
       };
-    } else if (diffSeconds <= 0.5) { // ACCETTABILE (entro 500 millesimi)
+    } else if (diffSeconds <= 1.0) { // ACCETTABILE (entro 1 secondo)
       return {
-        points: 50,
-        bonus: 0,
+        points: 100,
+        bonus: Math.floor(50 * (1 - diffSeconds / 1.0)),
         multiplier: 1.0,
         message: "Accettabile",
-        rating: "ok"
+        rating: "ok",
+        emoji: "👌"
       };
-    } else if (diffSeconds <= 1.0) { // SCARSO (entro 1 secondo)
-      const malus = Math.floor(30 * (diffSeconds / 1.0));
+    } else if (diffSeconds <= 1.5) { // SCARSO (entro 1.5 secondi)
+      const points = Math.floor(50 * (1 - (diffSeconds - 1.0) / 0.5));
       return {
-        points: -malus,
+        points: Math.max(points, 10),
         bonus: 0,
         multiplier: 0.8,
-        message: "Troppo lento!",
-        rating: "poor"
+        message: "Ci sei quasi!",
+        rating: "poor",
+        emoji: "😅"
       };
     } else if (diffSeconds <= 2.0) { // MOLTO SCARSO (entro 2 secondi)
-      const malus = 50 + Math.floor(50 * ((diffSeconds - 1.0) / 1.0));
+      const points = Math.floor(20 * (1 - (diffSeconds - 1.5) / 0.5));
       return {
-        points: -malus,
+        points: Math.max(points, 5),
         bonus: 0,
         multiplier: 0.5,
-        message: "Devi migliorare i riflessi!",
-        rating: "bad"
+        message: "Devi allenare il senso del tempo!",
+        rating: "bad",
+        emoji: "⏰"
       };
-    } else { // DISASTRO
-      const malus = 100 + Math.floor((diffSeconds - 2.0) * 20);
+    } else { // OLTRE 2 SECONDI - 0 punti
       return {
-        points: -Math.min(malus, 300),
+        points: 0,
         bonus: 0,
-        multiplier: 0.2,
-        message: "DISASTRO!",
-        rating: "disaster"
+        multiplier: 0,
+        message: "Troppo lontano! Prova a concentrarti di più.",
+        rating: "disaster",
+        emoji: "💤"
       };
     }
   };
@@ -193,7 +188,6 @@ export default function PitStopChallenge() {
     setMaxConsecutive(0);
     setBestTime(null);
     setGameTimer(15);
-    setCurrentTime(0);
     
     // Genera primo target
     const target = generateTargetTime();
@@ -229,36 +223,17 @@ export default function PitStopChallenge() {
     }, 1000);
   };
 
-  // INIZIA FASE REAZIONE CON ANIMAZIONE SMOOTH
+  // INIZIA FASE REAZIONE
   const startReaction = () => {
     setGameState('waiting');
-    setCurrentTime(0);
     
-    // Aspetta tempo random prima di dare il via (1-3 secondi)
+    // Tempo di attesa casuale prima di dare il via (1-3 secondi)
     const waitTime = 1000 + Math.random() * 2000;
+    setWaitingTime(waitTime);
     
     setTimeout(() => {
       setGameState('reaction');
-      const startTime = Date.now();
-      reactionStartRef.current = startTime;
-      
-      // AVVIA ANIMAZIONE SMOOTH DEL TIMER
-      const updateTimer = () => {
-        const elapsed = Date.now() - startTime;
-        setCurrentTime(elapsed);
-        
-        // Continua l'animazione fino a 10 secondi (limite di sicurezza)
-        if (elapsed < 10000 && gameState === 'reaction') {
-          animationFrameRef.current = requestAnimationFrame(updateTimer);
-        }
-      };
-      
-      // Ferma eventuali animazioni precedenti
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      
-      animationFrameRef.current = requestAnimationFrame(updateTimer);
+      reactionStartRef.current = Date.now();
     }, waitTime);
   };
 
@@ -266,15 +241,10 @@ export default function PitStopChallenge() {
   const handleClick = () => {
     if (gameState !== 'reaction') {
       // Click prematuro - penalità
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      
       setGameState('result');
       setReactionTime(0);
-      setCurrentTime(0);
-      setScore(-100);
-      setTotalScore(prev => prev - 100);
+      setScore(-50);
+      setTotalScore(prev => prev - 50);
       setConsecutiveHits(0);
       
       setTimeout(() => {
@@ -283,12 +253,7 @@ export default function PitStopChallenge() {
       return;
     }
     
-    // Ferma l'animazione
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-    
-    const reactionMs = currentTime;
+    const reactionMs = Date.now() - reactionStartRef.current;
     setReactionTime(reactionMs);
     setGameState('result');
     
@@ -308,7 +273,8 @@ export default function PitStopChallenge() {
       diff: diffSeconds,
       score: roundScore,
       rating: result.rating,
-      message: result.message
+      message: result.message,
+      emoji: result.emoji
     }];
     
     setAttempts(newAttempts);
@@ -352,36 +318,36 @@ export default function PitStopChallenge() {
     const newTarget = generateTargetTime();
     setTargetTime(newTarget);
     setGameState('ready');
-    setCurrentTime(0);
   };
 
   // TERMINA GIOCO
   const endGame = () => {
     if (timerRef.current) clearInterval(timerRef.current);
-    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     setGameState('finished');
-    setCurrentTime(0);
     
     // Calcola ricompensa SFT
     let tokensEarned = 50; // Base
     
     // Bonus per punteggio
     if (totalScore > 0) {
-      tokensEarned += Math.floor(totalScore / 100);
+      tokensEarned += Math.floor(totalScore / 80); // Più generoso
     }
     
-    // Bonus per precisione (se averageDiff < 0.2s)
-    if (averageDiff > 0 && averageDiff < 0.2) {
-      tokensEarned += Math.floor((0.2 - averageDiff) * 100);
+    // Bonus per precisione (se averageDiff < 0.5s)
+    if (averageDiff > 0 && averageDiff < 0.5) {
+      tokensEarned += Math.floor((0.5 - averageDiff) * 80);
     }
     
     // Bonus per streak
-    tokensEarned += maxConsecutive * 5;
+    tokensEarned += maxConsecutive * 8;
     
     // Bonus per miglior tempo
-    if (bestTime && bestTime.time < 0.1) {
-      tokensEarned += Math.floor((0.1 - bestTime.time) * 200);
+    if (bestTime && bestTime.time < 0.2) {
+      tokensEarned += Math.floor((0.2 - bestTime.time) * 150);
     }
+    
+    // Bonus per numero di round giocati
+    tokensEarned += Math.floor(attempts.length * 0.5);
     
     // Aggiorna token utente
     if (session) {
@@ -391,21 +357,19 @@ export default function PitStopChallenge() {
     }
   };
 
-  // FORMATTA TEMPO IN MILLISECONDI CON CENTESIMI E MILLESIMI
+  // FORMATTA TEMPO IN MILLISECONDI CON CENTESIMI
   const formatTime = (ms) => {
-    if (!ms && ms !== 0) return "0.000";
+    if (!ms && ms !== 0) return "0.00";
     const seconds = Math.floor(ms / 1000);
-    const remainingMs = ms % 1000;
-    const hundredths = Math.floor(remainingMs / 10);
-    const thousandths = remainingMs % 10;
-    return `${seconds}.${hundredths.toString().padStart(2, '0')}${thousandths}`;
+    const hundredths = Math.floor((ms % 1000) / 10);
+    return `${seconds}.${hundredths.toString().padStart(2, '0')}`;
   };
 
   // FORMATTA DIFFERENZA
   const formatDiff = (diffSeconds) => {
     const absDiff = Math.abs(diffSeconds);
-    if (absDiff < 0.001) return "0.000";
-    return absDiff.toFixed(3);
+    if (absDiff < 0.01) return "0.00";
+    return absDiff.toFixed(2);
   };
 
   // GET COLOR BASED ON RATING
@@ -440,27 +404,11 @@ export default function PitStopChallenge() {
     }
   };
 
-  // CALCOLA PROGRESSO VERSO TARGET (per barra di progresso)
-  const calculateProgress = () => {
-    if (!targetTime || currentTime === 0) return 0;
-    
-    // Progresso come percentuale (limite a 150% per overshoot)
-    const progress = (currentTime / targetTime.totalMs) * 100;
-    return Math.min(progress, 150);
-  };
-
-  // OTTIENE COLORE PROGRESS BAR IN BASE A DIFFERENZA
-  const getProgressColor = () => {
-    if (!targetTime) return 'bg-zinc-700';
-    
-    const diff = Math.abs(currentTime - targetTime.totalMs);
-    const diffSeconds = diff / 1000;
-    
-    if (diffSeconds <= 0.05) return 'bg-green-500';
-    if (diffSeconds <= 0.1) return 'bg-emerald-400';
-    if (diffSeconds <= 0.2) return 'bg-yellow-500';
-    if (diffSeconds <= 0.5) return 'bg-orange-500';
-    return 'bg-red-500';
+  // CALCOLA BARRA DI PROGRESSO PER VISUALIZZARE LA DIFFERENZA
+  const getProgressPercentage = (diffSeconds) => {
+    // Normalizza a 2 secondi (massimo)
+    const normalized = Math.min(diffSeconds, 2.0) / 2.0;
+    return 100 - (normalized * 100); // 100% = perfetto, 0% = 2+ secondi
   };
 
   return (
@@ -475,19 +423,19 @@ export default function PitStopChallenge() {
             animate={{ opacity: 1, y: 0 }}
           >
             <div className="inline-flex items-center gap-3 mb-6">
-              <Timer className="w-8 h-8 text-red-500" />
+              <Brain className="w-8 h-8 text-red-500" />
               <span className="text-red-600 font-black text-xs uppercase tracking-[0.3em] font-mono italic">
                 Scuderia Ferrari • Pit Stop Challenge
               </span>
             </div>
             
             <h1 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter mb-6">
-              Testa i tuoi <span className="text-red-600">Riflessi</span>
+              Sfida il tuo <span className="text-red-600">Senso del Tempo</span>
             </h1>
             
             <p className="text-zinc-400 max-w-2xl mx-auto text-lg italic">
-              Timer in tempo reale! Guarda i millisecondi scorrere e clicca quando raggiungi esattamente il target.
-              Precisione al <span className="text-yellow-500 font-bold">millesimo di secondo</span>!
+              <span className="text-yellow-500 font-bold">Nessun timer visivo!</span> Conta mentalmente e ferma al momento esatto.
+              Precisione da vero meccanico Ferrari!
             </p>
           </motion.div>
         </header>
@@ -560,24 +508,24 @@ export default function PitStopChallenge() {
                     <div className="mb-10">
                       <div className="relative w-40 h-40 mx-auto mb-8">
                         <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-yellow-600 rounded-full blur-xl opacity-30" />
-                        <Timer className="w-40 h-40 text-red-500 absolute inset-0" />
+                        <Brain className="w-40 h-40 text-red-500 absolute inset-0" />
                       </div>
                       
-                      <h2 className="text-4xl font-black uppercase mb-4">Pit Stop Challenge</h2>
+                      <h2 className="text-4xl font-black uppercase mb-4">Sfida Mentale</h2>
                       <p className="text-zinc-400 mb-10 max-w-md mx-auto">
-                        <span className="text-red-500 font-bold">Timer in tempo reale!</span><br/>
-                        Guarda i millisecondi scorrere e clicca esattamente al momento giusto.
+                        <span className="text-red-500 font-bold">Nessun timer visivo!</span><br/>
+                        Dovrai contare mentalmente il tempo e fermarti quando pensi sia passato il tempo target.
                       </p>
                       
                       {/* FEATURES */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 max-w-2xl mx-auto">
                         <div className="p-6 bg-zinc-800/50 rounded-2xl border border-red-500/20">
-                          <div className="text-red-500 text-sm font-bold mb-2">⚡ Timer Live</div>
-                          <p className="text-zinc-500 text-xs">Aggiornamento in tempo reale</p>
+                          <div className="text-red-500 text-sm font-bold mb-2">🧠 Conta Mentalmente</div>
+                          <p className="text-zinc-500 text-xs">Nessun timer da guardare</p>
                         </div>
                         <div className="p-6 bg-zinc-800/50 rounded-2xl border border-yellow-500/20">
-                          <div className="text-yellow-500 text-sm font-bold mb-2">🎯 Precisione Millesimi</div>
-                          <p className="text-zinc-500 text-xs">Bonus fino a +500 punti</p>
+                          <div className="text-yellow-500 text-sm font-bold mb-2">🎯 Fino a 2 Secondi</div>
+                          <p className="text-zinc-500 text-xs">Soglia massima di differenza</p>
                         </div>
                         <div className="p-6 bg-zinc-800/50 rounded-2xl border border-green-500/20">
                           <div className="text-green-500 text-sm font-bold mb-2">⏱️ 15s Totali</div>
@@ -608,13 +556,26 @@ export default function PitStopChallenge() {
                       
                       {/* TARGET TIME DISPLAY */}
                       <div className="mb-12">
-                        <p className="text-zinc-500 mb-4 text-sm uppercase tracking-widest">Tempo Target</p>
-                        <div className="text-7xl font-black text-green-500 font-mono tracking-tighter">
+                        <p className="text-zinc-500 mb-4 text-sm uppercase tracking-widest">Tempo da Memorizzare</p>
+                        <div className="text-8xl font-black text-green-500 font-mono tracking-tighter mb-8">
                           {targetTime.display}
-                          <span className="text-2xl text-zinc-500">s</span>
+                          <span className="text-4xl text-zinc-500">s</span>
                         </div>
-                        <p className="text-zinc-400 mt-4">
-                          Clicca quando il timer in basso raggiunge questo tempo esatto
+                        
+                        {/* MEMORY TIPS */}
+                        <div className="max-w-md mx-auto p-6 bg-zinc-800/30 rounded-2xl mb-8">
+                          <h4 className="text-yellow-500 font-bold mb-3 flex items-center gap-2">
+                            <Brain className="w-5 h-5" /> Come memorizzare:
+                          </h4>
+                          <ul className="text-left text-zinc-400 text-sm space-y-2">
+                            <li>• <span className="text-green-500">Conta</span> mentalmente "1... 2... {targetTime.display.split('.')[0]}..."</li>
+                            <li>• <span className="text-blue-500">Visualizza</span> un orologio nella tua mente</li>
+                            <li>• <span className="text-purple-500">Associa</span> il tempo a un ritmo conosciuto</li>
+                          </ul>
+                        </div>
+                        
+                        <p className="text-zinc-400">
+                          Memorizza questo tempo. Dovrai fermarti quando pensi sia passato esattamente questo intervallo.
                         </p>
                       </div>
                       
@@ -629,16 +590,6 @@ export default function PitStopChallenge() {
                           {countdown}
                         </motion.div>
                       )}
-                      
-                      {/* INSTRUCTIONS */}
-                      <div className="max-w-md mx-auto p-6 bg-zinc-800/30 rounded-2xl">
-                        <p className="text-zinc-400 mb-3">
-                          <span className="text-yellow-500 font-bold">Pronto?</span> Il countdown partirà a 3...
-                        </p>
-                        <p className="text-zinc-500 text-sm">
-                          Dopo il countdown, aspetta il semaforo verde prima di cliccare!
-                        </p>
-                      </div>
                     </div>
                     
                     {gameState === 'ready' && (
@@ -646,7 +597,7 @@ export default function PitStopChallenge() {
                         onClick={startTurn}
                         className="bg-gradient-to-r from-yellow-600 to-yellow-800 px-10 py-5 rounded-2xl font-black uppercase tracking-wider hover:scale-105 transition-transform"
                       >
-                        Preparati al Round
+                        Ho Memorizzato, Vai!
                       </button>
                     )}
                   </motion.div>
@@ -663,7 +614,7 @@ export default function PitStopChallenge() {
                     <div className="mb-10">
                       <h3 className="text-3xl font-black uppercase mb-6">Round {round}</h3>
                       
-                      {/* TRAFFIC LIGHT */}
+                      {/* TRAFFIC LIGHT RED */}
                       <div className="flex justify-center gap-8 mb-12">
                         <div className="w-24 h-24 rounded-full bg-red-600 shadow-[0_0_40px_rgba(239,68,68,0.5)] animate-pulse" />
                         <div className="w-24 h-24 rounded-full bg-zinc-800" />
@@ -671,18 +622,28 @@ export default function PitStopChallenge() {
                       </div>
                       
                       <div className="text-4xl font-black text-red-500 mb-6">
-                        ATTENDI IL VIA!
+                        PRONTI... ATTENDI...
                       </div>
                       
-                      <p className="text-zinc-400 max-w-md mx-auto">
-                        Non cliccare ora! Aspetta che il semaforo diventi verde.
-                        Se clicchi prima, penalità di <span className="text-red-500 font-bold">-100 punti</span>!
+                      <div className="max-w-md mx-auto p-6 bg-zinc-800/30 rounded-2xl mb-8">
+                        <h4 className="text-yellow-500 font-bold mb-3 flex items-center gap-2">
+                          <Eye className="w-5 h-5" /> Concentrati:
+                        </h4>
+                        <ul className="text-left text-zinc-400 text-sm space-y-2">
+                          <li>• <span className="text-green-500">Mantieni il tempo in mente</span></li>
+                          <li>• <span className="text-blue-500">Preparati a contare</span> quando il semaforo diventa verde</li>
+                          <li>• <span className="text-red-500">NON CLICCARE PRIMA</span> del verde! (-50 punti)</li>
+                        </ul>
+                      </div>
+                      
+                      <p className="text-zinc-400">
+                        Il semaforo diventerà verde tra poco. Inizia a contare mentalmente solo quando vedi il verde!
                       </p>
                     </div>
                   </motion.div>
                 )}
 
-                {/* REACTION PHASE - TIMER LIVE! */}
+                {/* REACTION PHASE - NO TIMER, JUST CLICK */}
                 {gameState === 'reaction' && (
                   <motion.div 
                     key="reaction"
@@ -701,60 +662,37 @@ export default function PitStopChallenge() {
                       </div>
                       
                       <div className="text-4xl font-black text-green-500 mb-6 animate-pulse">
-                        VIA! CLICCA AL MOMENTO GIUSTO!
+                        VIA! INIZIA A CONTARE!
                       </div>
                       
-                      {/* LIVE TIMER - GRANDE E VISIBILE */}
-                      <div className="relative mb-12">
-                        <div className="text-8xl font-black font-mono text-white mb-4 tracking-tighter">
-                          {formatTime(currentTime)}
-                          <span className="text-4xl text-zinc-500">s</span>
-                        </div>
-                        
-                        {/* TARGET INDICATOR */}
-                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                          <div className="text-center">
-                            <div className="text-sm text-zinc-500 mb-1">Target</div>
-                            <div className="text-2xl font-mono text-green-500">
-                              {targetTime.display}
-                              <span className="text-lg text-zinc-500">s</span>
-                            </div>
+                      {/* NO TIMER DISPLAY - JUST INSTRUCTIONS */}
+                      <div className="max-w-md mx-auto p-8 bg-zinc-800/40 rounded-3xl border border-green-500/30 mb-12">
+                        <div className="text-6xl mb-6">⏳</div>
+                        <h4 className="text-2xl font-black text-green-500 mb-4">
+                          Nessun Timer Visivo!
+                        </h4>
+                        <p className="text-zinc-300 mb-6">
+                          Devi contare mentalmente fino a <span className="text-yellow-500 font-bold">{targetTime.display} secondi</span>
+                        </p>
+                        <div className="text-left space-y-3 text-zinc-400">
+                          <div className="flex items-center gap-3">
+                            <Brain className="w-5 h-5 text-blue-500" />
+                            <span>Conta nella tua testa: "1... 2... 3..."</span>
                           </div>
-                        </div>
-                        
-                        {/* PROGRESS BAR VISUALE */}
-                        <div className="mt-8">
-                          <div className="h-3 bg-zinc-800 rounded-full overflow-hidden relative">
-                            {/* TARGET MARKER */}
-                            <div 
-                              className="absolute top-1/2 transform -translate-y-1/2 w-1 h-6 bg-green-500"
-                              style={{ left: `${(targetTime.totalMs / 10000) * 100}%` }}
-                            >
-                              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-green-500 font-bold">
-                                TARGET
-                              </div>
-                            </div>
-                            
-                            {/* CURRENT PROGRESS */}
-                            <motion.div 
-                              className={`h-full ${getProgressColor()}`}
-                              initial={{ width: 0 }}
-                              animate={{ width: `${calculateProgress()}%` }}
-                              transition={{ duration: 0.1 }}
-                            />
+                          <div className="flex items-center gap-3">
+                            <Ear className="w-5 h-5 text-purple-500" />
+                            <span>Usa un ritmo costante nel conteggio</span>
                           </div>
-                          
-                          <div className="flex justify-between text-xs text-zinc-500 mt-2">
-                            <span>0.000s</span>
-                            <span>5.000s</span>
-                            <span>10.000s</span>
+                          <div className="flex items-center gap-3">
+                            <Timer className="w-5 h-5 text-green-500" />
+                            <span>Fermati quando pensi siano passati {targetTime.display}s</span>
                           </div>
                         </div>
                       </div>
                       
                       <p className="text-zinc-400 max-w-md mx-auto">
-                        <span className="text-yellow-500 font-bold">Timer live!</span> Guarda i millisecondi scorrere in tempo reale.<br/>
-                        Clicca quando pensi di aver raggiunto esattamente <span className="text-green-500 font-bold">{targetTime.display}s</span>
+                        <span className="text-yellow-500 font-bold">Importante:</span> Non cercare di calcolare, 
+                        usa il tuo <span className="text-green-500">senso del tempo naturale</span>!
                       </p>
                     </div>
                     
@@ -762,7 +700,7 @@ export default function PitStopChallenge() {
                       onClick={handleClick}
                       className="w-full py-8 bg-gradient-to-r from-green-600 to-emerald-700 rounded-2xl text-2xl font-black uppercase tracking-wider hover:scale-105 transition-transform shadow-2xl"
                     >
-                      CLICCA ORA!
+                      FERMA IL TEMPO!
                     </button>
                   </motion.div>
                 )}
@@ -780,17 +718,21 @@ export default function PitStopChallenge() {
                       
                       {/* SCORE CARD */}
                       <div className={`p-8 rounded-3xl mb-10 ${getRatingBgColor(attempts[attempts.length - 1]?.rating)}`}>
+                        <div className="text-8xl mb-6">
+                          {attempts[attempts.length - 1]?.emoji}
+                        </div>
+                        
                         <div className="text-6xl font-black mb-4">
                           {score >= 0 ? '+' : ''}{score}
                           <span className="text-2xl text-zinc-400"> punti</span>
                         </div>
                         
-                        <p className="text-2xl font-bold mb-6">
+                        <p className="text-2xl font-bold mb-8">
                           {attempts[attempts.length - 1]?.message}
                         </p>
                         
                         {/* TIMES COMPARISON */}
-                        <div className="grid grid-cols-2 gap-8 max-w-md mx-auto">
+                        <div className="grid grid-cols-2 gap-8 max-w-md mx-auto mb-8">
                           <div className="text-center">
                             <p className="text-zinc-500 text-sm mb-2">Target</p>
                             <p className="text-3xl font-mono text-green-500">
@@ -807,19 +749,50 @@ export default function PitStopChallenge() {
                           </div>
                         </div>
                         
-                        {/* DIFFERENCE */}
-                        <div className="mt-8 p-4 bg-black/30 rounded-xl">
-                          <p className="text-zinc-400 mb-2">Differenza</p>
-                          <p className={`text-2xl font-black font-mono ${
-                            Math.abs(reactionTime - targetTime.totalMs) / 1000 <= 0.2 ? 'text-green-500' : 'text-red-500'
-                          }`}>
-                            {formatDiff(Math.abs(reactionTime - targetTime.totalMs) / 1000)}s
-                          </p>
+                        {/* DIFFERENCE VISUALIZATION */}
+                        <div className="mt-8">
+                          <div className="flex justify-between text-sm text-zinc-500 mb-2">
+                            <span>Precisione</span>
+                            <span>{formatDiff(Math.abs(reactionTime - targetTime.totalMs) / 1000)}s</span>
+                          </div>
+                          
+                          <div className="h-4 bg-zinc-800 rounded-full overflow-hidden">
+                            <motion.div 
+                              initial={{ width: 0 }}
+                              animate={{ width: `${getProgressPercentage(Math.abs(reactionTime - targetTime.totalMs) / 1000)}%` }}
+                              transition={{ duration: 1 }}
+                              className={`h-full ${
+                                Math.abs(reactionTime - targetTime.totalMs) / 1000 <= 0.5 ? 'bg-green-500' :
+                                Math.abs(reactionTime - targetTime.totalMs) / 1000 <= 1.0 ? 'bg-yellow-500' :
+                                Math.abs(reactionTime - targetTime.totalMs) / 1000 <= 1.5 ? 'bg-orange-500' :
+                                Math.abs(reactionTime - targetTime.totalMs) / 1000 <= 2.0 ? 'bg-red-500' : 'bg-zinc-500'
+                              }`}
+                            />
+                          </div>
+                          
+                          <div className="flex justify-between text-xs text-zinc-600 mt-2">
+                            <span>Perfetto</span>
+                            <span>2.00s</span>
+                          </div>
                         </div>
                       </div>
                       
+                      {/* FEEDBACK */}
+                      <div className="max-w-md mx-auto p-6 bg-zinc-800/30 rounded-2xl">
+                        <p className="text-zinc-400">
+                          {Math.abs(reactionTime - targetTime.totalMs) / 1000 <= 0.5 ? 
+                            "🎯 Fantastico! Il tuo senso del tempo è eccezionale!" :
+                           Math.abs(reactionTime - targetTime.totalMs) / 1000 <= 1.0 ?
+                            "👍 Buono! Con un po' di pratica migliorerai!" :
+                           Math.abs(reactionTime - targetTime.totalMs) / 1000 <= 1.5 ?
+                            "⏰ Accettabile! Prova a contare più lentamente o velocemente." :
+                            "💤 Hai bisogno di più concentrazione. Prova a visualizzare meglio il tempo!"
+                          }
+                        </p>
+                      </div>
+                      
                       {/* NEXT ROUND COUNTDOWN */}
-                      <div className="text-zinc-500">
+                      <div className="text-zinc-500 mt-8">
                         Prossimo round tra 2 secondi...
                       </div>
                     </div>
@@ -854,7 +827,7 @@ export default function PitStopChallenge() {
                           <p className="text-zinc-500 text-sm">Miglior precisione</p>
                         </div>
                         <div className="p-6 bg-zinc-800/50 rounded-2xl">
-                          <div className="text-2xl font-black mb-2">+{50 + Math.floor(totalScore/100)}</div>
+                          <div className="text-2xl font-black mb-2">+{50 + Math.floor(totalScore/80)}</div>
                           <p className="text-zinc-500 text-sm">SFT guadagnati</p>
                         </div>
                       </div>
@@ -894,7 +867,7 @@ export default function PitStopChallenge() {
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Media differenza:</span>
                   <span className="font-mono font-bold">
-                    {averageDiff > 0 ? `${formatDiff(averageDiff)}s` : '0.000s'}
+                    {averageDiff > 0 ? `${formatDiff(averageDiff)}s` : '0.00s'}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -914,44 +887,6 @@ export default function PitStopChallenge() {
               </div>
             </div>
 
-            {/* LIVE TIMER INFO */}
-            {gameState === 'reaction' && (
-              <div className="bg-zinc-900/30 border border-white/5 rounded-2xl p-6 border-green-500/30">
-                <h3 className="text-lg font-black mb-4 flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-green-500" /> Timer Live
-                </h3>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-zinc-400">Tempo corrente:</span>
-                    <span className="font-mono font-bold text-green-500">
-                      {formatTime(currentTime)}s
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-zinc-400">Target:</span>
-                    <span className="font-mono font-bold text-yellow-500">
-                      {targetTime.display}s
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-zinc-400">Differenza:</span>
-                    <span className={`font-mono font-bold ${
-                      Math.abs(currentTime - targetTime.totalMs) / 1000 <= 0.2 ? 'text-green-500' : 'text-red-500'
-                    }`}>
-                      {formatDiff(Math.abs(currentTime - targetTime.totalMs) / 1000)}s
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="mt-4 p-3 bg-black/30 rounded-lg">
-                  <p className="text-xs text-zinc-400">
-                    <span className="text-yellow-500">💡 Suggerimento:</span> Guarda il timer e clicca quando i millisecondi corrispondono al target!
-                  </p>
-                </div>
-              </div>
-            )}
-
             {/* SCORING GUIDE */}
             <div className="bg-zinc-900/30 border border-white/5 rounded-2xl p-6">
               <h3 className="text-lg font-black mb-4 flex items-center gap-2">
@@ -960,40 +895,76 @@ export default function PitStopChallenge() {
               
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className="text-green-500">≤ 1ms</span>
+                  <span className="text-green-500">≤ 10ms</span>
                   <span className="font-bold text-purple-500">+1000 ⭐</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-green-400">≤ 10ms</span>
+                  <span className="text-green-400">≤ 50ms</span>
                   <span className="font-bold text-yellow-500">+800</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-emerald-400">≤ 50ms</span>
+                  <span className="text-emerald-400">≤ 100ms</span>
                   <span className="font-bold text-green-500">+600</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-blue-400">≤ 100ms</span>
+                  <span className="text-blue-400">≤ 200ms</span>
                   <span className="font-bold text-blue-500">+400</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-zinc-400">≤ 200ms</span>
+                  <span className="text-emerald-300">≤ 500ms</span>
                   <span className="font-bold text-emerald-500">+200</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-orange-400">≤ 500ms</span>
-                  <span className="font-bold text-zinc-400">+50</span>
+                  <span className="text-zinc-400">≤ 1s</span>
+                  <span className="font-bold text-zinc-400">+100</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-orange-500">≤ 1s</span>
-                  <span className="font-bold text-orange-500">-30</span>
+                  <span className="text-orange-400">≤ 1.5s</span>
+                  <span className="font-bold text-orange-500">+10-50</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-red-400">≤ 2s</span>
-                  <span className="font-bold text-red-500">-100</span>
+                  <span className="font-bold text-red-500">+5-20</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-red-600">&gt; 2s</span>
-                  <span className="font-bold text-red-700">-300</span>
+                  <span className="font-bold text-red-700">0</span>
+                </div>
+              </div>
+              
+              <div className="mt-4 p-3 bg-black/30 rounded-lg">
+                <p className="text-xs text-zinc-400">
+                  <span className="text-yellow-500">🎯 Obiettivo:</span> Resta entro 2 secondi dal target per guadagnare punti!
+                </p>
+              </div>
+            </div>
+
+            {/* TIPS */}
+            <div className="bg-zinc-900/30 border border-white/5 rounded-2xl p-6">
+              <h3 className="text-lg font-black mb-4 flex items-center gap-2">
+                <Brain className="w-5 h-5 text-blue-500" /> Consigli
+              </h3>
+              
+              <div className="space-y-3 text-sm text-zinc-400">
+                <div className="flex items-start gap-2">
+                  <span className="text-green-500">•</span>
+                  <span>Conta con un ritmo costante: "1... 2... 3..."</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-blue-500">•</span>
+                  <span>Visualizza un orologio nella tua mente</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-purple-500">•</span>
+                  <span>Usa il battito del cuore come metronomo</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-yellow-500">•</span>
+                  <span>Non avere fretta, la precisione è tutto</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-red-500">•</span>
+                  <span>Evita di cliccare prima del verde (-50 punti)</span>
                 </div>
               </div>
             </div>
@@ -1009,7 +980,10 @@ export default function PitStopChallenge() {
                   {[...attempts].reverse().slice(0, 5).map((attempt, index) => (
                     <div key={attempt.round} className="p-3 bg-zinc-800/30 rounded-lg">
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs text-zinc-500">Round {attempt.round}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{attempt.emoji}</span>
+                          <span className="text-xs text-zinc-500">Round {attempt.round}</span>
+                        </div>
                         <span className={`text-xs font-bold ${getRatingColor(attempt.rating)}`}>
                           {attempt.score >= 0 ? '+' : ''}{attempt.score}
                         </span>
