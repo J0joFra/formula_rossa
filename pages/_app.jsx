@@ -1,8 +1,10 @@
-import Head from 'next/head'
+import { SessionProvider } from "next-auth/react";
+import Head from 'next/head';
+import '../styles/globals.css';
 
-function MyApp({ Component, pageProps }) {
+function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   return (
-    <>
+    <SessionProvider session={session}>
       <Head>
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8762257220044998"
         crossorigin="anonymous"></script>
@@ -109,7 +111,7 @@ function MyApp({ Component, pageProps }) {
       </div>
       
       <Component {...pageProps} />
-    </>
+    </SessionProvider>
   )
 }
 
