@@ -5,7 +5,7 @@ import StatsSection from '../components/ferrari/StatsSection';
 import NewsSection from '../components/ferrari/NewsSection';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion'; 
 import {   
   ChevronDown, Trophy, Flag, Star, Timer, Zap, Gauge, Award, 
   Sparkles, ArrowRight, Cpu, Coins, Gamepad2 } from 'lucide-react';

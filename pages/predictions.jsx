@@ -2,7 +2,7 @@ import React from 'react';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import PredictorSection from '../components/ferrari/PredictorSection';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion'; 
 
 export default function PredictionsPage() {
   return (
