@@ -1,0 +1,474 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "Quale pilota detiene il record di vittorie con la Ferrari?",
+      "options": ["Michael Schumacher", "Niki Lauda", "Fernando Alonso", "Kimi Räikkönen"],
+      "correct": 0,
+      "category": "Record Ferrari",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "Michael Schumacher ha vinto 72 Gran Premi con la Ferrari tra il 1996 e il 2006."
+    },
+    {
+      "id": 2,
+      "question": "In che anno la Ferrari vinse il suo primo titolo Costruttori?",
+      "options": ["1961", "1952", "1975", "1964"],
+      "correct": 0,
+      "category": "Storia Ferrari",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "La Ferrari vinse il suo primo titolo costruttori nel 1961."
+    },
+    {
+      "id": 3,
+      "question": "Quale di questi circuiti NON ha mai ospitato un GP vinto da una Ferrari?",
+      "options": ["Indianapolis", "Sochi", "Valencia", "Baku"],
+      "correct": 3,
+      "category": "Circuiti",
+      "difficulty": "Hard",
+      "points": 100,
+      "explanation": "A Baku, la Ferrari non ha mai vinto (vittorie più recenti: Mercedes e Red Bull)."
+    },
+    {
+      "id": 4,
+      "question": "Quanti titoli piloti ha vinto la Scuderia Ferrari?",
+      "options": ["15", "12", "18", "20"],
+      "correct": 0,
+      "category": "Statistiche",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "La Ferrari ha vinto 15 titoli piloti (ultimo con Kimi Räikkönen nel 2007)."
+    },
+    {
+      "id": 5,
+      "question": "Chi era il team principal durante l'era Schumacher?",
+      "options": ["Mattia Binotto", "Jean Todt", "Stefano Domenicali", "Maurizio Arrivabene"],
+      "correct": 1,
+      "category": "Team Ferrari",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Jean Todt è stato team principal dal 1993 al 2007."
+    },
+    {
+      "id": 6,
+      "question": "Quale di queste vetture Ferrari NON vinse il titolo costruttori?",
+      "options": ["F2004", "F2008", "SF70H", "312T"],
+      "correct": 2,
+      "category": "Vetture",
+      "difficulty": "Hard",
+      "points": 100,
+      "explanation": "La SF70H del 2017 non vinse il titolo (vinse la Mercedes)."
+    },
+    {
+      "id": 7,
+      "question": "In che anno la Ferrari introdusse il primo motore turbo?",
+      "options": ["1979", "1981", "1977", "1985"],
+      "correct": 1,
+      "category": "Tecnologia",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "La 126C del 1981 fu la prima Ferrari turbo in F1."
+    },
+    {
+      "id": 8,
+      "question": "Chi ha guidato più stagioni per la Ferrari?",
+      "options": ["Michael Schumacher", "Kimi Räikkönen", "Fernando Alonso", "Felipe Massa"],
+      "correct": 1,
+      "category": "Piloti",
+      "difficulty": "Hard",
+      "points": 100,
+      "explanation": "Kimi Räikkönen ha guidato per la Ferrari in 9 stagioni (2007-2009, 2014-2018)."
+    },
+    {
+      "id": 9,
+      "question": "Quale GP è stato vinto più volte dalla Ferrari?",
+      "options": ["GP d'Italia", "GP di Germania", "GP di Monaco", "GP del Belgio"],
+      "correct": 0,
+      "category": "Record GP",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "La Ferrari ha vinto il GP d'Italia 20 volte (record assoluto)."
+    },
+    {
+      "id": 10,
+      "question": "La Ferrari vinse il suo primo mondiale nel...",
+      "options": ["1950", "1951", "1952", "1953"],
+      "correct": 1,
+      "category": "Storia",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Il primo titolo mondiale Ferrari fu nel 1951 con Alberto Ascari."
+    },
+    {
+      "id": 11,
+      "question": "Chi vinse il mondiale di Formula 1 nel 1950?",
+      "options": ["Juan Manuel Fangio", "Alberto Ascari", "Giuseppe Farina", "Stirling Moss"],
+      "correct": 2,
+      "category": "Storia",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Giuseppe Farina vinse il primo mondiale di Formula 1 nel 1950."
+    },
+    {
+      "id": 12,
+      "question": "Quale pilota ha vinto 7 titoli mondiali di F1?",
+      "options": ["Michael Schumacher", "Lewis Hamilton", "Sebastian Vettel", "Ayrton Senna"],
+      "correct": 0,
+      "category": "Piloti",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Michael Schumacher ha vinto 7 titoli mondiali tra il 1994 e il 2004."
+    },
+    {
+      "id": 13,
+      "question": "Quale scuderia ha sede a Maranello?",
+      "options": ["Ferrari", "McLaren", "Alfa Romeo", "Williams"],
+      "correct": 0,
+      "category": "Scuderie",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "La Ferrari ha sede storica a Maranello, in Italia."
+    },
+    {
+      "id": 14,
+      "question": "In quale circuito si corre il GP di Monaco?",
+      "options": ["Monte Carlo", "Le Castellet", "Imola", "Spa"],
+      "correct": 0,
+      "category": "Circuiti",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Il GP di Monaco si corre sul circuito cittadino di Monte Carlo."
+    },
+    {
+      "id": 15,
+      "question": "Chi è stato il più giovane campione del mondo di F1?",
+      "options": ["Fernando Alonso", "Sebastian Vettel", "Lewis Hamilton", "Max Verstappen"],
+      "correct": 1,
+      "category": "Record",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "Sebastian Vettel vinse il mondiale 2010 a 23 anni."
+    },
+    {
+      "id": 16,
+      "question": "Quale circuito è noto come 'La Rouge'?",
+      "options": ["Spa-Francorchamps", "Monza", "Silverstone", "Suzuka"],
+      "correct": 0,
+      "category": "Circuiti",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "Eau Rouge è la celebre curva del circuito di Spa-Francorchamps."
+    },
+    {
+      "id": 17,
+      "question": "Quanti titoli mondiali ha vinto Ayrton Senna?",
+      "options": ["2", "3", "4", "5"],
+      "correct": 1,
+      "category": "Piloti",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Ayrton Senna vinse 3 titoli mondiali (1988, 1990, 1991)."
+    },
+    {
+      "id": 18,
+      "question": "Quale scuderia dominò l'era turbo negli anni '80?",
+      "options": ["Ferrari", "McLaren", "Williams", "Lotus"],
+      "correct": 2,
+      "category": "Storia",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "La Williams dominò l'era turbo grazie ai motori Honda e Renault."
+    },
+    {
+      "id": 19,
+      "question": "Chi vinse il mondiale F1 nel 2007?",
+      "options": ["Lewis Hamilton", "Fernando Alonso", "Kimi Räikkönen", "Felipe Massa"],
+      "correct": 2,
+      "category": "Storia",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Kimi Räikkönen vinse il mondiale 2007 con la Ferrari."
+    },
+    {
+      "id": 20,
+      "question": "Quale circuito è soprannominato 'Tempio della Velocità'?",
+      "options": ["Monza", "Silverstone", "Hockenheim", "Imola"],
+      "correct": 0,
+      "category": "Circuiti",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Monza è noto come il Tempio della Velocità."
+    },
+    {
+      "id": 21,
+      "question": "Quale pilota ha più pole position in carriera?",
+      "options": ["Ayrton Senna", "Michael Schumacher", "Lewis Hamilton", "Sebastian Vettel"],
+      "correct": 2,
+      "category": "Record",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "Lewis Hamilton detiene il record di pole position in F1."
+    },
+    {
+      "id": 22,
+      "question": "In quale anno la F1 ha introdotto il DRS?",
+      "options": ["2009", "2010", "2011", "2012"],
+      "correct": 2,
+      "category": "Tecnologia",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "Il DRS è stato introdotto ufficialmente nel 2011."
+    },
+    {
+      "id": 23,
+      "question": "Quale GP si corre di notte?",
+      "options": ["Singapore", "Abu Dhabi", "Bahrain", "Las Vegas"],
+      "correct": 0,
+      "category": "Gran Premi",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Il GP di Singapore è stato il primo GP notturno della storia."
+    },
+    {
+      "id": 24,
+      "question": "Quale pilota è soprannominato 'The Iceman'?",
+      "options": ["Mika Häkkinen", "Kimi Räikkönen", "Valtteri Bottas", "Nico Rosberg"],
+      "correct": 1,
+      "category": "Piloti",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Kimi Räikkönen è noto per il suo carattere glaciale."
+    },
+    {
+      "id": 25,
+      "question": "Quale scuderia ha vinto il mondiale costruttori nel 2021?",
+      "options": ["Mercedes", "Red Bull", "Ferrari", "McLaren"],
+      "correct": 0,
+      "category": "Scuderie",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "La Mercedes vinse il mondiale costruttori nel 2021."
+    },
+    {
+      "id": 26,
+      "question": "Chi vinse il mondiale F1 nel 2023?",
+      "options": ["Max Verstappen", "Lewis Hamilton", "Charles Leclerc", "Sergio Perez"],
+      "correct": 0,
+      "category": "F1 Moderna",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Max Verstappen vinse il mondiale 2023 con la Red Bull."
+    },
+    {
+      "id": 27,
+      "question": "Quale circuito è famoso per la curva 130R?",
+      "options": ["Suzuka", "Fuji", "Sepang", "Shanghai"],
+      "correct": 0,
+      "category": "Circuiti",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "La 130R è una delle curve più famose del circuito di Suzuka."
+    },
+    {
+      "id": 28,
+      "question": "Quale pilota vinse il mondiale F1 nel 1996?",
+      "options": ["Damon Hill", "Jacques Villeneuve", "Michael Schumacher", "Mika Häkkinen"],
+      "correct": 0,
+      "category": "Storia",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "Damon Hill vinse il mondiale 1996 con la Williams."
+    },
+    {
+      "id": 29,
+      "question": "Quale scuderia è soprannominata 'le Frecce d'Argento'?",
+      "options": ["McLaren", "Mercedes", "Williams", "Audi"],
+      "correct": 1,
+      "category": "Scuderie",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Mercedes è conosciuta come le Frecce d'Argento."
+    },
+    {
+      "id": 30,
+      "question": "Quante vittorie ha ottenuto Michael Schumacher in carriera?",
+      "options": ["85", "91", "94", "100"],
+      "correct": 1,
+      "category": "Record",
+      "difficulty": "Hard",
+      "points": 100,
+      "explanation": "Michael Schumacher ha ottenuto 91 vittorie in carriera."
+    },
+    {
+      "id": 31,
+      "question": "Quale circuito ospita il GP del Giappone?",
+      "options": ["Suzuka", "Fuji", "Motegi", "Okayama"],
+      "correct": 0,
+      "category": "Gran Premi",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Il GP del Giappone si corre a Suzuka."
+    },
+    {
+      "id": 32,
+      "question": "Quale pilota ha vinto il mondiale F1 nel 2012?",
+      "options": ["Fernando Alonso", "Sebastian Vettel", "Lewis Hamilton", "Jenson Button"],
+      "correct": 1,
+      "category": "Storia",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "Sebastian Vettel vinse il mondiale 2012 con la Red Bull."
+    },
+    {
+      "id": 33,
+      "question": "Quale GP è considerato 'di casa' per la Ferrari?",
+      "options": ["Monaco", "Imola", "Monza", "Mugello"],
+      "correct": 2,
+      "category": "Ferrari",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Monza è il GP di casa per la Ferrari."
+    },
+    {
+      "id": 34,
+      "question": "Chi vinse il mondiale F1 nel 2009?",
+      "options": ["Sebastian Vettel", "Jenson Button", "Lewis Hamilton", "Rubens Barrichello"],
+      "correct": 1,
+      "category": "Storia",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "Jenson Button vinse il mondiale 2009 con la Brawn GP."
+    },
+    {
+      "id": 35,
+      "question": "Quale circuito ha la curva 'Parabolica'?",
+      "options": ["Monza", "Imola", "Silverstone", "Spa"],
+      "correct": 0,
+      "category": "Circuiti",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "La Parabolica è una curva storica del circuito di Monza."
+    },
+    {
+      "id": 36,
+      "question": "Quale pilota ha vinto più GP consecutivi?",
+      "options": ["Sebastian Vettel", "Lewis Hamilton", "Max Verstappen", "Michael Schumacher"],
+      "correct": 2,
+      "category": "Record",
+      "difficulty": "Hard",
+      "points": 100,
+      "explanation": "Max Verstappen detiene il record di vittorie consecutive."
+    },
+    {
+      "id": 37,
+      "question": "In che anno è stata fondata la Ferrari?",
+      "options": ["1945", "1947", "1950", "1952"],
+      "correct": 1,
+      "category": "Ferrari",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "La Ferrari è stata fondata nel 1947."
+    },
+    {
+      "id": 38,
+      "question": "Quale pilota ha vinto il mondiale F1 nel 1998?",
+      "options": ["Michael Schumacher", "Mika Häkkinen", "Jacques Villeneuve", "Eddie Irvine"],
+      "correct": 1,
+      "category": "Storia",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "Mika Häkkinen vinse il mondiale 1998 con la McLaren."
+    },
+    {
+      "id": 39,
+      "question": "Quale scuderia vinse il mondiale costruttori nel 2014?",
+      "options": ["Red Bull", "Mercedes", "Ferrari", "Williams"],
+      "correct": 1,
+      "category": "Scuderie",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "La Mercedes dominò il mondiale costruttori 2014."
+    },
+    {
+      "id": 40,
+      "question": "Quale circuito ospita il GP del Belgio?",
+      "options": ["Zolder", "Spa-Francorchamps", "Nürburgring", "Hockenheim"],
+      "correct": 1,
+      "category": "Gran Premi",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Il GP del Belgio si corre a Spa-Francorchamps."
+    },
+    {
+      "id": 41,
+      "question": "Chi vinse il mondiale F1 nel 2020?",
+      "options": ["Lewis Hamilton", "Max Verstappen", "Valtteri Bottas", "Sebastian Vettel"],
+      "correct": 0,
+      "category": "F1 Moderna",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Lewis Hamilton vinse il mondiale 2020."
+    },
+    {
+      "id": 42,
+      "question": "Quale circuito è noto per la 'Esses'?",
+      "options": ["Suzuka", "Silverstone", "Interlagos", "Austin"],
+      "correct": 0,
+      "category": "Circuiti",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "Le Esses sono una sezione iconica del circuito di Suzuka."
+    },
+    {
+      "id": 43,
+      "question": "Quale pilota ha vinto il mondiale F1 nel 2005?",
+      "options": ["Michael Schumacher", "Fernando Alonso", "Kimi Räikkönen", "Juan Pablo Montoya"],
+      "correct": 1,
+      "category": "Storia",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "Fernando Alonso vinse il mondiale 2005 con la Renault."
+    },
+    {
+      "id": 44,
+      "question": "Quale scuderia è entrata in F1 nel 2016?",
+      "options": ["Haas", "AlphaTauri", "Aston Martin", "Alfa Romeo"],
+      "correct": 0,
+      "category": "Scuderie",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "Haas ha debuttato in Formula 1 nel 2016."
+    },
+    {
+      "id": 45,
+      "question": "Quale circuito ospita il GP del Brasile?",
+      "options": ["Interlagos", "Rio", "Curitiba", "Brasilia"],
+      "correct": 0,
+      "category": "Gran Premi",
+      "difficulty": "Easy",
+      "points": 30,
+      "explanation": "Il GP del Brasile si corre a Interlagos."
+    },
+    {
+      "id": 46,
+      "question": "Chi vinse il mondiale F1 nel 2016?",
+      "options": ["Lewis Hamilton", "Nico Rosberg", "Sebastian Vettel", "Max Verstappen"],
+      "correct": 1,
+      "category": "Storia",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "Nico Rosberg vinse il mondiale 2016 con la Mercedes."
+    },
+    {
+      "id": 47,
+      "question": "Quale circuito è stato introdotto nel calendario F1 nel 2021?",
+      "options": ["Jeddah", "Baku", "Sochi", "Sepang"],
+      "correct": 0,
+      "category": "F1 Moderna",
+      "difficulty": "Medium",
+      "points": 50,
+      "explanation": "Il circuito di Jeddah ha debuttato nel 2021."
+    }
+  ]
+}

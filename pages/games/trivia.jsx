@@ -13,107 +13,16 @@ import {
   ChevronRight,
   RefreshCw,
   TrendingUp,
-  Crown
+  Crown,
+  Loader2
 } from 'lucide-react';
 import { useSession } from "next-auth/react";
-
-// DOMANDE TRIVIA F1 (puoi espanderle)
-const triviaQuestions = [
-  {
-    id: 1,
-    question: "Quale pilota detiene il record di vittorie con la Ferrari?",
-    options: ["Michael Schumacher", "Niki Lauda", "Fernando Alonso", "Kimi Räikkönen"],
-    correct: 0,
-    category: "Record Ferrari",
-    difficulty: "Medium",
-    points: 50
-  },
-  {
-    id: 2,
-    question: "In che anno la Ferrari vinse il suo primo titolo Costruttori?",
-    options: ["1961", "1952", "1975", "1964"],
-    correct: 0,
-    category: "Storia Ferrari",
-    difficulty: "Easy",
-    points: 30
-  },
-  {
-    id: 3,
-    question: "Quale di questi circuiti NON ha mai ospitato un GP vinto da una Ferrari?",
-    options: ["Indianapolis", "Sochi", "Valencia", "Baku"],
-    correct: 3,
-    category: "Circuiti",
-    difficulty: "Hard",
-    points: 100
-  },
-  {
-    id: 4,
-    question: "Quanti titoli piloti ha vinto la Scuderia Ferrari?",
-    options: ["15", "12", "18", "20"],
-    correct: 0,
-    category: "Statistiche",
-    difficulty: "Medium",
-    points: 50
-  },
-  {
-    id: 5,
-    question: "Chi era il team principal durante l'era Schumacher?",
-    options: ["Mattia Binotto", "Jean Todt", "Stefano Domenicali", "Maurizio Arrivabene"],
-    correct: 1,
-    category: "Team Ferrari",
-    difficulty: "Easy",
-    points: 30
-  },
-  {
-    id: 6,
-    question: "Quale di queste vetture Ferrari NON vinse il titolo costruttori?",
-    options: ["F2004", "F2008", "SF70H", "312T"],
-    correct: 2,
-    category: "Vetture",
-    difficulty: "Hard",
-    points: 100
-  },
-  {
-    id: 7,
-    question: "In che anno la Ferrari introdusse il primo motore turbo?",
-    options: ["1979", "1981", "1977", "1985"],
-    correct: 1,
-    category: "Tecnologia",
-    difficulty: "Medium",
-    points: 50
-  },
-  {
-    id: 8,
-    question: "Chi ha guidato più stagioni per la Ferrari?",
-    options: ["Michael Schumacher", "Kimi Räikkönen", "Fernando Alonso", "Felipe Massa"],
-    correct: 1,
-    category: "Piloti",
-    difficulty: "Hard",
-    points: 100
-  },
-  {
-    id: 9,
-    question: "Quale GP è stato vinto più volte dalla Ferrari?",
-    options: ["GP d'Italia", "GP di Germania", "GP di Monaco", "GP del Belgio"],
-    correct: 0,
-    category: "Record GP",
-    difficulty: "Medium",
-    points: 50
-  },
-  {
-    id: 10,
-    question: "La Ferrari vinse il suo primo mondiale nel...",
-    options: ["1950", "1951", "1952", "1953"],
-    correct: 1,
-    category: "Storia",
-    difficulty: "Easy",
-    points: 30
-  }
-];
 
 export default function F1TriviaQuiz() {
   const router = useRouter();
   const { data: session } = useSession();
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -125,6 +34,23 @@ export default function F1TriviaQuiz() {
   const [streak, setStreak] = useState(0);
   const [maxStreak, setMaxStreak] = useState(0);
 
+  // Carica le domande dal JSON
+  useEffect(() => {
+    async function loadQuestions() {
+      try {
+        const response = await fetch('/data/trivia-questions.json');
+        const data = await response.json();
+        setQuestions(data.questions || []);
+      } catch (error) {
+        console.error("Errore nel caricamento delle domande:", error);
+        setQuestions([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadQuestions();
+  }, []);
+
   // Caricamento token utente
   useEffect(() => {
     if (session) {
@@ -135,7 +61,7 @@ export default function F1TriviaQuiz() {
 
   // Timer per ogni domanda
   useEffect(() => {
-    if (!gameStarted || showResult || currentQuestion >= triviaQuestions.length) return;
+    if (!gameStarted || showResult || currentQuestion >= questions.length || questions.length === 0) return;
     
     const timer = setInterval(() => {
       setTimeLeft(prev => {
@@ -148,12 +74,12 @@ export default function F1TriviaQuiz() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [gameStarted, showResult, currentQuestion]);
+  }, [gameStarted, showResult, currentQuestion, questions]);
 
   const handleAnswer = (optionIndex) => {
-    if (selectedAnswer !== null) return;
+    if (selectedAnswer !== null || questions.length === 0) return;
     
-    const question = triviaQuestions[currentQuestion];
+    const question = questions[currentQuestion];
     const isCorrect = optionIndex === question.correct;
     const pointsEarned = isCorrect ? question.points : 0;
     
@@ -171,7 +97,8 @@ export default function F1TriviaQuiz() {
       questionId: question.id, 
       answer: optionIndex, 
       correct: isCorrect,
-      points: pointsEarned
+      points: pointsEarned,
+      explanation: question.explanation
     }]);
     
     if (isCorrect) {
@@ -179,7 +106,7 @@ export default function F1TriviaQuiz() {
     }
     
     setTimeout(() => {
-      if (currentQuestion + 1 < triviaQuestions.length) {
+      if (currentQuestion + 1 < questions.length) {
         setCurrentQuestion(prev => prev + 1);
         setSelectedAnswer(null);
         setTimeLeft(15);
@@ -208,6 +135,8 @@ export default function F1TriviaQuiz() {
   };
 
   const startGame = () => {
+    if (questions.length === 0) return;
+    
     setGameStarted(true);
     setCurrentQuestion(0);
     setScore(0);
@@ -220,11 +149,11 @@ export default function F1TriviaQuiz() {
   };
 
   const getAnswerColor = (optionIndex) => {
-    if (selectedAnswer === null) return "bg-zinc-800 hover:bg-zinc-700";
-    if (optionIndex === triviaQuestions[currentQuestion].correct) {
+    if (selectedAnswer === null || questions.length === 0) return "bg-zinc-800 hover:bg-zinc-700";
+    if (optionIndex === questions[currentQuestion].correct) {
       return "bg-green-900/50 border-green-500";
     }
-    if (optionIndex === selectedAnswer && optionIndex !== triviaQuestions[currentQuestion].correct) {
+    if (optionIndex === selectedAnswer && optionIndex !== questions[currentQuestion].correct) {
       return "bg-red-900/50 border-red-500";
     }
     return "bg-zinc-800";
@@ -238,6 +167,35 @@ export default function F1TriviaQuiz() {
       default: return 'text-zinc-500';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white font-sans flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-red-600 animate-spin mx-auto mb-6" />
+          <p className="text-red-600 font-black tracking-widest uppercase italic">Caricamento domande...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-black text-white font-sans">
+        <Navigation />
+        <main className="max-w-6xl mx-auto pt-32 px-4 pb-20 text-center">
+          <h1 className="text-5xl font-black uppercase mb-6">Errore nel caricamento</h1>
+          <p className="text-zinc-400 mb-8">Le domande del quiz non sono disponibili.</p>
+          <button
+            onClick={() => router.push('/fanzone')}
+            className="bg-gradient-to-r from-red-600 to-red-800 px-8 py-4 rounded-2xl font-black uppercase"
+          >
+            Torna alla Fan Zone
+          </button>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white font-sans">
@@ -263,7 +221,7 @@ export default function F1TriviaQuiz() {
             </h1>
             
             <p className="text-zinc-400 max-w-2xl mx-auto text-lg italic">
-              Dimostra di essere il più grande tifoso Ferrari rispondendo a 10 domande.
+              Dimostra di essere il più grande tifoso Ferrari rispondendo a {questions.length} domande.
               Più rispondi velocemente e correttamente, più punti guadagni!
             </p>
           </motion.div>
@@ -334,7 +292,7 @@ export default function F1TriviaQuiz() {
                   <Crown className="w-24 h-24 text-yellow-500 mx-auto mb-8" />
                   <h2 className="text-4xl font-black uppercase mb-4">Pronto per la sfida?</h2>
                   <p className="text-zinc-400 mb-10 max-w-md mx-auto">
-                    Rispondi a 10 domande sulla storia Ferrari. Ogni risposta corretta ti dà punti, 
+                    Rispondi a {questions.length} domande sulla storia Ferrari. Ogni risposta corretta ti dà punti, 
                     il timer aggiunge pressione, e le streak moltiplicano il tuo punteggio!
                   </p>
                   
@@ -376,7 +334,7 @@ export default function F1TriviaQuiz() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto mb-12">
                     <div className="p-6 bg-zinc-800/50 rounded-2xl">
-                      <div className="text-2xl font-black mb-2">{answersHistory.filter(a => a.correct).length}/10</div>
+                      <div className="text-2xl font-black mb-2">{answersHistory.filter(a => a.correct).length}/{questions.length}</div>
                       <p className="text-zinc-500 text-sm">Risposte corrette</p>
                     </div>
                     <div className="p-6 bg-zinc-800/50 rounded-2xl">
@@ -417,16 +375,16 @@ export default function F1TriviaQuiz() {
                 {/* PROGRESS BAR */}
                 <div className="mb-10">
                   <div className="flex justify-between text-sm text-zinc-500 mb-2">
-                    <span>Domanda {currentQuestion + 1} di {triviaQuestions.length}</span>
-                    <span className={`font-bold ${getDifficultyColor(triviaQuestions[currentQuestion].difficulty)}`}>
-                      {triviaQuestions[currentQuestion].difficulty} • {triviaQuestions[currentQuestion].points} punti
+                    <span>Domanda {currentQuestion + 1} di {questions.length}</span>
+                    <span className={`font-bold ${getDifficultyColor(questions[currentQuestion].difficulty)}`}>
+                      {questions[currentQuestion].difficulty} • {questions[currentQuestion].points} punti
                     </span>
                   </div>
                   <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
                     <motion.div 
                       className="h-full bg-gradient-to-r from-red-600 to-red-800"
                       initial={{ width: 0 }}
-                      animate={{ width: `${((currentQuestion + 1) / triviaQuestions.length) * 100}%` }}
+                      animate={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
                       transition={{ duration: 0.5 }}
                     />
                   </div>
@@ -436,7 +394,7 @@ export default function F1TriviaQuiz() {
                 <div className="mb-12">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="px-4 py-2 bg-zinc-800 rounded-full text-xs font-black uppercase tracking-wider">
-                      {triviaQuestions[currentQuestion].category}
+                      {questions[currentQuestion].category}
                     </div>
                     <div className="px-4 py-2 bg-red-900/30 border border-red-500/30 rounded-full text-xs font-black uppercase tracking-wider">
                       Streak: {streak} {streak >= 3 && '🔥'}
@@ -444,12 +402,12 @@ export default function F1TriviaQuiz() {
                   </div>
                   
                   <h3 className="text-3xl md:text-4xl font-black leading-tight mb-10">
-                    {triviaQuestions[currentQuestion].question}
+                    {questions[currentQuestion].question}
                   </h3>
 
                   {/* OPTIONS */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {triviaQuestions[currentQuestion].options.map((option, index) => (
+                    {questions[currentQuestion].options.map((option, index) => (
                       <motion.button
                         key={index}
                         whileHover={selectedAnswer === null ? { scale: 1.02 } : {}}
@@ -462,7 +420,7 @@ export default function F1TriviaQuiz() {
                           <div className="flex items-center gap-4">
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center
                               ${selectedAnswer === null ? 'bg-zinc-700' : 
-                                index === triviaQuestions[currentQuestion].correct ? 'bg-green-700' :
+                                index === questions[currentQuestion].correct ? 'bg-green-700' :
                                 index === selectedAnswer ? 'bg-red-700' : 'bg-zinc-700'}`}
                             >
                               <span className="font-black">{String.fromCharCode(65 + index)}</span>
@@ -472,7 +430,7 @@ export default function F1TriviaQuiz() {
                           
                           {selectedAnswer !== null && (
                             <div>
-                              {index === triviaQuestions[currentQuestion].correct ? (
+                              {index === questions[currentQuestion].correct ? (
                                 <CheckCircle className="w-6 h-6 text-green-500" />
                               ) : index === selectedAnswer ? (
                                 <XCircle className="w-6 h-6 text-red-500" />
@@ -490,15 +448,16 @@ export default function F1TriviaQuiz() {
                   <motion.div 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={`p-6 rounded-2xl mb-8 ${selectedAnswer === triviaQuestions[currentQuestion].correct ? 'bg-green-900/20 border border-green-500/30' : 'bg-red-900/20 border border-red-500/30'}`}
+                    className={`p-6 rounded-2xl mb-8 ${selectedAnswer === questions[currentQuestion].correct ? 'bg-green-900/20 border border-green-500/30' : 'bg-red-900/20 border border-red-500/30'}`}
                   >
                     <div className="flex items-center gap-4">
-                      {selectedAnswer === triviaQuestions[currentQuestion].correct ? (
+                      {selectedAnswer === questions[currentQuestion].correct ? (
                         <>
                           <CheckCircle className="w-8 h-8 text-green-500" />
                           <div>
                             <h4 className="text-xl font-black text-green-500">Esatto!</h4>
-                            <p className="text-zinc-300">+{triviaQuestions[currentQuestion].points} punti</p>
+                            <p className="text-zinc-300">+{questions[currentQuestion].points} punti</p>
+                            <p className="text-zinc-400 text-sm mt-2">{questions[currentQuestion].explanation}</p>
                           </div>
                         </>
                       ) : (
@@ -508,9 +467,10 @@ export default function F1TriviaQuiz() {
                             <h4 className="text-xl font-black text-red-500">Risposta errata!</h4>
                             <p className="text-zinc-300">
                               La risposta corretta era: <span className="text-white font-bold">
-                                {triviaQuestions[currentQuestion].options[triviaQuestions[currentQuestion].correct]}
+                                {questions[currentQuestion].options[questions[currentQuestion].correct]}
                               </span>
                             </p>
+                            <p className="text-zinc-400 text-sm mt-2">{questions[currentQuestion].explanation}</p>
                           </div>
                         </>
                       )}
