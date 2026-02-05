@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useSession, signIn, signOut } from "next-auth/react";
 import { User, LogOut, LayoutDashboard, Trophy, Gamepad2, BarChart3, Home as HomeIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
