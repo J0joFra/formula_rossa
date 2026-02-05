@@ -1,5 +1,5 @@
 // components/ferrari/Navigation.jsx
-import { useState } from 'react'; // <--- Aggiunto import mancante
+import { useState } from 'react'; 
 import Link from 'next/link';
 import { useSession, signIn, signOut } from "next-auth/react";
 import { User, LogOut, LayoutDashboard, Trophy, Gamepad2, BarChart3, Home as HomeIcon } from 'lucide-react';
