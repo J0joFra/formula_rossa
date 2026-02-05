@@ -13,7 +13,6 @@ import {
   ChevronLeft, 
   Timer 
 } from 'lucide-react';
-import { Gamepad2, Coins, Shirt, Gift, Trophy as TrophyIcon } from 'lucide-react';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
