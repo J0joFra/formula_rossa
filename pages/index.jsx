@@ -6,8 +6,8 @@ import NewsSection from '../components/ferrari/NewsSection';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import {   ChevronDown, Trophy, Flag, Star, Timer, Zap, Gauge, Award, Sparkles, ArrowRight, Cpu  } from 'lucide-react';
-
+import {   
+  ChevronDown, Trophy, Flag, Star, Timer, Zap, Gauge, Award, Sparkles, ArrowRight, Cpu, Coins, Gamepad2 } from 'lucide-react';
 export default function Home() {
   const [activeSection, setActiveSection] = useState('home');
   

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Gamepad2, Coins, Trophy, Star, Shirt, 
-  Watch, Gift, ArrowRight, Zap, ChevronLeft 
-} from 'lucide-react';
+import { ChevronDown, Trophy, Flag, Star, Timer, Zap, Gauge, Award, Sparkles, ArrowRight, Cpu  } from 'lucide-react';
+import { Gamepad2, Coins, Shirt, Gift, Trophy as TrophyIcon } from 'lucide-react';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
