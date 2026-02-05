@@ -5,7 +5,7 @@ function MyApp({ Component, pageProps }) {
     <>
       <Head>
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8762257220044998"
-          crossorigin="anonymous"></script>
+        crossorigin="anonymous"></script>
         {/* Tailwind CSS da CDN */}
         <script src="https://cdn.tailwindcss.com"></script>
         
