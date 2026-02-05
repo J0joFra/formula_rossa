@@ -3,7 +3,7 @@ import Navigation from '../components/ferrari/Navigation';
 import HeroSection from '../components/ferrari/HeroSection';
 import StatsSection from '../components/ferrari/StatsSection';
 import NewsSection from '../components/ferrari/NewsSection';
-import FanZoneSection from './fanzone';
+import FanZoneSection from './FanZoneSection';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -67,6 +67,7 @@ export default function Home() {
         <main>
           <div ref={homeRef}><HeroSection /></div>
           <div ref={statsRef}><StatsSection /></div>
+          <div ref={fanzoneRef}><FanZoneSection /></div>
           
           {/* CTA PREDITTORE */}
           <div ref={predictorRef} className="py-28 px-4">
