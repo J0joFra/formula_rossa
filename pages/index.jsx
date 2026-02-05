@@ -3,7 +3,7 @@ import Navigation from '../components/ferrari/Navigation';
 import HeroSection from '../components/ferrari/HeroSection';
 import StatsSection from '../components/ferrari/StatsSection';
 import NewsSection from '../components/ferrari/NewsSection';
-import FanZoneSection from '../components/ferrari/FanZoneSection';
+import FanZoneSection from './fanzone';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -18,7 +18,7 @@ export default function Home() {
   const newsRef = useRef(null);
   const fanzoneRef = useRef(null);
 
-  
+
   const refs = {
     home: homeRef,
     stats: statsRef,
