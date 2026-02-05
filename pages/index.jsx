@@ -3,7 +3,6 @@ import Navigation from '../components/ferrari/Navigation';
 import HeroSection from '../components/ferrari/HeroSection';
 import StatsSection from '../components/ferrari/StatsSection';
 import NewsSection from '../components/ferrari/NewsSection';
-import FanZoneSection from './FanZoneSection';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -67,7 +66,49 @@ export default function Home() {
         <main>
           <div ref={homeRef}><HeroSection /></div>
           <div ref={statsRef}><StatsSection /></div>
-          <div ref={fanzoneRef}><FanZoneSection /></div>
+          <div ref={fanzoneRef} className="py-28 px-4">
+            <div className="max-w-6xl mx-auto">
+              <Link href="/fanzone"> {/*  */}
+                <motion.div
+                  whileHover={{ scale: 1.015 }}
+                  className="relative group overflow-hidden rounded-[40px] 
+                            bg-gradient-to-br from-zinc-900 via-zinc-950 to-black 
+                            border border-yellow-500/20 p-10 md:p-20 cursor-pointer shadow-2xl"
+                >
+                  {/* Sfondo decorativo */}
+                  <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity">
+                    <div className="absolute top-10 right-10 w-64 h-64 bg-yellow-600/20 rounded-full blur-[100px]" />
+                    <div className="absolute bottom-10 left-10 w-64 h-64 bg-red-600/10 rounded-full blur-[100px]" />
+                  </div>
+
+                  <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12 text-center lg:text-left">
+                    <div className="flex-1">
+                      <span className="inline-flex items-center gap-2 mb-6 text-[11px] tracking-[0.35em] uppercase text-yellow-500 font-black">
+                        <Coins className="w-4 h-4" />
+                        Members Club & Rewards
+                      </span>
+                      <h2 className="text-4xl md:text-7xl font-black leading-tight tracking-tighter text-white uppercase italic">
+                        Entra nella <br />
+                        <span className="text-yellow-500">Fan Zone</span>
+                      </h2>
+                      <p className="mt-6 text-zinc-400 max-w-md text-lg italic">
+                        Gioca ai mini-games ufficiali, accumula SF Tokens e riscatta premi esclusivi.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-5">
+                      <div className="w-40 h-40 md:w-48 md:h-48 bg-yellow-500 rounded-[48px] flex items-center justify-center shadow-[0_0_50px_rgba(234,179,8,0.2)]">
+                        <Gamepad2 className="w-20 h-20 md:w-24 md:h-24 text-black" />
+                      </div>
+                      <div className="mt-4 flex items-center gap-3 bg-white text-black px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-red-600 hover:text-white transition-all">
+                        Inizia a giocare <ArrowRight className="w-4 h-4" />
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </Link>
+            </div>
+          </div>
           
           {/* CTA PREDITTORE */}
           <div ref={predictorRef} className="py-28 px-4">
@@ -176,9 +217,7 @@ export default function Home() {
             </div>
           </div>
           <div ref={newsRef}><NewsSection /></div>
-          <div ref={fanzoneRef}><FanZoneSection /></div>
         </main>
-        
         <Footer />
       </div>
     </div>
