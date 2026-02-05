@@ -18,6 +18,7 @@ export default function Home() {
   const newsRef = useRef(null);
   const fanzoneRef = useRef(null);
 
+  
   const refs = {
     home: homeRef,
     stats: statsRef,
