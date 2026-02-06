@@ -15,6 +15,13 @@ export default function HeroSection() {
   });
   const [loading, setLoading] = useState(true);
 
+  const carouselImages = [
+    "/data/images/image1.jpg",
+    "/data/images/image2.jpg",
+    "/data/images/image3.jpg",
+    "/data/images/image4.jpg"
+  ];
+
   useEffect(() => {
     async function calculateFerrariStats() {
       try {
@@ -69,7 +76,7 @@ export default function HeroSection() {
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-yellow-500/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
       </div>
 
-      <div className="relative z-10 text-center px-4 max-w-7xl mx-auto flex flex-col items-center">
+      <div className="relative z-10 text-center px-4 max-w-7xl mx-auto flex flex-col items-center w-full">
         {/* Logo Ferrari e Titolo */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
@@ -100,41 +107,142 @@ export default function HeroSection() {
           </p>
         </motion.div>
 
-        {/* Stats Grid Dinamica - 3x3 Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl mb-32">
-          {statsConfig.map((stat, index) => (
-            <Link href={`/stats/${stat.id}`} key={stat.id}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 + 0.5 }}
-                className="group bg-zinc-900/30 backdrop-blur-xl border border-white/5 rounded-2xl p-10 hover:border-red-600/40 hover:bg-zinc-900/60 transition-all duration-500 shadow-2xl flex flex-col items-center cursor-pointer h-full"
-              >
-                <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${stat.color} mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                  <stat.icon className="w-8 h-8 text-white" />
+        {/* Container principale per Stats Grid con immagini laterali */}
+        <div className="relative w-full max-w-6xl mb-32">
+          {/* COLONNA SINISTRA - Immagini che scorrono in basso */}
+          <div className="hidden lg:block absolute -left-48 top-1/2 -translate-y-1/2 w-48 h-[120%] overflow-hidden z-0">
+            <motion.div
+              className="flex flex-col gap-8"
+              animate={{ y: [0, -1000] }}
+              transition={{ 
+                duration: 40,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            >
+              {/* Prima serie */}
+              {carouselImages.map((img, index) => (
+                <div key={`left-${index}`} className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden group">
+                  <img
+                    src={img}
+                    alt={`Ferrari ${index + 1}`}
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-60" />
                 </div>
-                <div className="text-4xl md:text-5xl font-black text-white mb-2 tabular-nums">
-                  {loading ? <span className="animate-pulse opacity-30">---</span> : stat.value}
+              ))}
+              {/* Seconda serie per loop continuo */}
+              {carouselImages.map((img, index) => (
+                <div key={`left-duplicate-${index}`} className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden group">
+                  <img
+                    src={img}
+                    alt={`Ferrari ${index + 1}`}
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-60" />
                 </div>
-                <div className="text-gray-500 text-xs md:text-sm uppercase font-black tracking-[0.2em] leading-tight">
-                  {stat.label}
+              ))}
+            </motion.div>
+            {/* Maschera di sfumatura */}
+            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black via-black/80 to-transparent z-10" />
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/80 to-transparent z-10" />
+          </div>
+
+          {/* COLONNA DESTRA - Immagini che scorrono in alto (verso l'alto) */}
+          <div className="hidden lg:block absolute -right-48 top-1/2 -translate-y-1/2 w-48 h-[120%] overflow-hidden z-0">
+            <motion.div
+              className="flex flex-col gap-8"
+              animate={{ y: [-1000, 0] }} // Scorre in direzione opposta
+              transition={{ 
+                duration: 40,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            >
+              {carouselImages.map((img, index) => (
+                <div key={`right-${index}`} className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden group">
+                  <img
+                    src={img}
+                    alt={`Ferrari ${index + 1}`}
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-60" />
                 </div>
-              </motion.div>
-            </Link>
-          ))}
+              ))}
+              {carouselImages.map((img, index) => (
+                <div key={`right-duplicate-${index}`} className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden group">
+                  <img
+                    src={img}
+                    alt={`Ferrari ${index + 1}`}
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-60" />
+                </div>
+              ))}
+            </motion.div>
+            {/* Maschera di sfumatura */}
+            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black via-black/80 to-transparent z-10" />
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/80 to-transparent z-10" />
+          </div>
+
+          {/* Stats Grid Centrale - 3x3 Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl mx-auto relative z-10">
+            {statsConfig.map((stat, index) => (
+              <Link href={`/stats/${stat.id}`} key={stat.id}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 + 0.5 }}
+                  className="group bg-zinc-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-8 hover:border-red-600/40 hover:bg-zinc-900/90 transition-all duration-500 shadow-2xl flex flex-col items-center cursor-pointer h-full relative overflow-hidden"
+                >
+                  {/* Overlay luminoso al hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-transparent via-red-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  {/* Icona con effetto glow */}
+                  <div className={`relative inline-flex p-4 rounded-2xl bg-gradient-to-br ${stat.color} mb-6 shadow-lg group-hover:shadow-red-500/30 group-hover:scale-110 transition-all duration-300 z-10`}>
+                    <stat.icon className="w-8 h-8 text-white" />
+                    <div className="absolute inset-0 rounded-2xl bg-red-500/20 blur-xl group-hover:blur-2xl transition-all duration-300" />
+                  </div>
+                  
+                  {/* Valore statistico */}
+                  <div className="relative text-4xl md:text-5xl font-black text-white mb-2 tabular-nums z-10">
+                    {loading ? (
+                      <span className="animate-pulse opacity-30">---</span>
+                    ) : (
+                      <motion.span
+                        key={stat.value}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        {stat.value}
+                      </motion.span>
+                    )}
+                  </div>
+                  
+                  {/* Etichetta */}
+                  <div className="relative text-gray-400 text-xs md:text-sm uppercase font-semibold tracking-[0.2em] leading-tight z-10">
+                    {stat.label}
+                  </div>
+                  
+                  {/* Linea decorativa inferiore */}
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-16 h-0.5 bg-gradient-to-r from-transparent via-red-600 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </motion.div>
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Scroll indicator */}
-        {/* SEZIONE CALL TO ACTION - PERFORMANCE ARCHIVE */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="mt-24 w-full max-w-5xl mx-auto px-4"
+          className="mt-24 w-full max-w-5xl mx-auto px-4 relative z-10"
         >
           <Link href="/statistics">
-            <div className="group relative overflow-hidden bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 md:p-12 cursor-pointer hover:border-red-600/50 transition-all duration-500 shadow-2xl">
+            <div className="group relative overflow-hidden bg-zinc-900/70 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 md:p-12 cursor-pointer hover:border-red-600/50 transition-all duration-500 shadow-2xl">
               
               {/* Sfondo Decorativo: Linee di telemetria animate */}
               <div className="absolute inset-0 opacity-10 pointer-events-none">
