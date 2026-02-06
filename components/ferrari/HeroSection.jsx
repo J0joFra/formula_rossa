@@ -19,7 +19,13 @@ export default function HeroSection() {
     "/data/images/image1.jpg",
     "/data/images/image2.jpg",
     "/data/images/image3.jpg",
-    "/data/images/image4.jpg"
+    "/data/images/image4.jpg",
+    "/data/images/image5.jpg",
+    "/data/images/image6.jpg",
+    "/data/images/image7.jpg",
+    "/data/images/image8.jpg",
+    "/data/images/image9.jpg",
+    "/data/images/image10.jpg"
   ];
 
   useEffect(() => {
