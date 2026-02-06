@@ -6,7 +6,6 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   return (
     <SessionProvider session={session}>
       <Head>
-        <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-8ZCZQFLK4L"></script>
         <script>
           window.dataLayer = window.dataLayer || [];
