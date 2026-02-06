@@ -4,21 +4,34 @@ import '../styles/globals.css';
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   return (
-    <SessionProvider session={session}>
+        <SessionProvider session={session}>
       <Head>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-8ZCZQFLK4L"></script>
-        <script>
+        <title>Formula Rossa</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+
+      {/* Google Analytics (gtag.js) */}
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-8ZCZQFLK4L"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-        
           gtag('config', 'G-8ZCZQFLK4L');
-        </script>
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8762257220044998"
-        crossorigin="anonymous"></script>
-        {/* Tailwind CSS da CDN */}
-        <script src="https://cdn.tailwindcss.com"></script>
-        
+        `}
+      </Script>
+
+      {/* Google AdSense */}
+      <Script
+        id="adsense-id"
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8762257220044998"
+        crossOrigin="anonymous"
+        strategy="afterInteractive"
+      />        
         {/* Configurazione colori Ferrari - VERSIONE CORRETTA */}
         <script dangerouslySetInnerHTML={{
           __html: `
