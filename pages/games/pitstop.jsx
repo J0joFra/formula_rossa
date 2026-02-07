@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Timer, RefreshCw, Trophy, ChevronLeft, Target, Zap } from 'lucide-react';
+import { Timer, RefreshCw, Trophy, ChevronLeft, Target, Zap, X } from 'lucide-react';
 import Navigation from '../../components/ferrari/Navigation';
 import Footer from '../../components/ferrari/Footer';
 
 export default function SimplePitStop() {
+  const router = useRouter();
   const [gameState, setGameState] = useState('idle'); // 'idle', 'running', 'result'
   const [targetTime, setTargetTime] = useState(0);
   const [resultTime, setResultTime] = useState(0);
@@ -25,22 +26,19 @@ export default function SimplePitStop() {
 
   const handleAction = () => {
     if (gameState === 'idle') {
-      // INIZIA A CONTARE
       startTimeRef.current = Date.now();
       setGameState('running');
     } else if (gameState === 'running') {
-      // STOPPA
       const endTime = Date.now();
       const duration = (endTime - startTimeRef.current) / 1000;
       setResultTime(duration);
       
-      // Calcolo punteggio semplice
       const diff = Math.abs(duration - targetTime);
       let points = 0;
-      if (diff < 0.05) points = 1000;      // Quasi perfetto
-      else if (diff < 0.2) points = 500;   // Ottimo
-      else if (diff < 0.5) points = 200;   // Buono
-      else if (diff < 1.0) points = 50;    // Accettabile
+      if (diff < 0.05) points = 1000;      
+      else if (diff < 0.2) points = 500;   
+      else if (diff < 0.5) points = 200;   
+      else if (diff < 1.0) points = 50;    
       
       setScore(points);
       setGameState('result');
@@ -51,7 +49,19 @@ export default function SimplePitStop() {
     <div className="min-h-screen bg-black text-white font-sans flex flex-col">
       <Navigation />
       
-      <main className="flex-grow flex flex-col items-center justify-center px-4 pt-20">
+      <main className="flex-grow flex flex-col items-center justify-center px-4 pt-24 pb-12">
+        
+        {/* PULSANTE INDIETRO / ESCI */}
+        <div className="max-w-md w-full mb-6">
+          <button 
+            onClick={() => router.push('/fanzone')}
+            className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors group"
+          >
+            <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-xs font-bold uppercase tracking-widest">Torna alla Fan Zone</span>
+          </button>
+        </div>
+
         <div className="max-w-md w-full text-center">
           
           {/* HEADER TITOLO */}
@@ -120,18 +130,29 @@ export default function SimplePitStop() {
               )}
             </AnimatePresence>
 
-            {/* PULSANTE AZIONE UNICO */}
-            <button
-              onClick={gameState === 'result' ? generateTarget : handleAction}
-              className={`w-full py-6 rounded-2xl text-xl font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg
-                ${gameState === 'idle' ? 'bg-red-600 hover:bg-red-700' : 
-                  gameState === 'running' ? 'bg-white text-black hover:bg-zinc-200' : 
-                  'bg-zinc-800 text-white hover:bg-zinc-700'}`}
-            >
-              {gameState === 'idle' && 'START'}
-              {gameState === 'running' && 'STOP!'}
-              {gameState === 'result' && 'PROVA ANCORA'}
-            </button>
+            {/* PULSANTI AZIONE */}
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={gameState === 'result' ? generateTarget : handleAction}
+                className={`w-full py-6 rounded-2xl text-xl font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg
+                  ${gameState === 'idle' ? 'bg-red-600 hover:bg-red-700 text-white' : 
+                    gameState === 'running' ? 'bg-white text-black hover:bg-zinc-200' : 
+                    'bg-red-600 text-white hover:bg-red-700'}`}
+              >
+                {gameState === 'idle' && 'START'}
+                {gameState === 'running' && 'STOP!'}
+                {gameState === 'result' && 'PROVA ANCORA'}
+              </button>
+
+              {gameState === 'result' && (
+                <button
+                  onClick={() => router.push('/fanzone')}
+                  className="w-full py-4 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-all text-sm font-bold uppercase tracking-widest"
+                >
+                  Esci dal gioco
+                </button>
+              )}
+            </div>
           </div>
 
           {/* TIPS RAPIDI */}
