@@ -42,7 +42,15 @@ export default function F1TriviaQuiz() {
       try {
         const response = await fetch('/data/trivia-questions.json');
         const data = await response.json();
-        setQuestions(data.questions || []);
+        
+        // Mescola le domande casualmente
+        const allQuestions = data.questions || [];
+        const shuffledQuestions = [...allQuestions].sort(() => Math.random() - 0.5);
+        
+        // Prendi solo le prime 10 domande (opzionale)
+        const limitedQuestions = shuffledQuestions.slice(0, 10);
+        
+        setQuestions(limitedQuestions);
       } catch (error) {
         console.error("Errore nel caricamento delle domande:", error);
         setQuestions([]);
@@ -151,6 +159,10 @@ export default function F1TriviaQuiz() {
   const startGame = () => {
     if (questions.length === 0) return;
     
+    // Rimescola le domande ad ogni nuovo gioco
+    const shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+    setQuestions(shuffledQuestions);
+    
     setGameStarted(true);
     setCurrentQuestion(0);
     setScore(0);
@@ -227,7 +239,7 @@ export default function F1TriviaQuiz() {
             <div className="inline-flex items-center gap-3 mb-6">
               <Timer className="w-8 h-8 text-red-500" />
               <span className="text-red-600 font-black text-xs uppercase tracking-[0.3em] font-mono italic">
-                Scuderia Ferrari Trivia • TIMED
+                Scuderia Ferrari Trivia • TIMED • DOMANDE RANDOM
               </span>
             </div>
             
@@ -237,7 +249,8 @@ export default function F1TriviaQuiz() {
             
             <p className="text-zinc-400 max-w-2xl mx-auto text-lg italic">
               <span className="text-red-500 font-bold">15 secondi totali per rispondere!</span><br/>
-              Rispondi velocemente e correttamente prima che il tempo scada.
+              Rispondi velocemente e correttamente prima che il tempo scada.<br/>
+              <span className="text-yellow-500 font-bold">Domande random ad ogni gioco!</span>
             </p>
           </motion.div>
         </header>
@@ -313,14 +326,15 @@ export default function F1TriviaQuiz() {
                   <h2 className="text-4xl font-black uppercase mb-4">Sfida a Tempo!</h2>
                   <p className="text-zinc-400 mb-10 max-w-md mx-auto">
                     <span className="text-red-500 font-bold">SOLO 15 SECONDI TOTALI!</span><br/>
-                    Rispondi alle domande il più velocemente possibile prima che il tempo scada.
+                    Rispondi alle domande il più velocemente possibile prima che il tempo scada.<br/>
+                    <span className="text-yellow-500 font-bold">Domande random ad ogni gioco!</span>
                   </p>
                   
                   {/* REGOLE RAPIDE */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 max-w-2xl mx-auto">
                     <div className="p-6 bg-zinc-800/50 rounded-2xl border border-red-500/20">
-                      <div className="text-red-500 text-sm font-bold mb-2">⏱️ 15s Totali</div>
-                      <p className="text-zinc-500 text-xs">Il timer parte quando inizi</p>
+                      <div className="text-red-500 text-sm font-bold mb-2">🎲 Random</div>
+                      <p className="text-zinc-500 text-xs">Domande diverse ogni volta</p>
                     </div>
                     <div className="p-6 bg-zinc-800/50 rounded-2xl border border-yellow-500/20">
                       <div className="text-yellow-500 text-sm font-bold mb-2">⚡ Bonus Velocità</div>
