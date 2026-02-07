@@ -92,7 +92,7 @@ export default function HeroSection() {
         >
           <div className="inline-flex items-center justify-center w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-3xl shadow-2xl shadow-yellow-500/30 mb-8 p-6 md:p-8">
             <img 
-              src="/data/images/ferrari.svg" 
+              src="/data/images/formula-rossa-logo.png" 
               alt="Logo Ferrari" 
               className="w-full h-full object-contain drop-shadow-md"
               onError={(e) => {
