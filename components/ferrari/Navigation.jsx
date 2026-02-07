@@ -17,8 +17,12 @@ export default function Navigation() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-3 group">
-              <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(220,0,0,0.4)] group-hover:scale-110 transition-transform">
-                <span className="text-white font-black text-xl italic">FR</span>
+              <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(220,0,0,0.4)] group-hover:scale-110 transition-transform overflow-hidden p-1">
+                <img 
+                  src="/data/images/formula-rossa-logo.png" 
+                  alt="Formula Rossa" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <span className="text-xl font-black tracking-tighter text-white uppercase italic group-hover:text-red-500 transition-colors">
                 Formula <span className="text-red-600">Rossa</span>
