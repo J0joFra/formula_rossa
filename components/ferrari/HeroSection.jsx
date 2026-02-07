@@ -83,35 +83,37 @@ export default function HeroSection() {
       </div>
 
       <div className="relative z-10 text-center px-4 max-w-7xl mx-auto flex flex-col items-center w-full">
-        {/* Logo Ferrari e Titolo */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
-          className="mb-16"
-        >
-          <div className="inline-flex items-center justify-center w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-3xl shadow-2xl shadow-yellow-500/30 mb-8 p-6 md:p-8">
-            <img 
-              src="/data/images/formula-rossa-logo.png" 
-              alt="Logo Ferrari" 
-              className="w-full h-full object-contain drop-shadow-md"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.parentElement.innerHTML = '<span class="text-6xl font-black text-black">SF</span>';
-              }}
-            />
-          </div>
-          
-          <h1 className="text-4xl md:text-9xl font-black mb-6 tracking-tighter leading-tight uppercase">
-            <span className="bg-gradient-to-r from-white via-red-600 to-yellow-500 bg-clip-text text-transparent">
-              SCUDERIA<br />FERRARI
-            </span>
-          </h1>
-          
-          <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto font-light italic">
-            "Datemi una macchina che sia veloce in rettilineo e che stia in strada in curva."
-          </p>
-        </motion.div>
+      {/* Logo Ferrari e Titolo */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8 }}
+        className="mb-16"
+      >
+        {/* Sostituito p-6 md:p-8 con p-2 per dare spazio al logo */}
+        <div className="inline-flex items-center justify-center w-32 h-32 md:w-40 md:h-40 bg-[#FFD700] rounded-3xl shadow-2xl shadow-yellow-500/30 mb-8 p-2 overflow-hidden">
+          <img 
+            src="/data/images/formula-rossa-logo.png" 
+            alt="Logo Ferrari" 
+            /* w-full h-full e object-contain lo faranno aderire ai bordi */
+            className="w-full h-full object-contain drop-shadow-2xl scale-110" 
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.parentElement.innerHTML = '<span class="text-6xl font-black text-black">SF</span>';
+            }}
+          />
+        </div>
+        
+        <h1 className="text-4xl md:text-9xl font-black mb-6 tracking-tighter leading-tight uppercase">
+          <span className="bg-gradient-to-r from-white via-red-600 to-yellow-500 bg-clip-text text-transparent">
+            SCUDERIA<br />FERRARI
+          </span>
+        </h1>
+        
+        <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto font-light italic">
+          "Datemi una macchina che sia veloce in rettilineo e che stia in strada in curva."
+        </p>
+      </motion.div>
 
         {/* Container principale per Stats Grid con immagini laterali */}
         <div className="relative w-full max-w-6xl mb-32">
