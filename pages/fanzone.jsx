@@ -117,12 +117,12 @@ export default function FanZonePage() {
                 link="/games/pitstop"
             />
             <GameCard 
-                title="The Oracle" 
-                reward="200" 
-                icon={Trophy} 
-                color="bg-zinc-800" 
-                desc="Predici il podio del prossimo GP e scala la classifica mondiale dei tifosi." 
-                link="/predictions"
+                title="Circuit Rush" 
+                reward="150" 
+                icon={Zap} 
+                color="bg-blue-600" 
+                desc="Sfreccia in pista e schiva i detriti. Più corri veloce, più SFT guadagni." 
+                link="/games/circuit-rush"
             />
             <GameCard 
                 title="F1 Trivia" 
