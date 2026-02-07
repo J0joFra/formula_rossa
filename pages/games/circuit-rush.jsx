@@ -14,14 +14,14 @@ export default function CircuitRush() {
   const [score, setScore] = useState(0);
   const [carLane, setCarLane] = useState(1); 
   const [obstacles, setObstacles] = useState([]);
-  const [gameSpeed, setGameSpeed] = useState(5);
+    const [gameSpeed, setGameSpeed] = useState(2.5);
   const [lastDodge, setLastDodge] = useState(false);
   const [earnedTokens, setEarnedTokens] = useState(0); // Token vinti in questa partita
 
   const gameLoopRef = useRef();
   const lastSpawnRef = useRef(0);
   const scoreRef = useRef(0); 
-  const speedRef = useRef(5);
+  const speedRef = useRef(2.5);
 
   // --- LOGICA TOKEN ---
   const saveTokens = (points) => {
@@ -50,10 +50,10 @@ export default function CircuitRush() {
 
   const startGame = () => {
     scoreRef.current = 0;
-    speedRef.current = 5;
+    speedRef.current = 2.5;
     setScore(0);
     setEarnedTokens(0);
-    setGameSpeed(5);
+    setGameSpeed(2.5);
     setObstacles([]);
     setCarLane(1);
     setGameState('playing');
