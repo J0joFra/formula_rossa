@@ -682,5 +682,14 @@
    "locality": "Miami",
    "country": "USA",
    "Wikipedia_url": "https://en.wikipedia.org/wiki/Miami_International_Autodrome"
+ },
+ {
+  "circuit_id":"madrid",
+  "name": "Spanish Grand Prix",
+  "lat": 40.4699,
+  "long": -3.6169,
+  "locality": "Madrid",
+  "country": "Spain",
+  "Wikipedia_url": "https://en.wikipedia.org/wiki/Spanish_Grand_Prix"
  }
 ]
