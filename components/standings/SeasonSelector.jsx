@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { getAvailableSeasons } from '../../lib/services/standingsService';
 
 export default function SeasonSelector({ season, onSeasonChange }) {
-  const [seasons, setSeasons] = useState([2025, 2024, 2023]);
+  const [seasons, setSeasons] = useState([2026, 2025, 2024, 2023]);
   const [loading, setLoading] = useState(false);
   
   useEffect(() => {
