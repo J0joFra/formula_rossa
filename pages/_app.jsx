@@ -8,7 +8,8 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
     <SessionProvider session={session}>
       <Head>
         <title>Formula Rossa</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="google-adsense-account" content="ca-pub-8762257220044998"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
         
         {/* Font Inter */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
