@@ -10,6 +10,11 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
         <title>Formula Rossa</title>
         <meta name="google-adsense-account" content="ca-pub-8762257220044998"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <meta property="og:title" content="Formula Rossa | Ferrari F1 Data Platform" />
+        <meta property="og:description" content="Esplora la storia e le statistiche della Scuderia Ferrari attraverso i dati." />
+        <meta property="og:image" content="https://formula-rossa.it/og-image.jpg" />
+        <meta property="og:url" content="https://formula-rossa.it" />
+        <meta name="twitter:card" content="summary_large_image" />
         
         {/* Font Inter */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
