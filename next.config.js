@@ -1,10 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+    reactStrictMode: true,
+  i18n: {
+    locales: ['it', 'en'], 
+    defaultLocale: 'it',  
+  },
   images: {
     domains: ['images.unsplash.com'],
   },
-  // NIENTE 'output: export', NIENTE 'trailingSlash'
 }
 
 module.exports = nextConfig
+
+

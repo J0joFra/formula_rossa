@@ -26,8 +26,8 @@ export default function Footer() {
               {[
                 { icon: Instagram, href: 'https://instagram.com/scuderiaferrari' },
                 { icon: Twitter, href: 'https://twitter.com/scuderiaferrari' },
-                { icon: Youtube, href: 'https://youtube.com/scuderiaferrari' },
-                { icon: Linkedin, href: 'https://www.linkedin.com/in/joaquim-francalanci/' },
+                { icon: Youtube, href: 'https://www.youtube.com/@jofrancalanci' },
+                { icon: Linkedin, href: 'https://www.linkedin.com/company/formula-rossa/' },
                 { icon: Facebook, href: 'https://facebook.com/scuderiaferrari' },
               ].map((social, i) => (
                 <a
