@@ -1,9 +1,8 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { 
   Instagram, Twitter, Youtube, Linkedin, Heart, Mail, MessageCircle, 
   Trophy, Gauge, Users, ChevronRight, Award, ExternalLink,
-  Sparkles, Zap, Shield, Terminal, Code, Database, Activity
+  Sparkles, Zap, Shield, Terminal, Code, Database, Activity, Info
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -13,12 +12,12 @@ export default function Footer() {
 
   return (
     <footer className="relative bg-gradient-to-b from-black via-zinc-900 to-black border-t border-red-600/20 overflow-hidden">
-      {/* Sfondo dinamico - solo CSS, niente JS problematico */}
+      {/* Sfondo dinamico */}
       <div className="absolute inset-0">
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-red-600/5 rounded-full blur-3xl"></div>
         <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-500/5 rounded-full blur-3xl"></div>
         
-        {/* Griglia telemetrica statica */}
+        {/* Griglia telemetrica */}
         <div className="absolute inset-0 opacity-5" style={{
           backgroundImage: 'linear-gradient(to right, #DC0000 1px, transparent 1px), linear-gradient(to bottom, #DC0000 1px, transparent 1px)',
           backgroundSize: '40px 40px'
@@ -26,12 +25,12 @@ export default function Footer() {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-16">
-        {/* Main Footer Content - Grid semplice e robusta */}
+        {/* Main Footer Content */}
         <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 mb-16">
           
-          {/* Brand Section */}
+          {/* Brand Section - 4 colonne */}
           <div className="lg:col-span-4 space-y-6">
-            {/* Logo semplice ma elegante */}
+            {/* Logo */}
             <div className="flex items-center gap-4">
               <div className="relative w-16 h-16">
                 <div className="absolute inset-0 rounded-2xl border border-dashed border-red-600/30" />
@@ -58,7 +57,7 @@ export default function Footer() {
               </div>
             </div>
 
-            {/* Description box */}
+            {/* Description */}
             <div className="bg-zinc-900/50 backdrop-blur-sm border border-white/5 rounded-xl p-6">
               <p className="text-gray-400 text-sm leading-relaxed">
                 Piattaforma indipendente di data intelligence dedicata all'analisi 
@@ -71,7 +70,7 @@ export default function Footer() {
               </div>
             </div>
 
-            {/* Social links */}
+            {/* Social */}
             <div className="flex gap-3 pt-2">
               {[
                 { icon: Linkedin, href: 'https://www.linkedin.com/company/formula-rossa/', label: 'LinkedIn' },
@@ -96,7 +95,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Analytics Links */}
+          {/* ANALYTICS - 3 colonne */}
           <div className="lg:col-span-3">
             <div className="bg-zinc-900/30 border border-white/5 rounded-xl p-6 h-full">
               <h4 className="text-sm font-black uppercase tracking-wider text-red-600 mb-6 flex items-center gap-2">
@@ -127,7 +126,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Community Links */}
+          {/* COMMUNITY - 3 colonne (solo INFO) */}
           <div className="lg:col-span-3">
             <div className="bg-zinc-900/30 border border-white/5 rounded-xl p-6 h-full">
               <h4 className="text-sm font-black uppercase tracking-wider text-red-600 mb-6 flex items-center gap-2">
@@ -160,21 +159,27 @@ export default function Footer() {
                 ))}
               </ul>
 
-              <h4 className="text-sm font-black uppercase tracking-wider text-gray-600 mb-4 flex items-center gap-2">
-                <Shield className="w-4 h-4" />
+              {/* Sezione INFO con lo stesso design delle voci sopra */}
+              <h4 className="text-sm font-black uppercase tracking-wider text-gray-500 mb-4 flex items-center gap-2 border-t border-white/5 pt-6">
+                <Info className="w-4 h-4" />
                 <span>INFO</span>
               </h4>
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {[
-                  { name: 'Privacy', href: '/legal/privacy' },
-                  { name: 'Cookies', href: '/legal/cookies' },
-                  { name: 'Terms', href: '/legal/terms' },
+                  { name: 'Privacy', href: '/legal/privacy', icon: Shield },
+                  { name: 'Cookies', href: '/legal/cookies', icon: Shield },
+                  { name: 'Terms', href: '/legal/terms', icon: Shield },
                 ].map((link, j) => (
                   <li key={j}>
                     <Link href={link.href} 
-                      className="text-xs text-gray-600 hover:text-red-600 transition-colors"
+                      className="group flex items-center justify-between text-sm text-gray-400 
+                        hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-600/5"
                     >
-                      {link.name}
+                      <div className="flex items-center gap-3">
+                        <link.icon className="w-4 h-4 text-gray-600 group-hover:text-red-600" />
+                        <span>{link.name}</span>
+                      </div>
+                      <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </Link>
                   </li>
                 ))}
@@ -182,30 +187,41 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Contact */}
+          {/* CONTACT - 2 colonne (ora più largo e non schiacciato) */}
           <div className="lg:col-span-2">
-            <div className="bg-gradient-to-br from-red-600/10 to-transparent border border-red-600/20 rounded-xl p-6 h-full">
-              <h4 className="text-sm font-black uppercase tracking-wider text-red-600 mb-4">
-                CONTACT
+            <div className="bg-gradient-to-br from-red-600/10 to-transparent border border-red-600/20 rounded-xl p-6 h-full flex flex-col">
+              <h4 className="text-sm font-black uppercase tracking-wider text-red-600 mb-6 flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                <span>CONTACT</span>
               </h4>
-              <a href="mailto:info@formula-rossa.it" 
-                className="block group"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-red-600/20 rounded-xl flex items-center justify-center 
-                    group-hover:bg-red-600 transition-colors">
-                    <Mail className="w-5 h-5 text-red-600 group-hover:text-white transition-colors" />
+              
+              {/* Email - più spaziosa */}
+              <div className="flex-1 flex flex-col">
+                <a href="mailto:info@formula-rossa.it" 
+                  className="group block bg-black/30 rounded-xl p-5 border border-red-600/10 
+                    hover:border-red-600/30 transition-all duration-300"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-red-600/20 rounded-xl flex items-center justify-center 
+                      group-hover:bg-red-600 transition-colors duration-300">
+                      <Mail className="w-6 h-6 text-red-600 group-hover:text-white transition-colors" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-1">Invia un messaggio</p>
+                      <p className="text-base text-white group-hover:text-red-600 transition-colors font-mono break-all">
+                        info@formula-rossa.it
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Email</p>
-                    <p className="text-sm text-white group-hover:text-red-600 transition-colors">
-                      info@formula-rossa.it
-                    </p>
-                  </div>
+                </a>
+
+                {/* Tempo di risposta - più integrato */}
+                <div className="mt-4 text-center">
+                  <span className="inline-flex items-center gap-2 text-xs text-gray-600 bg-black/20 px-4 py-2 rounded-full">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    Risposta garantita entro 24h
+                  </span>
                 </div>
-              </a>
-              <div className="text-xs text-gray-600 text-center border-t border-red-600/20 pt-4">
-                Risposta entro 24h
               </div>
             </div>
           </div>
@@ -241,7 +257,7 @@ export default function Footer() {
             <span>All rights reserved</span>
           </div>
 
-          {/* Mini grafico statico */}
+          {/* Mini grafico */}
           <div className="flex gap-1">
             {[1,2,3,4,5].map((i) => (
               <div
