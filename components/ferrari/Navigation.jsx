@@ -25,7 +25,7 @@ export default function Navigation() {
                 />
               </div>
               <span className="text-xl font-black tracking-tighter text-white uppercase italic group-hover:text-red-500 transition-colors">
-                Formula Rossa <br /><span className="text-red-600">Statistiche e Analisi Dati Ferrari F1 </span>
+                Formula <span className="text-red-600">Rossa</span>
               </span>
             </Link>
           </div>
@@ -67,7 +67,6 @@ export default function Navigation() {
 
           {/* Burger Button (Mobile) */}
           <div className="md:hidden flex items-center gap-4">
-             {/* Mostra avatar piccolo anche se il menu è chiuso su mobile se loggato */}
             {session && (
                 <img src={session.user.image} className="w-8 h-8 rounded-full border border-red-600" alt="user" />
             )}
