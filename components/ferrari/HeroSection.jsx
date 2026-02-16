@@ -95,45 +95,218 @@ export default function HeroSection() {
       </div>
 
       <div className="relative z-10 text-center px-4 max-w-7xl mx-auto flex flex-col items-center w-full">
-        {/* Logo Ferrari e Titolo */}
+        {/* NUOVO HEADER DINAMICO */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mb-16"
+          className="mb-20 w-full"
         >
-          <div className="inline-flex items-center justify-center w-32 h-32 md:w-40 md:h-40 bg-[#FFD700] rounded-3xl shadow-2xl shadow-yellow-500/30 mb-8 p-2 overflow-hidden">
-            <img 
-              src="/data/images/formula-rossa-logo.png" 
-              alt="Logo Ferrari" 
-              className="w-full h-full object-contain drop-shadow-2xl scale-110" 
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.parentElement.innerHTML = '<span class="text-6xl font-black text-black">SF</span>';
-              }}
-            />
-          </div>
-          
-          <div className="relative inline-block">
-            <h1 className="text-6xl md:text-[120px] font-black leading-none uppercase tracking-tighter text-white">
-              Formula<span className="text-red-600">Rossa</span>
-            </h1>
-            <div className="flex items-center gap-4 mt-2">
-              <div className="h-[2px] w-12 bg-red-600"></div>
-              <h2 className="text-sm md:text-xl font-bold uppercase tracking-widest text-gray-400">
-                Data Intelligence & <span className="text-white">F1 Statistics</span>
-              </h2>
+          {/* Badge in alto con effetto corsa */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="inline-flex items-center gap-3 bg-red-600/10 backdrop-blur-sm border border-red-600/20 rounded-full px-6 py-2 mb-8"
+          >
+            <div className="relative">
+              <div className="w-2 h-2 rounded-full bg-red-600 animate-ping absolute"></div>
+              <div className="w-2 h-2 rounded-full bg-red-600 relative"></div>
+            </div>
+            <span className="text-xs font-bold uppercase tracking-[0.3em] text-red-600">
+              LIVE TIMING • SEASON {new Date().getFullYear()}
+            </span>
+            <div className="flex items-center gap-1 ml-2">
+              <div className="w-1 h-4 bg-red-600/40 rounded-full"></div>
+              <div className="w-1 h-6 bg-red-600 rounded-full"></div>
+              <div className="w-1 h-4 bg-red-600/40 rounded-full"></div>
+            </div>
+          </motion.div>
+
+          {/* Logo e Titolo Principale con Animazione 3D */}
+          <div className="relative flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12">
+            {/* Logo Animato */}
+            <motion.div
+              initial={{ rotateY: 90, opacity: 0 }}
+              animate={{ rotateY: 0, opacity: 1 }}
+              transition={{ duration: 1, delay: 0.2 }}
+              className="relative group"
+              style={{ perspective: 1000 }}
+            >
+              <div className="relative w-28 h-28 md:w-36 md:h-36">
+                {/* Anello esterno rotante */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 rounded-full border-2 border-dashed border-red-600/30"
+                />
+                
+                {/* Logo container */}
+                <div className="absolute inset-2 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-2xl shadow-2xl shadow-yellow-500/30 overflow-hidden transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                  <div className="absolute inset-0 bg-black/10"></div>
+                  <img 
+                    src="/data/images/formula-rossa-logo.png" 
+                    alt="Formula Rossa" 
+                    className="w-full h-full object-contain p-2"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.parentElement.innerHTML = '<span class="text-4xl font-black text-black">SF</span>';
+                    }}
+                  />
+                </div>
+                
+                {/* Riflessi luminosi */}
+                <div className="absolute -inset-4 bg-gradient-to-r from-transparent via-red-600/20 to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 animate-pulse" />
+              </div>
+            </motion.div>
+
+            {/* Titolo con Effetto Pista */}
+            <div className="relative text-center md:text-left">
+              <motion.div
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.8 }}
+              >
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-none">
+                  <span className="text-white relative inline-block">
+                    FORMULA
+                    {/* Linea di velocità sotto */}
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: "100%" }}
+                      transition={{ delay: 1.2, duration: 0.8 }}
+                      className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-red-600 to-transparent"
+                    />
+                  </span>
+                  <span className="text-red-600 relative inline-block ml-2 md:ml-4">
+                    ROSSA
+                    {/* Effetto scia */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: [0, 1, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      className="absolute -right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-gradient-to-l from-red-600/20 to-transparent blur-xl"
+                    />
+                  </span>
+                </h1>
+              </motion.div>
+
+              {/* Sottotitolo con effetto telemetria */}
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.8, duration: 0.6 }}
+                className="mt-4 space-y-2"
+              >
+                <div className="flex items-center justify-center md:justify-start gap-3">
+                  <div className="h-12 w-1 bg-gradient-to-b from-red-600 via-red-400 to-transparent rounded-full" />
+                  
+                  <div className="text-left">
+                    <div className="overflow-hidden">
+                      <motion.div
+                        initial={{ y: 50 }}
+                        animate={{ y: 0 }}
+                        transition={{ delay: 1, duration: 0.5, staggerChildren: 0.1 }}
+                        className="text-2xl md:text-3xl font-black"
+                      >
+                        {"DATA INTELLIGENCE".split("").map((char, i) => (
+                          <motion.span
+                            key={i}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 1 + i * 0.05 }}
+                            className={`inline-block ${char === " " ? "w-2" : ""} text-white`}
+                          >
+                            {char}
+                          </motion.span>
+                        ))}
+                      </motion.div>
+                    </div>
+                    
+                    {/* Seconda riga con effetto fade */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 1.8 }}
+                      className="flex items-center gap-2 mt-1"
+                    >
+                      <span className="text-xs font-mono text-red-600/80">&lt;/&gt;</span>
+                      <span className="text-sm md:text-base text-gray-400 font-mono tracking-wider">
+                        F1 STATISTICS ENGINE
+                      </span>
+                      <span className="text-xs font-mono text-red-600/80">v2.0</span>
+                    </motion.div>
+                  </div>
+                </div>
+
+                {/* Barra dei tempi dinamica */}
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: "100%" }}
+                  transition={{ delay: 2, duration: 1 }}
+                  className="h-px bg-gradient-to-r from-red-600 via-yellow-500 to-transparent max-w-md mx-auto md:mx-0"
+                />
+              </motion.div>
             </div>
           </div>
-          
-          <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto font-light italic">
-            "Datemi una macchina che sia veloce in rettilineo e che stia in strada in curva."
-          </p>
+
+          {/* Citazione con effetto pit board */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2.2, duration: 0.8 }}
+            className="relative max-w-3xl mx-auto mt-12"
+          >
+            {/* Sfondo pit board */}
+            <div className="absolute inset-0 bg-gradient-to-r from-red-600/5 via-transparent to-red-600/5 rounded-3xl blur-3xl" />
+            
+            <div className="relative bg-zinc-900/50 backdrop-blur-sm border border-white/5 rounded-2xl p-6 overflow-hidden">
+              {/* Griglia di fondo stile telemetria */}
+              <div className="absolute inset-0 opacity-5">
+                <div className="w-full h-full" style={{
+                  backgroundImage: 'linear-gradient(to right, #DC0000 1px, transparent 1px), linear-gradient(to bottom, #DC0000 1px, transparent 1px)',
+                  backgroundSize: '20px 20px'
+                }} />
+              </div>
+              
+              {/* Contenuto citazione */}
+              <div className="relative flex items-start gap-4">
+                <div className="text-4xl font-serif text-red-600/40 leading-none">"</div>
+                <div className="flex-1">
+                  <p className="text-lg md:text-xl text-gray-300 font-light italic">
+                    Datemi una macchina che sia veloce in rettilineo e che stia in strada in curva.
+                  </p>
+                  <div className="flex items-center justify-end gap-2 mt-2">
+                    <span className="text-xs text-red-600/60">—</span>
+                    <span className="text-xs font-mono text-red-600/80 uppercase tracking-wider">
+                      Enzo Ferrari • Il Drake
+                    </span>
+                    {/* Mini semaforo */}
+                    <div className="flex gap-1 ml-2">
+                      <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+                      <div className="w-2 h-2 rounded-full bg-yellow-600/30" />
+                      <div className="w-2 h-2 rounded-full bg-green-600/30" />
+                    </div>
+                  </div>
+                </div>
+                <div className="text-4xl font-serif text-red-600/40 leading-none self-end">"</div>
+              </div>
+
+              {/* Barra di avanzamento stile giro */}
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: 3, duration: 2, repeat: Infinity, repeatType: "reverse" }}
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 via-yellow-500 to-red-600 origin-left"
+                style={{ transformOrigin: 'left' }}
+              />
+            </div>
+          </motion.div>
         </motion.div>
 
         {/* Container principale per Stats Grid con immagini laterali */}
         <div className="relative w-full max-w-6xl mb-32">
-          {/* COLONNA SINISTRA - Immagini che scorrono in basso */}
+          {/* COLONNA SINISTRA*/}
           <div className="hidden lg:block absolute -left-48 top-1/2 -translate-y-1/2 w-48 h-[120%] overflow-hidden z-0">
             <motion.div
               className="flex flex-col gap-8"
@@ -163,7 +336,7 @@ export default function HeroSection() {
             <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/80 to-transparent z-10" />
           </div>
 
-          {/* COLONNA DESTRA - Immagini che scorrono in alto */}
+          {/* COLONNA DESTRA */}
           <div className="hidden lg:block absolute -right-48 top-1/2 -translate-y-1/2 w-48 h-[120%] overflow-hidden z-0">
             <motion.div
               className="flex flex-col gap-8"
