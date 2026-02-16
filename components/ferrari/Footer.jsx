@@ -176,8 +176,7 @@ export default function Footer() {
                       <Mail className="w-6 h-6 text-red-600 group-hover:text-white transition-colors" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-xs text-gray-500 mb-1">Invia un messaggio</p>
-                      <p className="text-base text-white group-hover:text-red-600 transition-colors font-mono break-all">
+                      <p className="text-base text-white group-hover:text-red-350 transition-colors font-mono break-all">
                         info@formula-rossa.it
                       </p>
                     </div>
@@ -187,7 +186,7 @@ export default function Footer() {
                 {/* Tempo di risposta - più integrato */}
                 <div className="mt-4 text-center">
                   <span className="inline-flex items-center gap-2 text-xs text-gray-600 bg-black/20 px-4 py-2 rounded-full">
-                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <span className="w-2 h-2 bg-green-200 rounded-full animate-pulse"></span>
                     Risposta garantita entro 24h
                   </span>
                 </div>
