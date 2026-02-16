@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Instagram, Twitter, Youtube, Linkedin, Heart, Mail, Whatsapp, ExternalLink } from 'lucide-react';
+import { Instagram, Twitter, Youtube, Linkedin, Heart, Mail, MessageCircle, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Footer() {
@@ -31,7 +31,7 @@ export default function Footer() {
                 { icon: Linkedin, href: 'https://www.linkedin.com/company/formula-rossa/', label: 'LinkedIn' },
                 { icon: Youtube, href: 'https://www.youtube.com/@jofrancalanci', label: 'YouTube' },
                 { icon: Instagram, href: 'https://www.instagram.com/@jofrancalanci', label: 'Instagram' }, 
-                { icon: Whatsapp, href: 'https://whatsapp.com/channel/0029Vb7EagL6WaKvnD5Slm30', label: 'WhatsApp'},
+                { icon: MessageCircle, href: 'https://whatsapp.com/channel/0029Vb7EagL6WaKvnD5Slm30', label: 'WhatsApp'},
                 { icon: Twitter, href: 'https://www.x.com/@jofrancalanci', label: 'Twitter' },
               ].map((social, i) => (
                 <a
