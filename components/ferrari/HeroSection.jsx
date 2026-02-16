@@ -2,6 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown, Trophy, Flag, Star, Timer, Zap, Gauge, Award, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+
+<Image
+  src={img}
+  alt={`Ferrari ${index + 1}`}
+  width={192}
+  height={256}
+  className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+  loading="lazy"
+  quality={85}
+/>
 
 export default function HeroSection() {
   const [dynamicStats, setDynamicStats] = useState({
@@ -95,7 +106,6 @@ export default function HeroSection() {
           <img 
             src="/data/images/formula-rossa-logo.png" 
             alt="Logo Ferrari" 
-            /* w-full h-full e object-contain lo faranno aderire ai bordi */
             className="w-full h-full object-contain drop-shadow-2xl scale-110" 
             onError={(e) => {
               e.target.style.display = 'none';
@@ -126,14 +136,13 @@ export default function HeroSection() {
           {/* COLONNA SINISTRA - Immagini che scorrono in basso */}
           <div className="hidden lg:block absolute -left-48 top-1/2 -translate-y-1/2 w-48 h-[120%] overflow-hidden z-0">
             <motion.div
-              className="flex flex-col gap-8"
-              animate={{ y: [0, -1000] }}
-              transition={{ 
-                duration: 40,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-            >
+            animate={{ y: [0, -1000] }}
+            transition={{ 
+              duration: 40,
+              repeat: Infinity,
+              ease: [0.25, 0.1, 0.25, 1]
+            }}
+          >
               {/* Prima serie */}
               {carouselImages.map((img, index) => (
                 <div key={`left-${index}`} className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden group">
@@ -166,7 +175,7 @@ export default function HeroSection() {
           <div className="hidden lg:block absolute -right-48 top-1/2 -translate-y-1/2 w-48 h-[120%] overflow-hidden z-0">
             <motion.div
               className="flex flex-col gap-8"
-              animate={{ y: [-1000, 0] }} // Scorre in direzione opposta
+              animate={{ y: [-1000, 0] }}
               transition={{ 
                 duration: 40,
                 repeat: Infinity,
@@ -202,7 +211,7 @@ export default function HeroSection() {
           {/* Stats Grid Centrale - 3x3 Layout */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl mx-auto relative z-10">
             {statsConfig.map((stat, index) => (
-              <Link href={`/stats/${stat.id}`} key={stat.id}>
+              <Link href={`/stats/${stat.id}`} aria-label={`Visualizza statistiche dettagliate per ${stat.label}`}>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
