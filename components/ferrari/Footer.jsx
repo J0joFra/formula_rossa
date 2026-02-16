@@ -171,12 +171,12 @@ export default function Footer() {
                     hover:border-red-600/30 transition-all duration-300"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-red-600/20 rounded-xl flex items-center justify-center 
-                      group-hover:bg-red-600 transition-colors duration-300">
+                    <div className="w-12 h-12 bg-red-400/20 rounded-xl flex items-center justify-center 
+                      group-hover:bg-red-300 transition-colors duration-300">
                       <Mail className="w-6 h-6 text-red-600 group-hover:text-white transition-colors" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-base text-white group-hover:text-red-350 transition-colors font-mono break-all">
+                      <p className="text-base text-white group-hover:text-red-150 transition-colors font-mono break-all">
                         info@formula-rossa.it
                       </p>
                     </div>
@@ -185,8 +185,8 @@ export default function Footer() {
 
                 {/* Tempo di risposta - più integrato */}
                 <div className="mt-4 text-center">
-                  <span className="inline-flex items-center gap-2 text-xs text-gray-600 bg-black/20 px-4 py-2 rounded-full">
-                    <span className="w-2 h-2 bg-green-200 rounded-full animate-pulse"></span>
+                  <span className="inline-flex items-center gap-2 text-xs text-gray-200 bg-black/20 px-4 py-2 rounded-full">
+                    <span className="w-2 h-2 bg-green-150 rounded-full animate-pulse"></span>
                     Risposta garantita entro 24h
                   </span>
                 </div>
