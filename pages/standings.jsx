@@ -129,7 +129,7 @@ export default function StandingsPage() {
       <Navigation activeSection="stats" />
       <main className="max-w-7xl mx-auto px-4 pt-32 pb-20">
         <div className="flex justify-between items-end mb-12 border-b border-red-600/30 pb-6">
-          <h1 className="text-5xl font-black italic uppercase tracking-tighter">Standings <span className="text-red-600">{selectedSeason}</span></h1>
+          <h2 className="text-5xl font-black italic uppercase tracking-tighter">Standings <span className="text-red-600">{selectedSeason}</span></h2>
           <select value={selectedSeason} onChange={(e) => setSelectedSeason(Number(e.target.value))} className="bg-zinc-900 border-l-4 border-red-600 px-4 py-2 font-bold outline-none text-white cursor-pointer">
             {availableSeasons.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
@@ -138,7 +138,7 @@ export default function StandingsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
           {/* Driver Table */}
           <div className="bg-zinc-900/40 border border-zinc-800">
-            <h2 className="p-4 font-black uppercase text-sm border-b border-zinc-800 text-red-600">Drivers</h2>
+            <h3 className="p-4 font-black uppercase text-sm border-b border-zinc-800 text-red-600">Drivers</h3>
             <table className="w-full text-left text-sm">
               <tbody>
                 {visibleDrivers.map((s) => (
@@ -158,7 +158,7 @@ export default function StandingsPage() {
 
           {/* Constructor Table */}
           <div className="bg-zinc-900/40 border border-zinc-800">
-            <h2 className="p-4 font-black uppercase text-sm border-b border-zinc-800 text-red-600">Constructors</h2>
+            <h3 className="p-4 font-black uppercase text-sm border-b border-zinc-800 text-red-600">Constructors</h3>
             <table className="w-full text-left text-sm">
               <tbody>
                 {visibleConstructors.map((s) => (
@@ -177,7 +177,7 @@ export default function StandingsPage() {
         </div>
 
         {/* Calendar Section */}
-        <h2 className="mb-8 font-black uppercase tracking-widest text-sm text-red-600">Race Calendar</h2>
+        <h3 className="mb-8 font-black uppercase tracking-widest text-sm text-red-600">Race Calendar</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
           {calendar.map((race) => {
             const countryCode = circuitToCountry[race.circuitId];

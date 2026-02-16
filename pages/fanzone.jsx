@@ -70,9 +70,9 @@ export default function FanZonePage() {
               </motion.div>
             ) : (
               <div>
-                <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-none mb-4">
+                <h2 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-none mb-4">
                   Fan <span className="text-zinc-800 font-outline-2">Gaming</span>
-                </h1>
+                </h2>
                 <p className="text-red-500 font-black uppercase text-[10px] tracking-widest bg-red-600/10 inline-block px-3 py-1 rounded">
                   Effettua il login per salvare i progressi
                 </p>
