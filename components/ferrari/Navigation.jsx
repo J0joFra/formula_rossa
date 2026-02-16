@@ -2,7 +2,7 @@
 import { useState } from 'react'; 
 import Link from 'next/link';
 import { useSession, signIn, signOut } from "next-auth/react";
-import { User, LogOut, LayoutDashboard, Trophy, Gamepad2, BarChart3, Home, Zap as HomeIcon } from 'lucide-react';
+import { BarChart3, Gamepad2, Home, LayoutDashboard, LogOut, Gauge, Trophy, User, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navigation() {
