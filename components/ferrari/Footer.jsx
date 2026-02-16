@@ -155,44 +155,6 @@ export default function Footer() {
               </ul>
             </div>
           </div>
-
-          {/* CONTACT */}
-          <div className="lg:col-span-2">
-            <div className="bg-gradient-to-br from-red-600/10 to-transparent border border-red-600/20 rounded-xl p-6 h-full flex flex-col">
-              <h4 className="text-sm font-black uppercase tracking-wider text-red-600 mb-6 flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                <span>CONTACT</span>
-              </h4>
-              
-              {/* Email */}
-              <div className="flex-1 flex flex-col">
-                <a href="mailto:info@formula-rossa.it" 
-                  className="group block bg-black/30 rounded-xl p-5 border border-red-600/10 
-                    hover:border-red-600/30 transition-all duration-300"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-red-400/20 rounded-xl flex items-center justify-center 
-                      group-hover:bg-red-300 transition-colors duration-300">
-                      <Mail className="w-6 h-6 text-red-600 group-hover:text-white transition-colors" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-base text-white group-hover:text-red-150 transition-colors font-mono break-all">
-                        info@formula-rossa.it
-                      </p>
-                    </div>
-                  </div>
-                </a>
-
-                {/* Tempo di risposta - più integrato */}
-                <div className="mt-4 text-center">
-                  <span className="inline-flex items-center gap-2 text-xs text-gray-200 bg-black/20 px-4 py-2 rounded-full">
-                    <span className="w-2 h-2 bg-green-150 rounded-full animate-pulse"></span>
-                    Risposta garantita entro 24h
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Disclaimer */}
