@@ -105,8 +105,8 @@ export default function HeroSection() {
         </div>
         
         <h1 className="text-4xl md:text-9xl font-black mb-6 tracking-tighter leading-tight uppercase">
-          <span className="bg-gradient-to-r from-white via-red-600 to-yellow-500 bg-clip-text text-transparent">
-            Formula Rossa <br /><span className="text-red-600">Statistiche e Analisi Dati Ferrari F1 </span>
+          <span className="bg-gradient-to-r from-white via-red-500 to-yellow-500 bg-clip-text text-transparent">
+            Formula Rossa <br /><span className="text-red-250">Statistiche & Analisi Dati Ferrari F1 </span>
           </span>
         </h1>
         
