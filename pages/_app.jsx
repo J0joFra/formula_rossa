@@ -7,7 +7,9 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   return (
     <SessionProvider session={session}>
       <Head>
-        <title>Formula Rossa</title>
+        <title>Formula Rossa: <br />
+          <h2>Statistiche e Analisi Dati Ferrari F1</h2>
+        </title>
         <meta name="google-adsense-account" content="ca-pub-8762257220044998"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <meta property="og:title" content="Formula Rossa | Ferrari F1 Data Platform" />

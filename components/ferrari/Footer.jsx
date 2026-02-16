@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Instagram, Twitter, Youtube, Linkedin, Heart, Mail, ExternalLink } from 'lucide-react';
+import { Instagram, Twitter, Youtube, Linkedin, Heart, Mail, Whatsapp, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Footer() {
@@ -30,8 +30,9 @@ export default function Footer() {
               {[
                 { icon: Linkedin, href: 'https://www.linkedin.com/company/formula-rossa/', label: 'LinkedIn' },
                 { icon: Youtube, href: 'https://www.youtube.com/@jofrancalanci', label: 'YouTube' },
-                { icon: Instagram, href: '#', label: 'Instagram' }, // Aggiungi il tuo link se lo hai
-                { icon: Twitter, href: '#', label: 'Twitter' },
+                { icon: Instagram, href: 'https://www.instagram.com/@jofrancalanci', label: 'Instagram' }, 
+                { icon: Whatsapp, href: 'https://whatsapp.com/channel/0029Vb7EagL6WaKvnD5Slm30', label: 'WhatsApp'},
+                { icon: Twitter, href: 'https://www.x.com/@jofrancalanci', label: 'Twitter' },
               ].map((social, i) => (
                 <a
                   key={i}
@@ -72,9 +73,9 @@ export default function Footer() {
             <h4 className="text-sm font-bold text-white uppercase tracking-widest mb-6">Community</h4>
             <ul className="space-y-3">
               {[
-                { name: 'Mini-Games', href: '/community/games' },
-                { name: 'Leaderboard', href: '/community/leaderboard' },
-                { name: 'Sfide Interattive', href: '/community/challenges' },
+                { name: 'Mini-Games', href: '/fanzone' },
+                { name: 'Leaderboard', href: '/standings' },
+                { name: 'Sfide Interattive', href: '/fanzone' },
                 { name: 'Contatti', href: '/contact' },
               ].map((link, j) => (
                 <li key={j}>
