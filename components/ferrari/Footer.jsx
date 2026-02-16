@@ -1,75 +1,131 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Instagram, Twitter, Youtube, Facebook, Linkedin, Heart } from 'lucide-react';
+import { Instagram, Twitter, Youtube, Linkedin, Heart, Mail, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="bg-black border-t border-gray-800 py-12 px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
-          {/* Brand */}
+        <div className="grid md:grid-cols-4 gap-12 mb-12">
+          
+          {/* Brand & Mission */}
           <div className="md:col-span-1">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-ferrari-yellow to-yellow-500 rounded-xl flex items-center justify-center">
-                <span className="text-xl font-black text-black">SF</span>
+              <div className="w-12 h-12 bg-ferrari-red rounded-xl flex items-center justify-center shadow-lg shadow-red-900/20">
+                <span className="text-xl font-black text-white">FR</span>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">Scuderia Ferrari</h3>
-                <p className="text-sm text-gray-400">Formula 1 Team</p>
+                <h3 className="text-xl font-bold text-white uppercase tracking-wider">Formula Rossa</h3>
+                <p className="text-xs text-ferrari-red font-bold uppercase tracking-widest">Data & Passion</p>
               </div>
             </div>
-            <p className="text-gray-400 text-sm mb-6">
-              La leggenda che ha scritto la storia della Formula 1. 
-              Passione, innovazione ed eccellenza dal 1947.
+            <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+              La piattaforma digitale dedicata all'analisi dei dati e alla storia della Scuderia Ferrari. 
+              Built by fans, powered by data.
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               {[
-                { icon: Instagram, href: 'https://instagram.com/scuderiaferrari' },
-                { icon: Twitter, href: 'https://twitter.com/scuderiaferrari' },
-                { icon: Youtube, href: 'https://www.youtube.com/@jofrancalanci' },
-                { icon: Linkedin, href: 'https://www.linkedin.com/company/formula-rossa/' },
-                { icon: Facebook, href: 'https://facebook.com/scuderiaferrari' },
+                { icon: Linkedin, href: 'https://www.linkedin.com/company/formula-rossa/', label: 'LinkedIn' },
+                { icon: Youtube, href: 'https://www.youtube.com/@jofrancalanci', label: 'YouTube' },
+                { icon: Instagram, href: '#', label: 'Instagram' }, // Aggiungi il tuo link se lo hai
+                { icon: Twitter, href: '#', label: 'Twitter' },
               ].map((social, i) => (
                 <a
                   key={i}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-900 hover:bg-ferrari-red rounded-lg flex items-center justify-center transition-colors"
+                  aria-label={social.label}
+                  className="w-10 h-10 bg-gray-900 hover:bg-ferrari-red rounded-lg flex items-center justify-center transition-all duration-300 group"
                 >
-                  <social.icon className="w-5 h-5 text-gray-300 hover:text-white" />
+                  <social.icon className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Links */}
-          {[
-            { title: 'Il Team', links: ['Piloti', 'Storia', 'Tecnologia', 'Trofei'] },
-            { title: 'Fan Zone', links: ['Shop', 'Eventi', 'Community', 'Contatti'] },
-            { title: 'Risorse', links: ['Media', 'Sponsor', 'Lavora con noi', 'Privacy'] },
-          ].map((column, i) => (
-            <div key={i}>
-              <h4 className="text-lg font-bold text-white mb-4">{column.title}</h4>
-              <ul className="space-y-2">
-                {column.links.map((link, j) => (
-                  <li key={j}>
-                    <a href="#" className="text-gray-400 hover:text-ferrari-red transition-colors">
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {/* Esplora Dati */}
+          <div>
+            <h4 className="text-sm font-bold text-white uppercase tracking-widest mb-6">Analisi & Dati</h4>
+            <ul className="space-y-3">
+              {[
+                { name: 'Grand Slams', href: '/stats/grand-slams' },
+                { name: 'Archivio Stagioni', href: '/stats/seasons' },
+                { name: 'Confronto Piloti', href: '/stats/drivers' },
+                { name: 'Performance Trends', href: '/stats/trends' },
+              ].map((link, j) => (
+                <li key={j}>
+                  <Link href={link.href} className="text-gray-400 hover:text-ferrari-red text-sm transition-colors flex items-center gap-2">
+                    <span className="w-1 h-1 bg-gray-700 rounded-full"></span>
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Community */}
+          <div>
+            <h4 className="text-sm font-bold text-white uppercase tracking-widest mb-6">Community</h4>
+            <ul className="space-y-3">
+              {[
+                { name: 'Mini-Games', href: '/community/games' },
+                { name: 'Leaderboard', href: '/community/leaderboard' },
+                { name: 'Sfide Interattive', href: '/community/challenges' },
+                { name: 'Contatti', href: '/contact' },
+              ].map((link, j) => (
+                <li key={j}>
+                  <Link href={link.href} className="text-gray-400 hover:text-ferrari-red text-sm transition-colors flex items-center gap-2">
+                    <span className="w-1 h-1 bg-gray-700 rounded-full"></span>
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legale & Info */}
+          <div>
+            <h4 className="text-sm font-bold text-white uppercase tracking-widest mb-6">Info & Legale</h4>
+            <ul className="space-y-3">
+              {[
+                { name: 'Chi Siamo', href: '/about' },
+                { name: 'Privacy Policy', href: '/legal/privacy' },
+                { name: 'Cookie Policy', href: '/legal/cookies' },
+                { name: 'Termini di Servizio', href: '/legal/terms' },
+              ].map((link, j) => (
+                <li key={j}>
+                  <Link href={link.href} className="text-gray-400 hover:text-white text-sm transition-colors">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+              <li className="pt-2">
+                <a href="mailto:info@formula-rossa.it" className="text-ferrari-red text-sm flex items-center gap-2 hover:underline">
+                  <Mail className="w-4 h-4" /> info@formula-rossa.it
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Disclaimer - Fondamentale per AdSense */}
+        <div className="py-6 border-t border-gray-900">
+          <p className="text-[10px] text-gray-500 leading-relaxed uppercase tracking-tighter text-center max-w-4xl mx-auto">
+            DISCLAIMER: Formula Rossa è un progetto indipendente creato da appassionati e non è affiliato, sponsorizzato o approvato da Ferrari S.p.A. o Scuderia Ferrari. 
+            Tutti i marchi, nomi di piloti e loghi citati appartengono ai rispettivi proprietari e sono utilizzati esclusivamente a scopo informativo e divulgativo.
+          </p>
         </div>
 
         {/* Copyright */}
-        <div className="pt-8 border-t border-gray-800 text-center">
-          <p className="text-gray-500 text-sm flex items-center justify-center gap-2">
-            Made with <Heart className="w-4 h-4 text-ferrari-red fill-ferrari-red" /> by Ferrari Fans
-            <span className="mx-2">•</span>
-            © 2024 Scuderia Ferrari. All rights reserved.
+        <div className="pt-8 border-t border-gray-900 text-center">
+          <p className="text-gray-500 text-xs flex items-center justify-center gap-2">
+            Made with <Heart className="w-3 h-3 text-ferrari-red fill-ferrari-red" /> by Joaquim Francalanci
+            <span className="mx-2 text-gray-800">•</span>
+            © {currentYear} Formula Rossa. Tutti i diritti riservati.
           </p>
         </div>
       </div>

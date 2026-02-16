@@ -13,7 +13,7 @@ export default function Document(props) {
                 <meta property="og:image" content="https://formula-rossa.it/data/images/formula-rossa-logo.png" />
                 <meta property="og:url" content="https://formula-rossa.it" />             
                 <meta property="og:type" content="website" />
-                <meta property="og:logo" content="public\favicon.ico" />
+                <meta property="og:logo" content="data/images/formula-rossa-logo.png" />
                 <meta name="twitter:card" content="summary_large_image" />
             </Head>
             <body>
