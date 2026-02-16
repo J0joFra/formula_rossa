@@ -126,40 +126,9 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* COMMUNITY - 3 colonne (solo INFO) */}
+          {/* COMMUNITY */}
           <div className="lg:col-span-3">
             <div className="bg-zinc-900/30 border border-white/5 rounded-xl p-6 h-full">
-              <h4 className="text-sm font-black uppercase tracking-wider text-red-600 mb-6 flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                <span>COMMUNITY</span>
-              </h4>
-              <ul className="space-y-3 mb-8">
-                {[
-                  { name: 'Fan Zone', href: '/fanzone', icon: Trophy, badge: 'NEW' },
-                  { name: 'Leaderboard', href: '/standings', icon: Award, badge: 'LIVE' },
-                  { name: 'Predictor', href: '/predictions', icon: Sparkles, badge: 'BETA' },
-                  { name: 'Mini-Games', href: '/games', icon: Zap },
-                ].map((link, j) => (
-                  <li key={j}>
-                    <Link href={link.href} 
-                      className="group flex items-center justify-between text-sm text-gray-400 
-                        hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-600/5"
-                    >
-                      <div className="flex items-center gap-3">
-                        <link.icon className="w-4 h-4 text-gray-600 group-hover:text-red-600" />
-                        <span>{link.name}</span>
-                      </div>
-                      {link.badge && (
-                        <span className="text-[10px] font-bold text-red-600 bg-red-600/10 px-2 py-1 rounded-full">
-                          {link.badge}
-                        </span>
-                      )}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-
-              {/* Sezione INFO con lo stesso design delle voci sopra */}
               <h4 className="text-sm font-black uppercase tracking-wider text-gray-500 mb-4 flex items-center gap-2 border-t border-white/5 pt-6">
                 <Info className="w-4 h-4" />
                 <span>INFO</span>
@@ -187,7 +156,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* CONTACT - 2 colonne (ora più largo e non schiacciato) */}
+          {/* CONTACT */}
           <div className="lg:col-span-2">
             <div className="bg-gradient-to-br from-red-600/10 to-transparent border border-red-600/20 rounded-xl p-6 h-full flex flex-col">
               <h4 className="text-sm font-black uppercase tracking-wider text-red-600 mb-6 flex items-center gap-2">
@@ -195,7 +164,7 @@ export default function Footer() {
                 <span>CONTACT</span>
               </h4>
               
-              {/* Email - più spaziosa */}
+              {/* Email */}
               <div className="flex-1 flex flex-col">
                 <a href="mailto:info@formula-rossa.it" 
                   className="group block bg-black/30 rounded-xl p-5 border border-red-600/10 
