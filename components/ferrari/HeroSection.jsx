@@ -104,11 +104,17 @@ export default function HeroSection() {
           />
         </div>
         
-        <h1 className="text-4xl md:text-9xl font-black mb-6 tracking-tighter leading-tight uppercase">
-          <span className="bg-gradient-to-r from-white via-red-500 to-yellow-500 bg-clip-text text-transparent">
-            <h3>Formula Rossa <br /><span className="text-red-250">Statistiche & Analisi Dati Ferrari F1 </span></h3>
-          </span>
-        </h1>
+        <div className="relative inline-block">
+          <h1 className="text-6xl md:text-[120px] font-black leading-none uppercase tracking-tighter text-white">
+            Formula<span className="text-red-600">Rossa</span>
+          </h1>
+          <div className="flex items-center gap-4 mt-2">
+            <div className="h-[2px] w-12 bg-red-600"></div>
+            <h2 className="text-sm md:text-xl font-bold uppercase tracking-widest text-gray-400">
+              Data Intelligence & <span className="text-white">F1 Statistics</span>
+            </h2>
+          </div>
+        </div>
         
         <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto font-light italic">
           "Datemi una macchina che sia veloce in rettilineo e che stia in strada in curva."
