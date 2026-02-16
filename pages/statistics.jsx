@@ -535,14 +535,14 @@ export default function StatisticsPage() {
       <main className="max-w-7xl mx-auto px-4 pt-32 pb-20">
         <Link href="/" className="group inline-flex items-center gap-2 text-zinc-600 hover:text-red-500 transition-all mb-12">
           <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-[10px] font-black uppercase tracking-widest italic font-mono">Back to HQ</span>
+          <span className="text-[10px] font-white uppercase tracking-widest italic font-mono">Back to HQ</span>
         </Link>
 
         <header className="mb-24 relative px-6">
           <div className="absolute left-0 top-0 w-2 h-full bg-red-600 shadow-[0_0_25px_rgba(220,0,0,0.6)]" />
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
             <h2 className="text-red-600 font-black text-xs uppercase tracking-[0.6em] mb-4">Intelligence & Performance</h2>
-            <h3 className="text-6xl md:text-9xl font-black uppercase italic tracking-tighter leading-[0.85]">
+            <h3 className="text-6xl font-black uppercase italic tracking-tighter leading-[0.85]">
               Scuderia <br /><span className="text-zinc-800">Data Vault</span>
             </h3>
           </motion.div>

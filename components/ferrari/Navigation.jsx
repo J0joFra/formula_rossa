@@ -2,7 +2,7 @@
 import { useState } from 'react'; 
 import Link from 'next/link';
 import { useSession, signIn, signOut } from "next-auth/react";
-import { User, LogOut, LayoutDashboard, Trophy, Gamepad2, BarChart3, Home as HomeIcon } from 'lucide-react';
+import { User, LogOut, LayoutDashboard, Trophy, Gamepad2, BarChart3, Home, Speed as HomeIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navigation() {
@@ -25,7 +25,7 @@ export default function Navigation() {
                 />
               </div>
               <span className="text-xl font-black tracking-tighter text-white uppercase italic group-hover:text-red-500 transition-colors">
-                Formula <span className="text-red-600">Rossa</span>
+                Formula Rossa <br /><span className="text-red-600">Statistiche e Analisi Dati Ferrari F1 </span>
               </span>
             </Link>
           </div>
@@ -36,6 +36,7 @@ export default function Navigation() {
             <NavLink href="/standings" icon={Trophy} label="Standings" />
             <NavLink href="/statistics" icon={BarChart3} label="Stats" />
             <NavLink href="/fanzone" icon={Gamepad2} label="Fan Zone" />
+            <NavLink href="/live-timing" icon={Speed} label="Live timing"/>
 
             <div className="ml-6 pl-6 border-l border-white/10 flex items-center">
               {session ? (
