@@ -2,7 +2,7 @@
 import { useState } from 'react'; 
 import Link from 'next/link';
 import { useSession, signIn, signOut } from "next-auth/react";
-import { User, LogOut, LayoutDashboard, Trophy, Gamepad2, BarChart3, Home, Speed as HomeIcon } from 'lucide-react';
+import { User, LogOut, LayoutDashboard, Trophy, Gamepad2, BarChart3, Home, Zap as HomeIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navigation() {
@@ -36,7 +36,7 @@ export default function Navigation() {
             <NavLink href="/standings" icon={Trophy} label="Standings" />
             <NavLink href="/statistics" icon={BarChart3} label="Stats" />
             <NavLink href="/fanzone" icon={Gamepad2} label="Fan Zone" />
-            <NavLink href="/live-timing" icon={Speed} label="Live timing"/>
+            <NavLink href="/live-timing" icon={Zap} label="Live timing"/>
 
             <div className="ml-6 pl-6 border-l border-white/10 flex items-center">
               {session ? (
