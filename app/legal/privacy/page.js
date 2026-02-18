@@ -92,8 +92,8 @@ export default function PrivacyPage() {
             </ul>
             <p className="text-gray-400 mt-4">
               Per esercitare i tuoi diritti, scrivici a:{" "}
-              <a href="mailto:privacy@formula-rossa.it" className="text-red-600 hover:underline">
-                privacy@formula-rossa.it
+              <a href="mailto:info@formula-rossa.it" className="text-red-600 hover:underline">
+                info@formula-rossa.it
               </a>
             </p>
           </section>
@@ -120,7 +120,7 @@ export default function PrivacyPage() {
               Per qualsiasi domanda sulla privacy policy, puoi contattarci a:
             </p>
             <ul className="list-none text-gray-400 mt-2">
-              <li>Email: <a href="mailto:privacy@formula-rossa.it" className="text-red-600">privacy@formula-rossa.it</a></li>
+              <li>Email: <a href="mailto:info@formula-rossa.it" className="text-red-600">info@formula-rossa.it</a></li>
               <li>GitHub: <a href="https://github.com/J0joFra" className="text-red-600">@J0joFra</a></li>
             </ul>
           </section>
