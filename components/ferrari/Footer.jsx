@@ -106,10 +106,10 @@ export default function Footer() {
               </h4>
               <ul className="space-y-2 lg:space-y-3">
                 {[
-                  { name: 'Grand Slams', href: '/stats/grand-slams', icon: Award },
-                  { name: 'Archivio Stagioni', href: '/statistics/', icon: Trophy },
-                  { name: 'Confronto Piloti', href: '/stats/standings', icon: Gauge },
-                  { name: 'Community', href: '/stats/fanzone', icon: Users },
+                  { name: 'Vittorie', href: '/stats/wins', icon: Award },
+                  { name: 'Archivio Stagioni', href: '/statistics', icon: Trophy },
+                  { name: 'Confronto Piloti', href: '/standings', icon: Gauge },
+                  { name: 'Community', href: '/fanzone', icon: Users },
                 ].map((link, j) => (
                   <li key={j}>
                     <Link href={link.href} 
@@ -131,7 +131,7 @@ export default function Footer() {
           {/* INFO & LEGAL - 2 colonne */}
           <div className="lg:col-span-2">
             <div className="bg-zinc-900/30 border border-white/5 rounded-xl p-5 lg:p-6 h-full">
-              <h4 className="text-xs lg:text-sm font-black uppercase tracking-wider text-gray-500 mb-4 lg:mb-6 flex items-center gap-2">
+              <h4 className="text-xs lg:text-sm font-black uppercase tracking-wider text-[#FFC300]-500 mb-4 lg:mb-6 flex items-center gap-2">
                 <Info className="w-3 h-3 lg:w-4 lg:h-4" />
                 <span>INFO</span>
               </h4>
