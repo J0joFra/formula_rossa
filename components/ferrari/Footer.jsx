@@ -1,3 +1,5 @@
+'use client'; 
+
 import React from 'react';
 import { 
   Instagram, Twitter, Youtube, Linkedin, Heart, Mail, MessageCircle, 
@@ -36,7 +38,7 @@ export default function Footer() {
                 <div className="absolute inset-0 rounded-2xl border border-dashed border-red-600/30" />
                 <div className="absolute inset-1 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-xl shadow-2xl shadow-yellow-500/30 overflow-hidden">
                   <div className="absolute inset-0 bg-black/10" />
-                  <img 
+                  <imgage 
                     src="/data/images/formula-rossa-logo.png" 
                     alt="Formula Rossa" 
                     className="w-full h-full object-contain p-1"
