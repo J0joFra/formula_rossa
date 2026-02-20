@@ -79,7 +79,7 @@ export default function Footer() {
               {[
                 { icon: Linkedin, href: 'https://www.linkedin.com/company/formula-rossa/', label: 'LinkedIn' },
                 { icon: Youtube, href: 'https://www.youtube.com/@jofrancalanci', label: 'YouTube' },
-                { icon: Instagram, href: 'https://www.instagram.com/@jofrancalanci', label: 'Instagram' },
+                { icon: Instagram, href: 'https://www.instagram.com/@formularossa.it', label: 'Instagram' },
                 { icon: MessageCircle, href: 'https://whatsapp.com/channel/0029Vb7EagL6WaKvnD5Slm30', label: 'WhatsApp' },
                 { icon: Twitter, href: 'https://www.x.com/@jofrancalanci', label: 'Twitter' },
               ].map((social, i) => (
