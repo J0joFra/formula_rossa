@@ -1,0 +1,7 @@
+fastf1
+flask
+flask-cors
+gunicorn
+pandas
+numpy
+requests
