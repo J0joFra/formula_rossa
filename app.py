@@ -16,10 +16,10 @@ app = Flask(__name__)
 CORS(app, origins=[
     "http://localhost:3000",  # Sviluppo locale
     "http://localhost:3001",
-    "https://formula-rossa.it",  # Il tuo dominio
+    "https://formula-rossa.it",  
     "https://www.formula-rossa.it",
-    "https://formula-rossa.onrender.com",  # Se usi Render anche per frontend
-    "*"  # Per test, poi restringi
+    "https://formula-rossa.onrender.com", 
+    "*" 
 ])
 
 @app.route('/', methods=['GET'])
