@@ -14,23 +14,56 @@ export default function LiveTiming() {
   const [currentLap, setCurrentLap] = useState(0);
   const [totalLaps, setTotalLaps] = useState(70); // Default
 
-  // Get current/latest session
-  useEffect(() => {
-    const fetchLatestSession = async () => {
-      try {
-        const response = await fetch('https://api.openf1.org/v1/sessions?session_name=' + activeSession + '&meeting_key=latest');
-        const sessions = await response.json();
-        if (sessions.length > 0) {
-          setSessionKey(sessions[0].session_key);
-          setTotalLaps(sessions[0].total_laps || 70);
-        }
-      } catch (error) {
-        console.error('Error fetching session:', error);
+useEffect(() => {
+  const fetchLatestSession = async () => {
+    try {
+      setLoading(true);
+      
+      const meetingResponse = await fetch('https://api.openf1.org/v1/meetings?meeting_key=latest');
+      
+      if (!meetingResponse.ok) {
+        throw new Error(`HTTP error! status: ${meetingResponse.status}`);
       }
-    };
-    
-    fetchLatestSession();
-  }, [activeSession]);
+      
+      const meetings = await meetingResponse.json();
+      
+      if (meetings.length === 0) {
+        throw new Error('Nessun meeting trovato');
+      }
+      
+      const meetingKey = meetings[0].meeting_key;
+      
+      const sessionResponse = await fetch(`https://api.openf1.org/v1/sessions?meeting_key=${meetingKey}&session_name=${activeSession}`);
+      
+      if (!sessionResponse.ok) {
+        throw new Error(`HTTP error! status: ${sessionResponse.status}`);
+      }
+      
+      const sessions = await sessionResponse.json();
+      
+      if (sessions.length > 0) {
+        setSessionKey(sessions[0].session_key);
+        setTotalLaps(sessions[0].total_laps || 70);
+      } else {
+        console.log('Nessuna sessione attiva, uso dati mock');
+        useMockData();
+      }
+    } catch (error) {
+      console.error('Errore nel fetch della sessione:', error);
+      useMockData(); // Fallback ai dati mock
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  fetchLatestSession();
+}, [activeSession]);
+
+const useMockData = () => {
+    setSessionKey('mock');
+    setStandings(mockStandings);
+    setLoading(false);
+  };
 
   // Fetch drivers for current session
   useEffect(() => {
