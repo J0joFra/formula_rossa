@@ -233,6 +233,61 @@ def get_latest_race():
             'driver': 'LEC'
         })
         
+@app.route('/api/fastf1/lap-chart', methods=['GET'])
+def get_lap_chart():
+    """Restituisce i tempi sul giro per tutti i piloti"""
+    year = int(request.args.get('year', 2024))
+    gp = request.args.get('gp', 'Monza')
+    session_type = request.args.get('session', 'R')
+    
+    session = get_session(year, gp, session_type)
+    session.load(laps=True)
+    
+    result = {}
+    for driver in session.results['Abbreviation']:
+        driver_laps = session.laps.pick_driver(driver)
+        if not driver_laps.empty:
+            result[driver] = [
+                {
+                    'lapNumber': int(lap['LapNumber']),
+                    'lapTime': str(lap['LapTime'])
+                }
+                for _, lap in driver_laps.iterrows()
+            ]
+    
+    return jsonify(result)
+
+@app.route('/api/fastf1/lap-telemetry', methods=['GET'])
+def get_lap_telemetry():
+    """Restituisce la telemetria per un giro specifico"""
+    year = int(request.args.get('year', 2024))
+    gp = request.args.get('gp', 'Monza')
+    session_type = request.args.get('session', 'R')
+    driver_code = request.args.get('driver', 'LEC')
+    lap_number = int(request.args.get('lap', 1))
+    
+    session = get_session(year, gp, session_type)
+    session.load(laps=True, telemetry=True)
+    
+    driver_laps = session.laps.pick_driver(driver_code)
+    specific_lap = driver_laps[driver_laps['LapNumber'] == lap_number].iloc[0]
+    telemetry = specific_lap.get_telemetry()
+    
+    telemetry_data = []
+    for _, row in telemetry.iterrows():
+        telemetry_data.append({
+            'Distance': float(row['Distance']),
+            'Speed': float(row['Speed']),
+            'RPM': float(row.get('RPM', 0)),
+            'nGear': int(row.get('nGear', 0)),
+            'Throttle': float(row.get('Throttle', 0)),
+            'Brake': float(row.get('Brake', 0)),
+            'DRS': int(row.get('DRS', 0)),
+            'Time': float(row.get('Time', 0))
+        })
+    
+    return jsonify({'telemetry': telemetry_data})
+              
 if __name__ == '__main__':
     print("="*50)
     print("🚀 Server FastF1 avviato!")
