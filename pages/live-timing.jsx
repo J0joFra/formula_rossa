@@ -1,689 +1,753 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Head from 'next/head';
-import { 
-  Activity, 
-  Zap, 
-  User, 
-  Clock,
-  Gauge,
-  Thermometer,
-  Flag,
-  Map,
-  ChevronRight,
-  TrendingUp,
-  Disc,
-  Cloud,
-  Wind,
-  Droplets,
-  Timer,
-  Radio,
-  Cpu,
-  GaugeCircle,
-  ArrowUpRight,
-  CircleDot,
-  Calendar,
-  ChevronDown,
-  Filter,
-  Search,
-  RefreshCw,
-  X
+import {
+  Activity, Zap, Gauge, ChevronDown, Search, RefreshCw,
+  Radio, Cpu, Thermometer, Wind, Droplets, Clock, Flag
 } from 'lucide-react';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  ComposedChart,
-  BarChart,
-  Bar,
-  ScatterChart,
-  Scatter,
-  ZAxis
+import {
+  AreaChart, Area, BarChart, Bar,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
+import {
+  getSessionKey, getDrivers, getDriverNumber,
+  getTelemetry, getWeather, getMeetings,
+  getSessionsForMeeting, getLatestSession
+} from '../lib/openf1';
 
-// Anni disponibili (FastF1 ha dati dal 2018)
-const AVAILABLE_YEARS = [2024, 2023, 2022, 2021, 2020, 2019, 2018];
-
-// Mappa circuiti → paesi per bandiere
-const circuitToCountry = {
-  'monza': 'it', 'autodromo-nazionale-di-monza': 'it', 'imola': 'it', 'mugello': 'it',
-  'silverstone': 'gb', 'silverstone-circuit': 'gb', 'brands-hatch': 'gb',
-  'spa': 'be', 'spa-francorchamps': 'be',
-  'catalunya': 'es', 'barcelona': 'es', 'jerez': 'es', 'valencia': 'es',
-  'hungaroring': 'hu', 'budapest': 'hu',
-  'red-bull-ring': 'at', 'spielberg': 'at', 'zeltweg': 'at',
-  'monaco': 'mc', 'monte-carlo': 'mc', 'circuit-de-monaco': 'mc',
-  'americas': 'us', 'cota': 'us', 'austin': 'us', 'miami': 'us', 'las-vegas': 'us',
-  'villeneuve': 'ca', 'montreal': 'ca', 'circuit-gilles-villeneuve': 'ca',
-  'interlagos': 'br', 'sao-paulo': 'br', 'josé-carlos-pace': 'br',
-  'rodriguez': 'mx', 'hermanos-rodriguez': 'mx', 'mexico-city': 'mx',
-  'suzuka': 'jp', 'suzuka-circuit': 'jp', 'fuji': 'jp', 'fuji-speedway': 'jp',
-  'shanghai': 'cn', 'shanghai-international-circuit': 'cn',
-  'marina-bay': 'sg', 'singapore': 'sg',
-  'bahrain': 'bh', 'sakhir': 'bh', 'bahrain-international-circuit': 'bh',
-  'jeddah': 'sa', 'jeddah-corniche-circuit': 'sa',
-  'yas-marina': 'ae', 'abu-dhabi': 'ae', 'yas-marina-circuit': 'ae',
-  'albert-park': 'au', 'melbourne': 'au', 'adelaide': 'au',
-  'zandvoort': 'nl', 'circuit-zandvoort': 'nl',
-  'losail': 'qa', 'lusail': 'qa', 'lusail-international-circuit': 'qa',
-  'imola': 'it', 'enzo-e-dino-ferrari': 'it',
-  'portimao': 'pt', 'algarve': 'pt',
-  'istanbul': 'tr', 'istanbul-park': 'tr',
-  'nurburgring': 'de', 'nurburg': 'de', 'hockenheimring': 'de', 'hockenheim': 'de',
-  'magny-cours': 'fr', 'paul-ricard': 'fr', 'le-castellet': 'fr',
-  'kyalami': 'za', 'midrand': 'za'
-};
-
-// Lista completa piloti
-const DRIVERS = [
-  { code: 'VER', name: 'Max Verstappen', team: 'Red Bull', number: 1, color: '#1e3c72' },
-  { code: 'PER', name: 'Sergio Pérez', team: 'Red Bull', number: 11, color: '#2b4f8c' },
-  { code: 'HAM', name: 'Lewis Hamilton', team: 'Mercedes', number: 44, color: '#6f7c8a' },
-  { code: 'RUS', name: 'George Russell', team: 'Mercedes', number: 63, color: '#8f9b9c' },
-  { code: 'LEC', name: 'Charles Leclerc', team: 'Ferrari', number: 16, color: '#dc2626' },
-  { code: 'SAI', name: 'Carlos Sainz', team: 'Ferrari', number: 55, color: '#b91c1c' },
-  { code: 'NOR', name: 'Lando Norris', team: 'McLaren', number: 4, color: '#f97316' },
-  { code: 'PIA', name: 'Oscar Piastri', team: 'McLaren', number: 81, color: '#ea580c' },
-  { code: 'ALO', name: 'Fernando Alonso', team: 'Aston Martin', number: 14, color: '#15803d' },
-  { code: 'STR', name: 'Lance Stroll', team: 'Aston Martin', number: 18, color: '#166534' },
-  { code: 'GAS', name: 'Pierre Gasly', team: 'Alpine', number: 10, color: '#f43f5e' },
-  { code: 'OCO', name: 'Esteban Ocon', team: 'Alpine', number: 31, color: '#e11d48' },
-  { code: 'ALB', name: 'Alexander Albon', team: 'Williams', number: 23, color: '#2563eb' },
-  { code: 'SAR', name: 'Logan Sargeant', team: 'Williams', number: 2, color: '#1d4ed8' },
-  { code: 'BOT', name: 'Valtteri Bottas', team: 'Sauber', number: 77, color: '#16a34a' },
-  { code: 'ZHO', name: 'Guanyu Zhou', team: 'Sauber', number: 24, color: '#15803d' },
-  { code: 'TSU', name: 'Yuki Tsunoda', team: 'RB', number: 22, color: '#3b82f6' },
-  { code: 'RIC', name: 'Daniel Ricciardo', team: 'RB', number: 3, color: '#2563eb' },
-  { code: 'MAG', name: 'Kevin Magnussen', team: 'Haas', number: 20, color: '#b91c1c' },
-  { code: 'HUL', name: 'Nico Hülkenberg', team: 'Haas', number: 27, color: '#991b1b' }
-];
-
-// Lista gare 2024
-const RACES_2024 = [
-  { id: 1, name: 'Bahrain Grand Prix', circuit: 'Bahrain International Circuit', country: 'Bahrain', flag: 'bh', date: '2024-03-02' },
-  { id: 2, name: 'Saudi Arabian Grand Prix', circuit: 'Jeddah Corniche Circuit', country: 'Saudi Arabia', flag: 'sa', date: '2024-03-09' },
-  { id: 3, name: 'Australian Grand Prix', circuit: 'Albert Park Circuit', country: 'Australia', flag: 'au', date: '2024-03-24' },
-  { id: 4, name: 'Japanese Grand Prix', circuit: 'Suzuka International Racing Course', country: 'Japan', flag: 'jp', date: '2024-04-07' },
-  { id: 5, name: 'Chinese Grand Prix', circuit: 'Shanghai International Circuit', country: 'China', flag: 'cn', date: '2024-04-21' },
-  { id: 6, name: 'Miami Grand Prix', circuit: 'Miami International Autodrome', country: 'USA', flag: 'us', date: '2024-05-05' },
-  { id: 7, name: 'Emilia Romagna Grand Prix', circuit: 'Imola Circuit', country: 'Italy', flag: 'it', date: '2024-05-19' },
-  { id: 8, name: 'Monaco Grand Prix', circuit: 'Circuit de Monaco', country: 'Monaco', flag: 'mc', date: '2024-05-26' },
-  { id: 9, name: 'Canadian Grand Prix', circuit: 'Circuit Gilles Villeneuve', country: 'Canada', flag: 'ca', date: '2024-06-09' },
-  { id: 10, name: 'Spanish Grand Prix', circuit: 'Circuit de Barcelona-Catalunya', country: 'Spain', flag: 'es', date: '2024-06-23' },
-  { id: 11, name: 'Austrian Grand Prix', circuit: 'Red Bull Ring', country: 'Austria', flag: 'at', date: '2024-06-30' },
-  { id: 12, name: 'British Grand Prix', circuit: 'Silverstone Circuit', country: 'UK', flag: 'gb', date: '2024-07-07' },
-  { id: 13, name: 'Hungarian Grand Prix', circuit: 'Hungaroring', country: 'Hungary', flag: 'hu', date: '2024-07-21' },
-  { id: 14, name: 'Belgian Grand Prix', circuit: 'Circuit de Spa-Francorchamps', country: 'Belgium', flag: 'be', date: '2024-07-28' },
-  { id: 15, name: 'Dutch Grand Prix', circuit: 'Circuit Zandvoort', country: 'Netherlands', flag: 'nl', date: '2024-08-25' },
-  { id: 16, name: 'Italian Grand Prix', circuit: 'Monza Circuit', country: 'Italy', flag: 'it', date: '2024-09-01' },
-  { id: 17, name: 'Azerbaijan Grand Prix', circuit: 'Baku City Circuit', country: 'Azerbaijan', flag: 'az', date: '2024-09-15' },
-  { id: 18, name: 'Singapore Grand Prix', circuit: 'Marina Bay Street Circuit', country: 'Singapore', flag: 'sg', date: '2024-09-22' },
-  { id: 19, name: 'United States Grand Prix', circuit: 'Circuit of the Americas', country: 'USA', flag: 'us', date: '2024-10-20' },
-  { id: 20, name: 'Mexico City Grand Prix', circuit: 'Autódromo Hermanos Rodríguez', country: 'Mexico', flag: 'mx', date: '2024-10-27' },
-  { id: 21, name: 'São Paulo Grand Prix', circuit: 'Interlagos Circuit', country: 'Brazil', flag: 'br', date: '2024-11-03' },
-  { id: 22, name: 'Las Vegas Grand Prix', circuit: 'Las Vegas Strip Circuit', country: 'USA', flag: 'us', date: '2024-11-23' },
-  { id: 23, name: 'Qatar Grand Prix', circuit: 'Losail International Circuit', country: 'Qatar', flag: 'qa', date: '2024-12-01' },
-  { id: 24, name: 'Abu Dhabi Grand Prix', circuit: 'Yas Marina Circuit', country: 'UAE', flag: 'ae', date: '2024-12-08' }
-];
-
-// Sessioni disponibili
-const SESSIONS = [
+const SESSION_TYPES = [
   { id: 'FP1', name: 'Practice 1' },
   { id: 'FP2', name: 'Practice 2' },
   { id: 'FP3', name: 'Practice 3' },
-  { id: 'Q', name: 'Qualifying' },
-  { id: 'R', name: 'Race' },
-  { id: 'S', name: 'Sprint' },
-  { id: 'SQ', name: 'Sprint Qualifying' }
+  { id: 'Q',   name: 'Qualifying' },
+  { id: 'R',   name: 'Race' },
+  { id: 'S',   name: 'Sprint' },
+  { id: 'SQ',  name: 'Sprint Qualifying' },
 ];
 
-const getFlagCodeFromCircuit = (circuitName) => {
-  if (!circuitName) return '';
-  const normalized = circuitName.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
-  
-  if (circuitToCountry[normalized]) return circuitToCountry[normalized];
+const AVAILABLE_YEARS = [2025, 2024, 2023];
 
-  const lowerName = circuitName.toLowerCase();
-  if (lowerName.includes('monza') || lowerName.includes('imola') || lowerName.includes('mugello') || lowerName.includes('italian') || lowerName.includes('italy')) return 'it';
-  if (lowerName.includes('silverstone') || lowerName.includes('british') || lowerName.includes('uk')) return 'gb';
-  if (lowerName.includes('spa') || lowerName.includes('belgian')) return 'be';
-  if (lowerName.includes('catalunya') || lowerName.includes('barcelona') || lowerName.includes('spanish')) return 'es';
-  if (lowerName.includes('hungaroring') || lowerName.includes('hungarian')) return 'hu';
-  if (lowerName.includes('red bull ring') || lowerName.includes('austrian')) return 'at';
-  if (lowerName.includes('monaco') || lowerName.includes('monte carlo')) return 'mc';
-  if (lowerName.includes('americas') || lowerName.includes('usa') || lowerName.includes('miami') || lowerName.includes('las vegas')) return 'us';
-  if (lowerName.includes('villeneuve') || lowerName.includes('montreal') || lowerName.includes('canadian')) return 'ca';
-  if (lowerName.includes('interlagos') || lowerName.includes('brazilian')) return 'br';
-  if (lowerName.includes('rodriguez') || lowerName.includes('mexico')) return 'mx';
-  if (lowerName.includes('suzuka') || lowerName.includes('japanese')) return 'jp';
-  if (lowerName.includes('shanghai') || lowerName.includes('chinese')) return 'cn';
-  if (lowerName.includes('marina bay') || lowerName.includes('singapore')) return 'sg';
-  if (lowerName.includes('bahrain') || lowerName.includes('sakhir')) return 'bh';
-  if (lowerName.includes('jeddah') || lowerName.includes('saudi')) return 'sa';
-  if (lowerName.includes('yas marina') || lowerName.includes('abu dhabi')) return 'ae';
-  if (lowerName.includes('albert park') || lowerName.includes('melbourne') || lowerName.includes('australian')) return 'au';
-  if (lowerName.includes('zandvoort') || lowerName.includes('dutch')) return 'nl';
-  if (lowerName.includes('losail') || lowerName.includes('lusail') || lowerName.includes('qatar')) return 'qa';
-  return '';
+const circuitToCountry = {
+  monza: 'it', imola: 'it', mugello: 'it',
+  silverstone: 'gb',
+  spa: 'be',
+  barcelona: 'es', catalunya: 'es',
+  hungaroring: 'hu',
+  austria: 'at', spielberg: 'at',
+  monaco: 'mc',
+  austin: 'us', miami: 'us', 'las vegas': 'us',
+  montreal: 'ca', villeneuve: 'ca',
+  interlagos: 'br', paulo: 'br',
+  rodriguez: 'mx', mexico: 'mx',
+  suzuka: 'jp',
+  shanghai: 'cn',
+  singapore: 'sg', 'marina bay': 'sg',
+  bahrain: 'bh', sakhir: 'bh',
+  jeddah: 'sa',
+  'abu dhabi': 'ae', 'yas marina': 'ae',
+  melbourne: 'au', 'albert park': 'au',
+  zandvoort: 'nl',
+  lusail: 'qa', losail: 'qa', qatar: 'qa',
+  baku: 'az',
 };
 
-export default function LiveTimingPage() {
-  // Stati principali
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [selectedYear, setSelectedYear] = useState(2024);
-  const [selectedRace, setSelectedRace] = useState(RACES_2024[15]);
-  const [selectedSession, setSelectedSession] = useState('Q');
-  const [selectedDrivers, setSelectedDrivers] = useState(['LEC', 'SAI']); // Multi-select
-  
-  // Stati per i dati
-  const [lapChartData, setLapChartData] = useState([]);
-  const [selectedLaps, setSelectedLaps] = useState([]); // Array di { driver, lapNumber, telemetry, color }
-  
-  // Stati UI
-  const [showYearDropdown, setShowYearDropdown] = useState(false);
-  const [showRaceDropdown, setShowRaceDropdown] = useState(false);
-  const [showSessionDropdown, setShowSessionDropdown] = useState(false);
-  const [showDriversDropdown, setShowDriversDropdown] = useState(false);
+function getFlagCode(location = '') {
+  const l = location.toLowerCase();
+  for (const [key, code] of Object.entries(circuitToCountry)) {
+    if (l.includes(key)) return code;
+  }
+  return '';
+}
 
-  // Recupera l'ultima gara disponibile da FastF1 all'avvio
-  useEffect(() => {
-    fetchLatestRace();
-  }, []);
-
-  // Carica i dati del lap chart quando cambiano anno/gara/sessione
-  useEffect(() => {
-    if (selectedRace && selectedSession) {
-      fetchLapChartData();
-    }
-  }, [selectedYear, selectedRace, selectedSession]);
-
-  const fetchLatestRace = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/fastf1/latest-race');
-      if (response.ok) {
-        const data = await response.json();
-        const latestRace = RACES_2024.find(r => 
-          r.circuit.toLowerCase().includes(data.circuit.toLowerCase()) ||
-          data.circuit.toLowerCase().includes(r.circuit.toLowerCase())
-        );
-        if (latestRace) {
-          setSelectedRace(latestRace);
-          setSelectedYear(data.year);
-        }
-      }
-    } catch (error) {
-      console.error("Errore nel recuperare l'ultima gara:", error);
-    }
-  };
-
-  const fetchLapChartData = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`http://localhost:5000/api/fastf1/lap-chart?year=${selectedYear}&gp=${encodeURIComponent(selectedRace.circuit)}&session=${selectedSession}`);
-      
-      if (!response.ok) {
-        throw new Error(`Errore HTTP: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      // Trasforma i dati per il grafico
-      const formattedData = [];
-      Object.keys(data).forEach(driverCode => {
-        const driverLaps = data[driverCode].map(lap => ({
-          driver: driverCode,
-          lapNumber: lap.lapNumber,
-          lapTime: lap.lapTime,
-          color: DRIVERS.find(d => d.code === driverCode)?.color || '#666'
-        }));
-        formattedData.push(...driverLaps);
-      });
-      
-      setLapChartData(formattedData);
-      
-    } catch (error) {
-      console.error("Errore nel caricamento lap chart:", error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchLapTelemetry = async (driver, lapNumber) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/fastf1/lap-telemetry?year=${selectedYear}&gp=${encodeURIComponent(selectedRace.circuit)}&session=${selectedSession}&driver=${driver}&lap=${lapNumber}`);
-      
-      if (!response.ok) {
-        throw new Error(`Errore HTTP: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      const formattedTelemetry = data.telemetry.map(point => ({
-        distance: point.Distance,
-        speed: point.Speed,
-        rpm: point.RPM || 0,
-        gear: point.nGear || 0,
-        throttle: point.Throttle || 0,
-        brake: point.Brake || 0,
-        drs: point.DRS || 0,
-        time: point.Time || 0
-      }));
-      
-      return formattedTelemetry;
-      
-    } catch (error) {
-      console.error("Errore nel caricamento telemetria giro:", error);
-      return [];
-    }
-  };
-
-  const handleLapClick = async (lapData) => {
-    // Verifica se il giro è già selezionato
-    const alreadySelected = selectedLaps.some(
-      lap => lap.driver === lapData.driver && lap.lapNumber === lapData.lapNumber
-    );
-    
-    if (alreadySelected) {
-      // Rimuovi il giro
-      setSelectedLaps(selectedLaps.filter(
-        lap => !(lap.driver === lapData.driver && lap.lapNumber === lapData.lapNumber)
-      ));
-    } else {
-      // Aggiungi il giro
-      setLoading(true);
-      const telemetry = await fetchLapTelemetry(lapData.driver, lapData.lapNumber);
-      
-      const newLap = {
-        driver: lapData.driver,
-        lapNumber: lapData.lapNumber,
-        lapTime: lapData.lapTime,
-        telemetry: telemetry,
-        color: lapData.color
-      };
-      
-      setSelectedLaps([...selectedLaps, newLap]);
-      setLoading(false);
-    }
-  };
-
-  const removeSelectedLap = (lapToRemove) => {
-    setSelectedLaps(selectedLaps.filter(
-      lap => !(lap.driver === lapToRemove.driver && lap.lapNumber === lapToRemove.lapNumber)
-    ));
-  };
-
-  const toggleDriverSelection = (driverCode) => {
-    if (selectedDrivers.includes(driverCode)) {
-      setSelectedDrivers(selectedDrivers.filter(d => d !== driverCode));
-    } else {
-      setSelectedDrivers([...selectedDrivers, driverCode]);
-    }
-  };
-
-  const flagCode = getFlagCodeFromCircuit(selectedRace.circuit);
-
-  // Tooltip personalizzato per il lap chart
-  const LapChartTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-3 shadow-xl">
-          <p className="text-sm font-bold" style={{color: data.color}}>{data.driver}</p>
-          <p className="text-xs text-zinc-400">Lap {data.lapNumber}</p>
-          <p className="text-xs font-mono text-green-400">{data.lapTime}</p>
-        </div>
-      );
-    }
-    return null;
-  };
-
+// ─── Dropdown riutilizzabile ──────────────────────────────────────────────────
+function Dropdown({ label, isOpen, onToggle, disabled, header, children, dropdownRef }) {
   return (
-    <div className="min-h-screen bg-black text-white">
-      <Head>
-        <title>F1 Tempo Style Telemetry | Formula Rossa</title>
-        <meta name="description" content="Analisi telemetrica F1 stile F1 Tempo" />
-      </Head>
-
-      <Navigation activeSection="timing" />
-
-      <main className="max-w-7xl mx-auto px-4 pt-32 pb-20">
-        
-        {/* Header con selezione - stile f1-tempo.com */}
-        <div className="mb-8">
-          <div className="text-red-600 font-black uppercase text-xs mb-4 tracking-[0.2em]">
-            F1 TEMPO STYLE • LAP & TELEMETRY ANALYSIS
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            
-            {/* Selezione Anno */}
-            <div className="relative">
-              <button
-                onClick={() => setShowYearDropdown(!showYearDropdown)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-left hover:border-red-900/50 transition-all"
-              >
-                <p className="text-[10px] text-zinc-500 mb-1">YEAR</p>
-                <div className="flex items-center justify-between">
-                  <span className="font-bold">{selectedYear}</span>
-                  <ChevronDown size={16} className="text-zinc-500" />
-                </div>
-              </button>
-              
-              {showYearDropdown && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-800 rounded-lg z-50">
-                  {AVAILABLE_YEARS.map(year => (
-                    <button
-                      key={year}
-                      onClick={() => {
-                        setSelectedYear(year);
-                        setShowYearDropdown(false);
-                      }}
-                      className={`w-full p-2 text-left hover:bg-zinc-800 transition-colors ${
-                        selectedYear === year ? 'bg-red-600/20 text-red-400' : ''
-                      }`}
-                    >
-                      {year}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Selezione Gara */}
-            <div className="relative md:col-span-1">
-              <button
-                onClick={() => setShowRaceDropdown(!showRaceDropdown)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-left hover:border-red-900/50 transition-all"
-              >
-                <p className="text-[10px] text-zinc-500 mb-1">GRAND PRIX</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 truncate">
-                    {flagCode && (
-                      <img src={`https://flagcdn.com/w20/${flagCode}.png`} className="h-4 w-auto rounded" alt="" />
-                    )}
-                    <span className="font-bold truncate">{selectedRace.name}</span>
-                  </div>
-                  <ChevronDown size={16} className="text-zinc-500 flex-shrink-0" />
-                </div>
-              </button>
-              
-              {showRaceDropdown && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-800 rounded-lg max-h-60 overflow-y-auto z-50">
-                  {RACES_2024.map(race => (
-                    <button
-                      key={race.id}
-                      onClick={() => {
-                        setSelectedRace(race);
-                        setShowRaceDropdown(false);
-                      }}
-                      className={`w-full p-2 text-left hover:bg-zinc-800 transition-colors flex items-center gap-2 ${
-                        selectedRace.id === race.id ? 'bg-red-600/20' : ''
-                      }`}
-                    >
-                      <img src={`https://flagcdn.com/w20/${race.flag}.png`} className="h-3 w-auto rounded" alt="" />
-                      <span className="text-sm truncate">{race.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Selezione Sessione */}
-            <div className="relative">
-              <button
-                onClick={() => setShowSessionDropdown(!showSessionDropdown)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-left hover:border-red-900/50 transition-all"
-              >
-                <p className="text-[10px] text-zinc-500 mb-1">SESSION</p>
-                <div className="flex items-center justify-between">
-                  <span className="font-bold">{selectedSession}</span>
-                  <ChevronDown size={16} className="text-zinc-500" />
-                </div>
-              </button>
-              
-              {showSessionDropdown && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-800 rounded-lg z-50">
-                  {SESSIONS.map(session => (
-                    <button
-                      key={session.id}
-                      onClick={() => {
-                        setSelectedSession(session.id);
-                        setShowSessionDropdown(false);
-                      }}
-                      className={`w-full p-2 text-left hover:bg-zinc-800 transition-colors ${
-                        selectedSession === session.id ? 'bg-red-600/20 text-red-400' : ''
-                      }`}
-                    >
-                      <div className="text-sm font-bold">{session.id}</div>
-                      <div className="text-xs text-zinc-500">{session.name}</div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Selezione Piloti (multi-select) */}
-            <div className="relative">
-              <button
-                onClick={() => setShowDriversDropdown(!showDriversDropdown)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-left hover:border-red-900/50 transition-all"
-              >
-                <p className="text-[10px] text-zinc-500 mb-1">DRIVERS</p>
-                <div className="flex items-center justify-between">
-                  <span className="font-bold">{selectedDrivers.length} selected</span>
-                  <ChevronDown size={16} className="text-zinc-500" />
-                </div>
-              </button>
-              
-              {showDriversDropdown && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-800 rounded-lg max-h-60 overflow-y-auto z-50">
-                  {DRIVERS.map(driver => (
-                    <button
-                      key={driver.code}
-                      onClick={() => toggleDriverSelection(driver.code)}
-                      className={`w-full p-2 text-left hover:bg-zinc-800 transition-colors flex items-center gap-2 ${
-                        selectedDrivers.includes(driver.code) ? 'bg-red-600/20' : ''
-                      }`}
-                    >
-                      <div className="w-3 h-3 rounded-full" style={{backgroundColor: driver.color}}></div>
-                      <span className="text-sm font-bold">{driver.code}</span>
-                      <span className="text-xs text-zinc-500">{driver.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Layout a due colonne come f1-tempo.com */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
-          {/* COLONNA SINISTRA: LAP CHART */}
-          <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
-            <div className="bg-zinc-900 px-4 py-3 border-b border-zinc-800">
-              <h2 className="text-sm font-mono flex items-center gap-2">
-                <Activity size={14} className="text-red-500" /> LAP CHART
-              </h2>
-              <p className="text-xs text-zinc-500 mt-0.5">
-                {selectedRace.name} {selectedYear} • {selectedSession}
-              </p>
-            </div>
-            
-            <div className="p-4 h-[500px]">
-              {loading && lapChartData.length === 0 ? (
-                <div className="h-full flex items-center justify-center">
-                  <RefreshCw size={32} className="text-zinc-700 animate-spin" />
-                </div>
-              ) : lapChartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                    <XAxis 
-                      type="number" 
-                      dataKey="lapNumber" 
-                      name="Lap" 
-                      tick={{ fill: '#666', fontSize: 11 }}
-                      label={{ value: 'Lap Number', position: 'bottom', fill: '#666', fontSize: 11 }}
-                    />
-                    <YAxis 
-                      type="number" 
-                      dataKey="lapTime" 
-                      name="Time" 
-                      tick={{ fill: '#666', fontSize: 11 }}
-                      label={{ value: 'Lap Time (s)', angle: -90, position: 'insideLeft', fill: '#666', fontSize: 11 }}
-                      domain={['auto', 'auto']}
-                    />
-                    <Tooltip content={<LapChartTooltip />} />
-                    
-                    {/* Crea uno scatter per ogni pilota selezionato */}
-                    {selectedDrivers.map(driverCode => {
-                      const driverData = lapChartData.filter(d => d.driver === driverCode);
-                      const driverColor = DRIVERS.find(d => d.code === driverCode)?.color || '#666';
-                      
-                      return (
-                        <Scatter
-                          key={driverCode}
-                          name={driverCode}
-                          data={driverData}
-                          fill={driverColor}
-                          shape="circle"
-                          onClick={handleLapClick}
-                          cursor="pointer"
-                        />
-                      );
-                    })}
-                  </ScatterChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-full flex flex-col items-center justify-center text-zinc-600">
-                  <Disc size={48} className="mb-4 opacity-30" />
-                  <p className="text-sm">Waiting for your selections...</p>
-                </div>
-              )}
-            </div>
-            
-            <div className="border-t border-zinc-800 p-3 text-xs text-zinc-500 bg-zinc-900/20">
-              Click on a dot to add lap to telemetry comparison
-            </div>
-          </div>
-
-          {/* COLONNA DESTRA: TELEMETRY COMPARISON */}
-          <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
-            <div className="bg-zinc-900 px-4 py-3 border-b border-zinc-800">
-              <h2 className="text-sm font-mono flex items-center gap-2">
-                <Gauge size={14} className="text-red-500" /> TELEMETRY
-              </h2>
-              <p className="text-xs text-zinc-500 mt-0.5">
-                {selectedLaps.length} {selectedLaps.length === 1 ? 'lap' : 'laps'} selected
-              </p>
-            </div>
-            
-            <div className="p-4 h-[400px]">
-              {selectedLaps.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                    <XAxis 
-                      type="number" 
-                      dataKey="distance" 
-                      tick={{ fill: '#666', fontSize: 11 }}
-                      label={{ value: 'Distance (m)', position: 'bottom', fill: '#666', fontSize: 11 }}
-                    />
-                    <YAxis 
-                      tick={{ fill: '#666', fontSize: 11 }}
-                      label={{ value: 'Speed (km/h)', angle: -90, position: 'insideLeft', fill: '#666', fontSize: 11 }}
-                      domain={[0, 360]}
-                    />
-                    <Tooltip />
-                    
-                    {selectedLaps.map((lap, index) => (
-                      <Line
-                        key={`${lap.driver}-${lap.lapNumber}`}
-                        type="monotone"
-                        data={lap.telemetry}
-                        dataKey="speed"
-                        stroke={lap.color}
-                        dot={false}
-                        strokeWidth={2}
-                        name={`${lap.driver} L${lap.lapNumber}`}
-                      />
-                    ))}
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-full flex flex-col items-center justify-center text-zinc-600">
-                  <Activity size={48} className="mb-4 opacity-30" />
-                  <p className="text-sm">No valid laps have been selected</p>
-                  <p className="text-xs mt-2 text-center">Click on a dot on the lap chart to add it</p>
-                </div>
-              )}
-            </div>
-
-            {/* Lista giri selezionati */}
-            {selectedLaps.length > 0 && (
-              <div className="border-t border-zinc-800 p-3 bg-zinc-900/20">
-                <p className="text-xs text-zinc-500 mb-2">Selected laps:</p>
-                <div className="flex flex-wrap gap-2">
-                  {selectedLaps.map(lap => (
-                    <div 
-                      key={`${lap.driver}-${lap.lapNumber}`}
-                      className="bg-zinc-800 rounded-full pl-2 pr-1 py-1 text-xs flex items-center gap-1"
-                    >
-                      <span className="w-2 h-2 rounded-full" style={{backgroundColor: lap.color}}></span>
-                      <span className="font-mono">{lap.driver} L{lap.lapNumber}</span>
-                      <span className="text-green-400 ml-1">{lap.lapTime}</span>
-                      <button 
-                        onClick={() => removeSelectedLap(lap)}
-                        className="ml-1 p-1 hover:bg-zinc-700 rounded-full"
-                      >
-                        <X size={12} className="text-zinc-400" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Messaggio di errore */}
-        {error && (
-          <div className="mt-6 bg-red-900/20 border border-red-900/50 rounded-lg p-4">
-            <p className="text-red-400 text-sm font-mono">Error: {error}</p>
-          </div>
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={onToggle}
+        disabled={disabled}
+        className={`w-full bg-zinc-900 border rounded-lg p-4 text-left transition-all
+          ${disabled
+            ? 'border-zinc-800 opacity-40 cursor-not-allowed'
+            : 'border-zinc-800 hover:border-red-900/60 cursor-pointer'
+          }`}
+      >
+        <div className="text-xs text-zinc-500 font-mono mb-1 tracking-widest">{label}</div>
+        {header}
+        {!disabled && (
+          <ChevronDown className={`absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         )}
-
-        {/* Footer con ringraziamenti (stile f1-tempo.com) */}
-        <div className="mt-12 text-center">
-          <p className="text-xs text-zinc-600">
-            🏁 Thank you for your ongoing support this season
-          </p>
-          <p className="text-xs text-zinc-700 mt-1">
-            Data provided by FastF1 • Formula Rossa Telemetry
-          </p>
-        </div>
-      </main>
-
-      <Footer />
-
-      {loading && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="bg-zinc-900 border border-red-900/50 rounded-lg p-6">
-            <RefreshCw size={32} className="text-red-600 animate-spin mx-auto mb-4" />
-            <p className="text-sm text-zinc-400">Loading telemetry data...</p>
-          </div>
+      </button>
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-lg z-50 max-h-72 overflow-y-auto shadow-2xl">
+          {children}
         </div>
       )}
     </div>
   );
+}
+
+function useOutsideClose(refs, setters) {
+  useEffect(() => {
+    const h = (e) => refs.forEach((r, i) => {
+      if (r.current && !r.current.contains(e.target)) setters[i](false);
+    });
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+}
+
+// ─── Stat card ────────────────────────────────────────────────────────────────
+function StatCard({ label, value, icon, sub }) {
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+      <div className="flex items-center gap-2 mb-2">
+        {icon}
+        <span className="text-xs text-zinc-500 font-mono tracking-widest">{label}</span>
+      </div>
+      <div className="text-2xl font-black text-white font-mono">{value}</div>
+      {sub && <div className="text-xs text-zinc-500 mt-1">{sub}</div>}
+    </div>
+  );
+}
+
+// ─── Componente principale ────────────────────────────────────────────────────
+export default function LiveTimingPage() {
+  // Selezioni utente
+  const [year, setYear]           = useState(null);
+  const [meetings, setMeetings]   = useState([]);  // lista gare dell'anno
+  const [meeting, setMeeting]     = useState(null); // gara selezionata
+  const [sessionType, setSessionType] = useState('Q');
+  const [drivers, setDrivers]     = useState([]);  // piloti della sessione
+  const [driverCode, setDriverCode] = useState(null);
+
+  // Stato interno OpenF1
+  const [sessionInfo, setSessionInfo] = useState(null); // { session_key, ... }
+
+  // Telemetria
+  const [telemetry, setTelemetry]   = useState([]);
+  const [fastestLap, setFastestLap] = useState(null);
+  const [weather, setWeather]       = useState(null);
+
+  // Comparazione
+  const [compareCode, setCompareCode]     = useState(null);
+  const [compareTelemetry, setCompareTelemetry] = useState([]);
+  const [showCompare, setShowCompare]     = useState(false);
+
+  // UI
+  const [loading, setLoading]   = useState(false);
+  const [loadStep, setLoadStep] = useState('');
+  const [error, setError]       = useState(null);
+  const [activeTab, setActiveTab] = useState('speed');
+  const [lastQuery, setLastQuery] = useState(null);
+
+  // Dropdown open
+  const [openYear, setOpenYear]       = useState(false);
+  const [openMeeting, setOpenMeeting] = useState(false);
+  const [openSession, setOpenSession] = useState(false);
+  const [openDriver, setOpenDriver]   = useState(false);
+
+  const refYear    = useRef(null);
+  const refMeeting = useRef(null);
+  const refSession = useRef(null);
+  const refDriver  = useRef(null);
+  useOutsideClose(
+    [refYear, refMeeting, refSession, refDriver],
+    [setOpenYear, setOpenMeeting, setOpenSession, setOpenDriver]
+  );
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const latest = await getLatestSession('Q');
+        if (latest.year) {
+          await handleYearChange(latest.year, false);
+        }
+      } catch (e) {
+        handleYearChange(2024, false);
+      }
+    })();
+  }, []);
+
+  const handleYearChange = async (y, resetAll = true) => {
+    setYear(y);
+    if (resetAll) {
+      setMeeting(null);
+      setDrivers([]);
+      setDriverCode(null);
+      setSessionInfo(null);
+      setTelemetry([]);
+      setError(null);
+    }
+    setOpenYear(false);
+
+    try {
+      const data = await getMeetings(y);
+      data.sort((a, b) => new Date(a.date_start || 0) - new Date(b.date_start || 0));
+      setMeetings(data);
+    } catch {
+      setMeetings([]);
+    }
+  };
+
+  const handleMeetingChange = async (m) => {
+    setMeeting(m);
+    setDriverCode(null);
+    setSessionInfo(null);
+    setTelemetry([]);
+    setError(null);
+    setOpenMeeting(false);
+
+    try {
+      const sessions = await getSessionsForMeeting(m.meeting_key);
+      const sessionName = SESSION_TYPES.find(s => s.id === sessionType)?.name || 'Qualifying';
+      const sess = sessions.find(s => s.session_name === sessionName) || sessions[sessions.length - 1];
+      if (sess) {
+        const d = await getDrivers(sess.session_key);
+        setDrivers(d.sort((a, b) => (a.name_acronym || '').localeCompare(b.name_acronym || '')));
+        setSessionInfo(sess);
+      }
+    } catch {
+      setDrivers([]);
+    }
+  };
+
+  const handleSessionChange = async (sid) => {
+    setSessionType(sid);
+    setOpenSession(false);
+    setDriverCode(null);
+    setTelemetry([]);
+
+    if (!meeting) return;
+    try {
+      const sessions = await getSessionsForMeeting(meeting.meeting_key);
+      const sessionName = SESSION_TYPES.find(s => s.id === sid)?.name || sid;
+      const sess = sessions.find(s => s.session_name === sessionName);
+      if (sess) {
+        const d = await getDrivers(sess.session_key);
+        setDrivers(d.sort((a, b) => (a.name_acronym || '').localeCompare(b.name_acronym || '')));
+        setSessionInfo(sess);
+      }
+    } catch {
+      setDrivers([]);
+    }
+  };
+
+  const fetchTelemetry = async () => {
+    if (!year || !meeting || !driverCode || !sessionInfo) return;
+
+    setLoading(true);
+    setError(null);
+    setTelemetry([]);
+    setCompareTelemetry([]);
+    setFastestLap(null);
+    setWeather(null);
+
+    const sk = sessionInfo.session_key;
+
+    try {
+      setLoadStep('Ricerca pilota...');
+      const driverNumber = await getDriverNumber(sk, driverCode);
+
+      setLoadStep('Download telemetria giro più veloce...');
+      const result = await getTelemetry(sk, driverNumber);
+      setTelemetry(result.telemetry);
+      setFastestLap(result.fastest_lap);
+
+      setLoadStep('Caricamento meteo...');
+      try {
+        const w = await getWeather(sk);
+        setWeather(w);
+      } catch { /* meteo opzionale */ }
+
+      if (showCompare && compareCode && compareCode !== driverCode) {
+        setLoadStep(`Comparazione con ${compareCode}...`);
+        try {
+          const compNum = await getDriverNumber(sk, compareCode);
+          const compResult = await getTelemetry(sk, compNum);
+          setCompareTelemetry(compResult.telemetry);
+        } catch { /* comparazione fallisce silenziosamente */ }
+      }
+
+      setLastQuery({
+        year,
+        gp: meeting.meeting_name,
+        session: sessionType,
+        driver: driverCode,
+      });
+
+    } catch (e) {
+      setError(e.message || 'Errore sconosciuto');
+    } finally {
+      setLoading(false);
+      setLoadStep('');
+    }
+  };
+
+  const stats = React.useMemo(() => {
+    if (!telemetry.length) return null;
+    const speeds = telemetry.map(d => d.speed).filter(Boolean);
+    const rpms   = telemetry.map(d => d.rpm).filter(Boolean);
+    return {
+      maxSpeed: speeds.length ? Math.max(...speeds) : 0,
+      avgSpeed: speeds.length ? Math.round(speeds.reduce((a, b) => a + b, 0) / speeds.length) : 0,
+      maxRpm:   rpms.length   ? Math.max(...rpms)   : 0,
+      points:   telemetry.length,
+    };
+  }, [telemetry]);
+
+  const chartData = React.useMemo(() =>
+    telemetry.filter((_, i) => i % 3 === 0),
+    [telemetry]
+  );
+  const compareChartData = React.useMemo(() =>
+    compareTelemetry.filter((_, i) => i % 3 === 0),
+    [compareTelemetry]
+  );
+
+  const canFetch  = !!year && !!meeting && !!driverCode && !!sessionInfo && !loading;
+  const flagCode  = meeting ? getFlagCode(meeting.location || meeting.meeting_name || '') : '';
+  const driverInfo = drivers.find(d => d.name_acronym === driverCode);
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  return (
+    <>
+      <Head><title>Telemetry Explorer | Ferrari F1</title></Head>
+      <div className="min-h-screen bg-zinc-950 text-white">
+        <Navigation />
+
+        <main className="max-w-7xl mx-auto px-4 pt-24 pb-20">
+
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-2 text-xs text-red-500 font-mono tracking-widest mb-2">
+              <Radio className="w-3 h-3" />
+              OPENF1 API • TELEMETRY EXPLORER • DATI DAL 2023
+            </div>
+            <h1 className="text-3xl font-black tracking-tight">
+              TELEMETRY <span className="text-red-600">EXPLORER</span>
+            </h1>
+            <p className="text-zinc-500 text-sm mt-1 font-mono">
+              Giro più veloce • Speed · RPM · Gear · Throttle · Brake · DRS
+            </p>
+          </div>
+
+          {/* ── Selettori 2×2 ── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+
+            {/* Anno */}
+            <Dropdown
+              label="YEAR"
+              isOpen={openYear}
+              onToggle={() => setOpenYear(v => !v)}
+              dropdownRef={refYear}
+              header={
+                <div className="text-xl font-black font-mono text-white">
+                  {year || '—'}
+                </div>
+              }
+            >
+              {AVAILABLE_YEARS.map(y => (
+                <button
+                  key={y}
+                  onClick={() => handleYearChange(y)}
+                  className={`w-full p-3 text-left font-mono hover:bg-zinc-800 transition-colors
+                    ${year === y ? 'bg-red-600/20 border-l-4 border-red-600 pl-4' : ''}`}
+                >
+                  {y}
+                </button>
+              ))}
+            </Dropdown>
+
+            {/* Grand Prix */}
+            <Dropdown
+              label="GRAND PRIX"
+              isOpen={openMeeting && !!year}
+              onToggle={() => year && setOpenMeeting(v => !v)}
+              disabled={!year || !meetings.length}
+              dropdownRef={refMeeting}
+              header={
+                meeting ? (
+                  <div className="flex items-center gap-2 pr-6">
+                    {flagCode && (
+                      <img src={`https://flagcdn.com/w20/${flagCode}.png`} alt="" className="w-5 h-3 object-cover rounded-sm flex-shrink-0" />
+                    )}
+                    <div>
+                      <div className="text-sm font-bold text-white leading-tight">{meeting.meeting_name}</div>
+                      <div className="text-xs text-zinc-400">{meeting.location} · {meeting.country_name}</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-zinc-400">
+                    {year ? (meetings.length ? 'Seleziona GP' : 'Caricamento...') : 'Seleziona anno prima'}
+                  </div>
+                )
+              }
+            >
+              {meetings.map(m => {
+                const fc = getFlagCode(m.location || m.meeting_name || '');
+                return (
+                  <button
+                    key={m.meeting_key}
+                    onClick={() => handleMeetingChange(m)}
+                    className={`w-full p-3 text-left hover:bg-zinc-800 transition-colors flex items-center gap-3
+                      ${meeting?.meeting_key === m.meeting_key ? 'bg-red-600/20 border-l-4 border-red-600 pl-4' : ''}`}
+                  >
+                    {fc && <img src={`https://flagcdn.com/w20/${fc}.png`} alt="" className="w-5 h-3 object-cover rounded-sm flex-shrink-0" />}
+                    <div>
+                      <div className="text-sm font-bold text-white">{m.meeting_name}</div>
+                      <div className="text-xs text-zinc-400">{m.location}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </Dropdown>
+
+            {/* Sessione */}
+            <Dropdown
+              label="SESSION"
+              isOpen={openSession}
+              onToggle={() => setOpenSession(v => !v)}
+              dropdownRef={refSession}
+              header={
+                <div className="flex items-center gap-3">
+                  <span className="text-xl font-black font-mono text-white">{sessionType}</span>
+                  <span className="text-zinc-400 text-sm">
+                    {SESSION_TYPES.find(s => s.id === sessionType)?.name}
+                  </span>
+                </div>
+              }
+            >
+              {SESSION_TYPES.map(s => (
+                <button
+                  key={s.id}
+                  onClick={() => handleSessionChange(s.id)}
+                  className={`w-full p-3 text-left hover:bg-zinc-800 transition-colors
+                    ${sessionType === s.id ? 'bg-red-600/20 border-l-4 border-red-600 pl-4' : ''}`}
+                >
+                  <span className="font-mono font-bold text-white mr-3">{s.id}</span>
+                  <span className="text-zinc-400 text-sm">{s.name}</span>
+                </button>
+              ))}
+            </Dropdown>
+
+            {/* Pilota */}
+            <Dropdown
+              label="DRIVER"
+              isOpen={openDriver && !!meeting}
+              onToggle={() => meeting && drivers.length && setOpenDriver(v => !v)}
+              disabled={!meeting || !drivers.length}
+              dropdownRef={refDriver}
+              header={
+                driverInfo ? (
+                  <div className="flex items-center gap-3 pr-6">
+                    {driverInfo.headshot_url && (
+                      <img src={driverInfo.headshot_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                    )}
+                    <div>
+                      <div className="font-black font-mono text-white text-sm">
+                        {driverInfo.name_acronym}
+                        <span className="text-zinc-400 font-normal ml-2 text-xs">#{driverInfo.driver_number}</span>
+                      </div>
+                      <div className="text-xs text-zinc-400">{driverInfo.full_name} · {driverInfo.team_name}</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-zinc-400">
+                    {meeting ? (drivers.length ? 'Seleziona pilota' : 'Caricamento piloti...') : 'Seleziona GP prima'}
+                  </div>
+                )
+              }
+            >
+              {drivers.map(d => (
+                <button
+                  key={d.driver_number}
+                  onClick={() => {
+                    setDriverCode(d.name_acronym);
+                    if (!compareCode) setCompareCode(drivers.find(x => x.name_acronym !== d.name_acronym)?.name_acronym || null);
+                    setOpenDriver(false);
+                  }}
+                  className={`w-full p-3 text-left hover:bg-zinc-800 transition-colors flex items-center gap-3
+                    ${driverCode === d.name_acronym ? 'bg-red-600/20 border-l-4 border-red-600 pl-4' : ''}`}
+                >
+                  {d.headshot_url && (
+                    <img src={d.headshot_url} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+                  )}
+                  <div>
+                    <div className="font-mono font-bold text-white text-sm">
+                      {d.name_acronym}
+                      <span className="text-zinc-500 font-normal ml-2">#{d.driver_number}</span>
+                    </div>
+                    <div className="text-xs text-zinc-400">{d.full_name} · {d.team_name}</div>
+                  </div>
+                </button>
+              ))}
+            </Dropdown>
+          </div>
+
+          {/* ── Barra comparazione + fetch ── */}
+          <div className="flex flex-wrap items-center gap-3 mb-6">
+            <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2">
+              <span className="text-xs text-zinc-500 font-mono tracking-widest">COMPARE:</span>
+              <select
+                value={compareCode || ''}
+                onChange={e => setCompareCode(e.target.value || null)}
+                disabled={!showCompare || !drivers.length}
+                className="bg-zinc-800 text-white rounded px-2 py-1 text-sm font-mono disabled:opacity-40"
+              >
+                {drivers.filter(d => d.name_acronym !== driverCode).map(d => (
+                  <option key={d.driver_number} value={d.name_acronym}>
+                    {d.name_acronym} — {d.full_name}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => setShowCompare(v => !v)}
+                className={`px-3 py-1 rounded text-xs font-mono transition-all
+                  ${showCompare ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}
+              >
+                {showCompare ? 'ON' : 'OFF'}
+              </button>
+            </div>
+
+            <div className="flex-1" />
+
+            {lastQuery && (
+              <div className="hidden md:block text-xs text-zinc-600 font-mono">
+                {lastQuery.year} · {lastQuery.gp} · {lastQuery.driver} · {lastQuery.session}
+              </div>
+            )}
+
+            <button
+              onClick={fetchTelemetry}
+              disabled={!canFetch}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-mono font-bold text-sm transition-all
+                ${canFetch
+                  ? 'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-900/30'
+                  : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
+                }`}
+            >
+              {loading
+                ? <><RefreshCw className="w-4 h-4 animate-spin" /> {loadStep || 'LOADING...'}</>
+                : <><Search className="w-4 h-4" /> FETCH TELEMETRY</>
+              }
+            </button>
+          </div>
+
+          {/* Hint */}
+          {!canFetch && !loading && (
+            <div className="mb-4 text-xs text-zinc-600 font-mono text-center">
+              {!year && '← Seleziona un anno per iniziare'}
+              {year && !meeting && '← Seleziona un Grand Prix'}
+              {year && meeting && !driverCode && '← Seleziona un pilota'}
+              {year && meeting && driverCode && !sessionInfo && '← Sessione non ancora caricata'}
+            </div>
+          )}
+
+          {/* Errore */}
+          {error && (
+            <div className="mb-6 bg-red-950/30 border border-red-900/50 rounded-xl p-4">
+              <div className="text-red-400 font-mono font-bold text-sm mb-1">⚠ {error}</div>
+              <div className="text-red-500/60 text-xs font-mono">
+                OpenF1 ha dati dal 2023. Prova anno 2023 o 2024, e verifica che la sessione esista per questo GP.
+              </div>
+            </div>
+          )}
+
+          {/* ── Contenuto dati ── */}
+          {telemetry.length > 0 && (
+            <>
+              {/* Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <StatCard label="TOP SPEED"   value={`${stats.maxSpeed} km/h`}        icon={<Zap className="w-4 h-4 text-red-500" />} sub="Giro più veloce" />
+                <StatCard label="AVG SPEED"   value={`${stats.avgSpeed} km/h`}        icon={<Gauge className="w-4 h-4 text-yellow-500" />} />
+                <StatCard label="MAX RPM"     value={stats.maxRpm.toLocaleString()}    icon={<Activity className="w-4 h-4 text-blue-500" />} />
+                <StatCard label="DATA POINTS" value={stats.points.toLocaleString()}   icon={<Cpu className="w-4 h-4 text-green-500" />} sub="~3.7 Hz sample rate" />
+              </div>
+
+              {/* Lap time */}
+              {fastestLap && (
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-6 flex flex-wrap gap-6">
+                  <div>
+                    <div className="text-xs text-zinc-500 font-mono tracking-widest mb-1">FASTEST LAP</div>
+                    <div className="text-lg font-black font-mono text-red-500">
+                      Lap {fastestLap.lap_number}
+                    </div>
+                  </div>
+                  {fastestLap.lap_duration && (
+                    <div>
+                      <div className="text-xs text-zinc-500 font-mono tracking-widest mb-1">LAP TIME</div>
+                      <div className="text-lg font-black font-mono text-white">
+                        {formatLapTime(fastestLap.lap_duration)}
+                      </div>
+                    </div>
+                  )}
+                  {[1, 2, 3].map(s => fastestLap[`sector_${s}`] ? (
+                    <div key={s}>
+                      <div className="text-xs text-zinc-500 font-mono tracking-widest mb-1">S{s}</div>
+                      <div className="text-lg font-black font-mono text-zinc-300">
+                        {fastestLap[`sector_${s}`].toFixed(3)}s
+                      </div>
+                    </div>
+                  ) : null)}
+                  {/* Meteo */}
+                  {weather && (
+                    <>
+                      {weather.air_temp != null && (
+                        <div>
+                          <div className="text-xs text-zinc-500 font-mono tracking-widest mb-1 flex items-center gap-1"><Thermometer className="w-3 h-3" /> ARIA</div>
+                          <div className="text-lg font-black font-mono text-zinc-300">{weather.air_temp}°C</div>
+                        </div>
+                      )}
+                      {weather.track_temp != null && (
+                        <div>
+                          <div className="text-xs text-zinc-500 font-mono tracking-widest mb-1">PISTA</div>
+                          <div className="text-lg font-black font-mono text-zinc-300">{weather.track_temp}°C</div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Grafico principale */}
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-6">
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                  <div className="text-xs text-zinc-500 font-mono tracking-widest">
+                    {driverCode} · {meeting?.meeting_name} · {sessionType} · {year}
+                    {showCompare && compareCode && compareTelemetry.length > 0 && (
+                      <span className="text-blue-400 ml-2">vs {compareCode}</span>
+                    )}
+                  </div>
+                  <div className="flex gap-1">
+                    {['speed', 'rpm', 'gear', 'inputs'].map(tab => (
+                      <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`px-3 py-1 text-xs rounded font-mono transition-all
+                          ${activeTab === tab ? 'bg-red-600 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'}`}
+                      >
+                        {tab.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <ResponsiveContainer width="100%" height={280}>
+                  {activeTab === 'speed' ? (
+                    <AreaChart data={mergeCompare(chartData, compareChartData, showCompare, compareCode)}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                      <XAxis dataKey="distance" stroke="#52525b" tick={{ fontSize: 10 }} tickFormatter={v => `${(v / 1000).toFixed(1)}km`} />
+                      <YAxis stroke="#52525b" tick={{ fontSize: 10 }} unit=" km/h" />
+                      <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #3f3f46', fontSize: 12 }} formatter={(v, n) => [`${v} km/h`, n]} />
+                      {showCompare && compareTelemetry.length > 0 && <Legend />}
+                      <Area type="monotone" dataKey="speed" stroke="#ef4444" fill="#ef444415" strokeWidth={2} dot={false} name={driverCode} />
+                      {showCompare && compareTelemetry.length > 0 && (
+                        <Area type="monotone" dataKey="speed_compare" stroke="#3b82f6" fill="#3b82f615" strokeWidth={2} dot={false} name={compareCode} />
+                      )}
+                    </AreaChart>
+                  ) : activeTab === 'rpm' ? (
+                    <AreaChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                      <XAxis dataKey="distance" stroke="#52525b" tick={{ fontSize: 10 }} tickFormatter={v => `${(v / 1000).toFixed(1)}km`} />
+                      <YAxis stroke="#52525b" tick={{ fontSize: 10 }} />
+                      <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #3f3f46', fontSize: 12 }} />
+                      <Area type="monotone" dataKey="rpm" stroke="#f59e0b" fill="#f59e0b15" strokeWidth={2} dot={false} />
+                    </AreaChart>
+                  ) : activeTab === 'gear' ? (
+                    <BarChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                      <XAxis dataKey="distance" stroke="#52525b" tick={{ fontSize: 10 }} tickFormatter={v => `${(v / 1000).toFixed(1)}km`} />
+                      <YAxis stroke="#52525b" tick={{ fontSize: 10 }} domain={[1, 8]} />
+                      <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #3f3f46', fontSize: 12 }} />
+                      <Bar dataKey="gear" fill="#8b5cf6" maxBarSize={4} />
+                    </BarChart>
+                  ) : (
+                    <AreaChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                      <XAxis dataKey="distance" stroke="#52525b" tick={{ fontSize: 10 }} tickFormatter={v => `${(v / 1000).toFixed(1)}km`} />
+                      <YAxis stroke="#52525b" tick={{ fontSize: 10 }} domain={[0, 100]} />
+                      <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #3f3f46', fontSize: 12 }} formatter={(v, n) => [`${v}%`, n]} />
+                      <Legend />
+                      <Area type="monotone" dataKey="throttle" stroke="#22c55e" fill="#22c55e15" strokeWidth={1.5} dot={false} name="Throttle" />
+                      <Area type="monotone" dataKey="brake" stroke="#ef4444" fill="#ef444415" strokeWidth={1.5} dot={false} name="Brake" />
+                    </AreaChart>
+                  )}
+                </ResponsiveContainer>
+              </div>
+            </>
+          )}
+
+          {/* Placeholder */}
+          {!loading && !error && !telemetry.length && (
+            <div className="text-center py-24 border border-zinc-800/50 rounded-xl">
+              <Radio className="w-10 h-10 mx-auto mb-4 text-zinc-700" />
+              <div className="text-xl font-black font-mono text-zinc-600 mb-2">NO DATA</div>
+              <div className="text-sm font-mono text-zinc-700">
+                Seleziona Anno → GP → Sessione → Pilota → FETCH TELEMETRY
+              </div>
+              <div className="text-xs font-mono text-zinc-800 mt-2">
+                Powered by OpenF1 · Dati disponibili dal 2023
+              </div>
+            </div>
+          )}
+
+          {/* Status bar */}
+          <div className="mt-8 flex items-center justify-between border-t border-zinc-800/50 pt-4 text-xs text-zinc-700 font-mono">
+            <span>OpenF1 API · openf1.org</span>
+            <span>{meeting?.meeting_name || '—'} · {driverCode || '—'} · {sessionType} · {year || '—'}</span>
+            <span>{telemetry.length > 0 ? `${telemetry.length} punti` : 'Nessun dato'}</span>
+          </div>
+
+        </main>
+
+        {/* Loading overlay */}
+        {loading && (
+          <div className="fixed inset-0 bg-zinc-950/80 flex items-center justify-center z-50 backdrop-blur-sm">
+            <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-8 text-center max-w-sm w-full mx-4">
+              <RefreshCw className="w-8 h-8 text-red-500 animate-spin mx-auto mb-4" />
+              <div className="text-sm font-mono font-bold text-zinc-300 mb-2">FETCHING OPENF1 DATA</div>
+              <div className="text-xs text-zinc-500 font-mono mb-3">{loadStep}</div>
+              <div className="text-xs text-zinc-700 font-mono">
+                {meeting?.meeting_name} · {driverCode} · {sessionType} · {year}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <Footer />
+      </div>
+    </>
+  );
+}
+
+function formatLapTime(seconds) {
+  if (!seconds) return '—';
+  const m = Math.floor(seconds / 60);
+  const s = (seconds % 60).toFixed(3).padStart(6, '0');
+  return `${m}:${s}`;
+}
+
+function mergeCompare(main, compare, showCompare, compareCode) {
+  if (!showCompare || !compare.length) return main;
+
+  const compMap = new Map();
+  compare.forEach(d => compMap.set(d.distance, d.speed));
+
+  return main.map(d => {
+    const compSpeed = compMap.get(d.distance) ?? findClosest(compare, d.distance);
+    return { ...d, speed_compare: compSpeed };
+  });
+}
+
+function findClosest(arr, dist) {
+  if (!arr.length) return null;
+  let best = arr[0];
+  let bestDiff = Math.abs(arr[0].distance - dist);
+  for (const p of arr) {
+    const diff = Math.abs(p.distance - dist);
+    if (diff < bestDiff) { best = p; bestDiff = diff; }
+  }
+  return best.speed;
 }
