@@ -23,7 +23,9 @@ import {
   CircleDot,
   Calendar,
   ChevronDown,
-  Filter
+  Filter,
+  Search,
+  RefreshCw
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -41,6 +43,9 @@ import {
 } from 'recharts';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
+
+// Anni disponibili (FastF1 ha dati dal 2018)
+const AVAILABLE_YEARS = [2024, 2023, 2022, 2021, 2020, 2019, 2018];
 
 // Mappa circuiti → paesi per bandiere
 const circuitToCountry = {
@@ -168,135 +173,138 @@ const getFlagCodeFromCircuit = (circuitName) => {
 export default function LiveTimingPage() {
   const [telemetryData, setTelemetryData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedYear, setSelectedYear] = useState(2024);
   const [selectedDriver, setSelectedDriver] = useState('LEC');
   const [selectedRace, setSelectedRace] = useState(RACES_2024[15]); // Monza di default
   const [selectedSession, setSelectedSession] = useState('Q');
   const [comparisonData, setComparisonData] = useState([]);
-  const [weatherData, setWeatherData] = useState({
-    temperature: 24,
-    trackTemp: 32,
-    humidity: 45,
-    windSpeed: 3.2,
-    windDirection: 'NE',
-    pressure: 1013,
-    condition: 'Sereno'
-  });
-  const [sectorTimes, setSectorTimes] = useState({
-    s1: { time: '23.456', delta: '+0.123' },
-    s2: { time: '26.789', delta: '-0.234' },
-    s3: { time: '18.234', delta: '+0.045' }
-  });
+  const [showComparison, setShowComparison] = useState(false);
+  const [comparisonDriver, setComparisonDriver] = useState('SAI');
+  const [activeTab, setActiveTab] = useState('speed');
+  const [showYearDropdown, setShowYearDropdown] = useState(false);
   const [showDriverDropdown, setShowDriverDropdown] = useState(false);
   const [showRaceDropdown, setShowRaceDropdown] = useState(false);
   const [showSessionDropdown, setShowSessionDropdown] = useState(false);
-  const [showComparison, setShowComparison] = useState(true);
-  const [comparisonDriver, setComparisonDriver] = useState('SAI');
-  const [activeTab, setActiveTab] = useState('speed');
+  const [lastFetchParams, setLastFetchParams] = useState(null);
 
-  // Fetch telemetria quando cambiano i parametri
+  // Recupera l'ultima gara disponibile da FastF1 all'avvio
   useEffect(() => {
-    fetchTelemetry();
-  }, [selectedDriver, selectedRace, selectedSession]);
+    fetchLatestRace();
+  }, []);
+
+  const fetchLatestRace = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/fastf1/latest-race');
+      if (response.ok) {
+        const data = await response.json();
+        // Cerca la gara corrispondente nella lista RACES_2024
+        const latestRace = RACES_2024.find(r => 
+          r.circuit.toLowerCase().includes(data.circuit.toLowerCase()) ||
+          data.circuit.toLowerCase().includes(r.circuit.toLowerCase())
+        );
+        if (latestRace) {
+          setSelectedRace(latestRace);
+          setSelectedYear(data.year);
+        }
+      }
+    } catch (error) {
+      console.error("Errore nel recuperare l'ultima gara:", error);
+    }
+  };
 
   const fetchTelemetry = async () => {
     setLoading(true);
+    setError(null);
+    
+    const params = {
+      year: selectedYear,
+      gp: selectedRace.circuit,
+      session: selectedSession,
+      driver: selectedDriver
+    };
+    
+    setLastFetchParams(params);
+    
     try {
-      const response = await fetch(`http://localhost:5000/api/fastf1/telemetry?year=2024&gp=${selectedRace.circuit}&session=${selectedSession}&driver=${selectedDriver}`);
+      // Fetch telemetria principale
+      const response = await fetch(`http://localhost:5000/api/fastf1/telemetry?year=${selectedYear}&gp=${encodeURIComponent(selectedRace.circuit)}&session=${selectedSession}&driver=${selectedDriver}`);
       
-      if (response.ok) {
-        const data = await response.json();
-        
-        const formattedData = data.telemetry.map((point, index) => ({
-          distance: point.Distance,
-          speed: point.Speed,
-          rpm: point.RPM || Math.floor(Math.random() * 3000 + 10000),
-          gear: point.nGear || Math.floor(Math.random() * 8) + 1,
-          throttle: point.Throttle || Math.floor(Math.random() * 100),
-          brake: point.Brake || 0,
-          drs: point.DRS || 0,
-          time: point.Time || index * 0.1
-        }));
-        
-        setTelemetryData(formattedData);
-        
-        // Carica dati comparazione se attiva
-        if (showComparison && comparisonDriver !== selectedDriver) {
-          const comparisonResponse = await fetch(`http://localhost:5000/api/fastf1/telemetry?year=2024&gp=${selectedRace.circuit}&session=${selectedSession}&driver=${comparisonDriver}`);
-          
-          if (comparisonResponse.ok) {
-            const comparisonJson = await comparisonResponse.json();
-            const formattedComparison = comparisonJson.telemetry.map((point, index) => ({
-              distance: point.Distance,
-              speed: point.Speed,
-              driver: comparisonDriver
-            }));
-            setComparisonData(formattedComparison);
-          }
-        }
-      } else {
-        generateMockData();
+      if (!response.ok) {
+        throw new Error(`Errore HTTP: ${response.status}`);
       }
+      
+      const data = await response.json();
+      
+      if (!data.telemetry || data.telemetry.length === 0) {
+        throw new Error('Nessun dato telemetrico disponibile');
+      }
+      
+      const formattedData = data.telemetry.map((point) => ({
+        distance: point.Distance,
+        speed: point.Speed,
+        rpm: point.RPM || 0,
+        gear: point.nGear || 0,
+        throttle: point.Throttle || 0,
+        brake: point.Brake || 0,
+        drs: point.DRS || 0,
+        time: point.Time || 0
+      }));
+      
+      setTelemetryData(formattedData);
+      
+      // Fetch comparazione se attiva
+      if (showComparison && comparisonDriver !== selectedDriver) {
+        await fetchComparisonData();
+      } else {
+        setComparisonData([]);
+      }
+      
     } catch (error) {
       console.error("Errore nel caricamento dati FastF1:", error);
-      generateMockData();
+      setError(error.message);
+      setTelemetryData([]);
+      setComparisonData([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const generateMockData = () => {
-    const mockData = [];
-    const sectors = [2300, 3300, 1500];
-    let distance = 0;
-    
-    for (let i = 0; i < 3; i++) {
-      for (let d = 0; d < sectors[i]; d += 10) {
-        let speed;
-        if (i === 0) {
-          speed = 150 + Math.sin(d / 100) * 50 + Math.random() * 10;
-        } else if (i === 1) {
-          speed = 280 + Math.sin(d / 200) * 80 + Math.random() * 15;
-        } else {
-          speed = 200 + Math.cos(d / 150) * 70 + Math.random() * 12;
-        }
-        
-        mockData.push({
-          distance: distance,
-          speed: Math.round(speed),
-          rpm: Math.round(8000 + speed * 30 + Math.random() * 500),
-          gear: Math.floor(speed / 40) + 1,
-          throttle: Math.random() > 0.1 ? Math.round(70 + Math.random() * 30) : 0,
-          brake: Math.random() > 0.8 ? Math.round(50 + Math.random() * 50) : 0,
-          drs: Math.random() > 0.7 ? 1 : 0,
-          time: distance / 70
-        });
-        
-        distance += 10;
+  const fetchComparisonData = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/fastf1/telemetry?year=${selectedYear}&gp=${encodeURIComponent(selectedRace.circuit)}&session=${selectedSession}&driver=${comparisonDriver}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        const formattedComparison = data.telemetry.map((point) => ({
+          distance: point.Distance,
+          speed: point.Speed,
+          driver: comparisonDriver
+        }));
+        setComparisonData(formattedComparison);
       }
+    } catch (error) {
+      console.error("Errore nel caricamento dati comparazione:", error);
     }
-    
-    setTelemetryData(mockData);
-    
-    if (showComparison && comparisonDriver !== selectedDriver) {
-      const mockComparison = mockData.map(point => ({
-        distance: point.distance,
-        speed: point.speed + (Math.random() * 20 - 10),
-        driver: comparisonDriver
-      }));
-      setComparisonData(mockComparison);
+  };
+
+  const handleSearch = () => {
+    fetchTelemetry();
+    if (showComparison) {
+      fetchComparisonData();
     }
   };
 
   const calculateStats = () => {
     if (telemetryData.length === 0) return { maxSpeed: 0, avgSpeed: 0, maxRpm: 0 };
     
-    const speeds = telemetryData.map(d => d.speed);
-    const rpms = telemetryData.map(d => d.rpm);
+    const speeds = telemetryData.map(d => d.speed).filter(s => s > 0);
+    const rpms = telemetryData.map(d => d.rpm).filter(r => r > 0);
     
     return {
-      maxSpeed: Math.max(...speeds),
-      avgSpeed: Math.round(speeds.reduce((a, b) => a + b, 0) / speeds.length),
-      maxRpm: Math.max(...rpms)
+      maxSpeed: speeds.length > 0 ? Math.max(...speeds) : 0,
+      avgSpeed: speeds.length > 0 ? Math.round(speeds.reduce((a, b) => a + b, 0) / speeds.length) : 0,
+      maxRpm: rpms.length > 0 ? Math.max(...rpms) : 0
     };
   };
 
@@ -318,12 +326,53 @@ export default function LiveTimingPage() {
         {/* Header con selezione */}
         <div className="mb-8">
           <div className="text-red-600 font-black uppercase text-xs mb-2 tracking-[0.2em]">
-            FASTF1 TELEMETRY • LIVE DATA
+            FASTF1 TELEMETRY • CUSTOM QUERY
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Selezione Gara */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            
+            {/* Selezione Anno */}
             <div className="relative">
+              <button
+                onClick={() => setShowYearDropdown(!showYearDropdown)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-left hover:border-red-900/50 transition-all group"
+              >
+                <p className="text-[10px] text-zinc-500 font-black uppercase mb-1 tracking-widest">Year</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-zinc-800 rounded-lg flex items-center justify-center">
+                      <Calendar size={16} className="text-red-500" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-lg">{selectedYear}</p>
+                    </div>
+                  </div>
+                  <ChevronDown size={18} className="text-zinc-500 group-hover:text-red-500 transition-colors" />
+                </div>
+              </button>
+              
+              {showYearDropdown && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-800 rounded-lg z-50 shadow-2xl">
+                  {AVAILABLE_YEARS.map(year => (
+                    <button
+                      key={year}
+                      onClick={() => {
+                        setSelectedYear(year);
+                        setShowYearDropdown(false);
+                      }}
+                      className={`w-full p-3 text-left hover:bg-zinc-800 transition-colors ${
+                        selectedYear === year ? 'bg-red-600/20 border-l-4 border-red-600' : ''
+                      }`}
+                    >
+                      <p className="text-sm font-bold">{year}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Selezione Gara */}
+            <div className="relative md:col-span-2">
               <button
                 onClick={() => setShowRaceDropdown(!showRaceDropdown)}
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-left hover:border-red-900/50 transition-all group"
@@ -334,12 +383,12 @@ export default function LiveTimingPage() {
                     {flagCode && (
                       <img src={`https://flagcdn.com/w40/${flagCode}.png`} className="h-6 w-auto rounded" alt="flag" />
                     )}
-                    <div>
-                      <p className="font-bold uppercase">{selectedRace.name}</p>
-                      <p className="text-xs text-zinc-500">{selectedRace.circuit}</p>
+                    <div className="truncate">
+                      <p className="font-bold uppercase truncate">{selectedRace.name}</p>
+                      <p className="text-xs text-zinc-500 truncate">{selectedRace.circuit}</p>
                     </div>
                   </div>
-                  <ChevronDown size={18} className="text-zinc-500 group-hover:text-red-500 transition-colors" />
+                  <ChevronDown size={18} className="text-zinc-500 group-hover:text-red-500 transition-colors flex-shrink-0" />
                 </div>
               </button>
               
@@ -356,10 +405,10 @@ export default function LiveTimingPage() {
                         selectedRace.id === race.id ? 'bg-red-600/20 border-l-4 border-red-600' : ''
                       }`}
                     >
-                      <img src={`https://flagcdn.com/w20/${race.flag}.png`} className="h-4 w-auto rounded" alt="" />
-                      <div>
-                        <p className="text-sm font-bold">{race.name}</p>
-                        <p className="text-xs text-zinc-500">{race.circuit}</p>
+                      <img src={`https://flagcdn.com/w20/${race.flag}.png`} className="h-4 w-auto rounded flex-shrink-0" alt="" />
+                      <div className="truncate">
+                        <p className="text-sm font-bold truncate">{race.name}</p>
+                        <p className="text-xs text-zinc-500 truncate">{race.circuit}</p>
                       </div>
                     </button>
                   ))}
@@ -376,15 +425,15 @@ export default function LiveTimingPage() {
                 <p className="text-[10px] text-zinc-500 font-black uppercase mb-1 tracking-widest">Driver</p>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 bg-${selectedDriverInfo?.color}-600/20 rounded-lg flex items-center justify-center`}>
-                      <span className={`text-${selectedDriverInfo?.color}-400 font-black text-sm`}>#{selectedDriverInfo?.number}</span>
+                    <div className={`w-8 h-8 bg-${selectedDriverInfo?.color || 'red'}-600/20 rounded-lg flex items-center justify-center flex-shrink-0`}>
+                      <span className={`text-${selectedDriverInfo?.color || 'red'}-400 font-black text-sm`}>#{selectedDriverInfo?.number || '00'}</span>
                     </div>
-                    <div>
+                    <div className="truncate">
                       <p className="font-bold uppercase">{selectedDriver}</p>
-                      <p className="text-xs text-zinc-500">{selectedDriverInfo?.name}</p>
+                      <p className="text-xs text-zinc-500 truncate">{selectedDriverInfo?.name || ''}</p>
                     </div>
                   </div>
-                  <ChevronDown size={18} className="text-zinc-500 group-hover:text-red-500 transition-colors" />
+                  <ChevronDown size={18} className="text-zinc-500 group-hover:text-red-500 transition-colors flex-shrink-0" />
                 </div>
               </button>
               
@@ -401,12 +450,12 @@ export default function LiveTimingPage() {
                         selectedDriver === driver.code ? 'bg-red-600/20 border-l-4 border-red-600' : ''
                       }`}
                     >
-                      <div className={`w-8 h-8 bg-${driver.color}-600/20 rounded-lg flex items-center justify-center`}>
+                      <div className={`w-8 h-8 bg-${driver.color}-600/20 rounded-lg flex items-center justify-center flex-shrink-0`}>
                         <span className={`text-${driver.color}-400 font-black text-sm`}>#{driver.number}</span>
                       </div>
-                      <div>
+                      <div className="truncate">
                         <p className="text-sm font-bold">{driver.code} • {driver.name}</p>
-                        <p className="text-xs text-zinc-500">{driver.team}</p>
+                        <p className="text-xs text-zinc-500 truncate">{driver.team}</p>
                       </div>
                     </button>
                   ))}
@@ -423,7 +472,7 @@ export default function LiveTimingPage() {
                 <p className="text-[10px] text-zinc-500 font-black uppercase mb-1 tracking-widest">Session</p>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-zinc-800 rounded-lg flex items-center justify-center">
+                    <div className="w-8 h-8 bg-zinc-800 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Clock size={16} className="text-red-500" />
                     </div>
                     <div>
@@ -431,7 +480,7 @@ export default function LiveTimingPage() {
                       <p className="text-xs text-zinc-500">{SESSIONS.find(s => s.id === selectedSession)?.name}</p>
                     </div>
                   </div>
-                  <ChevronDown size={18} className="text-zinc-500 group-hover:text-red-500 transition-colors" />
+                  <ChevronDown size={18} className="text-zinc-500 group-hover:text-red-500 transition-colors flex-shrink-0" />
                 </div>
               </button>
               
@@ -455,15 +504,17 @@ export default function LiveTimingPage() {
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Comparazione Pilota */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-              <p className="text-[10px] text-zinc-500 font-black uppercase mb-1 tracking-widest">Compare with</p>
-              <div className="flex items-center gap-3">
+          {/* Barra di controllo comparazione e ricerca */}
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 bg-zinc-900/50 rounded-lg p-2">
+                <span className="text-xs text-zinc-400">Compare:</span>
                 <select
                   value={comparisonDriver}
                   onChange={(e) => setComparisonDriver(e.target.value)}
-                  className="bg-zinc-800 text-white rounded-lg px-3 py-2 text-sm font-mono flex-1"
+                  className="bg-zinc-800 text-white rounded-lg px-3 py-1.5 text-sm font-mono"
                   disabled={!showComparison}
                 >
                   {DRIVERS_2024.filter(d => d.code !== selectedDriver).map(d => (
@@ -472,7 +523,7 @@ export default function LiveTimingPage() {
                 </select>
                 <button
                   onClick={() => setShowComparison(!showComparison)}
-                  className={`px-4 py-2 rounded-lg text-xs font-mono transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
                     showComparison 
                       ? 'bg-red-600 text-white' 
                       : 'bg-zinc-800 text-zinc-400'
@@ -481,208 +532,261 @@ export default function LiveTimingPage() {
                   {showComparison ? 'ON' : 'OFF'}
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-          <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-xl border border-zinc-800 p-5">
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="text-zinc-500 text-xs font-mono mb-1">TOP SPEED</div>
-                <div className="text-3xl font-bold text-red-500">
-                  {stats.maxSpeed}
-                  <span className="text-sm text-zinc-500 ml-1">km/h</span>
+              
+              {lastFetchParams && (
+                <div className="text-xs text-zinc-600">
+                  Last query: {lastFetchParams.year} • {lastFetchParams.gp} • {lastFetchParams.driver} • {lastFetchParams.session}
                 </div>
-              </div>
-              <Gauge className="w-5 h-5 text-red-500" />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-xl border border-zinc-800 p-5">
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="text-zinc-500 text-xs font-mono mb-1">AVG SPEED</div>
-                <div className="text-3xl font-bold text-blue-400">
-                  {stats.avgSpeed}
-                  <span className="text-sm text-zinc-500 ml-1">km/h</span>
-                </div>
-              </div>
-              <TrendingUp className="w-5 h-5 text-blue-400" />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-xl border border-zinc-800 p-5">
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="text-zinc-500 text-xs font-mono mb-1">MAX RPM</div>
-                <div className="text-3xl font-bold text-purple-400">
-                  {stats.maxRpm.toLocaleString()}
-                </div>
-              </div>
-              <Cpu className="w-5 h-5 text-purple-400" />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-xl border border-zinc-800 p-5">
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="text-zinc-500 text-xs font-mono mb-1">BEST LAP</div>
-                <div className="text-3xl font-bold text-green-400">1:21.345</div>
-              </div>
-              <Timer className="w-5 h-5 text-green-400" />
-            </div>
-          </div>
-        </div>
-
-        {/* Main telemetry section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-          
-          {/* Telemetry chart */}
-          <div className="lg:col-span-2 bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
-            <div className="bg-zinc-900 p-4 border-b border-zinc-800">
-              <div className="flex justify-between items-center">
-                <h2 className="text-sm font-mono flex items-center gap-2">
-                  <Activity size={16} className="text-red-500" /> TELEMETRY • {selectedDriver} • {selectedRace.circuit} • {selectedSession}
-                </h2>
-                <div className="flex gap-1 bg-zinc-800 rounded-lg p-1">
-                  {['speed', 'rpm', 'gear'].map(tab => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`px-3 py-1 text-xs rounded-md transition-all ${
-                        activeTab === tab 
-                          ? 'bg-red-600 text-white' 
-                          : 'text-zinc-400 hover:text-white'
-                      }`}
-                    >
-                      {tab.toUpperCase()}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              )}
             </div>
             
-            <div className="h-[350px] p-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={telemetryData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-                  <XAxis 
-                    dataKey="distance" 
-                    tick={{fill: '#666', fontSize: 11}}
-                    label={{ value: 'Distance (m)', position: 'bottom', fill: '#666', fontSize: 11 }}
-                  />
-                  <YAxis 
-                    yAxisId="left"
-                    tick={{fill: '#666', fontSize: 11}}
-                    domain={activeTab === 'speed' ? [0, 360] : activeTab === 'rpm' ? [0, 15000] : [0, 9]}
-                  />
-                  <Tooltip />
-                  
-                  {activeTab === 'speed' && (
-                    <>
-                      <Line 
-                        yAxisId="left"
-                        type="monotone" 
-                        dataKey="speed" 
-                        stroke="#ff0000" 
-                        dot={false} 
-                        strokeWidth={2.5}
-                        name={`${selectedDriver} Speed`}
+            <button
+              onClick={handleSearch}
+              disabled={loading}
+              className="bg-red-600 hover:bg-red-700 disabled:bg-red-900/50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-mono text-sm flex items-center gap-2 transition-all"
+            >
+              {loading ? (
+                <>
+                  <RefreshCw size={16} className="animate-spin" />
+                  LOADING...
+                </>
+              ) : (
+                <>
+                  <Search size={16} />
+                  FETCH TELEMETRY
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Messaggio di errore */}
+        {error && (
+          <div className="mb-4 bg-red-900/20 border border-red-900/50 rounded-lg p-4">
+            <p className="text-red-400 text-sm font-mono">Error: {error}</p>
+            <p className="text-xs text-zinc-500 mt-1">Try different parameters or check if FastF1 server is running</p>
+          </div>
+        )}
+
+        {/* Stats cards - mostrate solo se ci sono dati */}
+        {telemetryData.length > 0 && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+              <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-xl border border-zinc-800 p-5">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="text-zinc-500 text-xs font-mono mb-1">TOP SPEED</div>
+                    <div className="text-3xl font-bold text-red-500">
+                      {stats.maxSpeed}
+                      <span className="text-sm text-zinc-500 ml-1">km/h</span>
+                    </div>
+                  </div>
+                  <Gauge className="w-5 h-5 text-red-500" />
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-xl border border-zinc-800 p-5">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="text-zinc-500 text-xs font-mono mb-1">AVG SPEED</div>
+                    <div className="text-3xl font-bold text-blue-400">
+                      {stats.avgSpeed}
+                      <span className="text-sm text-zinc-500 ml-1">km/h</span>
+                    </div>
+                  </div>
+                  <TrendingUp className="w-5 h-5 text-blue-400" />
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-xl border border-zinc-800 p-5">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="text-zinc-500 text-xs font-mono mb-1">MAX RPM</div>
+                    <div className="text-3xl font-bold text-purple-400">
+                      {stats.maxRpm.toLocaleString()}
+                    </div>
+                  </div>
+                  <Cpu className="w-5 h-5 text-purple-400" />
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-xl border border-zinc-800 p-5">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="text-zinc-500 text-xs font-mono mb-1">DATA POINTS</div>
+                    <div className="text-3xl font-bold text-green-400">
+                      {telemetryData.length}
+                    </div>
+                  </div>
+                  <Disc className="w-5 h-5 text-green-400" />
+                </div>
+              </div>
+            </div>
+
+            {/* Main telemetry section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+              
+              {/* Telemetry chart */}
+              <div className="lg:col-span-2 bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
+                <div className="bg-zinc-900 p-4 border-b border-zinc-800">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-sm font-mono flex items-center gap-2">
+                      <Activity size={16} className="text-red-500" /> TELEMETRY • {selectedDriver} • {selectedRace.circuit} • {selectedSession} • {selectedYear}
+                    </h2>
+                    <div className="flex gap-1 bg-zinc-800 rounded-lg p-1">
+                      {['speed', 'rpm', 'gear'].map(tab => (
+                        <button
+                          key={tab}
+                          onClick={() => setActiveTab(tab)}
+                          className={`px-3 py-1 text-xs rounded-md transition-all ${
+                            activeTab === tab 
+                              ? 'bg-red-600 text-white' 
+                              : 'text-zinc-400 hover:text-white'
+                          }`}
+                        >
+                          {tab.toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="h-[350px] p-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={telemetryData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
+                      <XAxis 
+                        dataKey="distance" 
+                        tick={{fill: '#666', fontSize: 11}}
+                        label={{ value: 'Distance (m)', position: 'bottom', fill: '#666', fontSize: 11 }}
                       />
-                      {showComparison && comparisonData.length > 0 && (
-                        <Line 
+                      <YAxis 
+                        yAxisId="left"
+                        tick={{fill: '#666', fontSize: 11}}
+                        domain={activeTab === 'speed' ? [0, 360] : activeTab === 'rpm' ? [0, 15000] : [0, 9]}
+                      />
+                      <Tooltip 
+                        contentStyle={{backgroundColor: '#000', border: '1px solid #ff0000'}}
+                      />
+                      
+                      {activeTab === 'speed' && (
+                        <>
+                          <Line 
+                            yAxisId="left"
+                            type="monotone" 
+                            dataKey="speed" 
+                            stroke="#ff0000" 
+                            dot={false} 
+                            strokeWidth={2.5}
+                            name={`${selectedDriver} Speed`}
+                          />
+                          {showComparison && comparisonData.length > 0 && (
+                            <Line 
+                              yAxisId="left"
+                              data={comparisonData}
+                              type="monotone" 
+                              dataKey="speed" 
+                              stroke="#3b82f6" 
+                              dot={false} 
+                              strokeWidth={2}
+                              strokeDasharray="5 5"
+                              name={`${comparisonDriver} Speed`}
+                            />
+                          )}
+                        </>
+                      )}
+                      
+                      {activeTab === 'rpm' && (
+                        <Area 
                           yAxisId="left"
-                          data={comparisonData}
                           type="monotone" 
-                          dataKey="speed" 
-                          stroke="#3b82f6" 
-                          dot={false} 
-                          strokeWidth={2}
-                          strokeDasharray="5 5"
-                          name={`${comparisonDriver} Speed`}
+                          dataKey="rpm" 
+                          stroke="#a855f7" 
+                          fill="#a855f7" 
+                          fillOpacity={0.2}
+                          name="RPM"
                         />
                       )}
-                    </>
-                  )}
-                  
-                  {activeTab === 'rpm' && (
-                    <Area 
-                      yAxisId="left"
-                      type="monotone" 
-                      dataKey="rpm" 
-                      stroke="#a855f7" 
-                      fill="#a855f7" 
-                      fillOpacity={0.2}
-                      name="RPM"
-                    />
-                  )}
-                  
-                  {activeTab === 'gear' && (
-                    <Bar 
-                      yAxisId="left"
-                      dataKey="gear" 
-                      fill="#eab308" 
-                      name="Gear"
-                      radius={[4, 4, 0, 0]}
-                    />
-                  )}
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+                      
+                      {activeTab === 'gear' && (
+                        <Bar 
+                          yAxisId="left"
+                          dataKey="gear" 
+                          fill="#eab308" 
+                          name="Gear"
+                          radius={[4, 4, 0, 0]}
+                        />
+                      )}
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
 
-          {/* Throttle & Brake */}
-          <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
-            <div className="bg-zinc-900 p-4 border-b border-zinc-800">
-              <h2 className="text-sm font-mono flex items-center gap-2">
-                <Gauge size={16} className="text-red-500" /> DRIVER INPUTS
-              </h2>
-            </div>
-            
-            <div className="h-[200px] p-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={telemetryData.filter((_, i) => i % 5 === 0)}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#222" />
-                  <XAxis dataKey="distance" tick={{fill: '#666', fontSize: 10}} />
-                  <YAxis domain={[0, 100]} tick={{fill: '#666', fontSize: 10}} />
-                  <Tooltip />
-                  <Area 
-                    type="monotone" 
-                    dataKey="throttle" 
-                    stroke="#10b981" 
-                    fill="#10b981" 
-                    fillOpacity={0.3}
-                    name="Throttle"
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="brake" 
-                    stroke="#ef4444" 
-                    fill="#ef4444" 
-                    fillOpacity={0.3}
-                    name="Brake"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-2 p-4 border-t border-zinc-800">
-              <div className="bg-zinc-900 rounded-lg p-3">
-                <div className="text-xs text-zinc-500">DRS</div>
-                <div className="text-lg font-bold text-green-400">ACTIVE</div>
+              {/* Throttle & Brake */}
+              <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
+                <div className="bg-zinc-900 p-4 border-b border-zinc-800">
+                  <h2 className="text-sm font-mono flex items-center gap-2">
+                    <Gauge size={16} className="text-red-500" /> DRIVER INPUTS
+                  </h2>
+                </div>
+                
+                <div className="h-[200px] p-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={telemetryData.filter((_, i) => i % 5 === 0)}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#222" />
+                      <XAxis dataKey="distance" tick={{fill: '#666', fontSize: 10}} />
+                      <YAxis domain={[0, 100]} tick={{fill: '#666', fontSize: 10}} />
+                      <Tooltip />
+                      <Area 
+                        type="monotone" 
+                        dataKey="throttle" 
+                        stroke="#10b981" 
+                        fill="#10b981" 
+                        fillOpacity={0.3}
+                        name="Throttle"
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="brake" 
+                        stroke="#ef4444" 
+                        fill="#ef4444" 
+                        fillOpacity={0.3}
+                        name="Brake"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-2 p-4 border-t border-zinc-800">
+                  <div className="bg-zinc-900 rounded-lg p-3">
+                    <div className="text-xs text-zinc-500">DRS</div>
+                    <div className="text-lg font-bold text-green-400">
+                      {telemetryData.some(d => d.drs > 0) ? 'ACTIVE' : 'INACTIVE'}
+                    </div>
+                  </div>
+                  <div className="bg-zinc-900 rounded-lg p-3">
+                    <div className="text-xs text-zinc-500">AVG GEAR</div>
+                    <div className="text-lg font-bold text-yellow-400">
+                      {(telemetryData.reduce((acc, d) => acc + (d.gear || 0), 0) / telemetryData.length).toFixed(1)}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="bg-zinc-900 rounded-lg p-3">
-                <div className="text-xs text-zinc-500">AVG GEAR</div>
-                <div className="text-lg font-bold text-yellow-400">6.2</div>
-              </div>
             </div>
+          </>
+        )}
+
+        {/* Nessun dato disponibile */}
+        {!loading && !error && telemetryData.length === 0 && (
+          <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-12 text-center">
+            <Activity size={48} className="text-zinc-700 mx-auto mb-4" />
+            <p className="text-zinc-500 font-mono text-lg mb-2">NO TELEMETRY DATA</p>
+            <p className="text-sm text-zinc-600">Select parameters and click "FETCH TELEMETRY" to load data</p>
           </div>
-        </div>
+        )}
 
         {/* FastF1 Status */}
-        <div className="flex justify-between items-center bg-zinc-900/30 rounded-lg border border-zinc-800 p-3">
+        <div className="flex justify-between items-center bg-zinc-900/30 rounded-lg border border-zinc-800 p-3 mt-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
@@ -691,11 +795,11 @@ export default function LiveTimingPage() {
             </div>
             <div className="h-4 w-px bg-zinc-800"></div>
             <div className="text-xs text-zinc-500">
-              {selectedRace.name} • {selectedDriver} • {selectedSession}
+              {selectedRace.name} • {selectedDriver} • {selectedSession} • {selectedYear}
             </div>
           </div>
           <div className="text-xs text-zinc-600 font-mono">
-            Last sync: {new Date().toLocaleTimeString()}
+            {telemetryData.length > 0 ? `${telemetryData.length} data points` : 'No data loaded'}
           </div>
         </div>
       </main>
@@ -710,7 +814,7 @@ export default function LiveTimingPage() {
               <div className="text-center">
                 <p className="text-red-500 font-mono text-lg mb-2">FETCHING FASTF1 TELEMETRY</p>
                 <p className="text-sm text-zinc-500">
-                  {selectedRace.name} • {selectedDriver} • {selectedSession}
+                  {selectedRace.name} • {selectedDriver} • {selectedSession} • {selectedYear}
                 </p>
               </div>
             </div>
