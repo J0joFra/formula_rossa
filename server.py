@@ -187,6 +187,52 @@ def health_check():
         'cache_enabled': fastf1.Cache.enabled
     })
 
+@app.route('/api/fastf1/latest-race', methods=['GET'])
+def get_latest_race():
+    """
+    Restituisce l'ultima gara disponibile nella cache FastF1
+    """
+    try:
+        current_year = datetime.now().year
+        
+        for year in [current_year, current_year - 1]:
+            try:
+                schedule = fastf1.get_event_schedule(year, include_testing=False)
+                today = pd.Timestamp.now(tz='UTC')
+                past_events = schedule[schedule['Session5Date'] < today]
+                
+                if not past_events.empty:
+                    latest = past_events.iloc[-1]
+                    return jsonify({
+                        'year': int(year),
+                        'circuit': str(latest['Location']),
+                        'event_name': str(latest['EventName']),
+                        'session': 'Q',
+                        'driver': 'LEC'
+                    })
+            except Exception as inner_e:
+                logger.warning(f"Nessun evento trovato per {year}: {inner_e}")
+                continue
+        
+        # Fallback
+        return jsonify({
+            'year': 2024,
+            'circuit': 'Monza',
+            'event_name': 'Italian Grand Prix',
+            'session': 'Q',
+            'driver': 'LEC'
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore latest-race: {str(e)}")
+        return jsonify({
+            'year': 2024,
+            'circuit': 'Monza',
+            'event_name': 'Italian Grand Prix', 
+            'session': 'Q',
+            'driver': 'LEC'
+        })
+        
 if __name__ == '__main__':
     print("="*50)
     print("🚀 Server FastF1 avviato!")
