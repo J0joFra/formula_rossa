@@ -213,7 +213,6 @@ function TelemetryChart({ data, code, color, tab }) {
 }
 
 // ─── ANIMATED GPS CIRCUIT MAP ─────────────────────────────────────────────────
-// Animazione velocissima (0.5ms per frame) e di default prende il giro più veloce
 function CircuitSpeedMap({ circuitMap, color, code }) {
   const W = 500, H = 320, PAD = 28;
   const [frame, setFrame] = useState(0);
@@ -236,25 +235,73 @@ function CircuitSpeedMap({ circuitMap, color, code }) {
     }));
   }, [circuitMap]);
 
-  // Colori in base alla velocità (heatmap)
+  // Calcola velocità min/max per la colorazione
+  const speedRange = useMemo(() => {
+    if (!normalizedPoints.length) return { min: 0, max: 1 };
+    const speeds = normalizedPoints.map(p => p.speed);
+    return {
+      min: Math.min(...speeds),
+      max: Math.max(...speeds, 1)
+    };
+  }, [normalizedPoints]);
+
+  // Funzione per ottenere il colore in base alla velocità
+  const getSpeedColor = (speed) => {
+    const { min, max } = speedRange;
+    const t = Math.max(0, Math.min(1, (speed - min) / (max - min)));
+    
+    // Viola/blu per lento, verde per medio, arancione/rosso per veloce
+    if (t < 0.33) {
+      // Da blu scuro a blu chiaro (lento)
+      return `hsl(${220 + t * 60}, 85%, 65%)`;
+    } else if (t < 0.66) {
+      // Da blu chiaro a verde (medio)
+      return `hsl(${140 - (t - 0.33) * 100}, 85%, 55%)`;
+    } else {
+      // Da verde a rosso (veloce)
+      return `hsl(${40 - (t - 0.66) * 40}, 95%, 60%)`;
+    }
+  };
+
+  // Colora i segmenti in base alla posizione del pallino
   const segmentColors = useMemo(() => {
     if (!normalizedPoints.length) return [];
-    const speeds = normalizedPoints.map(p => p.speed);
-    const minS = Math.min(...speeds), maxS = Math.max(...speeds, 1);
-    return normalizedPoints.slice(0, -1).map(p => {
-      const t = Math.max(0, Math.min(1, (p.speed - minS) / (maxS - minS)));
-      if (t < 0.25) return `hsl(${220 + t * 60},90%,60%)`;
-      if (t < 0.5)  return `hsl(${175 - t * 60},85%,55%)`;
-      if (t < 0.75) return `hsl(${90  - t * 60},90%,50%)`;
-      return               `hsl(${30  - t * 30},95%,55%)`;
+    
+    return normalizedPoints.slice(0, -1).map((p, i) => {
+      if (playing && i <= frame) {
+        // Più il segmento è vicino al frame, più è "acceso"
+        const distanceToCar = Math.abs(i - frame);
+        const opacity = Math.max(0.4, 1 - distanceToCar * 0.15);
+        
+        const baseColor = getSpeedColor(p.speed);
+        
+        if (i === frame) {
+          return { color: '#ff00ff', strokeWidth: 6, opacity: 1 }; // Fucsia acceso
+        } else if (i === frame - 1) {
+          return { color: baseColor, strokeWidth: 5, opacity: 0.9 };
+        } else if (i === frame - 2) {
+          return { color: baseColor, strokeWidth: 4.5, opacity: 0.8 };
+        } else {
+          return { color: baseColor, strokeWidth: 4, opacity };
+        }
+      }
+      
+      return { 
+        color: getSpeedColor(p.speed), 
+        strokeWidth: 4, 
+        opacity: playing ? 0.2 : 0.7 
+      };
     });
-  }, [normalizedPoints]);
+  }, [normalizedPoints, playing, frame, speedRange]);
 
   // Animazione ultraveloce
   useEffect(() => {
     if (playing && normalizedPoints.length > 1) {
       const interval = setInterval(() => {
-        setFrame(f => (f + 1) % normalizedPoints.length);
+        setFrame(f => {
+          const next = (f + 1) % normalizedPoints.length;
+          return next;
+        });
       }, animationSpeed);
       return () => clearInterval(interval);
     }
@@ -282,8 +329,8 @@ function CircuitSpeedMap({ circuitMap, color, code }) {
           )}
           {!isEmpty && (
             <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-500">
-              <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded inline-block" style={{ background: 'hsl(0,95%,55%)' }} />Fast</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded inline-block" style={{ background: 'hsl(220,90%,60%)' }} />Slow</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded inline-block" style={{ background: '#ff00ff' }} />Fast</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded inline-block" style={{ background: 'hsl(220,85%,65%)' }} />Slow</span>
             </div>
           )}
         </div>
@@ -294,16 +341,29 @@ function CircuitSpeedMap({ circuitMap, color, code }) {
       ) : (
         <>
           <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
-            {/* Tracciato grigio di base */}
+            {/* Tracciato grigio di base (solo come ombra) */}
             {normalizedPoints.slice(0, -1).map((p, i) => (
               <line key={`bg${i}`} x1={p.x} y1={p.y} x2={normalizedPoints[i+1].x} y2={normalizedPoints[i+1].y}
-                stroke="#3f3f46" strokeWidth={9} strokeLinecap="round" />
+                stroke="#27272a" strokeWidth={8} strokeLinecap="round" />
             ))}
-            {/* Segmenti colorati in base alla velocità */}
-            {normalizedPoints.slice(0, -1).map((p, i) => (
-              <line key={`c${i}`} x1={p.x} y1={p.y} x2={normalizedPoints[i+1].x} y2={normalizedPoints[i+1].y}
-                stroke={segmentColors[i]} strokeWidth={4} strokeLinecap="round" />
-            ))}
+            
+            {/* Segmenti colorati con opacità dinamica */}
+            {normalizedPoints.slice(0, -1).map((p, i) => {
+              const style = segmentColors[i];
+              return (
+                <line 
+                  key={`c${i}`} 
+                  x1={p.x} y1={p.y} 
+                  x2={normalizedPoints[i+1].x} y2={normalizedPoints[i+1].y}
+                  stroke={style.color} 
+                  strokeWidth={style.strokeWidth} 
+                  strokeLinecap="round"
+                  opacity={style.opacity}
+                  style={{ transition: 'stroke 0.1s ease, opacity 0.1s ease' }}
+                />
+              );
+            })}
+            
             {/* Start/finish */}
             {normalizedPoints[0] && (
               <>
@@ -311,17 +371,35 @@ function CircuitSpeedMap({ circuitMap, color, code }) {
                 <text x={normalizedPoints[0].x + 8} y={normalizedPoints[0].y + 4} fill="#71717a" fontSize="9" fontFamily="monospace">S/F</text>
               </>
             )}
-            {/* Auto animata */}
+            
+            {/* Auto animata con alone */}
             {playing && carPt && (
               <>
-                <circle cx={carPt.x} cy={carPt.y} r={10} fill={color} opacity={0.18} />
-                <circle cx={carPt.x} cy={carPt.y} r={6}  fill={color} opacity={0.9} />
+                <circle cx={carPt.x} cy={carPt.y} r={12} fill={color} opacity={0.15} />
+                <circle cx={carPt.x} cy={carPt.y} r={8} fill={color} opacity={0.5} />
+                <circle cx={carPt.x} cy={carPt.y} r={4} fill="white" stroke={color} strokeWidth={2} />
               </>
             )}
           </svg>
-          <div className="flex items-center justify-between mt-1 text-[10px] font-mono text-zinc-700">
-            <span>{normalizedPoints.length} GPS pts</span>
-            {playing && carPt && <span style={{ color }}>{Math.round(carPt.speed)} km/h</span>}
+          
+          <div className="flex items-center justify-between mt-2 text-[10px] font-mono">
+            <div className="flex items-center gap-3 text-zinc-700">
+              <span>{normalizedPoints.length} GPS pts</span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }}></span>
+                {code}
+              </span>
+            </div>
+            {playing && carPt && (
+              <div className="flex items-center gap-2">
+                <span className="text-zinc-500">Lap progress:</span>
+                <span className="text-white font-bold">{Math.round((frame / normalizedPoints.length) * 100)}%</span>
+                <span className="text-zinc-500">Speed:</span>
+                <span className="text-white font-bold" style={{ color: getSpeedColor(carPt.speed) }}>
+                  {Math.round(carPt.speed)} km/h
+                </span>
+              </div>
+            )}
           </div>
         </>
       )}
