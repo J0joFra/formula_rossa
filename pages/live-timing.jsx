@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Head from 'next/head';
+import dynamic from 'next/dynamic';
 import {
   Activity, Zap, Gauge, ChevronDown, Search, RefreshCw,
   Radio, Cpu, Thermometer, Wind, ChevronLeft, ChevronRight, Play, Pause,
@@ -12,18 +13,31 @@ import {
 } from 'recharts';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
-import QualifyingToRaceProgression from '../components/QualifyingToRaceProgression';
 import {
   getDrivers, getDriverNumber, getTelemetry, getCircuitMap, getFullSessionTelemetry,
   getWeather, getMeetings, getSessionsForMeeting, getLatestSession,
   getAllDriversSectors, getRacePositions, getAllLaps,
 } from '../lib/openf1';
 
+const QualifyingToRaceProgression = dynamic(
+  () => import('../components/QualifyingToRaceProgression'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center">
+        <p className="text-zinc-500 font-mono text-sm">Loading progression data...</p>
+      </div>
+    )
+  }
+);
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 const [raceResults, setRaceResults] = useState(null);
 const [loadingResults, setLoadingResults] = useState(false);
 
 const loadRaceResults = async (year, round) => {
+  if (typeof window === 'undefined') return;
+  
   setLoadingResults(true);
   try {
     const response = await fetch('/data/f1db-races-race-results.json');
@@ -478,12 +492,18 @@ export default function LiveTimingPage() {
 
 const fetchAll = async () => {
   if (!year || !meeting || !driverCode || !sessionInfo) return;
-  setLoading(true); setError(null);
-  setTelemetry([]); setFastestLap(null);
-  setCircuitMap([]); setWeather(null); setSectorsData(null); setPositionsData(null);
+  
+  setLoading(true); 
+  setError(null);
+  setTelemetry([]); 
+  setFastestLap(null);
+  setCircuitMap([]);
+  setWeather(null);
+  setSectorsData(null); 
+  setPositionsData(null);
   setDriverLaps([]);
 
-  const sk = sessionInfo.session_key;
+const sk = sessionInfo.session_key;
   try {
     setLoadStep('Caricamento dati pilota…');
     const num = await getDriverNumber(sk, driverCode);
@@ -523,15 +543,19 @@ const fetchAll = async () => {
     setWeather(weatherResult);
     setSectorsData(sectorsResult);
     
-    if (sessionType === 'R' && meeting?.round) {
+      if (sessionType === 'R' && meeting?.round && typeof window !== 'undefined') {
+      setLoadStep('Caricamento risultati gara…');
       await loadRaceResults(year, meeting.round);
     }
-
+    
     setLastQuery({ year, gp: meeting.meeting_name, session: sessionType, driver: driverCode });
   } catch (e) {
     setError(e.message || 'Errore sconosciuto');
-  } finally { setLoading(false); setLoadStep(''); }
-  };
+  } finally { 
+    setLoading(false); 
+    setLoadStep(''); 
+  }
+};
 
   const refetchLap = async (lapNum) => {
     if (!sessionInfo) return;
@@ -770,19 +794,24 @@ const fetchAll = async () => {
               </div>
 
               {/*  */}
-              {sessionType === 'R' && raceResults && (
+              {sessionType === 'R' && raceResults && raceResults.length > 0 && (
                 <QualifyingToRaceProgression
                   raceResults={raceResults}
                   year={year}
                   grandPrix={meeting?.meeting_name}
-                  driverStandings={null} 
+                  driverStandings={null}
                 />
               )}
 
-              {/* */}
               {sessionType !== 'R' && sectorsData && (
                 <div className="grid grid-cols-1 gap-4">
                   <SectorTable sectorsData={sectorsData} highlightCode={driverCode} />
+                </div>
+              )}
+
+              {sessionType === 'R' && !raceResults && !loading && (
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center">
+                  <p className="text-zinc-500 font-mono text-sm">No race results available for this session</p>
                 </div>
               )}
             </div>

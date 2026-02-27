@@ -7,7 +7,6 @@ import {
 } from 'recharts';
 import { ChevronDown, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
-// Colori per i team (approssimativi)
 const TEAM_COLORS = {
   'red-bull': '#3671C6',
   'mercedes': '#6CD3BF',
