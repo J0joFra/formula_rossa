@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Head from 'next/head';
 import dynamic from 'next/dynamic';
@@ -19,6 +17,8 @@ import {
   getAllDriversSectors, getRacePositions, getAllLaps,
 } from '../lib/openf1';
 
+const LiveTiming = dynamic(() => import('../components/live-timing'), { ssr: false });
+
 const QualifyingToRaceProgression = dynamic(
   () => import('../components/QualifyingToRaceProgression'),
   { 
@@ -32,28 +32,6 @@ const QualifyingToRaceProgression = dynamic(
 );
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const [raceResults, setRaceResults] = useState(null);
-const [loadingResults, setLoadingResults] = useState(false);
-
-const loadRaceResults = async (year, round) => {
-  if (typeof window === 'undefined') return;
-  
-  setLoadingResults(true);
-  try {
-    const response = await fetch('/data/f1db-races-race-results.json');
-    const allResults = await response.json();
-    
-    const filtered = allResults.filter(r => 
-      r.year === parseInt(year) && r.round === parseInt(round)
-    );
-    
-    setRaceResults(filtered);
-  } catch (error) {
-    console.error('Error loading race results:', error);
-  } finally {
-    setLoadingResults(false);
-  }
-};
 
 const SESSION_TYPES = [
   { id: 'FP1', name: 'Practice 1' }, { id: 'FP2', name: 'Practice 2' },
@@ -402,6 +380,29 @@ function RacePositionsChart({ positionsData, highlightCodes }) {
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function LiveTimingPage() {
+
+  const [raceResults, setRaceResults] = useState(null);
+  const [loadingResults, setLoadingResults] = useState(false);
+  const loadRaceResults = async (year, round) => {
+    if (typeof window === 'undefined') return;
+    
+    setLoadingResults(true);
+    try {
+      const response = await fetch('/data/f1db-races-race-results.json');
+      const allResults = await response.json();
+      
+      const filtered = allResults.filter(r => 
+        r.year === parseInt(year) && r.round === parseInt(round)
+      );
+      
+      setRaceResults(filtered);
+    } catch (error) {
+      console.error('Error loading race results:', error);
+    } finally {
+      setLoadingResults(false);
+    }
+  };
+  
   // Selections
   const [year, setYear]               = useState(null);
   const [meetings, setMeetings]       = useState([]);
