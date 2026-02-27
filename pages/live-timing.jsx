@@ -10,6 +10,7 @@ import {
 } from 'recharts';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
+import QualifyingToRaceProgression from '../components/QualifyingToRaceProgression';
 import {
   getDrivers, getDriverNumber, getTelemetry, getCircuitMap, getFullSessionTelemetry,
   getWeather, getMeetings, getSessionsForMeeting, getLatestSession,
@@ -17,6 +18,27 @@ import {
 } from '../lib/openf1';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
+const [raceResults, setRaceResults] = useState(null);
+const [loadingResults, setLoadingResults] = useState(false);
+
+const loadRaceResults = async (year, round) => {
+  setLoadingResults(true);
+  try {
+    const response = await fetch('/data/f1db-races-race-results.json');
+    const allResults = await response.json();
+    
+    const filtered = allResults.filter(r => 
+      r.year === parseInt(year) && r.round === parseInt(round)
+    );
+    
+    setRaceResults(filtered);
+  } catch (error) {
+    console.error('Error loading race results:', error);
+  } finally {
+    setLoadingResults(false);
+  }
+};
+
 const SESSION_TYPES = [
   { id: 'FP1', name: 'Practice 1' }, { id: 'FP2', name: 'Practice 2' },
   { id: 'FP3', name: 'Practice 3' }, { id: 'Q',   name: 'Qualifying'  },
@@ -499,12 +521,8 @@ const fetchAll = async () => {
     setWeather(weatherResult);
     setSectorsData(sectorsResult);
     
-    if (sessionType === 'R') {
-      setLoadStep('Caricamento posizioni gara…');
-      try { 
-        const positions = await getRacePositions(sk);
-        setPositionsData(positions); 
-      } catch { /* optional */ }
+    if (sessionType === 'R' && meeting?.round) {
+      await loadRaceResults(year, meeting.round);
     }
 
     setLastQuery({ year, gp: meeting.meeting_name, session: sessionType, driver: driverCode });
@@ -749,19 +767,21 @@ const fetchAll = async () => {
                 />
               </div>
 
-              {/* Map + Sectors - con tutti i piloti */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Mappa rimossa temporaneamente */}
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 flex items-center justify-center h-64">
-                  <span className="text-zinc-600 font-mono text-sm">Circuit map coming soon...</span>
-                </div>
-                <SectorTable sectorsData={sectorsData} highlightCode={driverCode} />
-              </div>
+              {/*  */}
+              {sessionType === 'R' && raceResults && (
+                <QualifyingToRaceProgression
+                  raceResults={raceResults}
+                  year={year}
+                  grandPrix={meeting?.meeting_name}
+                  driverStandings={null} 
+                />
+              )}
 
-              {/* Race positions */}
-              {sessionType === 'R' && (
-                <RacePositionsChart positionsData={positionsData}
-                  highlightCodes={[driverCode]} />
+              {/* */}
+              {sessionType !== 'R' && sectorsData && (
+                <div className="grid grid-cols-1 gap-4">
+                  <SectorTable sectorsData={sectorsData} highlightCode={driverCode} />
+                </div>
               )}
             </div>
           )}
