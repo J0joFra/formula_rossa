@@ -17,8 +17,6 @@ import {
   getAllDriversSectors, getRacePositions, getAllLaps,
 } from '../lib/openf1';
 
-const LiveTiming = dynamic(() => import('../components/live-timing'), { ssr: false });
-
 const QualifyingToRaceProgression = dynamic(
   () => import('../components/QualifyingToRaceProgression'),
   { 
