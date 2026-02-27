@@ -736,11 +736,10 @@ export default function LiveTimingPage() {
 
               {/* Map + Sectors - con tutti i piloti */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <CircuitSpeedMap
-                  circuitMap={circuitMap}
-                  color={color}
-                  code={driverCode}
-                />
+                {/* Mappa rimossa temporaneamente */}
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 flex items-center justify-center h-64">
+                  <span className="text-zinc-600 font-mono text-sm">Circuit map coming soon...</span>
+                </div>
                 <SectorTable sectorsData={sectorsData} highlightCode={driverCode} />
               </div>
 
