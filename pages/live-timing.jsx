@@ -452,50 +452,65 @@ export default function LiveTimingPage() {
     catch { setDrivers([]); }
   };
 
-  const fetchAll = async () => {
-    if (!year || !meeting || !driverCode || !sessionInfo) return;
-    setLoading(true); setError(null);
-    setTelemetry([]); setFastestLap(null);
-    setCircuitMap([]); setWeather(null); setSectorsData(null); setPositionsData(null);
-    setDriverLaps([]);
+const fetchAll = async () => {
+  if (!year || !meeting || !driverCode || !sessionInfo) return;
+  setLoading(true); setError(null);
+  setTelemetry([]); setFastestLap(null);
+  setCircuitMap([]); setWeather(null); setSectorsData(null); setPositionsData(null);
+  setDriverLaps([]);
 
-    const sk = sessionInfo.session_key;
-    try {
-      setLoadStep('Telemetria giro…');
-      const num = await getDriverNumber(sk, driverCode);
-      
-      // Prima prendi tutti i giri per conoscere il fastest lap
-      const allLaps = await getAllLaps(sk, num);
+  const sk = sessionInfo.session_key;
+  try {
+    setLoadStep('Caricamento dati pilota…');
+    const num = await getDriverNumber(sk, driverCode);
+    setLoadStep('Caricamento giri e telemetria…');
+    
+    const [allLaps, telemetryResult, weatherResult, sectorsResult] = await Promise.all([
+      getAllLaps(sk, num),
+      getTelemetry(sk, num, null).catch(() => null), 
+      getWeather(sk).catch(() => null),
+      getAllDriversSectors(sk).catch(() => null)
+    ]);
+    
+    if (allLaps?.length) {
       setDriverLaps(allLaps);
-      
-      // Seleziona il giro più veloce di default
-      const fastestLapNum = allLaps.reduce((a, b) => a.lap_duration < b.lap_duration ? a : b).lap_number;
+      const fastestLapNum = allLaps.reduce((a, b) => 
+        a.lap_duration < b.lap_duration ? a : b
+      ).lap_number;
       setSelectedLap(fastestLapNum);
-      
-      const r = await getTelemetry(sk, num, fastestLapNum);
-      setTelemetry(r.telemetry); setFastestLap(r.target_lap);
-
-      setLoadStep('GPS circuito (giro veloce)…');
-      try { 
+    }
+    
+    if (telemetryResult) {
+      setTelemetry(telemetryResult.telemetry);
+      setFastestLap(telemetryResult.target_lap);
+    }
+    
+    setLoadStep('Caricamento mappa GPS…');
+    try { 
+      const fastestLapNum = allLaps?.length ? 
+        allLaps.reduce((a, b) => a.lap_duration < b.lap_duration ? a : b).lap_number : 
+        null;
+      if (fastestLapNum) {
         const map = await getCircuitMap(sk, num, fastestLapNum);
         setCircuitMap(map); 
-      } catch { /* optional */ }
-
-      setLoadStep('Meteo + settori…');
-      try { setWeather(await getWeather(sk)); } catch { /* optional */ }
-      try { 
-        const sectors = await getAllDriversSectors(sk);
-        setSectorsData(sectors); 
-      } catch { /* optional */ }
-      
-      if (sessionType === 'R') {
-        try { setPositionsData(await getRacePositions(sk)); } catch { /* optional */ }
       }
+    } catch { /* optional */ }
+    
+    setWeather(weatherResult);
+    setSectorsData(sectorsResult);
+    
+    if (sessionType === 'R') {
+      setLoadStep('Caricamento posizioni gara…');
+      try { 
+        const positions = await getRacePositions(sk);
+        setPositionsData(positions); 
+      } catch { /* optional */ }
+    }
 
-      setLastQuery({ year, gp: meeting.meeting_name, session: sessionType, driver: driverCode });
-    } catch (e) {
-      setError(e.message || 'Errore sconosciuto');
-    } finally { setLoading(false); setLoadStep(''); }
+    setLastQuery({ year, gp: meeting.meeting_name, session: sessionType, driver: driverCode });
+  } catch (e) {
+    setError(e.message || 'Errore sconosciuto');
+  } finally { setLoading(false); setLoadStep(''); }
   };
 
   const refetchLap = async (lapNum) => {
@@ -772,6 +787,9 @@ export default function LiveTimingPage() {
               <RefreshCw className="w-8 h-8 text-red-500 animate-spin mx-auto mb-4" />
               <div className="text-sm font-mono font-bold text-white mb-2">FETCHING DATA</div>
               <div className="text-xs text-zinc-500 font-mono mb-1">{loadStep}</div>
+              <div className="w-full bg-zinc-800 h-1 rounded-full mt-3 overflow-hidden">
+                <div className="bg-red-600 h-full rounded-full animate-pulse" style={{ width: '60%' }}></div>
+              </div>
               <div className="text-xs text-zinc-700 font-mono mt-3">{meeting?.meeting_name} · {driverCode} · {sessionType}</div>
             </div>
           </div>
