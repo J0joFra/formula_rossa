@@ -138,160 +138,32 @@ function LapSelector({ laps, selectedLap, onSelect, fastestLapNumber, color, lab
   );
 }
 
-// ─── TELEMETRY CHART — single lap overlay + full session ──────────────────────
-// ALL useMemo hooks are declared unconditionally at the top of this component.
-function TelemetryChart({ data1, data2, code1, code2, color1, color2, tab, mode, fullData1, fullData2 }) {
+// ─── TELEMETRY CHART — single lap only ──────────────────────────────────────
+function TelemetryChart({ data, code, color, tab }) {
   const cs = { backgroundColor: '#18181b', border: '1px solid #3f3f46', fontSize: 11, borderRadius: '8px' };
   const kmFmt = v => `${(v / 1000).toFixed(1)}km`;
 
-  // ── Downsample full-session data ────────────────────────────────────────────
-  const rd1 = useMemo(() => {
-    if (!fullData1?.points?.length) return [];
-    return fullData1.points
-      .filter((_, i) => i % 6 === 0)
-      .map((p, i) => ({ i, lap: p.lap_number, speed: p.speed, rpm: p.rpm }));
-  }, [fullData1]);
-
-  const rd2 = useMemo(() => {
-    if (!fullData2?.points?.length) return [];
-    return fullData2.points
-      .filter((_, i) => i % 6 === 0)
-      .map((p, i) => ({ i, lap: p.lap_number, speed: p.speed, rpm: p.rpm }));
-  }, [fullData2]);
-
-  // ── Race-mode merged array (by index) ────────────────────────────────────────
-  const raceMerged = useMemo(() => {
-    if (!rd1.length && !rd2.length) return [];
-    const len = Math.max(rd1.length, rd2.length);
-    return Array.from({ length: len }, (_, idx) => ({
-      idx,
-      [`${code1}_speed`]: rd1[idx]?.speed ?? null,
-      [`${code1}_rpm`]:   rd1[idx]?.rpm   ?? null,
-      [`${code2}_speed`]: rd2[idx]?.speed ?? null,
-      [`${code2}_rpm`]:   rd2[idx]?.rpm   ?? null,
-    }));
-  }, [rd1, rd2, code1, code2]);
-
-  // ── Lap-tick markers for race mode ────────────────────────────────────────────
-  const lapTicks = useMemo(() => {
-    const ticks = [];
-    let last = null;
-    rd1.forEach(p => { if (p.lap !== last) { ticks.push({ idx: p.i, lap: p.lap }); last = p.lap; } });
-    return ticks;
-  }, [rd1]);
-
-  // ── Single-lap merged array (interpolated by distance %) ─────────────────────
-  const lapMerged = useMemo(() => {
-    if (!data1.length) return [];
-    const d1 = data1.filter((_, i) => i % 3 === 0);
-    const d2 = data2.filter((_, i) => i % 3 === 0);
-    const empty2 = { speed: null, rpm: null, gear: null, throttle: null, brake: null };
-
-    const interp = (norm) => {
-      if (!d2.length) return empty2;
-      const maxD2 = d2[d2.length - 1]?.distance || 1;
-      const target = norm * maxD2;
-      let lo = 0, hi = d2.length - 1;
-      while (lo < hi - 1) { const m = (lo + hi) >> 1; d2[m].distance <= target ? lo = m : hi = m; }
-      const a = d2[lo], b = d2[Math.min(lo + 1, d2.length - 1)];
-      if (!b || a.distance === b.distance) return a;
-      const t = (target - a.distance) / (b.distance - a.distance);
-      const lerp = (x, y) => Math.round(x + (y - x) * t);
-      return { speed: lerp(a.speed, b.speed), rpm: lerp(a.rpm, b.rpm), gear: lerp(a.gear, b.gear), throttle: lerp(a.throttle, b.throttle), brake: lerp(a.brake, b.brake) };
-    };
-
-    const maxD1 = d1[d1.length - 1]?.distance || 1;
-    return d1.map(p => {
-      const q = interp(p.distance / maxD1);
-      return {
-        dist: p.distance,
-        [`${code1}_speed`]: p.speed,        [`${code2}_speed`]: q.speed,
-        [`${code1}_rpm`]:   p.rpm,          [`${code2}_rpm`]:   q.rpm,
-        [`${code1}_gear`]:  p.gear,         [`${code2}_gear`]:  q.gear,
-        [`${code1}_throttle`]: p.throttle,  [`${code2}_throttle`]: q.throttle,
-        [`${code1}_brake`]:    p.brake,     [`${code2}_brake`]:    q.brake,
-      };
-    });
-  }, [data1, data2, code1, code2]);
-
-  // ── Render ──────────────────────────────────────────────────────────────────
-  if (mode === 'race') {
-    const k1 = `${code1}_${tab === 'rpm' ? 'rpm' : 'speed'}`;
-    const k2 = `${code2}_${tab === 'rpm' ? 'rpm' : 'speed'}`;
-    const unit = tab === 'rpm' ? '' : ' km/h';
-
-    if (!raceMerged.length) return (
-      <div className="flex items-center justify-center h-48 text-zinc-600 font-mono text-sm">
-        Full session data not available
-      </div>
-    );
-
-    return (
-      <div>
-        <ResponsiveContainer width="100%" height={240}>
-          <AreaChart data={raceMerged} margin={{ top: 4, right: 8, left: 0, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-            <XAxis dataKey="idx" stroke="#52525b" tick={false}
-              label={{ value: '← Full session progress →', position: 'insideBottom', fill: '#52525b', fontSize: 10, dy: 8 }} />
-            <YAxis stroke="#52525b" tick={{ fontSize: 10 }} unit={unit} width={46} />
-            <Tooltip contentStyle={cs}
-              content={({ active, payload, label }) => {
-                if (!active || !payload?.length) return null;
-                const v1 = payload.find(p => p.dataKey === k1);
-                const v2 = payload.find(p => p.dataKey === k2);
-                const lap = rd1[label]?.lap;
-                return (
-                  <div className="bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-xs font-mono">
-                    {lap != null && <div className="text-zinc-500 mb-1">Lap {lap}</div>}
-                    {v1?.value != null && <div style={{ color: color1 }}>{code1}: {v1.value}{unit}</div>}
-                    {v2?.value != null && <div style={{ color: color2 }}>{code2}: {v2.value}{unit}</div>}
-                  </div>
-                );
-              }}
-            />
-            <Legend wrapperStyle={{ fontSize: 11 }} />
-            <Area type="monotone" dataKey={k1} name={code1} stroke={color1} fill={`${color1}20`} strokeWidth={1.5} dot={false} connectNulls isAnimationActive={false} />
-            {rd2.length > 0 && (
-              <Area type="monotone" dataKey={k2} name={code2} stroke={color2} fill={`${color2}10`} strokeWidth={1.5} dot={false} strokeDasharray="4 2" connectNulls isAnimationActive={false} />
-            )}
-          </AreaChart>
-        </ResponsiveContainer>
-        {/* Lap markers */}
-        <div className="relative h-5 mt-1 px-2 overflow-hidden">
-          {lapTicks.map(t => {
-            const pct = rd1.length > 0 ? (t.idx / rd1.length) * 100 : 0;
-            return (
-              <span key={t.lap} className="absolute text-[8px] font-mono text-zinc-700 -translate-x-1/2" style={{ left: `${pct}%` }}>
-                L{t.lap}
-              </span>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  // Single-lap mode
-  const merged = lapMerged;
+  // Downsample per performance
+  const chartData = useMemo(() => {
+    if (!data.length) return [];
+    return data.filter((_, i) => i % 3 === 0);
+  }, [data]);
 
   if (tab === 'inputs') {
     return (
       <div className="space-y-2">
         {[
-          ['Throttle %', `${code1}_throttle`, `${code2}_throttle`, '#22c55e', '#4ade80', 80],
-          ['Brake %',    `${code1}_brake`,    `${code2}_brake`,    '#ef4444', '#f87171', 60],
-        ].map(([name, k1, k2, c1, c2, h]) => (
+          ['Throttle %', 'throttle', '#22c55e', 80],
+          ['Brake %',    'brake',    '#ef4444', 60],
+        ].map(([name, key, c, h]) => (
           <div key={name}>
             <div className="text-[9px] text-zinc-600 font-mono mb-0.5 uppercase tracking-widest">{name}</div>
             <ResponsiveContainer width="100%" height={h}>
-              <AreaChart data={merged} margin={{ top: 2, right: 4, left: 0, bottom: 0 }}>
-                <XAxis dataKey="dist" stroke="#3f3f46" tick={{ fontSize: 9 }} tickFormatter={kmFmt} />
+              <AreaChart data={chartData} margin={{ top: 2, right: 4, left: 0, bottom: 0 }}>
+                <XAxis dataKey="distance" stroke="#3f3f46" tick={{ fontSize: 9 }} tickFormatter={kmFmt} />
                 <YAxis stroke="#3f3f46" tick={{ fontSize: 9 }} domain={[0, 100]} width={28} />
-                <Tooltip contentStyle={cs} formatter={(v, n) => [`${v}%`, n]} />
-                <Area type="monotone" dataKey={k1} name={code1} stroke={c1} fill={`${c1}25`} strokeWidth={1.5} dot={false} connectNulls isAnimationActive={false} />
-                {data2.length > 0 && (
-                  <Area type="monotone" dataKey={k2} name={code2} stroke={c2} fill={`${c2}10`} strokeWidth={1.5} dot={false} strokeDasharray="4 2" connectNulls isAnimationActive={false} />
-                )}
+                <Tooltip contentStyle={cs} formatter={(v) => [`${v}%`, '']} />
+                <Area type="monotone" dataKey={key} name={code} stroke={c} fill={`${c}25`} strokeWidth={1.5} dot={false} connectNulls isAnimationActive={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -303,29 +175,23 @@ function TelemetryChart({ data1, data2, code1, code2, color1, color2, tab, mode,
   if (tab === 'gear') {
     return (
       <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={merged} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+        <BarChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-          <XAxis dataKey="dist" stroke="#52525b" tick={{ fontSize: 10 }} tickFormatter={kmFmt} />
+          <XAxis dataKey="distance" stroke="#52525b" tick={{ fontSize: 10 }} tickFormatter={kmFmt} />
           <YAxis stroke="#52525b" tick={{ fontSize: 10 }} domain={[1, 8]} />
           <Tooltip contentStyle={cs} />
-          <Legend wrapperStyle={{ fontSize: 11 }} />
-          <Bar dataKey={`${code1}_gear`} name={code1} fill={color1} maxBarSize={3} opacity={0.9} isAnimationActive={false} />
-          {data2.length > 0 && <Bar dataKey={`${code2}_gear`} name={code2} fill={color2} maxBarSize={3} opacity={0.65} isAnimationActive={false} />}
+          <Bar dataKey="gear" name={code} fill={color} maxBarSize={3} opacity={0.9} isAnimationActive={false} />
         </BarChart>
       </ResponsiveContainer>
     );
   }
 
-  // speed or rpm
-  const k1 = `${code1}_${tab}`;
-  const k2 = `${code2}_${tab}`;
   const unit = tab === 'speed' ? ' km/h' : '';
-
   return (
     <ResponsiveContainer width="100%" height={240}>
-      <AreaChart data={merged} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+      <AreaChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-        <XAxis dataKey="dist" stroke="#52525b" tick={{ fontSize: 10 }} tickFormatter={kmFmt} />
+        <XAxis dataKey="distance" stroke="#52525b" tick={{ fontSize: 10 }} tickFormatter={kmFmt} />
         <YAxis stroke="#52525b" tick={{ fontSize: 10 }} unit={unit} width={46} />
         <Tooltip contentStyle={cs}
           content={({ active, payload, label }) => {
@@ -340,91 +206,71 @@ function TelemetryChart({ data1, data2, code1, code2, color1, color2, tab, mode,
             );
           }}
         />
-        <Legend wrapperStyle={{ fontSize: 11 }} />
-        <Area type="monotone" dataKey={k1} name={code1} stroke={color1} fill={`${color1}20`} strokeWidth={2} dot={false} connectNulls isAnimationActive={false} />
-        {data2.length > 0 && (
-          <Area type="monotone" dataKey={k2} name={code2} stroke={color2} fill={`${color2}10`} strokeWidth={2} dot={false} strokeDasharray="5 3" connectNulls isAnimationActive={false} />
-        )}
+        <Area type="monotone" dataKey={tab} name={code} stroke={color} fill={`${color}20`} strokeWidth={2} dot={false} connectNulls isAnimationActive={false} />
       </AreaChart>
     </ResponsiveContainer>
   );
 }
 
 // ─── ANIMATED GPS CIRCUIT MAP ─────────────────────────────────────────────────
-// Default: first lap, speed heatmap. Animate button: loops through GPS points
-// like a replay at ~600ms/frame. Compare mode: dominance colors.
-function CircuitSpeedMap({ circuitMap, compareCircuitMap, color1, color2, code1, code2, showCompare }) {
+// Animazione velocissima (0.5ms per frame) e di default prende il giro più veloce
+function CircuitSpeedMap({ circuitMap, color, code }) {
   const W = 500, H = 320, PAD = 28;
   const [frame, setFrame] = useState(0);
   const [playing, setPlaying] = useState(false);
   const timerRef = useRef(null);
+  const animationSpeed = 0.5; // ms per frame — velocissimo!
 
-  // Normalize both tracks using main track bounds
-  const { mainPts, comparePts } = useMemo(() => {
-    if (!circuitMap?.length) return { mainPts: [], comparePts: [] };
+  const normalizedPoints = useMemo(() => {
+    if (!circuitMap?.length) return [];
     const xs = circuitMap.map(p => p.x), ys = circuitMap.map(p => p.y);
     const minX = Math.min(...xs), maxX = Math.max(...xs);
     const minY = Math.min(...ys), maxY = Math.max(...ys);
     const rX = maxX - minX || 1, rY = maxY - minY || 1;
     const scale = Math.min((W - PAD * 2) / rX, (H - PAD * 2) / rY);
     const oX = (W - rX * scale) / 2, oY = (H - rY * scale) / 2;
-    const toSVG = p => ({
+    return circuitMap.map(p => ({
       x: oX + (p.x - minX) * scale,
       y: H - (oY + (p.y - minY) * scale),
       speed: p.speed,
-    });
-    return {
-      mainPts: circuitMap.map(toSVG),
-      comparePts: compareCircuitMap?.length ? compareCircuitMap.map(toSVG) : [],
-    };
-  }, [circuitMap, compareCircuitMap]);
+    }));
+  }, [circuitMap]);
 
-  // Segment colors
-  const segColors = useMemo(() => {
-    if (!mainPts.length) return [];
-    if (!showCompare || !comparePts.length) {
-      const speeds = mainPts.map(p => p.speed);
-      const minS = Math.min(...speeds), maxS = Math.max(...speeds, 1);
-      return mainPts.slice(0, -1).map(p => {
-        const t = Math.max(0, Math.min(1, (p.speed - minS) / (maxS - minS)));
-        if (t < 0.25) return `hsl(${220 + t * 60},90%,60%)`;
-        if (t < 0.5)  return `hsl(${175 - t * 60},85%,55%)`;
-        if (t < 0.75) return `hsl(${90  - t * 60},90%,50%)`;
-        return               `hsl(${30  - t * 30},95%,55%)`;
-      });
-    }
-    // Dominance
-    return mainPts.slice(0, -1).map((p, i) => {
-      const mx = (p.x + mainPts[i + 1].x) / 2, my = (p.y + mainPts[i + 1].y) / 2;
-      let best = comparePts[0], bestD = Infinity;
-      for (const cp of comparePts) {
-        const d = (cp.x - mx) ** 2 + (cp.y - my) ** 2;
-        if (d < bestD) { best = cp; bestD = d; }
-      }
-      return p.speed >= (best?.speed ?? 0) ? color1 : color2;
+  // Colori in base alla velocità (heatmap)
+  const segmentColors = useMemo(() => {
+    if (!normalizedPoints.length) return [];
+    const speeds = normalizedPoints.map(p => p.speed);
+    const minS = Math.min(...speeds), maxS = Math.max(...speeds, 1);
+    return normalizedPoints.slice(0, -1).map(p => {
+      const t = Math.max(0, Math.min(1, (p.speed - minS) / (maxS - minS)));
+      if (t < 0.25) return `hsl(${220 + t * 60},90%,60%)`;
+      if (t < 0.5)  return `hsl(${175 - t * 60},85%,55%)`;
+      if (t < 0.75) return `hsl(${90  - t * 60},90%,50%)`;
+      return               `hsl(${30  - t * 30},95%,55%)`;
     });
-  }, [mainPts, comparePts, showCompare, color1, color2]);
+  }, [normalizedPoints]);
 
-  // Play / pause
+  // Animazione ultraveloce
   useEffect(() => {
-    clearInterval(timerRef.current);
-    if (playing && mainPts.length > 1) {
-      timerRef.current = setInterval(() => setFrame(f => (f + 1) % mainPts.length), 600);
+    if (playing && normalizedPoints.length > 1) {
+      const interval = setInterval(() => {
+        setFrame(f => (f + 1) % normalizedPoints.length);
+      }, animationSpeed);
+      return () => clearInterval(interval);
     }
-    return () => clearInterval(timerRef.current);
-  }, [playing, mainPts.length]);
+  }, [playing, normalizedPoints.length]);
 
-  // Reset on new data
+  // Reset quando cambiano i dati
   useEffect(() => { setFrame(0); setPlaying(false); }, [circuitMap]);
 
-  const carPt = mainPts[frame] ?? mainPts[0];
-  const isEmpty = !mainPts.length;
+  const carPt = normalizedPoints[frame] ?? normalizedPoints[0];
+  const isEmpty = !normalizedPoints.length;
 
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
         <div className="text-[10px] text-zinc-600 font-mono tracking-[0.15em] uppercase">
-          Circuit Map{!isEmpty ? (showCompare && comparePts.length ? ' · dominance' : ' · speed') : ''}
+          Circuit Map · speed heatmap
         </div>
         <div className="flex items-center gap-3">
           {!isEmpty && (
@@ -434,16 +280,10 @@ function CircuitSpeedMap({ circuitMap, compareCircuitMap, color1, color2, code1,
               {playing ? <><Pause className="w-3 h-3" />STOP</> : <><Play className="w-3 h-3" />ANIMATE</>}
             </button>
           )}
-          {!isEmpty && !showCompare && (
+          {!isEmpty && (
             <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-500">
               <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded inline-block" style={{ background: 'hsl(0,95%,55%)' }} />Fast</span>
               <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded inline-block" style={{ background: 'hsl(220,90%,60%)' }} />Slow</span>
-            </div>
-          )}
-          {!isEmpty && showCompare && comparePts.length > 0 && (
-            <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-500">
-              <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded inline-block" style={{ background: color1 }} />{code1}</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-1.5 rounded inline-block" style={{ background: color2 }} />{code2}</span>
             </div>
           )}
         </div>
@@ -454,34 +294,34 @@ function CircuitSpeedMap({ circuitMap, compareCircuitMap, color1, color2, code1,
       ) : (
         <>
           <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
-            {/* Background */}
-            {mainPts.slice(0, -1).map((p, i) => (
-              <line key={`bg${i}`} x1={p.x} y1={p.y} x2={mainPts[i+1].x} y2={mainPts[i+1].y}
+            {/* Tracciato grigio di base */}
+            {normalizedPoints.slice(0, -1).map((p, i) => (
+              <line key={`bg${i}`} x1={p.x} y1={p.y} x2={normalizedPoints[i+1].x} y2={normalizedPoints[i+1].y}
                 stroke="#3f3f46" strokeWidth={9} strokeLinecap="round" />
             ))}
-            {/* Colored segments */}
-            {mainPts.slice(0, -1).map((p, i) => (
-              <line key={`c${i}`} x1={p.x} y1={p.y} x2={mainPts[i+1].x} y2={mainPts[i+1].y}
-                stroke={segColors[i]} strokeWidth={4} strokeLinecap="round" />
+            {/* Segmenti colorati in base alla velocità */}
+            {normalizedPoints.slice(0, -1).map((p, i) => (
+              <line key={`c${i}`} x1={p.x} y1={p.y} x2={normalizedPoints[i+1].x} y2={normalizedPoints[i+1].y}
+                stroke={segmentColors[i]} strokeWidth={4} strokeLinecap="round" />
             ))}
             {/* Start/finish */}
-            {mainPts[0] && (
+            {normalizedPoints[0] && (
               <>
-                <circle cx={mainPts[0].x} cy={mainPts[0].y} r={5} fill="#18181b" stroke="#fff" strokeWidth={2} />
-                <text x={mainPts[0].x + 8} y={mainPts[0].y + 4} fill="#71717a" fontSize="9" fontFamily="monospace">S/F</text>
+                <circle cx={normalizedPoints[0].x} cy={normalizedPoints[0].y} r={5} fill="#18181b" stroke="#fff" strokeWidth={2} />
+                <text x={normalizedPoints[0].x + 8} y={normalizedPoints[0].y + 4} fill="#71717a" fontSize="9" fontFamily="monospace">S/F</text>
               </>
             )}
-            {/* Animated car */}
+            {/* Auto animata */}
             {playing && carPt && (
               <>
-                <circle cx={carPt.x} cy={carPt.y} r={10} fill={color1} opacity={0.18} />
-                <circle cx={carPt.x} cy={carPt.y} r={6}  fill={color1} opacity={0.9} />
+                <circle cx={carPt.x} cy={carPt.y} r={10} fill={color} opacity={0.18} />
+                <circle cx={carPt.x} cy={carPt.y} r={6}  fill={color} opacity={0.9} />
               </>
             )}
           </svg>
           <div className="flex items-center justify-between mt-1 text-[10px] font-mono text-zinc-700">
-            <span>{mainPts.length} GPS pts</span>
-            {playing && carPt && <span style={{ color: color1 }}>{Math.round(carPt.speed)} km/h</span>}
+            <span>{normalizedPoints.length} GPS pts</span>
+            {playing && carPt && <span style={{ color }}>{Math.round(carPt.speed)} km/h</span>}
           </div>
         </>
       )}
@@ -489,8 +329,8 @@ function CircuitSpeedMap({ circuitMap, compareCircuitMap, color1, color2, code1,
   );
 }
 
-// ─── SECTOR TABLE ─────────────────────────────────────────────────────────────
-function SectorTable({ sectorsData, highlightCode, compareCode }) {
+// ─── SECTOR TABLE — TUTTI I PILOTI ─────────────────────────────────────────────
+function SectorTable({ sectorsData, highlightCode }) {
   const [lapFilter, setLapFilter] = useState(null);
   const [openFilter, setOpenFilter] = useState(false);
   const filterRef = useRef(null);
@@ -522,7 +362,6 @@ function SectorTable({ sectorsData, highlightCode, compareCode }) {
   );
 
   const leader = tableData[0];
-  const refRow = tableData.find(d => d.code === highlightCode) || leader;
   const bS1 = Math.min(...tableData.map(d => d.s1 ?? Infinity));
   const bS2 = Math.min(...tableData.map(d => d.s2 ?? Infinity));
   const bS3 = Math.min(...tableData.map(d => d.s3 ?? Infinity));
@@ -573,17 +412,16 @@ function SectorTable({ sectorsData, highlightCode, compareCode }) {
           <tbody>
             {tableData.map((d, i) => {
               const gap = d.lap_duration - leader.lap_duration;
-              const dS1 = (d.s1 ?? 0) - (refRow?.s1 ?? 0);
-              const dS2 = (d.s2 ?? 0) - (refRow?.s2 ?? 0);
-              const dS3 = (d.s3 ?? 0) - (refRow?.s3 ?? 0);
-              const isHL = d.code === highlightCode, isCmp = d.code === compareCode;
+              const dS1 = (d.s1 ?? 0) - (leader?.s1 ?? 0);
+              const dS2 = (d.s2 ?? 0) - (leader?.s2 ?? 0);
+              const dS3 = (d.s3 ?? 0) - (leader?.s3 ?? 0);
+              const isHL = d.code === highlightCode;
               return (
-                <tr key={d.code} className={`border-b border-zinc-900 hover:bg-zinc-800/30 transition-colors ${isHL ? 'bg-zinc-800/50' : isCmp ? 'bg-zinc-800/20' : ''}`}>
+                <tr key={d.code} className={`border-b border-zinc-900 hover:bg-zinc-800/30 transition-colors ${isHL ? 'bg-zinc-800/50' : ''}`}>
                   <td className="py-1.5 pr-2 text-zinc-500">{i + 1}</td>
                   <td className="py-1.5 pr-2">
                     <span className={isHL ? 'text-white font-bold' : 'font-bold'} style={{ color: isHL ? undefined : d.color }}>{d.code}</span>
                     {isHL && <span className="text-zinc-600 ml-1 text-[9px]">◀</span>}
-                    {isCmp && <span className="text-zinc-600 ml-1 text-[9px]">◁</span>}
                   </td>
                   <td className="py-1.5 pr-2 text-right">
                     <span className={d.isBest ? 'text-purple-400' : 'text-zinc-500'}>{d.isBest ? '★' : ''}{d.lap_number}</span>
@@ -651,30 +489,20 @@ export default function LiveTimingPage() {
   const [sessionInfo, setSessionInfo] = useState(null);
   const [drivers, setDrivers]         = useState([]);
   const [driverCode, setDriverCode]   = useState(null);
-  const [compareCode, setCompareCode] = useState(null);
-  const [showCompare, setShowCompare] = useState(false);
 
   // Lap selectors
-  const [driver1Laps, setDriver1Laps]     = useState([]);
-  const [driver2Laps, setDriver2Laps]     = useState([]);
-  const [selectedLap1, setSelectedLap1]   = useState(null);
-  const [selectedLap2, setSelectedLap2]   = useState(null);
+  const [driverLaps, setDriverLaps]   = useState([]);
+  const [selectedLap, setSelectedLap] = useState(null);
 
   // Data
-  const [telemetry, setTelemetry]                   = useState([]);
-  const [compareTelemetry, setCompareTelemetry]     = useState([]);
-  const [fastestLap1, setFastestLap1]               = useState(null);
-  const [fastestLap2, setFastestLap2]               = useState(null);
-  const [fullData1, setFullData1]                   = useState(null);
-  const [fullData2, setFullData2]                   = useState(null);
-  const [circuitMap, setCircuitMap]                 = useState([]);
-  const [compareCircuitMap, setCompareCircuitMap]   = useState([]);
-  const [weather, setWeather]                       = useState(null);
-  const [sectorsData, setSectorsData]               = useState(null);
-  const [positionsData, setPositionsData]           = useState(null);
+  const [telemetry, setTelemetry]               = useState([]);
+  const [fastestLap, setFastestLap]             = useState(null);
+  const [circuitMap, setCircuitMap]             = useState([]);
+  const [weather, setWeather]                   = useState(null);
+  const [sectorsData, setSectorsData]           = useState(null);
+  const [positionsData, setPositionsData]       = useState(null);
 
   // UI
-  const [chartMode, setChartMode]   = useState('lap');
   const [activeTab, setActiveTab]   = useState('speed');
   const [loading, setLoading]       = useState(false);
   const [loadStep, setLoadStep]     = useState('');
@@ -686,10 +514,9 @@ export default function LiveTimingPage() {
   const [openMeeting, setOpenMeeting] = useState(false);
   const [openSession, setOpenSession] = useState(false);
   const [openDriver, setOpenDriver]   = useState(false);
-  const [openCompare, setOpenCompare] = useState(false);
 
-  const r1=useRef(null),r2=useRef(null),r3=useRef(null),r4=useRef(null),r5=useRef(null);
-  useOutsideClose([r1,r2,r3,r4,r5],[setOpenYear,setOpenMeeting,setOpenSession,setOpenDriver,setOpenCompare]);
+  const r1=useRef(null),r2=useRef(null),r3=useRef(null),r4=useRef(null);
+  useOutsideClose([r1,r2,r3,r4],[setOpenYear,setOpenMeeting,setOpenSession,setOpenDriver]);
 
   // Auto-populate on mount
   useEffect(() => {
@@ -745,42 +572,39 @@ export default function LiveTimingPage() {
   const fetchAll = async () => {
     if (!year || !meeting || !driverCode || !sessionInfo) return;
     setLoading(true); setError(null);
-    setTelemetry([]); setCompareTelemetry([]);
-    setFastestLap1(null); setFastestLap2(null);
-    setFullData1(null); setFullData2(null);
-    setCircuitMap([]); setCompareCircuitMap([]);
-    setWeather(null); setSectorsData(null); setPositionsData(null);
-    setDriver1Laps([]); setDriver2Laps([]);
+    setTelemetry([]); setFastestLap(null);
+    setCircuitMap([]); setWeather(null); setSectorsData(null); setPositionsData(null);
+    setDriverLaps([]);
 
     const sk = sessionInfo.session_key;
     try {
       setLoadStep('Telemetria giro…');
-      const num1 = await getDriverNumber(sk, driverCode);
-      const r1 = await getTelemetry(sk, num1, selectedLap1);
-      setTelemetry(r1.telemetry); setFastestLap1(r1.target_lap);
-      setDriver1Laps(await getAllLaps(sk, num1));
+      const num = await getDriverNumber(sk, driverCode);
+      
+      // Prima prendi tutti i giri per conoscere il fastest lap
+      const allLaps = await getAllLaps(sk, num);
+      setDriverLaps(allLaps);
+      
+      // Seleziona il giro più veloce di default
+      const fastestLapNum = allLaps.reduce((a, b) => a.lap_duration < b.lap_duration ? a : b).lap_number;
+      setSelectedLap(fastestLapNum);
+      
+      const r = await getTelemetry(sk, num, fastestLapNum);
+      setTelemetry(r.telemetry); setFastestLap(r.target_lap);
 
-      setLoadStep('GPS circuito (giro 1)…');
-      try { setCircuitMap(await getCircuitMap(sk, num1, null)); } catch { /* optional */ }
-
-      setLoadStep('Sessione completa…');
-      try { setFullData1(await getFullSessionTelemetry(sk, num1)); } catch { /* optional */ }
-
-      if (showCompare && compareCode && compareCode !== driverCode) {
-        setLoadStep(`Dati ${compareCode}…`);
-        try {
-          const num2 = await getDriverNumber(sk, compareCode);
-          const r2 = await getTelemetry(sk, num2, selectedLap2);
-          setCompareTelemetry(r2.telemetry); setFastestLap2(r2.target_lap);
-          setDriver2Laps(await getAllLaps(sk, num2));
-          try { setCompareCircuitMap(await getCircuitMap(sk, num2, null)); } catch { /* optional */ }
-          try { setFullData2(await getFullSessionTelemetry(sk, num2)); } catch { /* optional */ }
-        } catch { /* optional */ }
-      }
+      setLoadStep('GPS circuito (giro veloce)…');
+      try { 
+        const map = await getCircuitMap(sk, num, fastestLapNum);
+        setCircuitMap(map); 
+      } catch { /* optional */ }
 
       setLoadStep('Meteo + settori…');
       try { setWeather(await getWeather(sk)); } catch { /* optional */ }
-      try { setSectorsData(await getAllDriversSectors(sk)); } catch { /* optional */ }
+      try { 
+        const sectors = await getAllDriversSectors(sk);
+        setSectorsData(sectors); 
+      } catch { /* optional */ }
+      
       if (sessionType === 'R') {
         try { setPositionsData(await getRacePositions(sk)); } catch { /* optional */ }
       }
@@ -791,26 +615,24 @@ export default function LiveTimingPage() {
     } finally { setLoading(false); setLoadStep(''); }
   };
 
-  const refetchLap = async (lapNum, isCompare) => {
+  const refetchLap = async (lapNum) => {
     if (!sessionInfo) return;
     const sk = sessionInfo.session_key;
     try {
-      if (!isCompare) {
-        const num = await getDriverNumber(sk, driverCode);
-        const r = await getTelemetry(sk, num, lapNum);
-        setTelemetry(r.telemetry); setFastestLap1(r.target_lap);
-        try { setCircuitMap(await getCircuitMap(sk, num, lapNum)); } catch { /* optional */ }
-      } else {
-        const num = await getDriverNumber(sk, compareCode);
-        const r = await getTelemetry(sk, num, lapNum);
-        setCompareTelemetry(r.telemetry); setFastestLap2(r.target_lap);
-        try { setCompareCircuitMap(await getCircuitMap(sk, num, lapNum)); } catch { /* optional */ }
-      }
+      const num = await getDriverNumber(sk, driverCode);
+      const r = await getTelemetry(sk, num, lapNum);
+      setTelemetry(r.telemetry); setFastestLap(r.target_lap);
+      try { 
+        const map = await getCircuitMap(sk, num, lapNum);
+        setCircuitMap(map); 
+      } catch { /* optional */ }
     } catch (e) { setError(e.message); }
   };
 
-  const handleLap1 = n => { setSelectedLap1(n); if (telemetry.length) refetchLap(n, false); };
-  const handleLap2 = n => { setSelectedLap2(n); if (compareTelemetry.length) refetchLap(n, true); };
+  const handleLapChange = (n) => { 
+    setSelectedLap(n); 
+    if (telemetry.length) refetchLap(n); 
+  };
 
   const stats = useMemo(() => {
     if (!telemetry.length) return null;
@@ -824,15 +646,13 @@ export default function LiveTimingPage() {
     };
   }, [telemetry]);
 
-  const driverInfo  = drivers.find(d => d.name_acronym === driverCode);
-  const compareInfo = drivers.find(d => d.name_acronym === compareCode);
-  const color1 = driverInfo?.team_colour  ? `#${driverInfo.team_colour}`  : '#ef4444';
-  const color2 = compareInfo?.team_colour ? `#${compareInfo.team_colour}` : '#3b82f6';
+  const driverInfo = drivers.find(d => d.name_acronym === driverCode);
+  const color = driverInfo?.team_colour ? `#${driverInfo.team_colour}` : '#ef4444';
 
   const canFetch = !!year && !!meeting && !!driverCode && !!sessionInfo && !loading;
   const flagCode = meeting ? getFlagCode(meeting.location || meeting.meeting_name || '') : '';
-  const fast1 = driver1Laps.length ? driver1Laps.reduce((a,b)=>a.lap_duration<b.lap_duration?a:b).lap_number : null;
-  const fast2 = driver2Laps.length ? driver2Laps.reduce((a,b)=>a.lap_duration<b.lap_duration?a:b).lap_number : null;
+  const fastestLapNumber = driverLaps.length ? 
+    driverLaps.reduce((a,b)=>a.lap_duration<b.lap_duration?a:b).lap_number : null;
 
   return (
     <>
@@ -913,7 +733,7 @@ export default function LiveTimingPage() {
                     {driverInfo.headshot_url && <img src={driverInfo.headshot_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />}
                     <div>
                       <div className="font-black font-mono text-sm flex items-center gap-2">
-                        <span style={{ color: color1 }}>{driverInfo.name_acronym}</span>
+                        <span style={{ color }}>{driverInfo.name_acronym}</span>
                         <span className="text-zinc-600 font-normal">#{driverInfo.driver_number}</span>
                       </div>
                       <div className="text-xs text-zinc-500">{driverInfo.full_name} · {driverInfo.team_name}</div>
@@ -923,12 +743,7 @@ export default function LiveTimingPage() {
               }>
               {drivers.map(d => (
                 <button key={d.driver_number}
-                  onClick={() => {
-                    setDriverCode(d.name_acronym);
-                    if (!compareCode||compareCode===d.name_acronym)
-                      setCompareCode(drivers.find(x=>x.name_acronym!==d.name_acronym)?.name_acronym||null);
-                    setOpenDriver(false);
-                  }}
+                  onClick={() => { setDriverCode(d.name_acronym); setOpenDriver(false); }}
                   className={`w-full p-3 text-left hover:bg-zinc-800 transition-colors flex items-center gap-3 ${driverCode===d.name_acronym?'bg-red-600/15 border-l-2 border-red-600 pl-4':''}`}>
                   {d.headshot_url && <img src={d.headshot_url} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />}
                   <div>
@@ -940,37 +755,8 @@ export default function LiveTimingPage() {
             </Dropdown>
           </div>
 
-          {/* Compare + Fetch row */}
+          {/* Fetch row */}
           <div className="flex flex-wrap items-center gap-3 mb-6">
-            <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5">
-              <span className="text-[10px] text-zinc-600 font-mono tracking-[0.15em] uppercase">Compare</span>
-              <button onClick={() => setShowCompare(v=>!v)}
-                className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all ${showCompare?'bg-red-600 text-white':'bg-zinc-800 text-zinc-500 hover:text-white'}`}>
-                {showCompare ? 'ON' : 'OFF'}
-              </button>
-            </div>
-            {showCompare && (
-              <Dropdown label="vs Driver" isOpen={openCompare&&!!meeting} onToggle={() => meeting&&drivers.length&&setOpenCompare(v=>!v)}
-                disabled={!meeting||!drivers.length} dropdownRef={r5}
-                header={
-                  compareInfo ? (
-                    <div className="flex items-center gap-2">
-                      {compareInfo.headshot_url && <img src={compareInfo.headshot_url} alt="" className="w-6 h-6 rounded-full object-cover" />}
-                      <span className="font-mono font-bold text-sm" style={{ color: color2 }}>{compareInfo.name_acronym}</span>
-                      <span className="text-zinc-600 text-xs">{compareInfo.team_name}</span>
-                    </div>
-                  ) : <div className="text-sm text-zinc-500">Select driver</div>
-                }>
-                {drivers.filter(d=>d.name_acronym!==driverCode).map(d => (
-                  <button key={d.driver_number} onClick={() => { setCompareCode(d.name_acronym); setOpenCompare(false); }}
-                    className={`w-full p-3 text-left hover:bg-zinc-800 transition-colors flex items-center gap-3 ${compareCode===d.name_acronym?'bg-red-600/15 border-l-2 border-red-600 pl-4':''}`}>
-                    {d.headshot_url && <img src={d.headshot_url} alt="" className="w-6 h-6 rounded-full object-cover" />}
-                    <span className="font-mono text-sm text-white">{d.name_acronym}</span>
-                    <span className="text-zinc-500 text-xs ml-1">{d.team_name}</span>
-                  </button>
-                ))}
-              </Dropdown>
-            )}
             <div className="flex-1" />
             {lastQuery && <div className="hidden lg:block text-xs text-zinc-700 font-mono">{lastQuery.year} · {lastQuery.gp} · {lastQuery.driver} · {lastQuery.session}</div>}
             <button onClick={fetchAll} disabled={!canFetch}
@@ -1006,29 +792,27 @@ export default function LiveTimingPage() {
               {/* Lap info strip */}
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-5 py-3 flex flex-wrap items-center gap-x-8 gap-y-3">
                 <div className="flex items-center gap-3 flex-wrap">
-                  {driver1Laps.length > 0 && (
-                    <LapSelector laps={driver1Laps} selectedLap={selectedLap1} onSelect={handleLap1} fastestLapNumber={fast1} color={color1} label={driverCode} />
-                  )}
-                  {showCompare && driver2Laps.length > 0 && (
-                    <LapSelector laps={driver2Laps} selectedLap={selectedLap2} onSelect={handleLap2} fastestLapNumber={fast2} color={color2} label={compareCode} />
+                  {driverLaps.length > 0 && (
+                    <LapSelector 
+                      laps={driverLaps} 
+                      selectedLap={selectedLap} 
+                      onSelect={handleLapChange} 
+                      fastestLapNumber={fastestLapNumber} 
+                      color={color} 
+                      label={driverCode} 
+                    />
                   )}
                 </div>
-                {fastestLap1 && (
+                {fastestLap && (
                   <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
                     <div className="text-xs font-mono">
                       <span className="text-zinc-600 uppercase mr-2">Time</span>
-                      <span className="text-white font-black">{formatTime(fastestLap1.lap_duration)}</span>
-                      {fastestLap2 && <span className="text-zinc-600 ml-2">vs <span style={{ color: color2 }}>{formatTime(fastestLap2.lap_duration)}</span></span>}
+                      <span className="text-white font-black">{formatTime(fastestLap.lap_duration)}</span>
                     </div>
-                    {[1,2,3].map(s => fastestLap1[`sector_${s}`] ? (
+                    {[1,2,3].map(s => fastestLap[`sector_${s}`] ? (
                       <div key={s} className="text-xs font-mono">
                         <span className="text-zinc-600 mr-1">S{s}</span>
-                        <span className="text-zinc-300">{fastestLap1[`sector_${s}`].toFixed(3)}s</span>
-                        {fastestLap2?.[`sector_${s}`] && (
-                          <span className={`ml-1 ${fastestLap1[`sector_${s}`] < fastestLap2[`sector_${s}`] ? 'text-green-400' : 'text-red-400'}`}>
-                            ({formatDelta(fastestLap1[`sector_${s}`] - fastestLap2[`sector_${s}`])})
-                          </span>
-                        )}
+                        <span className="text-zinc-300">{fastestLap[`sector_${s}`].toFixed(3)}s</span>
                       </div>
                     ) : null)}
                   </div>
@@ -1041,28 +825,16 @@ export default function LiveTimingPage() {
                 )}
               </div>
 
-              {/* Telemetry chart */}
+              {/* Telemetry chart - solo single lap */}
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
                 <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                   <div className="flex items-center gap-3 flex-wrap">
-                    {/* Mode toggle */}
-                    <div className="flex bg-zinc-800 rounded-lg p-0.5">
-                      {[['lap','Single Lap'],['race','Full Session']].map(([m, lbl]) => (
-                        <button key={m} onClick={() => setChartMode(m)}
-                          className={`px-3 py-1 text-xs rounded-md font-mono transition-all ${chartMode===m?'bg-zinc-600 text-white':'text-zinc-500 hover:text-zinc-300'}`}>
-                          {lbl}
-                        </button>
-                      ))}
-                    </div>
                     <div className="text-[10px] text-zinc-600 font-mono flex items-center gap-2">
-                      <span style={{ color: color1 }}>● {driverCode}</span>
-                      {showCompare && (compareTelemetry.length > 0 || fullData2) && (
-                        <><span className="text-zinc-700">·</span><span style={{ color: color2 }}>╌ {compareCode}</span></>
-                      )}
+                      <span style={{ color }}>● {driverCode}</span>
                     </div>
                   </div>
                   <div className="flex gap-1">
-                    {(chartMode === 'race' ? ['speed','rpm'] : ['speed','rpm','gear','inputs']).map(t => (
+                    {['speed','rpm','gear','inputs'].map(t => (
                       <button key={t} onClick={() => setActiveTab(t)}
                         className={`px-3 py-1 text-xs rounded-lg font-mono transition-all ${activeTab===t?'bg-red-600 text-white':'text-zinc-500 hover:text-white hover:bg-zinc-800'}`}>
                         {t.toUpperCase()}
@@ -1072,30 +844,27 @@ export default function LiveTimingPage() {
                 </div>
 
                 <TelemetryChart
-                  data1={telemetry}
-                  data2={showCompare ? compareTelemetry : []}
-                  code1={driverCode} code2={compareCode || ''}
-                  color1={color1} color2={color2}
-                  tab={activeTab} mode={chartMode}
-                  fullData1={fullData1}
-                  fullData2={showCompare ? fullData2 : null}
+                  data={telemetry}
+                  code={driverCode}
+                  color={color}
+                  tab={activeTab}
                 />
               </div>
 
-              {/* Map + Sectors */}
+              {/* Map + Sectors - con tutti i piloti */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <CircuitSpeedMap
-                  circuitMap={circuitMap} compareCircuitMap={showCompare ? compareCircuitMap : []}
-                  color1={color1} color2={color2} code1={driverCode} code2={compareCode}
-                  showCompare={showCompare && compareCircuitMap.length > 0}
+                  circuitMap={circuitMap}
+                  color={color}
+                  code={driverCode}
                 />
-                <SectorTable sectorsData={sectorsData} highlightCode={driverCode} compareCode={showCompare ? compareCode : null} />
+                <SectorTable sectorsData={sectorsData} highlightCode={driverCode} />
               </div>
 
               {/* Race positions */}
               {sessionType === 'R' && (
                 <RacePositionsChart positionsData={positionsData}
-                  highlightCodes={[driverCode, showCompare&&compareCode].filter(Boolean)} />
+                  highlightCodes={[driverCode]} />
               )}
             </div>
           )}
