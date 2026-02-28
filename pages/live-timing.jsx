@@ -480,12 +480,16 @@ export default function LiveTimingPage() {
 
   const handleMeetingChange = async (m) => {
     setMeeting(m); setOpenMeeting(false); setDrivers([]); setSessionInfo(null);
+    setRaceResults(null);
+    if (sessionType === 'R' && m?.round) loadRaceResults(year, m.round);
     try { await loadDriversForSession(m, SESSION_TYPES.find(s => s.id === sessionType)?.name || 'Qualifying'); }
     catch { setDrivers([]); }
   };
 
   const handleSessionChange = async (sid) => {
     setSessionType(sid); setOpenSession(false); setDrivers([]); setSessionInfo(null);
+    setRaceResults(null);
+    if (sid === 'R' && meeting?.round) loadRaceResults(year, meeting.round);
     if (!meeting) return;
     try { await loadDriversForSession(meeting, SESSION_TYPES.find(s => s.id === sid)?.name || sid); }
     catch { setDrivers([]); }
@@ -512,24 +516,32 @@ const fetchAll = async () => {
   try {
     const num = await getDriverNumber(sk, driverCode);
 
-    // Telemetry + laps (independent of sectors/weather)
+    // Step 1: fetch laps immediately — cheapest call, gives us lap list + fastest lap info fast
+    const lapsPromise = getAllLaps(sk, num).catch(() => null);
+
+    // Step 2: fetch telemetry in parallel but don't wait for it to show laps
+    const rawTelemetryPromise = getTelemetry(sk, num, null).catch(() => null);
+
     const telemetryPromise = (async () => {
       try {
-        const [allLaps, telemetryResult] = await Promise.all([
-          getAllLaps(sk, num),
-          getTelemetry(sk, num, null).catch(() => null),
-        ]);
+        const allLaps = await lapsPromise;
         if (allLaps?.length) {
           setDriverLaps(allLaps);
           const fastestLapNum = allLaps.reduce((a, b) =>
             a.lap_duration < b.lap_duration ? a : b
           ).lap_number;
           setSelectedLap(fastestLapNum);
+          // Set fastest lap info from laps data immediately (no need to wait for telemetry)
+          const fl = allLaps.find(l => l.lap_number === fastestLapNum);
+          if (fl) setFastestLap(fl);
           getCircuitMap(sk, num, fastestLapNum).then(setCircuitMap).catch(() => {});
         }
+        // Now wait for telemetry (chart data) — arrives later, updates chart when ready
+        const telemetryResult = await rawTelemetryPromise;
         if (telemetryResult) {
           setTelemetry(telemetryResult.telemetry);
-          setFastestLap(telemetryResult.target_lap);
+          // Override fastestLap with richer telemetry-based lap object if available
+          if (telemetryResult.target_lap) setFastestLap(telemetryResult.target_lap);
         }
       } finally {
         setLoadingTelemetry(false);
@@ -550,11 +562,7 @@ const fetchAll = async () => {
       }
     })();
 
-    const racePromise = (sessionType === 'R' && meeting?.round && typeof window !== 'undefined')
-      ? loadRaceResults(year, meeting.round)
-      : Promise.resolve();
-
-    await Promise.all([telemetryPromise, sectorsPromise, racePromise]);
+    await Promise.all([telemetryPromise, sectorsPromise]);
     setLastQuery({ year, gp: meeting.meeting_name, session: sessionType, driver: driverCode });
   } catch (e) {
     setError(e.message || 'Errore sconosciuto');
@@ -586,16 +594,32 @@ const fetchAll = async () => {
   };
 
   const stats = useMemo(() => {
-    if (!telemetry.length) return null;
-    const spd = telemetry.map(d => d.speed).filter(Boolean);
-    const rpm = telemetry.map(d => d.rpm).filter(Boolean);
-    return {
-      maxSpeed: spd.length ? Math.max(...spd) : 0,
-      avgSpeed: spd.length ? Math.round(spd.reduce((a,b)=>a+b,0)/spd.length) : 0,
-      maxRpm:   rpm.length ? Math.max(...rpm) : 0,
-      points:   telemetry.length,
-    };
-  }, [telemetry]);
+    // If telemetry is loaded, use full point-by-point data
+    if (telemetry.length) {
+      const spd = telemetry.map(d => d.speed).filter(Boolean);
+      const rpm = telemetry.map(d => d.rpm).filter(Boolean);
+      return {
+        maxSpeed: spd.length ? Math.max(...spd) : 0,
+        avgSpeed: spd.length ? Math.round(spd.reduce((a,b)=>a+b,0)/spd.length) : 0,
+        maxRpm:   rpm.length ? Math.max(...rpm) : 0,
+        points:   telemetry.length,
+        fromLaps: false,
+      };
+    }
+    // Fallback: show lap-based stats immediately while telemetry is loading
+    if (driverLaps.length) {
+      const fl = fastestLapNumber ? driverLaps.find(l => l.lap_number === fastestLapNumber) : null;
+      return {
+        maxSpeed: fl?.top_speed ?? null,
+        avgSpeed: null,
+        maxRpm: null,
+        points: driverLaps.length,
+        fastestTime: fl?.lap_duration ?? null,
+        fromLaps: true,
+      };
+    }
+    return null;
+  }, [telemetry, driverLaps, fastestLapNumber]);
 
   const driverInfo = drivers.find(d => d.name_acronym === driverCode);
   const color = driverInfo?.team_colour ? `#${driverInfo.team_colour}` : '#ef4444';
@@ -730,25 +754,32 @@ const fetchAll = async () => {
           )}
 
           {/* ── DATA SECTION ── */}
-          {(telemetry.length > 0 || loadingTelemetry || loadingSectors) && (
+          {(telemetry.length > 0 || driverLaps.length > 0 || loadingTelemetry || loadingSectors) && (
             <div className="space-y-4">
 
-              {/* Stats */}
-              {loadingTelemetry ? (
+              {/* Stats — show immediately from lap data, upgrade values once telemetry loads */}
+              {stats && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {[...Array(4)].map((_, i) => (
-                    <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 animate-pulse">
-                      <div className="h-3 bg-zinc-800 rounded w-1/2 mb-3" />
-                      <div className="h-7 bg-zinc-800 rounded w-3/4" />
-                    </div>
-                  ))}
-                </div>
-              ) : stats && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <StatCard accent label="Top Speed" value={`${stats.maxSpeed} km/h`} icon={<Zap className="w-4 h-4 text-red-500" />} sub="Selected lap" />
-                  <StatCard label="Avg Speed" value={`${stats.avgSpeed} km/h`} icon={<Gauge className="w-4 h-4 text-yellow-500" />} />
-                  <StatCard label="Max RPM" value={stats.maxRpm.toLocaleString()} icon={<Activity className="w-4 h-4 text-blue-500" />} />
-                  <StatCard label="Data Points" value={stats.points.toLocaleString()} icon={<Cpu className="w-4 h-4 text-green-500" />} sub="~3.7 Hz" />
+                  <StatCard accent label="Top Speed"
+                    value={stats.maxSpeed != null ? `${stats.maxSpeed} km/h` : loadingTelemetry ? '…' : '—'}
+                    icon={<Zap className="w-4 h-4 text-red-500" />}
+                    sub={stats.fromLaps ? 'Fastest lap' : 'Selected lap'}
+                  />
+                  <StatCard label="Avg Speed"
+                    value={stats.avgSpeed != null ? `${stats.avgSpeed} km/h` : loadingTelemetry ? '…' : '—'}
+                    icon={<Gauge className="w-4 h-4 text-yellow-500" />}
+                    sub={stats.fromLaps ? 'Loading…' : undefined}
+                  />
+                  <StatCard label="Max RPM"
+                    value={stats.maxRpm != null ? stats.maxRpm.toLocaleString() : loadingTelemetry ? '…' : '—'}
+                    icon={<Activity className="w-4 h-4 text-blue-500" />}
+                    sub={stats.fromLaps ? 'Loading…' : undefined}
+                  />
+                  <StatCard label="Total Laps"
+                    value={stats.points.toLocaleString()}
+                    icon={<Cpu className="w-4 h-4 text-green-500" />}
+                    sub={stats.fromLaps ? 'Laps' : 'Data points · ~3.7 Hz'}
+                  />
                 </div>
               )}
 
@@ -821,14 +852,23 @@ const fetchAll = async () => {
               </div>
               )}
 
-              {/*  */}
-              {sessionType === 'R' && raceResults && raceResults.length > 0 && (
-                <QualifyingToRaceProgression
-                  raceResults={raceResults}
-                  year={year}
-                  grandPrix={meeting?.meeting_name}
-                  driverStandings={null}
-                />
+              {/* Race progression — loads as soon as JSON is ready (before telemetry) */}
+              {sessionType === 'R' && (
+                loadingResults ? (
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 animate-pulse">
+                    <div className="h-4 bg-zinc-800 rounded w-1/3 mb-4" />
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="h-8 bg-zinc-800/50 rounded mb-1" />
+                    ))}
+                  </div>
+                ) : raceResults && raceResults.length > 0 && (
+                  <QualifyingToRaceProgression
+                    raceResults={raceResults}
+                    year={year}
+                    grandPrix={meeting?.meeting_name}
+                    driverStandings={null}
+                  />
+                )
               )}
 
               {sessionType !== 'R' && (
@@ -854,7 +894,7 @@ const fetchAll = async () => {
             </div>
           )}
 
-          {!isFetching && !error && !telemetry.length && (
+          {!isFetching && !error && !telemetry.length && !driverLaps.length && (
             <div className="text-center py-28 border border-zinc-900 rounded-xl">
               <Radio className="w-10 h-10 mx-auto mb-4 text-zinc-800" />
               <div className="text-xl font-black font-mono text-zinc-700 mb-2">NO DATA LOADED</div>
