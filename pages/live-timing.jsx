@@ -16,9 +16,6 @@ import {
   getWeather, getMeetings, getSessionsForMeeting, getLatestSession,
   getAllDriversSectors, getRacePositions, getAllLaps, openf1Fetch,
 } from '../lib/openf1';
-
-// QualifyingToRaceProgression defined inline below
-
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 var SESSION_TYPES = [
@@ -366,20 +363,70 @@ function RacePositionsChart({ positionsData, highlightCodes }) {
   );
 }
 
-// ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 // ─── QUALIFYING→RACE SLOPE CHART ────────────────────────────────────────────
 const TEAM_COLORS = {
-  'red-bull':    '#3671C6',
-  'mercedes':    '#6CD3BF',
-  'ferrari':     '#F91536',
-  'mclaren':     '#F58020',
-  'aston-martin':'#2D826D',
-  'alpine':      '#2090D0',
-  'williams':    '#64C4FF',
-  'rb':          '#6692FF',
-  'haas':        '#B6BABD',
+  'ferrari': '#F91536',
+  'mercedes': '#6CD3BF',
+  'red-bull': '#3671C6',
+  'mclaren': '#F58020',
+  'aston-martin': '#2D826D',
+  'alpine': '#2090D0',
+  'williams': '#64C4FF',
+  'rb': '#6692FF',
+  'haas': '#B6BABD',
   'kick-sauber': '#52E252',
-  'default':     '#888888',
+  'sauber': '#006F62',
+  'bmw-sauber': '#1B3C8C',
+  'alfa-romeo': '#9B0000',
+  'renault': '#FFD800',
+  'lotus-renault': '#111111',
+  'lotus': '#005A2C',
+  'team-lotus': '#005A2C',
+  'brabham': '#003366',
+  'tyrrell': '#0033A0',
+  'benetton': '#008C45',
+  'brawn': '#B7E000',
+  'honda': '#FFFFFF',
+  'jaguar': '#005A2C',
+  'stewart': '#FFFFFF',
+  'bar': '#FFFFFF',
+  'toyota': '#CC0000',
+  'porsche': '#E60000',
+  'maserati': '#003A8F',
+  'alfa-romeo-works': '#8B0000',
+  'cooper': '#0033A0',
+  'matra': '#0055A4',
+  'ligier': '#0055A4',
+  'arrows': '#FF6600',
+  'minardi': '#000000',
+  'toro-rosso': '#1E5BC6',
+  'hrt': '#B30000',
+  'caterham': '#005030',
+  'virgin': '#CC0000',
+  'marussia': '#9B0000',
+  'manor': '#003A8F',
+  'super-aguri': '#FFFFFF',
+  'force-india': '#FF5F00',
+  'spyker': '#FF6600',
+  'jordan': '#FFD800',
+  'prost': '#0055A4',
+  'footwork': '#0033A0',
+  'pacific': '#003A8F',
+  'simtek': '#000000',
+  'lola': '#0033A0',
+  'shadow': '#000000',
+  'march': '#0033A0',
+  'ats': '#000000',
+  'osella': '#000000',
+  'coloni': '#000000',
+  'zakspeed': '#000000',
+  'eurobrun': '#000000',
+  'onyx': '#000000',
+  'larrousse': '#0055A4',
+  'forti': '#FFD800',
+  'andrea-moda': '#000000',
+  'life': '#000000',
+  'default': '#888888'
 };
 
 function getColor(constructorId, gain) {
@@ -567,9 +614,8 @@ function QualifyingToRaceProgression({ raceResults, year, grandPrix }) {
               const isHL = highlight === d.id;
               if (isHighlightPass !== isHL) return null;
 
-              const color = getGainColor(d.gain);
-              const opacity = highlight && !isHL ? 0.06 : isHL ? 1 : 0.55;
-              const strokeW = isHL ? 3 : 1.5;
+              const opacity = highlight && !isHL ? 0.07 : isHL ? 1 : 0.75;
+              const strokeW = isHL ? 6 : 3.5;
 
               // Cubic bezier: control points at 40% and 60% of the width
               const cx1 = LEFT_X  + (RIGHT_X - LEFT_X) * 0.42;
@@ -579,22 +625,26 @@ function QualifyingToRaceProgression({ raceResults, year, grandPrix }) {
               return (
                 <g key={d.id}>
                   {/* Wider invisible hit area */}
-                  <path d={path} fill="none" stroke="transparent" strokeWidth={12}
+                  <path d={path} fill="none" stroke="transparent" strokeWidth={16}
                     style={{ cursor: 'pointer' }}
                     onMouseEnter={() => setHighlight(d.id)}
                     onMouseLeave={() => setHighlight(null)}
                   />
+                  {/* Glow layer on highlight */}
+                  {isHL && (
+                    <path d={path} fill="none" stroke={d.color} strokeWidth={12} opacity={0.18} strokeLinecap="round" />
+                  )}
                   <path
                     d={path}
                     fill="none"
-                    stroke={color}
+                    stroke={d.color}
                     strokeWidth={strokeW}
                     opacity={opacity}
                     strokeLinecap="round"
                   />
                   {/* Dots at endpoints */}
-                  <circle cx={LEFT_X}  cy={y1} r={isHL ? 5 : 3} fill={d.color} opacity={opacity} />
-                  <circle cx={RIGHT_X} cy={y2} r={isHL ? 5 : 3} fill={d.color} opacity={opacity} />
+                  <circle cx={LEFT_X}  cy={y1} r={isHL ? 6 : 4} fill={d.color} opacity={opacity} />
+                  <circle cx={RIGHT_X} cy={y2} r={isHL ? 6 : 4} fill={d.color} opacity={opacity} />
                 </g>
               );
             })
@@ -695,14 +745,12 @@ function QualifyingToRaceProgression({ raceResults, year, grandPrix }) {
 
 export default function LiveTimingPage() {
 
-  // Session-level cache refs — avoid re-fetching same data within a session
   const cachedDriverNum = React.useRef(null);   // { sk, code, num }
   const cachedCarData   = React.useRef(null);   // { sk, num, data }
   const cachedRawLaps   = React.useRef(null);   // { sk, num, data }
 
   const [raceResults, setRaceResults] = useState(null);
   const [loadingResults, setLoadingResults] = useState(false);
-  // Carica i risultati di gara dal JSON locale, matchando per anno + nome/location del meeting
   const loadRaceResults = async (year, meetingObj) => {
     if (typeof window === 'undefined' || !meetingObj) return;
 

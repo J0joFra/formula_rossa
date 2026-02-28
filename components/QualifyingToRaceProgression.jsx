@@ -3,7 +3,6 @@ import React, { useState, useMemo } from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 const TEAM_COLORS = {
-  // Attuali / moderni
   'ferrari': '#F91536',
   'mercedes': '#6CD3BF',
   'red-bull': '#3671C6',
@@ -14,90 +13,38 @@ const TEAM_COLORS = {
   'rb': '#6692FF',
   'haas': '#B6BABD',
   'kick-sauber': '#52E252',
-
-  // Sauber lineage
   'sauber': '#006F62',
   'bmw-sauber': '#1B3C8C',
   'alfa-romeo': '#9B0000',
-
-  // Renault lineage
   'renault': '#FFD800',
   'lotus-renault': '#111111',
   'lotus': '#005A2C',
   'team-lotus': '#005A2C',
-
-  // Brabham
   'brabham': '#003366',
-
-  // Tyrrell
   'tyrrell': '#0033A0',
-
-  // Benetton
   'benetton': '#008C45',
-
-  // Brawn
   'brawn': '#B7E000',
-
-  // Honda works
   'honda': '#FFFFFF',
-
-  // Jaguar
   'jaguar': '#005A2C',
-
-  // Stewart
   'stewart': '#FFFFFF',
-
-  // BAR
   'bar': '#FFFFFF',
-
-  // Toyota
   'toyota': '#CC0000',
-
-  // Porsche
   'porsche': '#E60000',
-
-  // Maserati
   'maserati': '#003A8F',
-
-  // Alfa Romeo (storico)
   'alfa-romeo-works': '#8B0000',
-
-  // Cooper
   'cooper': '#0033A0',
-
-  // Matra
   'matra': '#0055A4',
-
-  // Ligier
   'ligier': '#0055A4',
-
-  // Arrows
   'arrows': '#FF6600',
-
-  // Minardi
   'minardi': '#000000',
-
-  // Toro Rosso
   'toro-rosso': '#1E5BC6',
-
-  // HRT
   'hrt': '#B30000',
-
-  // Caterham
   'caterham': '#005030',
-
-  // Manor / Marussia / Virgin
   'virgin': '#CC0000',
   'marussia': '#9B0000',
   'manor': '#003A8F',
-
-  // Super Aguri
   'super-aguri': '#FFFFFF',
-
-  // Force India
   'force-india': '#FF5F00',
-
-  // Spyker
   'spyker': '#FF6600',
   'jordan': '#FFD800',
   'prost': '#0055A4',
@@ -117,7 +64,6 @@ const TEAM_COLORS = {
   'forti': '#FFD800',
   'andrea-moda': '#000000',
   'life': '#000000',
-  // Default
   'default': '#888888'
 };
 
