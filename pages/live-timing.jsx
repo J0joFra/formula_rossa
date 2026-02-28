@@ -27,7 +27,7 @@ var SESSION_TYPES = [
 ];
 var AVAILABLE_YEARS = [2026, 2025, 2024, 2023];
 
-const circuitToCountry = {
+const CIRCUIT_COUNTRY = {
   'monza': 'it', 'autodromo_nazionale_di_monza': 'it', 'milan': 'it', 'imola': 'it', 'enzo_e_dino_ferrari': 'it',
   'mugello': 'it', 'bologna': 'it', 'pescara': 'it', 'silverstone': 'gb', 'silverstone_circuit': 'gb',
   'northamptonshire': 'gb', 'brands_hatch': 'gb', 'kent': 'gb', 'donington': 'gb', 'aintree': 'gb',
