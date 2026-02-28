@@ -572,8 +572,8 @@ function QualifyingToRaceProgression({ raceResults, year, grandPrix }) {
                 if (hlPass !== isHL) return null;
                 const dimmed = highlight && !isHL;
 
-                const opacity = dimmed ? 0.04 : isHL ? 1 : 0.78;
-                const sw      = isHL ? 5.5 : 3.5;
+                const opacity = dimmed ? 0.08 : isHL ? 1 : 1;
+                const sw      = isHL ? 9 : 7;
                 const cx1 = LX + (RX - LX) * 0.35;
                 const cx2 = LX + (RX - LX) * 0.65;
                 const path = `M ${LX} ${y1} C ${cx1} ${y1}, ${cx2} ${y2}, ${RX} ${y2}`;
@@ -601,8 +601,8 @@ function QualifyingToRaceProgression({ raceResults, year, grandPrix }) {
                       <circle cx={RX} cy={y2} r={9} fill={d.color} opacity={0.18} />
                     </>}
                     {/* Endpoint dots */}
-                    <circle cx={LX} cy={y1} r={isHL ? 5.5 : 4} fill={d.color} opacity={opacity} />
-                    <circle cx={RX} cy={y2} r={isHL ? 5.5 : 4} fill={d.color} opacity={opacity} />
+                    <circle cx={LX} cy={y1} r={isHL ? 8 : 6} fill={d.color} opacity={opacity} />
+                    <circle cx={RX} cy={y2} r={isHL ? 8 : 6} fill={d.color} opacity={opacity} />
                   </g>
                 );
               })
@@ -744,12 +744,14 @@ function QualifyingToRaceProgression({ raceResults, year, grandPrix }) {
 }
 export default function LiveTimingPage() {
 
+  // Session-level cache refs — avoid re-fetching same data within a session
   const cachedDriverNum = React.useRef(null);   // { sk, code, num }
   const cachedCarData   = React.useRef(null);   // { sk, num, data }
   const cachedRawLaps   = React.useRef(null);   // { sk, num, data }
 
   const [raceResults, setRaceResults] = useState(null);
   const [loadingResults, setLoadingResults] = useState(false);
+  // Carica i risultati di gara dal JSON locale, matchando per anno + nome/location del meeting
   const loadRaceResults = async (year, meetingObj) => {
     if (typeof window === 'undefined' || !meetingObj) return;
 
@@ -761,6 +763,7 @@ export default function LiveTimingPage() {
       ]);
       const allResults = await resultsRes.json();
 
+      // Debug: log struttura primo elemento per capire i campi
       const sampleResult = allResults.find(r => r.year === parseInt(year));
       console.log('🏁 Sample result entry:', sampleResult);
       console.log('🏟 Meeting obj:', { 
@@ -773,6 +776,7 @@ export default function LiveTimingPage() {
 
       let filtered = [];
 
+      // Strategia 1: usa f1db-races.json per trovare il round corretto
       if (racesRes?.ok) {
         const allRaces = await racesRes.json();
         const racesForYear = allRaces.filter(r => r.year === parseInt(year));
@@ -811,6 +815,8 @@ export default function LiveTimingPage() {
         }
       }
 
+      // Strategia 2: match diretto su f1db-races-race-results.json
+      // I risultati potrebbero avere campi come grandPrixId, raceId che matchano location
       if (!filtered.length) {
         const loc = (meetingObj.location || '').toLowerCase();
         const country = (meetingObj.country_name || '').toLowerCase();
