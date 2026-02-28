@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Head from 'next/head';
-import dynamic from 'next/dynamic';
 import {
   Activity, Zap, Gauge, ChevronDown, Search, RefreshCw,
   Radio, Cpu, Thermometer, Wind, ChevronLeft, ChevronRight, Play, Pause,
+  TrendingUp, TrendingDown, Minus,
 } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
@@ -17,17 +17,7 @@ import {
   getAllDriversSectors, getRacePositions, getAllLaps, openf1Fetch,
 } from '../lib/openf1';
 
-const QualifyingToRaceProgression = dynamic(
-  () => import('../components/QualifyingToRaceProgression'),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center">
-        <p className="text-zinc-500 font-mono text-sm">Loading progression data...</p>
-      </div>
-    )
-  }
-);
+// QualifyingToRaceProgression defined inline below
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -40,201 +30,13 @@ var SESSION_TYPES = [
 var AVAILABLE_YEARS = [2025, 2024, 2023];
 
 var CIRCUIT_COUNTRY = {
-  monza:'it',
-milan:'it',
-imola:'it',
-mugello:'it',
-bologna:'it',
-pescara:'it',
-
-silverstone:'gb',
-silverstone_circuit:'gb',
-northamptonshire:'gb',
-brands_hatch:'gb',
-kent:'gb',
-donington:'gb',
-aintree:'gb',
-liverpool:'gb',
-
-spa:'be',
-spa_francorchamps:'be',
-stavelot:'be',
-zolder:'be',
-heusden_zolder:'be',
-nivelles:'be',
-brussels:'be',
-
-zandvoort:'nl',
-circuit_zandvoort:'nl',
-
-catalunya:'es',
-barcelona:'es',
-montmelo:'es',
-jerez:'es',
-valencia:'es',
-valencia_street_circuit:'es',
-pedralbes:'es',
-montjuic:'es',
-madrid:'es',
-madring:'es',
-jarama:'es',
-
-hungaroring:'hu',
-budapest:'hu',
-mogyorod:'hu',
-
-red_bull_ring:'at',
-spielberg:'at',
-zeltweg:'at',
-oesterreichring:'at',
-styria:'at',
-
-magny_cours:'fr',
-nevers:'fr',
-paul_ricard:'fr',
-le_castellet:'fr',
-ricard:'fr',
-reims:'fr',
-dijon:'fr',
-dijon_prenois:'fr',
-rouen:'fr',
-essarts:'fr',
-charade:'fr',
-clermont_ferrand:'fr',
-lemans:'fr',
-
-nurburgring:'de',
-nurburg:'de',
-hockenheimring:'de',
-hockenheim:'de',
-avus:'de',
-berlin:'de',
-
-estoril:'pt',
-cascais:'pt',
-portimao:'pt',
-algarve:'pt',
-boavista:'pt',
-oporto:'pt',
-monsanto:'pt',
-lisbon:'pt',
-
-bremgarten:'ch',
-bern:'ch',
-
-anderstorp:'se',
-scandinavian_raceway:'se',
-
-monaco:'mc',
-monte_carlo:'mc',
-circuit_de_monaco:'mc',
-
-baku:'az',
-azerbaijan:'az',
-
-americas:'us',
-cota:'us',
-austin:'us',
-circuit_of_the_americas:'us',
-miami:'us',
-miami_international_autodrome:'us',
-vegas:'us',
-las_vegas:'us',
-las_vegas_strip:'us',
-caesars_palace:'us',
-indianapolis:'us',
-indianapolis_motor_speedway:'us',
-watkins_glen:'us',
-long_beach:'us',
-phoenix:'us',
-detroit:'us',
-dallas:'us',
-sebring:'us',
-riverside:'us',
-
-villeneuve:'ca',
-montreal:'ca',
-circuit_gilles_villeneuve:'ca',
-mosport:'ca',
-bowmanville:'ca',
-tremblant:'ca',
-st_jovite:'ca',
-
-interlagos:'br',
-sao_paulo:'br',
-jose_carlos_pace:'br',
-jacarepagua:'br',
-rio_de_janeiro:'br',
-carlos_pace:'br',
-
-rodriguez:'mx',
-hermanos_rodriguez:'mx',
-mexico_city:'mx',
-
-galvez:'ar',
-buenos_aires:'ar',
-oscar_galvez:'ar',
-juan_y_oscar_galvez:'ar',
-juan_y_ignacio_cobos:'ar',
-
-suzuka:'jp',
-suzuka_circuit:'jp',
-mie:'jp',
-fuji:'jp',
-fuji_speedway:'jp',
-oyama:'jp',
-okayama:'jp',
-ti_circuit:'jp',
-
-shanghai:'cn',
-shanghai_international_circuit:'cn',
-
-singapore:'sg',
-marina_bay:'sg',
-
-sepang:'my',
-kuala_lumpur:'my',
-
-yeongam:'kr',
-korea_international_circuit:'kr',
-
-buddh:'in',
-greater_noida:'in',
-
-bahrain:'bh',
-sakhir:'bh',
-manama:'bh',
-bahrain_international_circuit:'bh',
-
-losail:'qa',
-lusail:'qa',
-lusail_international_circuit:'qa',
-
-jeddah:'sa',
-jeddah_corniche_circuit:'sa',
-
-abu_dhabi:'ae',
-yas_marina:'ae',
-yas_marina_circuit:'ae',
-
-istanbul:'tr',
-istanbul_park:'tr',
-
-sochi:'ru',
-sochi_autodrom:'ru',
-
-kyalami:'za',
-midrand:'za',
-george:'za',
-prince_george:'za',
-
-adelaide:'au',
-melbourne:'au',
-albert_park:'au',
-
-ain_diab:'ma',
-casablanca:'ma'
-
+  monza:'it',imola:'it',mugello:'it',silverstone:'gb',spa:'be',barcelona:'es',
+  catalunya:'es',hungaroring:'hu',austria:'at',spielberg:'at',monaco:'mc',
+  austin:'us',miami:'us','las vegas':'us',montreal:'ca',villeneuve:'ca',
+  interlagos:'br',paulo:'br',rodriguez:'mx',mexico:'mx',suzuka:'jp',shanghai:'cn',
+  singapore:'sg','marina bay':'sg',bahrain:'bh',sakhir:'bh',jeddah:'sa',
+  'abu dhabi':'ae','yas marina':'ae',melbourne:'au','albert park':'au',
+  zandvoort:'nl',lusail:'qa',losail:'qa',qatar:'qa',baku:'az',
 };
 var getFlagCode = (loc = '') => {
   const l = loc.toLowerCase();
@@ -565,6 +367,332 @@ function RacePositionsChart({ positionsData, highlightCodes }) {
 }
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
+// ─── QUALIFYING→RACE SLOPE CHART ────────────────────────────────────────────
+const TEAM_COLORS = {
+  'red-bull':    '#3671C6',
+  'mercedes':    '#6CD3BF',
+  'ferrari':     '#F91536',
+  'mclaren':     '#F58020',
+  'aston-martin':'#2D826D',
+  'alpine':      '#2090D0',
+  'williams':    '#64C4FF',
+  'rb':          '#6692FF',
+  'haas':        '#B6BABD',
+  'kick-sauber': '#52E252',
+  'default':     '#888888',
+};
+
+function getColor(constructorId, gain) {
+  return TEAM_COLORS[constructorId] || TEAM_COLORS.default;
+}
+
+function getGainColor(gain) {
+  if (gain > 0) return '#22c55e';
+  if (gain < 0) return '#ef4444';
+  return '#a1a1aa';
+}
+
+function QualifyingToRaceProgression({ raceResults, year, grandPrix }) {
+  const [highlight, setHighlight] = useState(null);
+  const [filter, setFilter]       = useState('all'); // 'all' | 'gained' | 'lost' | 'same'
+
+  const drivers = useMemo(() => {
+    if (!raceResults?.length) return [];
+    return raceResults
+      .filter(r => r.gridPositionNumber && r.positionNumber)
+      .map(r => {
+        const gain = (r.gridPositionNumber || 0) - (r.positionNumber || 0); // positive = gained
+        const driverName = (r.driverId || '')
+          .split('-')
+          .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+          .join(' ');
+        const lastName = driverName.split(' ').pop();
+        const code = (r.driverId || '').split('-').pop().toUpperCase().substring(0, 3);
+        return {
+          id: r.driverId,
+          code,
+          lastName,
+          constructorId: r.constructorId || 'default',
+          color: TEAM_COLORS[r.constructorId] || TEAM_COLORS.default,
+          gridPos: r.gridPositionNumber,
+          qualPos: r.qualificationPositionNumber || r.gridPositionNumber,
+          racePos: r.positionNumber,
+          gain,
+          gainCategory: gain > 0 ? 'gained' : gain < 0 ? 'lost' : 'same',
+          points: r.points || 0,
+          laps: r.laps,
+          time: r.time || r.gap || '',
+        };
+      });
+  }, [raceResults]);
+
+  const filteredDrivers = useMemo(() => {
+    if (filter === 'all') return drivers;
+    return drivers.filter(d => d.gainCategory === filter);
+  }, [drivers, filter]);
+
+  // Sorted by grid position (left column) and race position (right column)
+  const byGrid = useMemo(() =>
+    [...filteredDrivers].sort((a, b) => a.gridPos - b.gridPos),
+    [filteredDrivers]
+  );
+  const byRace = useMemo(() =>
+    [...filteredDrivers].sort((a, b) => a.racePos - b.racePos),
+    [filteredDrivers]
+  );
+
+  const stats = useMemo(() => {
+    const gained = drivers.filter(d => d.gain > 0).length;
+    const lost   = drivers.filter(d => d.gain < 0).length;
+    const same   = drivers.filter(d => d.gain === 0).length;
+    const max    = drivers.reduce((a, b) => b.gain > a.gain ? b : a, drivers[0] || {});
+    const min    = drivers.reduce((a, b) => b.gain < a.gain ? b : a, drivers[0] || {});
+    return { gained, lost, same, max, min };
+  }, [drivers]);
+
+  if (!drivers.length) {
+    return (
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center">
+        <p className="text-zinc-500 font-mono text-sm">No race results available</p>
+      </div>
+    );
+  }
+
+  // SVG layout
+  const ROW_H   = 28;
+  const N       = Math.max(byGrid.length, byRace.length);
+  const SVG_H   = Math.max(N * ROW_H + 40, 200);
+  const SVG_W   = 900;
+  const LEFT_X  = 200;  // x of left column (grid) dots
+  const RIGHT_X = 700;  // x of right column (race) dots
+  const LABEL_LEFT  = LEFT_X - 10;
+  const LABEL_RIGHT = RIGHT_X + 10;
+
+  // Map position → Y coordinate
+  const gridYMap = {};
+  byGrid.forEach((d, i) => { gridYMap[d.id] = 24 + i * ROW_H; });
+  const raceYMap = {};
+  byRace.forEach((d, i) => { raceYMap[d.id] = 24 + i * ROW_H; });
+
+  return (
+    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+      {/* Header */}
+      <div className="flex flex-wrap items-start justify-between mb-5 gap-4">
+        <div>
+          <h2 className="text-xl font-black tracking-tight">
+            QUALIFYING → RACE <span className="text-red-600">PROGRESSION</span>
+          </h2>
+          <p className="text-xs text-zinc-600 font-mono mt-1">
+            {year} {grandPrix} · Grid vs Race finish
+          </p>
+        </div>
+
+        {/* Filter */}
+        <div className="flex gap-2 flex-wrap">
+          {[
+            ['all',    'All',    null],
+            ['gained', 'Gained', <TrendingUp  key="g" className="w-3 h-3" />],
+            ['lost',   'Lost',   <TrendingDown key="l" className="w-3 h-3" />],
+            ['same',   'Same',   <Minus       key="s" className="w-3 h-3" />],
+          ].map(([key, label, icon]) => (
+            <button key={key} onClick={() => setFilter(key)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono flex items-center gap-1 transition-all border ${
+                filter === key
+                  ? key === 'gained' ? 'bg-green-600/20 text-green-400 border-green-800'
+                  : key === 'lost'   ? 'bg-red-600/20 text-red-400 border-red-800'
+                  : key === 'same'   ? 'bg-yellow-600/20 text-yellow-400 border-yellow-800'
+                  : 'bg-zinc-700 text-white border-zinc-600'
+                  : 'bg-zinc-800 text-zinc-500 border-transparent hover:text-zinc-300'
+              }`}>
+              {icon}{label}
+              {key !== 'all' && <span className="ml-1 opacity-60">({stats[key] ?? drivers.length})</span>}
+              {key === 'all' && <span className="ml-1 opacity-60">({drivers.length})</span>}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Stats strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
+        <div className="bg-zinc-800/50 rounded-lg px-3 py-2">
+          <div className="text-[10px] text-zinc-600 font-mono">GAINED</div>
+          <div className="text-lg font-black text-green-400">{stats.gained}</div>
+        </div>
+        <div className="bg-zinc-800/50 rounded-lg px-3 py-2">
+          <div className="text-[10px] text-zinc-600 font-mono">LOST</div>
+          <div className="text-lg font-black text-red-400">{stats.lost}</div>
+        </div>
+        <div className="bg-zinc-800/50 rounded-lg px-3 py-2">
+          <div className="text-[10px] text-zinc-600 font-mono">BIGGEST GAINER</div>
+          <div className="text-lg font-black text-green-400">
+            {stats.max?.code} <span className="text-sm">+{stats.max?.gain}</span>
+          </div>
+        </div>
+        <div className="bg-zinc-800/50 rounded-lg px-3 py-2">
+          <div className="text-[10px] text-zinc-600 font-mono">BIGGEST LOSER</div>
+          <div className="text-lg font-black text-red-400">
+            {stats.min?.code} <span className="text-sm">{stats.min?.gain}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center gap-5 mb-4 text-[10px] font-mono text-zinc-500">
+        <span className="flex items-center gap-1.5"><span className="w-6 h-0.5 bg-green-500 inline-block rounded" /> Gained positions</span>
+        <span className="flex items-center gap-1.5"><span className="w-6 h-0.5 bg-red-500 inline-block rounded" /> Lost positions</span>
+        <span className="flex items-center gap-1.5"><span className="w-6 h-0.5 bg-zinc-500 inline-block rounded" /> No change</span>
+      </div>
+
+      {/* Slope chart */}
+      <div className="overflow-x-auto">
+        <svg
+          width="100%"
+          viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+          style={{ minWidth: 520 }}
+        >
+          {/* Column headers */}
+          <text x={LEFT_X}  y={10} textAnchor="middle" fill="#52525b" fontSize={10} fontFamily="monospace" letterSpacing={2}>GRID</text>
+          <text x={RIGHT_X} y={10} textAnchor="middle" fill="#52525b" fontSize={10} fontFamily="monospace" letterSpacing={2}>RACE</text>
+
+          {/* Vertical guide lines */}
+          <line x1={LEFT_X}  y1={16} x2={LEFT_X}  y2={SVG_H - 4} stroke="#27272a" strokeWidth={1} />
+          <line x1={RIGHT_X} y1={16} x2={RIGHT_X} y2={SVG_H - 4} stroke="#27272a" strokeWidth={1} />
+
+          {/* Connecting curves — draw unhighlighted first, then highlighted on top */}
+          {[false, true].map(isHighlightPass =>
+            filteredDrivers.map(d => {
+              const y1 = gridYMap[d.id];
+              const y2 = raceYMap[d.id];
+              if (y1 == null || y2 == null) return null;
+              const isHL = highlight === d.id;
+              if (isHighlightPass !== isHL) return null;
+
+              const color = getGainColor(d.gain);
+              const opacity = highlight && !isHL ? 0.06 : isHL ? 1 : 0.55;
+              const strokeW = isHL ? 3 : 1.5;
+
+              // Cubic bezier: control points at 40% and 60% of the width
+              const cx1 = LEFT_X  + (RIGHT_X - LEFT_X) * 0.42;
+              const cx2 = LEFT_X  + (RIGHT_X - LEFT_X) * 0.58;
+              const path = `M ${LEFT_X} ${y1} C ${cx1} ${y1}, ${cx2} ${y2}, ${RIGHT_X} ${y2}`;
+
+              return (
+                <g key={d.id}>
+                  {/* Wider invisible hit area */}
+                  <path d={path} fill="none" stroke="transparent" strokeWidth={12}
+                    style={{ cursor: 'pointer' }}
+                    onMouseEnter={() => setHighlight(d.id)}
+                    onMouseLeave={() => setHighlight(null)}
+                  />
+                  <path
+                    d={path}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth={strokeW}
+                    opacity={opacity}
+                    strokeLinecap="round"
+                  />
+                  {/* Dots at endpoints */}
+                  <circle cx={LEFT_X}  cy={y1} r={isHL ? 5 : 3} fill={d.color} opacity={opacity} />
+                  <circle cx={RIGHT_X} cy={y2} r={isHL ? 5 : 3} fill={d.color} opacity={opacity} />
+                </g>
+              );
+            })
+          )}
+
+          {/* Left labels (grid order) */}
+          {byGrid.map((d, i) => {
+            const y = gridYMap[d.id];
+            const isHL = highlight === d.id;
+            const dimmed = highlight && !isHL;
+            return (
+              <g key={`gl-${d.id}`}
+                onMouseEnter={() => setHighlight(d.id)}
+                onMouseLeave={() => setHighlight(null)}
+                style={{ cursor: 'pointer' }}>
+                <text
+                  x={LABEL_LEFT} y={y + 4}
+                  textAnchor="end"
+                  fontSize={isHL ? 12 : 10.5}
+                  fontWeight={isHL ? 700 : 500}
+                  fontFamily="monospace"
+                  fill={isHL ? '#ffffff' : dimmed ? '#3f3f46' : '#a1a1aa'}
+                  style={{ transition: 'all 0.15s' }}
+                >
+                  <tspan fill={isHL ? d.color : dimmed ? '#3f3f46' : '#6b7280'} fontSize={9}>P{d.gridPos} </tspan>
+                  {d.code}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Right labels (race order) */}
+          {byRace.map((d, i) => {
+            const y = raceYMap[d.id];
+            const isHL = highlight === d.id;
+            const dimmed = highlight && !isHL;
+            const gainColor = getGainColor(d.gain);
+            return (
+              <g key={`rl-${d.id}`}
+                onMouseEnter={() => setHighlight(d.id)}
+                onMouseLeave={() => setHighlight(null)}
+                style={{ cursor: 'pointer' }}>
+                <text
+                  x={LABEL_RIGHT} y={y + 4}
+                  textAnchor="start"
+                  fontSize={isHL ? 12 : 10.5}
+                  fontWeight={isHL ? 700 : 500}
+                  fontFamily="monospace"
+                  fill={isHL ? '#ffffff' : dimmed ? '#3f3f46' : '#a1a1aa'}
+                  style={{ transition: 'all 0.15s' }}
+                >
+                  {d.code}
+                  <tspan fill={isHL ? d.color : dimmed ? '#3f3f46' : '#6b7280'} fontSize={9}> P{d.racePos}</tspan>
+                  {isHL && d.gain !== 0 && (
+                    <tspan fill={gainColor} fontSize={9} dx={4}>
+                      {d.gain > 0 ? `+${d.gain}` : d.gain}
+                    </tspan>
+                  )}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Hover tooltip */}
+          {highlight && (() => {
+            const d = drivers.find(x => x.id === highlight);
+            if (!d) return null;
+            const gy = gridYMap[d.id] ?? 0;
+            const ry = raceYMap[d.id] ?? 0;
+            const midY = (gy + ry) / 2;
+            const midX = (LEFT_X + RIGHT_X) / 2;
+            const gainColor = getGainColor(d.gain);
+            return (
+              <g>
+                <rect x={midX - 70} y={midY - 36} width={140} height={62}
+                  rx={6} fill="#18181b" stroke="#3f3f46" strokeWidth={1} />
+                <text x={midX} y={midY - 18} textAnchor="middle" fill={d.color}
+                  fontSize={12} fontWeight={700} fontFamily="monospace">{d.code}</text>
+                <text x={midX} y={midY - 4} textAnchor="middle" fill="#a1a1aa"
+                  fontSize={9} fontFamily="monospace">Grid P{d.gridPos} → Race P{d.racePos}</text>
+                <text x={midX} y={midY + 12} textAnchor="middle" fill={gainColor}
+                  fontSize={11} fontWeight={700} fontFamily="monospace">
+                  {d.gain > 0 ? `▲ +${d.gain}` : d.gain < 0 ? `▼ ${d.gain}` : '● No change'}
+                </text>
+                {d.points > 0 && (
+                  <text x={midX} y={midY + 24} textAnchor="middle" fill="#52525b"
+                    fontSize={8} fontFamily="monospace">{d.points} pts</text>
+                )}
+              </g>
+            );
+          })()}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+
 export default function LiveTimingPage() {
 
   // Session-level cache refs — avoid re-fetching same data within a session
