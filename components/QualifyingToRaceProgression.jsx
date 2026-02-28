@@ -34,7 +34,6 @@ export default function QualifyingToRaceProgression({
   const chartData = useMemo(() => {
     if (!raceResults?.length) return [];
 
-    // Ordina per posizione in griglia (dal primo all'ultimo)
     const sorted = [...raceResults]
       .filter(r => r.gridPositionNumber) // Solo chi ha una posizione di griglia
       .sort((a, b) => a.gridPositionNumber - b.gridPositionNumber);

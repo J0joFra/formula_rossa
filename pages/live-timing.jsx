@@ -40,42 +40,201 @@ var SESSION_TYPES = [
 var AVAILABLE_YEARS = [2025, 2024, 2023];
 
 var CIRCUIT_COUNTRY = {
-  'monza': 'it', 'autodromo-nazionale-di-monza': 'it', 'milan': 'it', 'imola': 'it', 'enzo-e-dino-ferrari': 'it',
-  'mugello': 'it', 'bologna': 'it', 'pescara': 'it', 'silverstone': 'gb', 'silverstone-circuit': 'gb',
-  'northamptonshire': 'gb', 'brands-hatch': 'gb', 'kent': 'gb', 'donington': 'gb', 'aintree': 'gb',
-  'liverpool': 'gb', 'spa': 'be', 'spa-francorchamps': 'be', 'stavelot': 'be', 'zolder': 'be',
-  'heusden-zolder': 'be', 'nivelles': 'be', 'brussels': 'be', 'zandvoort': 'nl', 'circuit-zandvoort': 'nl',
-  'catalunya': 'es', 'barcelona': 'es', 'montmelo': 'es', 'jerez': 'es', 'valencia': 'es',
-  'valencia-street-circuit': 'es', 'pedralbes': 'es', 'montjuic': 'es', 'madrid': 'es', 'madring': 'es', 'jarama': 'es',
-  'hungaroring': 'hu', 'budapest': 'hu', 'mogyorod': 'hu', 'red-bull-ring': 'at', 'spielberg': 'at',
-  'zeltweg': 'at', 'oesterreichring': 'at', 'styria': 'at', 'magny-cours': 'fr', 'nevers': 'fr',
-  'paul-ricard': 'fr', 'le-castellet': 'fr', 'ricard': 'fr', 'reims': 'fr', 'dijon': 'fr',
-  'dijon-prenois': 'fr', 'rouen': 'fr', 'essarts': 'fr', 'charade': 'fr', 'clermont-ferrand': 'fr',
-  'lemans': 'fr', 'nurburgring': 'de', 'nurburg': 'de', 'hockenheimring': 'de', 'hockenheim': 'de',
-  'avus': 'de', 'berlin': 'de', 'estoril': 'pt', 'cascais': 'pt', 'portimao': 'pt',
-  'algarve': 'pt', 'boavista': 'pt', 'oporto': 'pt', 'monsanto': 'pt', 'lisbon': 'pt',
-  'bremgarten': 'ch', 'bern': 'ch', 'anderstorp': 'se', 'scandinavian-raceway': 'se', 'monaco': 'mc',
-  'monte-carlo': 'mc', 'circuit-de-monaco': 'mc', 'bakú': 'az', 'baku': 'az', 'azerbaijan': 'az',
-  'americas': 'us', 'cota': 'us', 'austin': 'us', 'circuit-of-the-americas': 'us', 'miami': 'us',
-  'miami-international-autodrome': 'us', 'vegas': 'us', 'las-vegas': 'us', 'las-vegas-strip': 'us', 'caesars-palace': 'us',
-  'indianapolis': 'us', 'indianapolis-motor-speedway': 'us', 'watkins-glen': 'us', 'long-beach': 'us', 'phoenix': 'us',
-  'detroit': 'us', 'dallas': 'us', 'sebring': 'us', 'riverside': 'us', 'villeneuve': 'ca',
-  'montreal': 'ca', 'circuit-gilles-villeneuve': 'ca', 'mosport': 'ca', 'bowmanville': 'ca', 'tremblant': 'ca',
-  'st-jovite': 'ca', 'interlagos': 'br', 'sao-paulo': 'br', 'são-paulo': 'br', 'jose-carlos-pace': 'br',
-  'jacarepagua': 'br', 'rio-de-janeiro': 'br', 'rodriguez': 'mx', 'hermanos-rodriguez': 'mx', 'mexico-city': 'mx',
-  'galvez': 'ar', 'buenos-aires': 'ar', 'oscar-galvez': 'ar', 
-  'juan-y-oscar-galvez': 'ar', 'juan-y-ignacio-cobos': 'ar', 'carlos-pace': 'br', 'juan-y-ignacio-cobos': 'ar',
-  'suzuka': 'jp', 'suzuka-circuit': 'jp', 'mie': 'jp', 'fuji': 'jp', 'fuji-speedway': 'jp',
-  'oyama': 'jp', 'okayama': 'jp', 'ti-circuit': 'jp', 'shanghai': 'cn', 'shanghai-international-circuit': 'cn',
-  'marina-bay': 'sg', 'singapore': 'sg', 'sepang': 'my', 'kuala-lumpur': 'my', 'yeongam': 'kr',
-  'korea-international-circuit': 'kr', 'buddh': 'in', 'greater-noida': 'in', 'bahrain': 'bh', 'sakhir': 'bh',
-  'manama': 'bh', 'bahrain-international-circuit': 'bh', 'losail': 'qa', 'lusail': 'qa', 'lusail-international-circuit': 'qa',
-  'jeddah': 'sa', 'jeddah-corniche-circuit': 'sa', 'yas-marina': 'ae', 'abu-dhabi': 'ae', 'yas-marina-circuit': 'ae',
-  'istanbul': 'tr', 'istanbul-park': 'tr', 'sochi': 'ru', 'sochi-autodrom': 'ru', 'kyalami': 'za',
-  'midrand': 'za', 'george': 'za', 'prince-george': 'za', 'adelaide': 'au', 'albert-park': 'au',
-  'melbourne': 'au', 'ain-diab': 'ma', 'casablanca': 'ma', 'albert_park': 'au', 'marina_bay': 'sg', 'yas_marina': 'ae', 'paul_ricard': 'fr', 'watkins_glen': 'us',
-  'long_beach': 'us', 'las_vegas': 'us', 'jose_carlos_pace': 'br', 'hermanos_rodriguez': 'mx', 'mexico_city': 'mx',
-  'red_bull_ring': 'at', 'silverstone_circuit': 'gb', 'spa_francorchamps': 'be', 'circuit_de_monaco': 'mc', 'fuji_speedway': 'jp'
+  monza:'it',
+milan:'it',
+imola:'it',
+mugello:'it',
+bologna:'it',
+pescara:'it',
+
+silverstone:'gb',
+silverstone_circuit:'gb',
+northamptonshire:'gb',
+brands_hatch:'gb',
+kent:'gb',
+donington:'gb',
+aintree:'gb',
+liverpool:'gb',
+
+spa:'be',
+spa_francorchamps:'be',
+stavelot:'be',
+zolder:'be',
+heusden_zolder:'be',
+nivelles:'be',
+brussels:'be',
+
+zandvoort:'nl',
+circuit_zandvoort:'nl',
+
+catalunya:'es',
+barcelona:'es',
+montmelo:'es',
+jerez:'es',
+valencia:'es',
+valencia_street_circuit:'es',
+pedralbes:'es',
+montjuic:'es',
+madrid:'es',
+madring:'es',
+jarama:'es',
+
+hungaroring:'hu',
+budapest:'hu',
+mogyorod:'hu',
+
+red_bull_ring:'at',
+spielberg:'at',
+zeltweg:'at',
+oesterreichring:'at',
+styria:'at',
+
+magny_cours:'fr',
+nevers:'fr',
+paul_ricard:'fr',
+le_castellet:'fr',
+ricard:'fr',
+reims:'fr',
+dijon:'fr',
+dijon_prenois:'fr',
+rouen:'fr',
+essarts:'fr',
+charade:'fr',
+clermont_ferrand:'fr',
+lemans:'fr',
+
+nurburgring:'de',
+nurburg:'de',
+hockenheimring:'de',
+hockenheim:'de',
+avus:'de',
+berlin:'de',
+
+estoril:'pt',
+cascais:'pt',
+portimao:'pt',
+algarve:'pt',
+boavista:'pt',
+oporto:'pt',
+monsanto:'pt',
+lisbon:'pt',
+
+bremgarten:'ch',
+bern:'ch',
+
+anderstorp:'se',
+scandinavian_raceway:'se',
+
+monaco:'mc',
+monte_carlo:'mc',
+circuit_de_monaco:'mc',
+
+baku:'az',
+azerbaijan:'az',
+
+americas:'us',
+cota:'us',
+austin:'us',
+circuit_of_the_americas:'us',
+miami:'us',
+miami_international_autodrome:'us',
+vegas:'us',
+las_vegas:'us',
+las_vegas_strip:'us',
+caesars_palace:'us',
+indianapolis:'us',
+indianapolis_motor_speedway:'us',
+watkins_glen:'us',
+long_beach:'us',
+phoenix:'us',
+detroit:'us',
+dallas:'us',
+sebring:'us',
+riverside:'us',
+
+villeneuve:'ca',
+montreal:'ca',
+circuit_gilles_villeneuve:'ca',
+mosport:'ca',
+bowmanville:'ca',
+tremblant:'ca',
+st_jovite:'ca',
+
+interlagos:'br',
+sao_paulo:'br',
+jose_carlos_pace:'br',
+jacarepagua:'br',
+rio_de_janeiro:'br',
+carlos_pace:'br',
+
+rodriguez:'mx',
+hermanos_rodriguez:'mx',
+mexico_city:'mx',
+
+galvez:'ar',
+buenos_aires:'ar',
+oscar_galvez:'ar',
+juan_y_oscar_galvez:'ar',
+juan_y_ignacio_cobos:'ar',
+
+suzuka:'jp',
+suzuka_circuit:'jp',
+mie:'jp',
+fuji:'jp',
+fuji_speedway:'jp',
+oyama:'jp',
+okayama:'jp',
+ti_circuit:'jp',
+
+shanghai:'cn',
+shanghai_international_circuit:'cn',
+
+singapore:'sg',
+marina_bay:'sg',
+
+sepang:'my',
+kuala_lumpur:'my',
+
+yeongam:'kr',
+korea_international_circuit:'kr',
+
+buddh:'in',
+greater_noida:'in',
+
+bahrain:'bh',
+sakhir:'bh',
+manama:'bh',
+bahrain_international_circuit:'bh',
+
+losail:'qa',
+lusail:'qa',
+lusail_international_circuit:'qa',
+
+jeddah:'sa',
+jeddah_corniche_circuit:'sa',
+
+abu_dhabi:'ae',
+yas_marina:'ae',
+yas_marina_circuit:'ae',
+
+istanbul:'tr',
+istanbul_park:'tr',
+
+sochi:'ru',
+sochi_autodrom:'ru',
+
+kyalami:'za',
+midrand:'za',
+george:'za',
+prince_george:'za',
+
+adelaide:'au',
+melbourne:'au',
+albert_park:'au',
+
+ain_diab:'ma',
+casablanca:'ma'
+
 };
 var getFlagCode = (loc = '') => {
   const l = loc.toLowerCase();
@@ -415,21 +574,112 @@ export default function LiveTimingPage() {
 
   const [raceResults, setRaceResults] = useState(null);
   const [loadingResults, setLoadingResults] = useState(false);
-  const loadRaceResults = async (year, round) => {
-    if (typeof window === 'undefined') return;
-    
+  // Carica i risultati di gara dal JSON locale, matchando per anno + nome/location del meeting
+  const loadRaceResults = async (year, meetingObj) => {
+    if (typeof window === 'undefined' || !meetingObj) return;
+
     setLoadingResults(true);
     try {
-      const response = await fetch('/data/f1db-races-race-results.json');
-      const allResults = await response.json();
-      
-      const filtered = allResults.filter(r => 
-        r.year === parseInt(year) && r.round === parseInt(round)
-      );
-      
-      setRaceResults(filtered);
+      const [resultsRes, racesRes] = await Promise.all([
+        fetch('/data/f1db-races-race-results.json'),
+        fetch('/data/f1db-races.json').catch(() => null),
+      ]);
+      const allResults = await resultsRes.json();
+
+      // Debug: log struttura primo elemento per capire i campi
+      const sampleResult = allResults.find(r => r.year === parseInt(year));
+      console.log('🏁 Sample result entry:', sampleResult);
+      console.log('🏟 Meeting obj:', { 
+        meeting_name: meetingObj.meeting_name, 
+        location: meetingObj.location,
+        country_name: meetingObj.country_name,
+        circuit_key: meetingObj.circuit_key,
+        circuit_short_name: meetingObj.circuit_short_name,
+      });
+
+      let filtered = [];
+
+      // Strategia 1: usa f1db-races.json per trovare il round corretto
+      if (racesRes?.ok) {
+        const allRaces = await racesRes.json();
+        const racesForYear = allRaces.filter(r => r.year === parseInt(year));
+        console.log('📋 Races for year, first entry:', racesForYear[0]);
+
+        const loc = (meetingObj.location || '').toLowerCase();
+        const country = (meetingObj.country_name || '').toLowerCase();
+        const circuitShort = (meetingObj.circuit_short_name || '').toLowerCase();
+        const meetingName = (meetingObj.meeting_name || '').toLowerCase()
+          .replace(' grand prix', '').replace(' gp', '').trim();
+
+        const matchedRace = racesForYear.find(r => {
+          // Controlla tutti i possibili campi nome/location
+          const fields = [
+            r.name, r.officialName, r.grandPrixId, r.circuitId,
+            r.location, r.country, r.circuit,
+          ].map(f => (f || '').toLowerCase());
+
+          return fields.some(f =>
+            f && (
+              f.includes(loc) || loc.includes(f) ||
+              f.includes(country) || country.includes(f) ||
+              f.includes(meetingName) || meetingName.includes(f) ||
+              (circuitShort && (f.includes(circuitShort) || circuitShort.includes(f)))
+            )
+          );
+        });
+
+        console.log('🎯 Matched race:', matchedRace);
+
+        if (matchedRace) {
+          filtered = allResults.filter(r =>
+            r.year === parseInt(year) && r.round === matchedRace.round
+          );
+          console.log('✅ Filtered results count:', filtered.length);
+        }
+      }
+
+      // Strategia 2: match diretto su f1db-races-race-results.json
+      // I risultati potrebbero avere campi come grandPrixId, raceId che matchano location
+      if (!filtered.length) {
+        const loc = (meetingObj.location || '').toLowerCase();
+        const country = (meetingObj.country_name || '').toLowerCase();
+        const meetingName = (meetingObj.meeting_name || '').toLowerCase()
+          .replace(' grand prix', '').replace(' gp', '').trim();
+
+        // Raggruppa per round, testa ogni round
+        const rounds = [...new Set(allResults.filter(r => r.year === parseInt(year)).map(r => r.round))];
+        let bestRound = null, bestScore = -1;
+
+        for (const round of rounds) {
+          const sample = allResults.find(r => r.year === parseInt(year) && r.round === round);
+          if (!sample) continue;
+          
+          // Controlla tutti i campi stringa del sample
+          const fields = Object.values(sample)
+            .filter(v => typeof v === 'string')
+            .map(v => v.toLowerCase());
+          
+          let score = 0;
+          for (const f of fields) {
+            if (f.includes(loc) || loc.includes(f)) score += 3;
+            if (f.includes(country) || country.includes(f)) score += 2;
+            if (f.includes(meetingName) || meetingName.includes(f)) score += 1;
+          }
+          
+          console.log(`Round ${round} score: ${score}`, Object.values(sample).filter(v => typeof v === 'string').slice(0,5));
+          if (score > bestScore) { bestScore = score; bestRound = round; }
+        }
+
+        if (bestRound && bestScore > 0) {
+          filtered = allResults.filter(r => r.year === parseInt(year) && r.round === bestRound);
+          console.log(`✅ Fallback matched round ${bestRound} (score ${bestScore}), results:`, filtered.length);
+        }
+      }
+
+      setRaceResults(filtered.length ? filtered : null);
     } catch (error) {
-      console.error('Error loading race results:', error);
+      console.error('❌ Error loading race results:', error);
+      setRaceResults(null);
     } finally {
       setLoadingResults(false);
     }
@@ -515,7 +765,7 @@ export default function LiveTimingPage() {
   const handleMeetingChange = async (m) => {
     setMeeting(m); setOpenMeeting(false); setDrivers([]); setSessionInfo(null);
     setRaceResults(null);
-    if (sessionType === 'R' && m?.round) loadRaceResults(year, m.round);
+    if (sessionType === 'R') loadRaceResults(year, m);
     try { await loadDriversForSession(m, SESSION_TYPES.find(s => s.id === sessionType)?.name || 'Qualifying'); }
     catch { setDrivers([]); }
   };
@@ -523,7 +773,7 @@ export default function LiveTimingPage() {
   const handleSessionChange = async (sid) => {
     setSessionType(sid); setOpenSession(false); setDrivers([]); setSessionInfo(null);
     setRaceResults(null);
-    if (sid === 'R' && meeting?.round) loadRaceResults(year, meeting.round);
+    if (sid === 'R' && meeting) loadRaceResults(year, meeting);
     if (!meeting) return;
     try { await loadDriversForSession(meeting, SESSION_TYPES.find(s => s.id === sid)?.name || sid); }
     catch { setDrivers([]); }
