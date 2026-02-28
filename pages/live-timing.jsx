@@ -31,15 +31,15 @@ const QualifyingToRaceProgression = dynamic(
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const SESSION_TYPES = [
+var SESSION_TYPES = [
   { id: 'FP1', name: 'Practice 1' }, { id: 'FP2', name: 'Practice 2' },
   { id: 'FP3', name: 'Practice 3' }, { id: 'Q',   name: 'Qualifying'  },
   { id: 'R',   name: 'Race'        }, { id: 'S',   name: 'Sprint'      },
   { id: 'SQ',  name: 'Sprint Qualifying' },
 ];
-const AVAILABLE_YEARS = [2025, 2024, 2023];
+var AVAILABLE_YEARS = [2025, 2024, 2023];
 
-const circuitToCountry = {
+var CIRCUIT_COUNTRY = {
   'monza': 'it', 'autodromo-nazionale-di-monza': 'it', 'milan': 'it', 'imola': 'it', 'enzo-e-dino-ferrari': 'it',
   'mugello': 'it', 'bologna': 'it', 'pescara': 'it', 'silverstone': 'gb', 'silverstone-circuit': 'gb',
   'northamptonshire': 'gb', 'brands-hatch': 'gb', 'kent': 'gb', 'donington': 'gb', 'aintree': 'gb',
@@ -63,7 +63,7 @@ const circuitToCountry = {
   'montreal': 'ca', 'circuit-gilles-villeneuve': 'ca', 'mosport': 'ca', 'bowmanville': 'ca', 'tremblant': 'ca',
   'st-jovite': 'ca', 'interlagos': 'br', 'sao-paulo': 'br', 'são-paulo': 'br', 'jose-carlos-pace': 'br',
   'jacarepagua': 'br', 'rio-de-janeiro': 'br', 'rodriguez': 'mx', 'hermanos-rodriguez': 'mx', 'mexico-city': 'mx',
-  'galvez': 'ar', 'buenos-aires': 'ar', 'oscar-galvez': 'ar',
+  'galvez': 'ar', 'buenos-aires': 'ar', 'oscar-galvez': 'ar', 
   'juan-y-oscar-galvez': 'ar', 'juan-y-ignacio-cobos': 'ar', 'carlos-pace': 'br', 'juan-y-ignacio-cobos': 'ar',
   'suzuka': 'jp', 'suzuka-circuit': 'jp', 'mie': 'jp', 'fuji': 'jp', 'fuji-speedway': 'jp',
   'oyama': 'jp', 'okayama': 'jp', 'ti-circuit': 'jp', 'shanghai': 'cn', 'shanghai-international-circuit': 'cn',
@@ -73,23 +73,21 @@ const circuitToCountry = {
   'jeddah': 'sa', 'jeddah-corniche-circuit': 'sa', 'yas-marina': 'ae', 'abu-dhabi': 'ae', 'yas-marina-circuit': 'ae',
   'istanbul': 'tr', 'istanbul-park': 'tr', 'sochi': 'ru', 'sochi-autodrom': 'ru', 'kyalami': 'za',
   'midrand': 'za', 'george': 'za', 'prince-george': 'za', 'adelaide': 'au', 'albert-park': 'au',
-  'melbourne': 'au', 'ain-diab': 'ma', 'casablanca': 'ma',
-
-  'albert_park': 'au', 'marina_bay': 'sg', 'yas_marina': 'ae', 'paul_ricard': 'fr', 'watkins_glen': 'us',
+  'melbourne': 'au', 'ain-diab': 'ma', 'casablanca': 'ma', 'albert_park': 'au', 'marina_bay': 'sg', 'yas_marina': 'ae', 'paul_ricard': 'fr', 'watkins_glen': 'us',
   'long_beach': 'us', 'las_vegas': 'us', 'jose_carlos_pace': 'br', 'hermanos_rodriguez': 'mx', 'mexico_city': 'mx',
   'red_bull_ring': 'at', 'silverstone_circuit': 'gb', 'spa_francorchamps': 'be', 'circuit_de_monaco': 'mc', 'fuji_speedway': 'jp'
 };
-const getFlagCode = (loc = '') => {
+var getFlagCode = (loc = '') => {
   const l = loc.toLowerCase();
   for (const [k, v] of Object.entries(CIRCUIT_COUNTRY)) if (l.includes(k)) return v;
   return '';
 };
-const formatTime = (s) => {
+var formatTime = (s) => {
   if (!s) return '—';
   return `${Math.floor(s / 60)}:${(s % 60).toFixed(3).padStart(6, '0')}`;
 };
-const formatDelta = (d) => d == null ? '—' : (d > 0 ? '+' : '') + d.toFixed(3) + 's';
-const FALLBACK_COLORS = ['#ef4444','#3b82f6','#f59e0b','#22c55e','#a855f7',
+var formatDelta = (d) => d == null ? '—' : (d > 0 ? '+' : '') + d.toFixed(3) + 's';
+var FALLBACK_COLORS = ['#ef4444','#3b82f6','#f59e0b','#22c55e','#a855f7',
   '#ec4899','#06b6d4','#f97316','#84cc16','#14b8a6'];
 
 // ─── Hooks ────────────────────────────────────────────────────────────────────
