@@ -425,6 +425,8 @@ export default function LiveTimingPage() {
   // UI
   const [activeTab, setActiveTab]   = useState('speed');
   const [loading, setLoading]       = useState(false);
+  const [loadingTelemetry, setLoadingTelemetry] = useState(false);
+  const [loadingSectors, setLoadingSectors]     = useState(false);
   const [loadStep, setLoadStep]     = useState('');
   const [error, setError]           = useState(null);
   const [lastQuery, setLastQuery]   = useState(null);
@@ -492,67 +494,75 @@ export default function LiveTimingPage() {
 const fetchAll = async () => {
   if (!year || !meeting || !driverCode || !sessionInfo) return;
   
-  setLoading(true); 
+  setLoading(true);
   setError(null);
-  setTelemetry([]); 
+  setTelemetry([]);
   setFastestLap(null);
   setCircuitMap([]);
   setWeather(null);
-  setSectorsData(null); 
+  setSectorsData(null);
   setPositionsData(null);
   setDriverLaps([]);
+  setLoadingTelemetry(true);
+  setLoadingSectors(true);
 
-const sk = sessionInfo.session_key;
+
+  const sk = sessionInfo.session_key;
+
   try {
-    setLoadStep('Caricamento dati pilota…');
     const num = await getDriverNumber(sk, driverCode);
-    setLoadStep('Caricamento giri e telemetria…');
-    
-    const [allLaps, telemetryResult, weatherResult, sectorsResult] = await Promise.all([
-      getAllLaps(sk, num),
-      getTelemetry(sk, num, null).catch(() => null), 
-      getWeather(sk).catch(() => null),
-      getAllDriversSectors(sk).catch(() => null)
-    ]);
-    
-    if (allLaps?.length) {
-      setDriverLaps(allLaps);
-      const fastestLapNum = allLaps.reduce((a, b) => 
-        a.lap_duration < b.lap_duration ? a : b
-      ).lap_number;
-      setSelectedLap(fastestLapNum);
-    }
-    
-    if (telemetryResult) {
-      setTelemetry(telemetryResult.telemetry);
-      setFastestLap(telemetryResult.target_lap);
-    }
-    
-    setLoadStep('Caricamento mappa GPS…');
-    try { 
-      const fastestLapNum = allLaps?.length ? 
-        allLaps.reduce((a, b) => a.lap_duration < b.lap_duration ? a : b).lap_number : 
-        null;
-      if (fastestLapNum) {
-        const map = await getCircuitMap(sk, num, fastestLapNum);
-        setCircuitMap(map); 
+
+    // Telemetry + laps (independent of sectors/weather)
+    const telemetryPromise = (async () => {
+      try {
+        const [allLaps, telemetryResult] = await Promise.all([
+          getAllLaps(sk, num),
+          getTelemetry(sk, num, null).catch(() => null),
+        ]);
+        if (allLaps?.length) {
+          setDriverLaps(allLaps);
+          const fastestLapNum = allLaps.reduce((a, b) =>
+            a.lap_duration < b.lap_duration ? a : b
+          ).lap_number;
+          setSelectedLap(fastestLapNum);
+          getCircuitMap(sk, num, fastestLapNum).then(setCircuitMap).catch(() => {});
+        }
+        if (telemetryResult) {
+          setTelemetry(telemetryResult.telemetry);
+          setFastestLap(telemetryResult.target_lap);
+        }
+      } finally {
+        setLoadingTelemetry(false);
       }
-    } catch { /* optional */ }
-    
-    setWeather(weatherResult);
-    setSectorsData(sectorsResult);
-    
-      if (sessionType === 'R' && meeting?.round && typeof window !== 'undefined') {
-      setLoadStep('Caricamento risultati gara…');
-      await loadRaceResults(year, meeting.round);
-    }
-    
+    })();
+
+    // Sectors + weather (independent)
+    const sectorsPromise = (async () => {
+      try {
+        const [weatherResult, sectorsResult] = await Promise.all([
+          getWeather(sk).catch(() => null),
+          getAllDriversSectors(sk).catch(() => null),
+        ]);
+        setWeather(weatherResult);
+        setSectorsData(sectorsResult);
+      } finally {
+        setLoadingSectors(false);
+      }
+    })();
+
+    const racePromise = (sessionType === 'R' && meeting?.round && typeof window !== 'undefined')
+      ? loadRaceResults(year, meeting.round)
+      : Promise.resolve();
+
+    await Promise.all([telemetryPromise, sectorsPromise, racePromise]);
     setLastQuery({ year, gp: meeting.meeting_name, session: sessionType, driver: driverCode });
   } catch (e) {
     setError(e.message || 'Errore sconosciuto');
-  } finally { 
-    setLoading(false); 
-    setLoadStep(''); 
+    setLoadingTelemetry(false);
+    setLoadingSectors(false);
+  } finally {
+    setLoading(false);
+    setLoadStep('');
   }
 };
 
@@ -590,7 +600,8 @@ const sk = sessionInfo.session_key;
   const driverInfo = drivers.find(d => d.name_acronym === driverCode);
   const color = driverInfo?.team_colour ? `#${driverInfo.team_colour}` : '#ef4444';
 
-  const canFetch = !!year && !!meeting && !!driverCode && !!sessionInfo && !loading;
+  const canFetch = !!year && !!meeting && !!driverCode && !!sessionInfo;
+  const isFetching = loading || loadingTelemetry || loadingSectors;
   const flagCode = meeting ? getFlagCode(meeting.location || meeting.meeting_name || '') : '';
   const fastestLapNumber = driverLaps.length ? 
     driverLaps.reduce((a,b)=>a.lap_duration<b.lap_duration?a:b).lap_number : null;
@@ -702,7 +713,7 @@ const sk = sessionInfo.session_key;
             {lastQuery && <div className="hidden lg:block text-xs text-zinc-700 font-mono">{lastQuery.year} · {lastQuery.gp} · {lastQuery.driver} · {lastQuery.session}</div>}
             <button onClick={fetchAll} disabled={!canFetch}
               className={`flex items-center gap-2 px-6 py-3 rounded-xl font-mono font-bold text-sm transition-all ${canFetch?'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-950/50':'bg-zinc-800 text-zinc-600 cursor-not-allowed'}`}>
-              {loading ? <><RefreshCw className="w-4 h-4 animate-spin" />{loadStep||'Loading…'}</> : <><Search className="w-4 h-4" />FETCH TELEMETRY</>}
+              {isFetching ? <><RefreshCw className="w-4 h-4 animate-spin" />LOADING…</> : <><Search className="w-4 h-4" />FETCH TELEMETRY</>}
             </button>
           </div>
 
@@ -719,16 +730,27 @@ const sk = sessionInfo.session_key;
           )}
 
           {/* ── DATA SECTION ── */}
-          {telemetry.length > 0 && (
+          {(telemetry.length > 0 || loadingTelemetry || loadingSectors) && (
             <div className="space-y-4">
 
               {/* Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <StatCard accent label="Top Speed" value={`${stats.maxSpeed} km/h`} icon={<Zap className="w-4 h-4 text-red-500" />} sub="Selected lap" />
-                <StatCard label="Avg Speed" value={`${stats.avgSpeed} km/h`} icon={<Gauge className="w-4 h-4 text-yellow-500" />} />
-                <StatCard label="Max RPM" value={stats.maxRpm.toLocaleString()} icon={<Activity className="w-4 h-4 text-blue-500" />} />
-                <StatCard label="Data Points" value={stats.points.toLocaleString()} icon={<Cpu className="w-4 h-4 text-green-500" />} sub="~3.7 Hz" />
-              </div>
+              {loadingTelemetry ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 animate-pulse">
+                      <div className="h-3 bg-zinc-800 rounded w-1/2 mb-3" />
+                      <div className="h-7 bg-zinc-800 rounded w-3/4" />
+                    </div>
+                  ))}
+                </div>
+              ) : stats && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <StatCard accent label="Top Speed" value={`${stats.maxSpeed} km/h`} icon={<Zap className="w-4 h-4 text-red-500" />} sub="Selected lap" />
+                  <StatCard label="Avg Speed" value={`${stats.avgSpeed} km/h`} icon={<Gauge className="w-4 h-4 text-yellow-500" />} />
+                  <StatCard label="Max RPM" value={stats.maxRpm.toLocaleString()} icon={<Activity className="w-4 h-4 text-blue-500" />} />
+                  <StatCard label="Data Points" value={stats.points.toLocaleString()} icon={<Cpu className="w-4 h-4 text-green-500" />} sub="~3.7 Hz" />
+                </div>
+              )}
 
               {/* Lap info strip */}
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl px-5 py-3 flex flex-wrap items-center gap-x-8 gap-y-3">
@@ -767,7 +789,13 @@ const sk = sessionInfo.session_key;
               </div>
 
               {/* Telemetry chart - solo single lap */}
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+              {loadingTelemetry ? (
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 animate-pulse">
+                  <div className="h-4 bg-zinc-800 rounded w-1/4 mb-4" />
+                  <div className="h-56 bg-zinc-800/50 rounded-lg" />
+                </div>
+              ) : telemetry.length > 0 && (
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
                 <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                   <div className="flex items-center gap-3 flex-wrap">
                     <div className="text-[10px] text-zinc-600 font-mono flex items-center gap-2">
@@ -791,6 +819,7 @@ const sk = sessionInfo.session_key;
                   tab={activeTab}
                 />
               </div>
+              )}
 
               {/*  */}
               {sessionType === 'R' && raceResults && raceResults.length > 0 && (
@@ -802,13 +831,22 @@ const sk = sessionInfo.session_key;
                 />
               )}
 
-              {sessionType !== 'R' && sectorsData && (
-                <div className="grid grid-cols-1 gap-4">
-                  <SectorTable sectorsData={sectorsData} highlightCode={driverCode} />
-                </div>
+              {sessionType !== 'R' && (
+                loadingSectors ? (
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 animate-pulse">
+                    <div className="h-3 bg-zinc-800 rounded w-1/3 mb-4" />
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="h-8 bg-zinc-800/50 rounded mb-1" />
+                    ))}
+                  </div>
+                ) : sectorsData && (
+                  <div className="grid grid-cols-1 gap-4">
+                    <SectorTable sectorsData={sectorsData} highlightCode={driverCode} />
+                  </div>
+                )
               )}
 
-              {sessionType === 'R' && !raceResults && !loading && (
+              {sessionType === 'R' && !raceResults && !loadingResults && (
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center">
                   <p className="text-zinc-500 font-mono text-sm">No race results available for this session</p>
                 </div>
@@ -816,7 +854,7 @@ const sk = sessionInfo.session_key;
             </div>
           )}
 
-          {!loading && !error && !telemetry.length && (
+          {!isFetching && !error && !telemetry.length && (
             <div className="text-center py-28 border border-zinc-900 rounded-xl">
               <Radio className="w-10 h-10 mx-auto mb-4 text-zinc-800" />
               <div className="text-xl font-black font-mono text-zinc-700 mb-2">NO DATA LOADED</div>
@@ -831,19 +869,6 @@ const sk = sessionInfo.session_key;
           </div>
         </main>
 
-        {loading && (
-          <div className="fixed inset-0 bg-zinc-950/85 flex items-center justify-center z-50 backdrop-blur-sm">
-            <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-8 text-center max-w-xs w-full mx-4">
-              <RefreshCw className="w-8 h-8 text-red-500 animate-spin mx-auto mb-4" />
-              <div className="text-sm font-mono font-bold text-white mb-2">FETCHING DATA</div>
-              <div className="text-xs text-zinc-500 font-mono mb-1">{loadStep}</div>
-              <div className="w-full bg-zinc-800 h-1 rounded-full mt-3 overflow-hidden">
-                <div className="bg-red-600 h-full rounded-full animate-pulse" style={{ width: '60%' }}></div>
-              </div>
-              <div className="text-xs text-zinc-700 font-mono mt-3">{meeting?.meeting_name} · {driverCode} · {sessionType}</div>
-            </div>
-          </div>
-        )}
         <Footer />
       </div>
     </>
