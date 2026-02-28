@@ -17,8 +17,6 @@ import {
   getAllDriversSectors, getRacePositions, getAllLaps, openf1Fetch,
 } from '../lib/openf1';
 
-// QualifyingToRaceProgression defined inline below
-
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 var SESSION_TYPES = [
@@ -27,16 +25,46 @@ var SESSION_TYPES = [
   { id: 'R',   name: 'Race'        }, { id: 'S',   name: 'Sprint'      },
   { id: 'SQ',  name: 'Sprint Qualifying' },
 ];
-var AVAILABLE_YEARS = [2025, 2024, 2023];
+var AVAILABLE_YEARS = [2026, 2025, 2024, 2023];
 
-var CIRCUIT_COUNTRY = {
-  monza:'it',imola:'it',mugello:'it',silverstone:'gb',spa:'be',barcelona:'es',
-  catalunya:'es',hungaroring:'hu',austria:'at',spielberg:'at',monaco:'mc',
-  austin:'us',miami:'us','las vegas':'us',montreal:'ca',villeneuve:'ca',
-  interlagos:'br',paulo:'br',rodriguez:'mx',mexico:'mx',suzuka:'jp',shanghai:'cn',
-  singapore:'sg','marina bay':'sg',bahrain:'bh',sakhir:'bh',jeddah:'sa',
-  'abu dhabi':'ae','yas marina':'ae',melbourne:'au','albert park':'au',
-  zandvoort:'nl',lusail:'qa',losail:'qa',qatar:'qa',baku:'az',
+const circuitToCountry = {
+  'monza': 'it', 'autodromo_nazionale_di_monza': 'it', 'milan': 'it', 'imola': 'it', 'enzo_e_dino_ferrari': 'it',
+  'mugello': 'it', 'bologna': 'it', 'pescara': 'it', 'silverstone': 'gb', 'silverstone_circuit': 'gb',
+  'northamptonshire': 'gb', 'brands_hatch': 'gb', 'kent': 'gb', 'donington': 'gb', 'aintree': 'gb',
+  'liverpool': 'gb', 'spa': 'be', 'spa_francorchamps': 'be', 'stavelot': 'be', 'zolder': 'be',
+  'heusden_zolder': 'be', 'nivelles': 'be', 'brussels': 'be', 'zandvoort': 'nl', 'circuit_zandvoort': 'nl',
+  'catalunya': 'es', 'barcelona': 'es', 'montmelo': 'es', 'jerez': 'es', 'valencia': 'es',
+  'valencia_street_circuit': 'es', 'pedralbes': 'es', 'montjuic': 'es', 'madrid': 'es', 'madring': 'es', 'jarama': 'es',
+  'hungaroring': 'hu', 'budapest': 'hu', 'mogyorod': 'hu', 'red_bull_ring': 'at', 'spielberg': 'at',
+  'zeltweg': 'at', 'oesterreichring': 'at', 'styria': 'at', 'magny_cours': 'fr', 'nevers': 'fr',
+  'paul_ricard': 'fr', 'le_castellet': 'fr', 'ricard': 'fr', 'reims': 'fr', 'dijon': 'fr',
+  'dijon_prenois': 'fr', 'rouen': 'fr', 'essarts': 'fr', 'charade': 'fr', 'clermont_ferrand': 'fr',
+  'lemans': 'fr', 'nurburgring': 'de', 'nurburg': 'de', 'hockenheimring': 'de', 'hockenheim': 'de',
+  'avus': 'de', 'berlin': 'de', 'estoril': 'pt', 'cascais': 'pt', 'portimao': 'pt',
+  'algarve': 'pt', 'boavista': 'pt', 'oporto': 'pt', 'monsanto': 'pt', 'lisbon': 'pt',
+  'bremgarten': 'ch', 'bern': 'ch', 'anderstorp': 'se', 'scandinavian_raceway': 'se', 'monaco': 'mc',
+  'monte_carlo': 'mc', 'circuit_de_monaco': 'mc', 'bakú': 'az', 'baku': 'az', 'azerbaijan': 'az',
+  'americas': 'us', 'cota': 'us', 'austin': 'us', 'circuit_of_the_americas': 'us', 'miami': 'us',
+  'miami_international_autodrome': 'us', 'vegas': 'us', 'las_vegas': 'us', 'las_vegas_strip': 'us', 'caesars_palace': 'us',
+  'indianapolis': 'us', 'indianapolis_motor_speedway': 'us', 'watkins_glen': 'us', 'long_beach': 'us', 'phoenix': 'us',
+  'detroit': 'us', 'dallas': 'us', 'sebring': 'us', 'riverside': 'us', 'villeneuve': 'ca',
+  'montreal': 'ca', 'circuit_gilles_villeneuve': 'ca', 'mosport': 'ca', 'bowmanville': 'ca', 'tremblant': 'ca',
+  'st_jovite': 'ca', 'interlagos': 'br', 'sao_paulo': 'br', 'são_paulo': 'br', 'jose_carlos_pace': 'br',
+  'jacarepagua': 'br', 'rio_de_janeiro': 'br', 'rodriguez': 'mx', 'hermanos_rodriguez': 'mx', 'mexico_city': 'mx',
+  'galvez': 'ar', 'buenos_aires': 'ar', 'oscar_galvez': 'ar',
+  'juan_y_oscar_galvez': 'ar', 'juan_y_ignacio_cobos': 'ar', 'carlos_pace': 'br', 'juan_y_ignacio_cobos': 'ar',
+  'suzuka': 'jp', 'suzuka_circuit': 'jp', 'mie': 'jp', 'fuji': 'jp', 'fuji_speedway': 'jp',
+  'oyama': 'jp', 'okayama': 'jp', 'ti_circuit': 'jp', 'shanghai': 'cn', 'shanghai_international_circuit': 'cn',
+  'marina_bay': 'sg', 'singapore': 'sg', 'sepang': 'my', 'kuala_lumpur': 'my', 'yeongam': 'kr',
+  'korea_international_circuit': 'kr', 'buddh': 'in', 'greater_noida': 'in', 'bahrain': 'bh', 'sakhir': 'bh',
+  'manama': 'bh', 'bahrain_international_circuit': 'bh', 'losail': 'qa', 'lusail': 'qa', 'lusail_international_circuit': 'qa',
+  'jeddah': 'sa', 'jeddah_corniche_circuit': 'sa', 'yas_marina': 'ae', 'abu_dhabi': 'ae', 'yas_marina_circuit': 'ae',
+  'istanbul': 'tr', 'istanbul_park': 'tr', 'sochi': 'ru', 'sochi_autodrom': 'ru', 'kyalami': 'za',
+  'midrand': 'za', 'george': 'za', 'prince_george': 'za', 'adelaide': 'au', 'albert_park': 'au',
+  'melbourne': 'au', 'ain_diab': 'ma', 'casablanca': 'ma',
+  'albert_park': 'au', 'marina_bay': 'sg', 'yas_marina': 'ae', 'paul_ricard': 'fr', 'watkins_glen': 'us',
+  'long_beach': 'us', 'las_vegas': 'us', 'jose_carlos_pace': 'br', 'hermanos_rodriguez': 'mx', 'mexico_city': 'mx',
+  'red_bull_ring': 'at', 'silverstone_circuit': 'gb', 'spa_francorchamps': 'be', 'circuit_de_monaco': 'mc', 'fuji_speedway': 'jp'
 };
 var getFlagCode = (loc = '') => {
   const l = loc.toLowerCase();
@@ -366,7 +394,6 @@ function RacePositionsChart({ positionsData, highlightCodes }) {
   );
 }
 
-// ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 // ─── QUALIFYING→RACE SLOPE CHART ────────────────────────────────────────────
 const TEAM_COLORS = {
   'ferrari':'#F91536','mercedes':'#6CD3BF','red-bull':'#3671C6','mclaren':'#F58020',
@@ -634,7 +661,7 @@ function QualifyingToRaceProgression({ raceResults, year, grandPrix }) {
                   <text x={LX - 14} y={y + 5} textAnchor="end"
                     fontSize={dim ? 11 : isHL ? 15 : 13}
                     fontWeight={isHL ? 900 : 700} fontFamily="monospace"
-                    fill={dim ? '#252525' : isHL ? '#ffffff' : '#d4d4d4'}>
+                    fill={dim ? '#252525' : isHL ? '#ffffff' : '#fffefe'}>
                     {d.code}
                   </text>
                 </g>
@@ -660,7 +687,7 @@ function QualifyingToRaceProgression({ raceResults, year, grandPrix }) {
                   <text x={RX + 16} y={y + 5} textAnchor="start"
                     fontSize={dim ? 11 : isHL ? 15 : 13}
                     fontWeight={isHL ? 900 : 700} fontFamily="monospace"
-                    fill={dim ? '#252525' : isHL ? '#ffffff' : '#d4d4d4'}>
+                    fill={dim ? '#252525' : isHL ? '#ffffff' : '#fffefe'}>
                     {d.code}
                   </text>
 
@@ -751,7 +778,6 @@ export default function LiveTimingPage() {
 
   const [raceResults, setRaceResults] = useState(null);
   const [loadingResults, setLoadingResults] = useState(false);
-  // Carica i risultati di gara dal JSON locale, matchando per anno + nome/location del meeting
   const loadRaceResults = async (year, meetingObj) => {
     if (typeof window === 'undefined' || !meetingObj) return;
 
@@ -763,7 +789,6 @@ export default function LiveTimingPage() {
       ]);
       const allResults = await resultsRes.json();
 
-      // Debug: log struttura primo elemento per capire i campi
       const sampleResult = allResults.find(r => r.year === parseInt(year));
       console.log('🏁 Sample result entry:', sampleResult);
       console.log('🏟 Meeting obj:', { 
@@ -776,7 +801,6 @@ export default function LiveTimingPage() {
 
       let filtered = [];
 
-      // Strategia 1: usa f1db-races.json per trovare il round corretto
       if (racesRes?.ok) {
         const allRaces = await racesRes.json();
         const racesForYear = allRaces.filter(r => r.year === parseInt(year));
@@ -789,7 +813,6 @@ export default function LiveTimingPage() {
           .replace(' grand prix', '').replace(' gp', '').trim();
 
         const matchedRace = racesForYear.find(r => {
-          // Controlla tutti i possibili campi nome/location
           const fields = [
             r.name, r.officialName, r.grandPrixId, r.circuitId,
             r.location, r.country, r.circuit,
@@ -815,15 +838,12 @@ export default function LiveTimingPage() {
         }
       }
 
-      // Strategia 2: match diretto su f1db-races-race-results.json
-      // I risultati potrebbero avere campi come grandPrixId, raceId che matchano location
       if (!filtered.length) {
         const loc = (meetingObj.location || '').toLowerCase();
         const country = (meetingObj.country_name || '').toLowerCase();
         const meetingName = (meetingObj.meeting_name || '').toLowerCase()
           .replace(' grand prix', '').replace(' gp', '').trim();
 
-        // Raggruppa per round, testa ogni round
         const rounds = [...new Set(allResults.filter(r => r.year === parseInt(year)).map(r => r.round))];
         let bestRound = null, bestScore = -1;
 
@@ -831,7 +851,6 @@ export default function LiveTimingPage() {
           const sample = allResults.find(r => r.year === parseInt(year) && r.round === round);
           if (!sample) continue;
           
-          // Controlla tutti i campi stringa del sample
           const fields = Object.values(sample)
             .filter(v => typeof v === 'string')
             .map(v => v.toLowerCase());
