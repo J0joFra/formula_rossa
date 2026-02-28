@@ -14,7 +14,7 @@ import Footer from '../components/ferrari/Footer';
 import {
   getDrivers, getDriverNumber, getTelemetry, getCircuitMap, getFullSessionTelemetry,
   getWeather, getMeetings, getSessionsForMeeting, getLatestSession,
-  getAllDriversSectors, getRacePositions, getAllLaps,
+  getAllDriversSectors, getRacePositions, getAllLaps, openf1Fetch,
 } from '../lib/openf1';
 
 const QualifyingToRaceProgression = dynamic(
@@ -39,7 +39,7 @@ const SESSION_TYPES = [
 ];
 const AVAILABLE_YEARS = [2025, 2024, 2023];
 
-const CIRCUIT_COUNTRY = {
+const circuitToCountry = {
   'monza': 'it', 'autodromo-nazionale-di-monza': 'it', 'milan': 'it', 'imola': 'it', 'enzo-e-dino-ferrari': 'it',
   'mugello': 'it', 'bologna': 'it', 'pescara': 'it', 'silverstone': 'gb', 'silverstone-circuit': 'gb',
   'northamptonshire': 'gb', 'brands-hatch': 'gb', 'kent': 'gb', 'donington': 'gb', 'aintree': 'gb',
@@ -74,6 +74,7 @@ const CIRCUIT_COUNTRY = {
   'istanbul': 'tr', 'istanbul-park': 'tr', 'sochi': 'ru', 'sochi-autodrom': 'ru', 'kyalami': 'za',
   'midrand': 'za', 'george': 'za', 'prince-george': 'za', 'adelaide': 'au', 'albert-park': 'au',
   'melbourne': 'au', 'ain-diab': 'ma', 'casablanca': 'ma',
+
   'albert_park': 'au', 'marina_bay': 'sg', 'yas_marina': 'ae', 'paul_ricard': 'fr', 'watkins_glen': 'us',
   'long_beach': 'us', 'las_vegas': 'us', 'jose_carlos_pace': 'br', 'hermanos_rodriguez': 'mx', 'mexico_city': 'mx',
   'red_bull_ring': 'at', 'silverstone_circuit': 'gb', 'spa_francorchamps': 'be', 'circuit_de_monaco': 'mc', 'fuji_speedway': 'jp'
@@ -409,6 +410,11 @@ function RacePositionsChart({ positionsData, highlightCodes }) {
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function LiveTimingPage() {
 
+  // Session-level cache refs — avoid re-fetching same data within a session
+  const cachedDriverNum = React.useRef(null);   // { sk, code, num }
+  const cachedCarData   = React.useRef(null);   // { sk, num, data }
+  const cachedRawLaps   = React.useRef(null);   // { sk, num, data }
+
   const [raceResults, setRaceResults] = useState(null);
   const [loadingResults, setLoadingResults] = useState(false);
   const loadRaceResults = async (year, round) => {
@@ -527,7 +533,7 @@ export default function LiveTimingPage() {
 
 const fetchAll = async () => {
   if (!year || !meeting || !driverCode || !sessionInfo) return;
-  
+
   setLoading(true);
   setError(null);
   setTelemetry([]);
@@ -540,37 +546,62 @@ const fetchAll = async () => {
   setLoadingTelemetry(true);
   setLoadingSectors(true);
 
-
   const sk = sessionInfo.session_key;
 
   try {
-    const num = await getDriverNumber(sk, driverCode);
+    // Resolve driver number — use cached if same session+driver
+    let num;
+    if (cachedDriverNum.current?.sk === sk && cachedDriverNum.current?.code === driverCode) {
+      num = cachedDriverNum.current.num;
+    } else {
+      num = await getDriverNumber(sk, driverCode);
+      cachedDriverNum.current = { sk, code: driverCode, num };
+    }
 
-    // Step 1: fetch laps immediately — cheapest call, gives us lap list + fastest lap info fast
-    const lapsPromise = getAllLaps(sk, num).catch(() => null);
+    // Fetch /laps and /car_data once, in parallel — reuse both everywhere below
+    const rawLapsPromise = (cachedRawLaps.current?.sk === sk && cachedRawLaps.current?.num === num)
+      ? Promise.resolve(cachedRawLaps.current.data)
+      : openf1Fetch('/laps', { session_key: sk, driver_number: num }).then(d => {
+          cachedRawLaps.current = { sk, num, data: d };
+          return d;
+        });
 
-    // Step 2: fetch telemetry in parallel but don't wait for it to show laps
-    const rawTelemetryPromise = getTelemetry(sk, num, null).catch(() => null);
+    const carDataPromise = (cachedCarData.current?.sk === sk && cachedCarData.current?.num === num)
+      ? Promise.resolve(cachedCarData.current.data)
+      : openf1Fetch('/car_data', { session_key: sk, driver_number: num }).then(d => {
+          cachedCarData.current = { sk, num, data: d };
+          return d;
+        });
 
+    // Step 1: laps resolve first (cheap) — show lap list + fastest lap immediately
     const telemetryPromise = (async () => {
       try {
-        const allLaps = await lapsPromise;
-        if (allLaps?.length) {
+        const rawLaps = await rawLapsPromise;
+        const allLaps = rawLaps
+          .filter(l => l.lap_duration != null && l.lap_duration > 0)
+          .sort((a, b) => a.lap_number - b.lap_number);
+
+        if (allLaps.length) {
           setDriverLaps(allLaps);
           const fastestLapNum = allLaps.reduce((a, b) =>
             a.lap_duration < b.lap_duration ? a : b
           ).lap_number;
           setSelectedLap(fastestLapNum);
-          // Set fastest lap info from laps data immediately (no need to wait for telemetry)
           const fl = allLaps.find(l => l.lap_number === fastestLapNum);
           if (fl) setFastestLap(fl);
-          getCircuitMap(sk, num, fastestLapNum).then(setCircuitMap).catch(() => {});
+          // Circuit map reuses laps + car_data already being fetched
+          carDataPromise.then(carData =>
+            getCircuitMap(sk, num, fastestLapNum, rawLaps, carData)
+              .then(setCircuitMap)
+              .catch(() => {})
+          );
         }
-        // Now wait for telemetry (chart data) — arrives later, updates chart when ready
-        const telemetryResult = await rawTelemetryPromise;
+
+        // Step 2: wait for car_data then build telemetry — no extra fetch
+        const carData = await carDataPromise;
+        const telemetryResult = await getTelemetry(sk, num, null, rawLaps, carData).catch(() => null);
         if (telemetryResult) {
           setTelemetry(telemetryResult.telemetry);
-          // Override fastestLap with richer telemetry-based lap object if available
           if (telemetryResult.target_lap) setFastestLap(telemetryResult.target_lap);
         }
       } finally {
@@ -578,7 +609,7 @@ const fetchAll = async () => {
       }
     })();
 
-    // Sectors + weather (independent)
+    // Sectors + weather — independent, no overlap with above
     const sectorsPromise = (async () => {
       try {
         const [weatherResult, sectorsResult] = await Promise.all([
@@ -608,13 +639,20 @@ const fetchAll = async () => {
     if (!sessionInfo) return;
     const sk = sessionInfo.session_key;
     try {
-      const num = await getDriverNumber(sk, driverCode);
-      const r = await getTelemetry(sk, num, lapNum);
-      setTelemetry(r.telemetry); setFastestLap(r.target_lap);
-      try { 
-        const map = await getCircuitMap(sk, num, lapNum);
-        setCircuitMap(map); 
-      } catch { /* optional */ }
+      // Reuse cached driver number, laps and car_data — zero extra API calls
+      const num = cachedDriverNum.current?.sk === sk && cachedDriverNum.current?.code === driverCode
+        ? cachedDriverNum.current.num
+        : await getDriverNumber(sk, driverCode);
+      const rawLaps = cachedRawLaps.current?.sk === sk && cachedRawLaps.current?.num === num
+        ? cachedRawLaps.current.data : null;
+      const carData = cachedCarData.current?.sk === sk && cachedCarData.current?.num === num
+        ? cachedCarData.current.data : null;
+
+      const r = await getTelemetry(sk, num, lapNum, rawLaps, carData);
+      setTelemetry(r.telemetry);
+      setFastestLap(r.target_lap);
+      // Circuit map also reuses cached data
+      getCircuitMap(sk, num, lapNum, rawLaps, carData).then(setCircuitMap).catch(() => {});
     } catch (e) { setError(e.message); }
   };
 
