@@ -7,20 +7,32 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   return (
     <SessionProvider session={session}>
       <Head>
-        <title>Formula Rossa | Statistiche e Analisi Dati Ferrari F1</title>
-        <meta name="google-adsense-account" content="ca-pub-8762257220044998"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5"/>
-        <meta property="og:title" content="Formula Rossa | Ferrari F1 Data Platform" />
-        <meta property="og:description" content="Esplora la storia e le statistiche della Scuderia Ferrari attraverso i dati." />
-        <meta property="og:image" content="https://formula-rossa.it/og-image.jpg" />
-        <meta property="og:url" content="https://formula-rossa.it" />
-        <meta name="twitter:card" content="summary_large_image" />
-        
-        {/* Font Inter */}
+        {/* Charset & Viewport */}
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+
+        {/* AdSense verification */}
+        <meta name="google-adsense-account" content="ca-pub-8762257220044998" />
+
+        {/* Theme color (barra browser su Android/Chrome) */}
+        <meta name="theme-color" content="#DC0000" />
+        <meta name="msapplication-TileColor" content="#DC0000" />
+
+        {/* PWA manifest (crea /public/manifest.json se vuoi installabilità) */}
+        <link rel="manifest" href="/manifest.json" />
+
+        {/* Favicon */}
+        <link rel="icon"             href="/favicon.ico" />
+        <link rel="icon"             href="/favicon.svg"    type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+        {/* Font Inter — preconnect prima del CSS per velocizzare */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-        <meta name="description" content="Formula Rossa è la piattaforma definitiva per i tifosi della Scuderia Ferrari. Esplora statistiche F1, dati storici e grafici interattivi della Rossa." />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
       </Head>
 
       {/* Google Analytics (gtag.js) */}

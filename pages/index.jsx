@@ -4,6 +4,7 @@ import HeroSection from '../components/ferrari/HeroSection';
 import StatsSection from '../components/ferrari/StatsSection';
 import NewsSection from '../components/ferrari/NewsSection';
 import Footer from '../components/ferrari/Footer';
+import SEO from '../components/seo';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion'; 
 import {   
@@ -52,8 +53,30 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
+  /* ── Dati strutturati JSON-LD per la homepage ── */
+  const homeJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Formula Rossa',
+    url: 'https://formula-rossa.it',
+    description: 'Piattaforma di statistiche e analisi dati della Scuderia Ferrari F1.',
+    inLanguage: 'it',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: 'https://formula-rossa.it/search?q={search_term_string}',
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
+
+      <SEO
+        title="Statistiche e Analisi Dati Ferrari F1"
+        description="Formula Rossa è la piattaforma definitiva per i tifosi della Scuderia Ferrari. Esplora statistiche F1, dati storici e grafici interattivi della Rossa."
+        path="/"
+        jsonLd={homeJsonLd}
+      />
 
       {/* Background dot grid */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
