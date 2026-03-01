@@ -1,7 +1,7 @@
 // pages/about.jsx
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
-import SEO from '../components/SEO';
+import SEO from '../components/seo';
 import { motion } from 'framer-motion';
 import {
   Database, BarChart3, Users, Zap, Trophy, Code2,
