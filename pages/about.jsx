@@ -60,11 +60,11 @@ const FEATURES = [
 ];
 
 const TIMELINE = [
-  { year: 'Dec 2025', event: 'Idea e primo prototipo', desc: 'Nasce l\'idea di creare la piattaforma dati Ferrari definitiva per i tifosi.' },
-  { year: 'Jan 2026', event: 'Lancio Beta',              desc: 'Prima versione pubblica con statistiche storiche e confronto piloti.' },
-  { year: 'Feb 2026', event: 'AI Predictor',             desc: 'Integrazione dell\'algoritmo di previsione basato su machine learning.' },
-  { year: 'Feb 2026', event: 'Fan Zone',                 desc: 'Lancio della community interattiva con mini-games e sistema di reward.' },
-  { year: 'Mar 2026', event: 'Lancio versione di prova', desc: 'Prima versione completa con dati real-time e adattamento per in-app' },
+  { year: 'Dec 2025', event: 'Idea e primo prototipo', desc: 'Nasce l\'idea di creare la piattaforma dati Ferrari definitiva per i tifosi.', icon: '💡' },
+  { year: 'Jan 2026', event: 'Lancio Beta',              desc: 'Prima versione pubblica con statistiche storiche e confronto piloti.', icon: '🚀' },
+  { year: 'Feb 2026', event: 'AI Predictor',             desc: 'Integrazione dell\'algoritmo di previsione basato su machine learning.', icon: '🤖' },
+  { year: 'Feb 2026', event: 'Fan Zone',                 desc: 'Lancio della community interattiva con mini-games e sistema di reward.', icon: '🏆' },
+  { year: 'Mar 2026', event: 'Lancio versione di prova', desc: 'Prima versione completa con dati real-time e adattamento per in-app', icon: '🏎️' },
 ];
 
 export default function AboutPage() {
@@ -197,7 +197,7 @@ export default function AboutPage() {
                     >
                       <div className="flex flex-col items-center">
                         <div className="w-8 h-8 rounded-full bg-red-600/20 border border-red-600/40 flex items-center justify-center flex-shrink-0">
-                          <span className="text-red-500 text-[9px] font-black">{item.year.slice(2)}</span>
+                          <span className="text-sm leading-none">{item.icon}</span>
                         </div>
                         {i < TIMELINE.length - 1 && (
                           <div className="w-px h-full bg-white/5 mt-2" aria-hidden="true" />
