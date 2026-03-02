@@ -3,6 +3,7 @@ import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import SEO from '../components/seo';
 import { motion } from 'framer-motion';
+import { getHeroImages } from '../lib/getHeroImages';
 import {
   Database, BarChart3, Users, Zap, Trophy, Code2,
   Globe, Heart, Github, Linkedin, Youtube, Instagram,
