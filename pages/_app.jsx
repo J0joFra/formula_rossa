@@ -58,37 +58,6 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
         strategy="afterInteractive"
       />
 
-      {/* Configurazione colori Ferrari */}
-      <Script
-        id="tailwind-config"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
-            tailwind.config = {
-              theme: {
-                extend: {
-                  colors: {
-                    'ferrari-red': '#DC0000',
-                    'ferrari-yellow': '#FFD700',
-                    'ferrari-dark': '#0A0A0A'
-                  },
-                  animation: {
-                    'pulse-slow': 'pulse 3s ease-in-out infinite',
-                    'float': 'float 6s ease-in-out infinite',
-                  },
-                  keyframes: {
-                    float: {
-                      '0%, 100%': { transform: 'translateY(0)' },
-                      '50%': { transform: 'translateY(-20px)' },
-                    }
-                  }
-                }
-              }
-            }
-          `
-        }}
-      />
-
       {/* Stili globali */}
       <style jsx global>{`
         /* ===== RESET & BASE ===== */
