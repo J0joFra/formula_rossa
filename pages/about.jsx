@@ -98,7 +98,7 @@ export default function AboutPage() {
         <main className="pt-20">
 
           {/* ── HERO ── */}
-          <section className="relative py-24 md:py-36 px-4 overflow-hidden" aria-label="Presentazione Formula Rossa">
+          <section className="relative py-24 md:py-32 px-4 overflow-hidden" aria-label="Presentazione Formula Rossa">
             {/* Sfondo */}
             <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
               <div className="absolute inset-0 opacity-5"
@@ -110,35 +110,86 @@ export default function AboutPage() {
               <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-red-600/10 rounded-full blur-[120px]" />
               <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-yellow-500/5 rounded-full blur-[80px]" />
             </div>
-
-            <div className="relative max-w-5xl mx-auto text-center">
+          
+            <div className="relative max-w-6xl mx-auto">
+              {/* Badge + Titolo */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
+                className="text-center mb-16"
               >
                 <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-600/10 border border-red-600/20 text-red-500 text-[10px] font-black uppercase tracking-[0.3em] mb-8">
                   <Heart className="w-3 h-3 fill-red-500" aria-hidden="true" /> Il Progetto
                 </span>
-
-                <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter leading-none mb-8">
-                  Dati al servizio<br />
-                  della <span className="text-red-600">Passione</span>
+          
+                <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter leading-none mb-6">
+                  Una piattaforma per i <span className="text-red-600">Tifosi Ferrari</span>
                 </h2>
-
-                <p className="text-zinc-400 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed mb-6">
-                  Formula Rossa nasce da una semplice domanda: <em>"Perché non esiste un posto dove trovare 
-                  tutti i dati Ferrari in modo bello e accessibile?"</em>
+          
+                <p className="text-zinc-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed mb-4">
+                  Formula Rossa nasce da una domanda semplice ma senza risposta: perché non esiste un unico posto 
+                  dove trovare tutti i dati Ferrari — belli, ordinati, accessibili a chiunque?
                 </p>
-                <p className="text-zinc-500 text-base max-w-2xl mx-auto leading-relaxed">
-                  Dal 1950 ad oggi, la Scuderia Ferrari è la squadra più vincente e iconica della Formula 1. 
-                  Oltre 240 vittorie, 16 titoli costruttori, piloti leggendari da Ascari a Schumacher, 
-                  da Lauda a Leclerc. Questa storia merita una piattaforma all'altezza.
+                <p className="text-zinc-500 text-sm max-w-2xl mx-auto leading-relaxed">
+                  Da quella domanda è nata questa piattaforma: un archivio vivente di 75 anni di storia, 
+                  da Ascari a Leclerc, dai circuiti del dopoguerra alle piste moderne. Ogni vittoria, 
+                  ogni pole, ogni stagione — raccontata attraverso i numeri e resa visiva per chi ama davvero 
+                  il Cavallino Rampante.
                 </p>
               </motion.div>
+          
+              {/* Griglia immagini */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-5xl mx-auto"
+              >
+                {/* Immagine grande sinistra */}
+                <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden aspect-square md:aspect-auto md:h-72 relative group">
+                  <img
+                    src="/data/images/image1.jpg"
+                    alt="Ferrari in pista"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                </div>
+          
+                {/* Immagini piccole destra */}
+                {[2, 3, 4, 5].map((n) => (
+                  <div key={n} className="rounded-xl overflow-hidden h-[130px] md:h-[134px] relative group">
+                    <img
+                      src={`/data/images/image${n}.jpg`}
+                      alt={`Ferrari immagine ${n}`}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                  </div>
+                ))}
+              </motion.div>
+          
+              {/* Strip immagini orizzontale */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="flex gap-3 mt-3 max-w-5xl mx-auto overflow-hidden"
+              >
+                {[6, 7, 8, 9, 10].map((n) => (
+                  <div key={n} className="flex-1 rounded-xl overflow-hidden h-24 relative group">
+                    <img
+                      src={`/data/images/image${n}.jpg`}
+                      alt={`Ferrari immagine ${n}`}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                  </div>
+                ))}
+              </motion.div>
+          
             </div>
           </section>
-
           {/* ── NUMERI ── */}
           <section className="py-16 px-4 border-y border-white/5 bg-zinc-950/50" aria-label="Numeri del progetto">
             <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
