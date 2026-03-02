@@ -67,7 +67,7 @@ const TIMELINE = [
   { year: 'Mar 2026', event: 'Lancio versione di prova', desc: 'Prima versione completa con dati real-time e adattamento per in-app', icon: '🏎️' },
 ];
 
-export default function AboutPage() {
+export default function AboutPage({ heroImages = [] }) {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'AboutPage',
@@ -147,40 +147,33 @@ export default function AboutPage() {
                 className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-5xl mx-auto"
               >
                 {/* Immagine grande sinistra */}
-                <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden aspect-square md:aspect-auto md:h-72 relative group">
+                <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden h-72 relative group">
                   <img
-                    src="/data/images/image1.jpg"
-                    alt="Ferrari in pista"
+                    src={heroImages[0]?.urls?.regular ?? '/data/images/image1.jpg'}
+                    alt={heroImages[0]?.alt_description ?? 'Ferrari in pista'}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 </div>
-          
-                {/* Immagini piccole destra */}
-                {[2, 3, 4, 5].map((n) => (
-                  <div key={n} className="rounded-xl overflow-hidden h-[130px] md:h-[134px] relative group">
+
+                {/* Immagini piccole */}
+                {[1, 2, 3, 4].map((n) => (
+                  <div key={n} className="rounded-xl overflow-hidden h-[134px] relative group">
                     <img
-                      src={`/data/images/image${n}.jpg`}
-                      alt={`Ferrari immagine ${n}`}
+                      src={heroImages[n]?.urls?.small ?? `/data/images/image${n+1}.jpg`}
+                      alt={heroImages[n]?.alt_description ?? `Ferrari ${n}`}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                   </div>
                 ))}
-              </motion.div>
-          
-              {/* Strip immagini orizzontale */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                className="flex gap-3 mt-3 max-w-5xl mx-auto overflow-hidden"
-              >
-                {[6, 7, 8, 9, 10].map((n) => (
+
+                {/* Strip orizzontale */}
+                {[5, 6, 7, 8, 9].map((n) => (
                   <div key={n} className="flex-1 rounded-xl overflow-hidden h-24 relative group">
                     <img
-                      src={`/data/images/image${n}.jpg`}
-                      alt={`Ferrari immagine ${n}`}
+                      src={heroImages[n]?.urls?.small ?? `/data/images/image${n}.jpg`}
+                      alt={heroImages[n]?.alt_description ?? `Ferrari ${n}`}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
@@ -420,5 +413,14 @@ export default function AboutPage() {
         <Footer />
       </div>
     </>
+    
   );
+}
+
+export async function getStaticProps() {
+  const images = await getHeroImages();
+  return {
+    props: { heroImages: images },
+    revalidate: 60 * 60 * 24, 
+  };
 }
