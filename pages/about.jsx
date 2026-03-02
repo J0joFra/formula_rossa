@@ -273,10 +273,6 @@ export default function AboutPage() {
                 <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter">
                   Cosa trovi su <span className="text-red-600"> Formula Rossa</span>
                 </h2>
-                <p className="text-zinc-500 mt-4 max-w-2xl mx-auto text-sm leading-relaxed">
-                  Una piattaforma completa per esplorare la storia della Ferrari in Formula 1, 
-                  con strumenti di analisi avanzati e una community di appassionati.
-                </p>
               </div>
 
               <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
