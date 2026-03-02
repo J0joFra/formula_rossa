@@ -60,10 +60,11 @@ const FEATURES = [
 ];
 
 const TIMELINE = [
-  { year: '2024', event: 'Idea e primo prototipo', desc: 'Nasce l\'idea di creare la piattaforma dati Ferrari definitiva per i tifosi.' },
-  { year: '2025', event: 'Lancio Beta',              desc: 'Prima versione pubblica con statistiche storiche e confronto piloti.' },
-  { year: '2025', event: 'AI Predictor',             desc: 'Integrazione dell\'algoritmo di previsione basato su machine learning.' },
-  { year: '2026', event: 'Fan Zone',                 desc: 'Lancio della community interattiva con mini-games e sistema di reward.' },
+  { year: 'Dec 2025', event: 'Idea e primo prototipo', desc: 'Nasce l\'idea di creare la piattaforma dati Ferrari definitiva per i tifosi.' },
+  { year: 'Jan 2026', event: 'Lancio Beta',              desc: 'Prima versione pubblica con statistiche storiche e confronto piloti.' },
+  { year: 'Feb 2026', event: 'AI Predictor',             desc: 'Integrazione dell\'algoritmo di previsione basato su machine learning.' },
+  { year: 'Feb 2026', event: 'Fan Zone',                 desc: 'Lancio della community interattiva con mini-games e sistema di reward.' },
+  { year: 'Mar 2026', event: 'Lancio versione di prova', desc: 'Prima versione completa con dati real-time e adattamento per in-app' },
 ];
 
 export default function AboutPage() {
@@ -120,10 +121,10 @@ export default function AboutPage() {
                   <Heart className="w-3 h-3 fill-red-500" aria-hidden="true" /> Il Progetto
                 </span>
 
-                <h1 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter leading-none mb-8">
+                <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter leading-none mb-8">
                   Dati al servizio<br />
                   della <span className="text-red-600">Passione</span>
-                </h1>
+                </h2>
 
                 <p className="text-zinc-400 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed mb-6">
                   Formula Rossa nasce da una semplice domanda: <em>"Perché non esiste un posto dove trovare 
@@ -163,7 +164,7 @@ export default function AboutPage() {
               <div className="grid md:grid-cols-2 gap-12 items-center">
                 <div>
                   <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter mb-6">
-                    La nostra <span className="text-red-600">Missione</span>
+                    La nostra <span className="text-red-600"> Missione</span>
                   </h2>
                   <div className="space-y-4 text-zinc-400 leading-relaxed">
                     <p>
@@ -219,7 +220,7 @@ export default function AboutPage() {
             <div className="max-w-5xl mx-auto">
               <div className="text-center mb-16">
                 <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter">
-                  Cosa trovi su <span className="text-red-600">Formula Rossa</span>
+                  Cosa trovi su <span className="text-red-600"> Formula Rossa</span>
                 </h2>
                 <p className="text-zinc-500 mt-4 max-w-2xl mx-auto text-sm leading-relaxed">
                   Una piattaforma completa per esplorare la storia della Ferrari in Formula 1, 
@@ -249,13 +250,8 @@ export default function AboutPage() {
           <section className="py-24 px-4" aria-label="Il fondatore">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter mb-4">
-                Chi c'è <span className="text-red-600">dietro</span>
+                Chi c'è <span className="text-red-600"> dietro</span>
               </h2>
-              <p className="text-zinc-500 text-sm mb-12 max-w-xl mx-auto leading-relaxed">
-                Formula Rossa è un progetto personale, costruito una riga di codice alla volta durante 
-                notti insonni e weekend di gara.
-              </p>
-
               <motion.div
                 initial={{ opacity: 0, scale: 0.96 }}
                 whileInView={{ opacity: 1, scale: 1 }}
@@ -263,8 +259,17 @@ export default function AboutPage() {
               >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8">
                   {/* Avatar placeholder */}
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 flex items-center justify-center flex-shrink-0 shadow-xl shadow-red-600/20">
-                    <span className="text-3xl font-black text-white">JF</span>
+                  <div className="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 shadow-xl shadow-red-600/20 border border-white/10">
+                    <img
+                      src="https://github.com/J0joFra.png"
+                      alt="Foto profilo di Joaquim Francalanci"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.parentElement.innerHTML = '<span class="text-3xl font-black text-white">JF</span>';
+                        e.currentTarget.parentElement.classList.add('bg-gradient-to-br', 'from-red-600', 'to-red-900', 'flex', 'items-center', 'justify-center');
+                      }}
+                    />
                   </div>
                   <div>
                     <h3 className="text-2xl font-black text-white tracking-tight">{FOUNDER.name}</h3>
@@ -318,7 +323,7 @@ export default function AboutPage() {
           <section className="py-16 px-4 bg-zinc-950/50 border-t border-white/5" aria-label="Tecnologie usate">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-2xl font-black uppercase italic tracking-tighter mb-2">
-                Costruito con <span className="text-red-600">passione</span> e tecnologia
+                Costruito con <span className="text-red-600"> passione</span> e tecnologia
               </h2>
               <p className="text-zinc-600 text-xs mb-8">
                 Stack tecnico open-source, dati verificabili, performance ottimizzata.
