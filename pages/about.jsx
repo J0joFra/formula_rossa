@@ -127,11 +127,7 @@ export default function AboutPage({ heroImages = [] }) {
                 <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter leading-none mb-6">
                   Una piattaforma per i <span className="text-red-600">Tifosi Ferrari</span>
                 </h2>
-          
-                <p className="text-zinc-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed mb-4">
-                  Formula Rossa nasce da una domanda semplice ma senza risposta: perché non esiste un unico posto 
-                  dove trovare tutti i dati Ferrari — belli, ordinati, accessibili a chiunque?
-                </p>
+                
                 <p className="text-zinc-500 text-sm max-w-2xl mx-auto leading-relaxed">
                   Da quella domanda è nata questa piattaforma: un archivio vivente di 75 anni di storia, 
                   da Ascari a Leclerc, dai circuiti del dopoguerra alle piste moderne. Ogni vittoria, 
