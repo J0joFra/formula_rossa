@@ -11,17 +11,6 @@ export default function PredictionsPage() {
       
       <main className="pt-32 pb-20">
         <div className="max-w-7xl mx-auto px-4">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-red-600 font-black text-xs uppercase tracking-[0.4em] mb-4">Interactive Experience</h2>
-            <h3 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter">
-              The Ferrari <span className="text-zinc-700">Oracle</span>
-            </h3>
-          </motion.div>
-
           {/* componente PredictorSection*/}
           <div className="bg-zinc-900/50 rounded-3xl border border-white/5 overflow-hidden">
             <PredictorSection />

@@ -230,7 +230,7 @@ function projectChampionship(results2026, driverId, racesLeft, globalStats) {
 // ─── SUB-COMPONENT: Bandiera ──────────────────────────────────────────────────
 function RaceFlag({ circuitId, className = '' }) {
   const cc = CIRCUIT_COUNTRY[circuitId];
-  if (!cc) return <div className={`bg-zinc-800 ${className}`} />;
+  if (!cc) return <div className={`bg-white-800 ${className}`} />;
   return (
     <img
       src={`https://flagcdn.com/w320/${cc}.png`}
@@ -340,7 +340,7 @@ export default function PredictorSection() {
   }, [dbData, driverSearch]);
 
   const trendLabel = (t) => t === 'up' ? '↑ In forma' : t === 'down' ? '↓ In calo' : '→ Stabile';
-  const trendColor = (t) => t === 'up' ? 'text-green-400' : t === 'down' ? 'text-red-400' : 'text-zinc-400';
+  const trendColor = (t) => t === 'up' ? 'text-green-400' : t === 'down' ? 'text-red-400' : 'text-white-400';
   const DRIVER_COLOR = { primary: '#DC0000', secondary: '#FFD700' };
 
   return (
@@ -350,21 +350,13 @@ export default function PredictorSection() {
         {/* HEADER */}
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-14">
           <p className="text-red-600 text-[10px] font-black uppercase tracking-[0.5em] mb-3">Scuderia Ferrari · Predizione 2026</p>
-          <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter leading-none mb-4">
-            Race<br /><span className="text-red-600">Predictor</span>
+          <h2 className="text-red-600 font-black text-xs uppercase tracking-[0.4em] mb-4">
+            Race <span className="text-yellow-600"> Predictor</span>
           </h2>
           <div className="flex flex-wrap items-center gap-4">
-            <p className="text-zinc-500 text-sm max-w-xl leading-relaxed">
+            <p className="text-white-500 text-sm max-w-xl leading-relaxed">
               Predizioni statistiche basate su dati F1DB (1950→2026). Media ponderata per anno, storico circuito, forma recente.
             </p>
-            {predictions?.completedRounds && (
-              <div className="flex items-center gap-2 bg-zinc-900/60 border border-white/5 px-4 py-2 rounded-full">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                  {predictions.completedRounds.size} gare 2026 completate
-                </span>
-              </div>
-            )}
           </div>
         </motion.div>
 
@@ -373,8 +365,8 @@ export default function PredictorSection() {
             <AlertCircle className="w-6 h-6 text-red-400 shrink-0 mt-0.5" />
             <div>
               <p className="font-black text-red-400">Errore nel caricamento dei dati</p>
-              <p className="text-zinc-500 text-sm mt-1">{loadError}</p>
-              <p className="text-zinc-600 text-xs mt-1">Verifica i JSON in <code className="text-zinc-400 bg-zinc-800 px-1 rounded">public/data/</code></p>
+              <p className="text-white-500 text-sm mt-1">{loadError}</p>
+              <p className="text-white-600 text-xs mt-1">Verifica i JSON in <code className="text-white-400 bg-white-800 px-1 rounded">public/data/</code></p>
             </div>
           </div>
         )}
@@ -382,11 +374,11 @@ export default function PredictorSection() {
         {loadingDB && (
           <div className="flex flex-col items-center justify-center py-32 gap-5">
             <div className="relative w-16 h-16">
-              <div className="absolute inset-0 border-4 border-zinc-800 rounded-full" />
+              <div className="absolute inset-0 border-4 border-white-800 rounded-full" />
               <div className="absolute inset-0 border-4 border-transparent border-t-red-600 rounded-full animate-spin" />
             </div>
             <p className="font-black text-sm uppercase tracking-widest">Caricamento database F1</p>
-            <p className="text-zinc-600 text-xs">1950 → 2026</p>
+            <p className="text-white-600 text-xs">1950 → 2026</p>
           </div>
         )}
 
@@ -397,10 +389,10 @@ export default function PredictorSection() {
             <div className="lg:col-span-4 space-y-5">
 
               {/* PILOTI */}
-              <div className="bg-zinc-900/60 border border-white/5 rounded-3xl p-6">
+              <div className="bg-white-900/60 border border-white/5 rounded-3xl p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <Users className="w-4 h-4 text-zinc-500" />
-                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Piloti a confronto</p>
+                  <Users className="w-4 h-4 text-white-500" />
+                  <p className="text-[10px] font-black text-white-500 uppercase tracking-widest">Piloti a confronto</p>
                 </div>
                 {(['primary', 'secondary']).map((target) => {
                   const drv   = target === 'primary' ? primaryDriver : secondaryDriver;
@@ -408,21 +400,21 @@ export default function PredictorSection() {
                   const label = target === 'primary' ? 'Pilota A' : 'Pilota B';
                   return (
                     <div key={target} className="mb-3">
-                      <p className="text-[9px] text-zinc-700 uppercase font-bold mb-1">{label}</p>
+                      <p className="text-[9px] text-white-700 uppercase font-bold mb-1">{label}</p>
                       <button
                         onClick={() => {
                           setPickerTarget(target);
                           setDriverSearch('');
                           setShowDriverPicker(p => pickerTarget === target ? !p : true);
                         }}
-                        className="w-full p-3 rounded-2xl border border-zinc-800 hover:border-zinc-600 transition-all flex items-center gap-3"
+                        className="w-full p-3 rounded-2xl border border-white-800 hover:border-white-600 transition-all flex items-center gap-3"
                       >
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0"
                           style={{ backgroundColor: color + '22', color, border: `2px solid ${color}44` }}>
                           {drv?.id?.split('-').pop().slice(0, 3).toUpperCase() ?? '?'}
                         </div>
                         <p className="flex-1 text-left font-black text-sm truncate">{drv?.id ?? '—'}</p>
-                        <ChevronDown className="w-4 h-4 text-zinc-600 shrink-0" />
+                        <ChevronDown className="w-4 h-4 text-white-600 shrink-0" />
                       </button>
                     </div>
                   );
@@ -432,11 +424,11 @@ export default function PredictorSection() {
                 <AnimatePresence>
                   {showDriverPicker && (
                     <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-                      className="mt-2 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-                      <div className="p-3 border-b border-zinc-800">
+                      className="mt-2 bg-white-900 border border-white-800 rounded-2xl overflow-hidden">
+                      <div className="p-3 border-b border-white-800">
                         <input autoFocus value={driverSearch} onChange={e => setDriverSearch(e.target.value)}
                           placeholder="Cerca per id (es. max-verstappen)..."
-                          className="w-full bg-zinc-800 rounded-xl px-3 py-2 text-sm outline-none text-white placeholder-zinc-600 font-bold" />
+                          className="w-full bg-white-800 rounded-xl px-3 py-2 text-sm outline-none text-white placeholder-white-600 font-bold" />
                       </div>
                       <div className="max-h-48 overflow-y-auto">
                         {filteredDrivers.slice(0, 40).map(d => (
@@ -446,15 +438,15 @@ export default function PredictorSection() {
                               else setSecondaryDriver(d);
                               setShowDriverPicker(false);
                             }}
-                            className="w-full px-4 py-2.5 hover:bg-zinc-800 transition-all flex items-center gap-3 text-left">
-                            <span className="text-[10px] font-black text-zinc-500 w-8 shrink-0">
+                            className="w-full px-4 py-2.5 hover:bg-white-800 transition-all flex items-center gap-3 text-left">
+                            <span className="text-[10px] font-black text-white-500 w-8 shrink-0">
                               {d.id.split('-').pop().slice(0, 3).toUpperCase()}
                             </span>
                             <span className="text-sm font-bold truncate">{d.id}</span>
                           </button>
                         ))}
                         {filteredDrivers.length === 0 && (
-                          <p className="text-center text-zinc-600 text-xs py-4">Nessun pilota trovato</p>
+                          <p className="text-center text-white-600 text-xs py-4">Nessun pilota trovato</p>
                         )}
                       </div>
                     </motion.div>
@@ -465,14 +457,14 @@ export default function PredictorSection() {
               {/* INFO CIRCUITO TARGET */}
               {predictions.circuitInfo && (
                 <motion.div key={targetRace.circuitId} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                  className="bg-zinc-900/40 border border-white/5 rounded-3xl overflow-hidden">
+                  className="bg-white-900/40 border border-white/5 rounded-3xl overflow-hidden">
                   {/* Bandiera */}
                   <div className="relative h-24 w-full overflow-hidden">
                     <RaceFlag circuitId={targetRace.circuitId} className="w-full h-full opacity-50" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/60 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-white-900 via-white-900/60 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                       <div className="flex items-center gap-2">
-                        <MapPin className="w-3.5 h-3.5 text-zinc-400" />
+                        <MapPin className="w-3.5 h-3.5 text-white-400" />
                         <p className="text-[10px] font-black text-white uppercase tracking-widest">
                           {predictions.circuitInfo.fullName ?? predictions.circuitInfo.name}
                         </p>
@@ -483,15 +475,15 @@ export default function PredictorSection() {
                     <div className="grid grid-cols-3 gap-3 text-center">
                       <div>
                         <p className="text-lg font-black">{predictions.circuitInfo.length?.toFixed(3) ?? '—'}</p>
-                        <p className="text-[9px] text-zinc-600 uppercase font-bold">km</p>
+                        <p className="text-[9px] text-white-600 uppercase font-bold">km</p>
                       </div>
                       <div>
                         <p className="text-lg font-black">{predictions.circuitInfo.turns ?? '—'}</p>
-                        <p className="text-[9px] text-zinc-600 uppercase font-bold">curve</p>
+                        <p className="text-[9px] text-white-600 uppercase font-bold">curve</p>
                       </div>
                       <div>
                         <p className="text-lg">{predictions.circuitInfo.type === 'STREET' ? '🏙️' : '🏁'}</p>
-                        <p className="text-[9px] text-zinc-600 uppercase font-bold">{predictions.circuitInfo.type === 'STREET' ? 'Street' : 'Race'}</p>
+                        <p className="text-[9px] text-white-600 uppercase font-bold">{predictions.circuitInfo.type === 'STREET' ? 'Street' : 'Race'}</p>
                       </div>
                     </div>
                   </div>
@@ -499,8 +491,8 @@ export default function PredictorSection() {
               )}
 
               {/* ═══ CALENDARIO 2026 COMPLETO ═══ */}
-              <div className="bg-zinc-900/60 border border-white/5 rounded-3xl p-5">
-                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4">Calendario 2026</p>
+              <div className="bg-white-900/60 border border-white/5 rounded-3xl p-5">
+                <p className="text-[10px] font-black text-white-500 uppercase tracking-widest mb-4">Calendario 2026</p>
                 <div className="grid grid-cols-2 gap-2">
                   {CALENDAR_2026.map(r => {
                     const isDone = predictions.completedRounds.has(r.round);
@@ -512,7 +504,7 @@ export default function PredictorSection() {
                         className={`relative overflow-hidden rounded-xl border transition-all text-left group ${
                           isSelected  ? 'border-red-500 shadow-lg shadow-red-500/10' :
                           isDone      ? 'border-green-500/30' :
-                          'border-zinc-800 hover:border-zinc-600'
+                          'border-white-800 hover:border-white-600'
                         }`}
                       >
                         {/* Bandiera di sfondo */}
@@ -525,7 +517,7 @@ export default function PredictorSection() {
                             />
                           )}
                           <div className={`absolute inset-0 ${
-                            isSelected ? 'bg-red-950/60' : isDone ? 'bg-green-950/40' : 'bg-zinc-900/70'
+                            isSelected ? 'bg-red-950/60' : isDone ? 'bg-green-950/40' : 'bg-white-900/70'
                           }`} />
                         </div>
 
@@ -539,14 +531,14 @@ export default function PredictorSection() {
                             <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${
                               isSelected ? 'bg-red-500 text-white' :
                               isDone     ? 'bg-green-500/20 text-green-400' :
-                              'bg-zinc-800/80 text-zinc-500'
+                              'bg-white-800/80 text-white-500'
                             }`}>R{r.round}</span>
                             {isDone && <span className="text-[9px] text-green-400 font-black">✓</span>}
                           </div>
                           <p className="font-black text-xs text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                             {r.name.replace(' GP', '')}
                           </p>
-                          <p className="text-[9px] text-zinc-300 mt-0.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                          <p className="text-[9px] text-white-300 mt-0.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                             {new Date(r.date).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })}
                           </p>
                         </div>
@@ -566,7 +558,7 @@ export default function PredictorSection() {
                 {/* Bandiera grande */}
                 <div className="absolute inset-0">
                   <RaceFlag circuitId={targetRace.circuitId} className="w-full h-full opacity-20" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-red-950/80 via-zinc-950/70 to-zinc-950/50" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-950/80 via-white-950/70 to-white-950/50" />
                 </div>
                 <div className="relative z-10 p-6 flex items-center justify-between">
                   <div>
@@ -574,7 +566,7 @@ export default function PredictorSection() {
                       {predictions.completedRounds.has(targetRace.round) ? '✓ Completata' : '⬤ Prossima predizione'}
                     </p>
                     <h3 className="text-3xl font-black uppercase italic tracking-tight">{targetRace.name}</h3>
-                    <p className="text-zinc-400 text-xs uppercase tracking-widest mt-1">
+                    <p className="text-white-400 text-xs uppercase tracking-widest mt-1">
                       Round {targetRace.round} · {new Date(targetRace.date).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' })}
                     </p>
                   </div>
@@ -595,7 +587,7 @@ export default function PredictorSection() {
                   return (
                     <motion.div key={`${key}-${drv?.id}-${targetRace.round}`}
                       initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
-                      className="bg-zinc-900/60 border border-white/5 rounded-3xl overflow-hidden">
+                      className="bg-white-900/60 border border-white/5 rounded-3xl overflow-hidden">
                       {/* Header pilota */}
                       <div className="p-4 border-b border-white/5 flex items-center gap-3"
                         style={{ background: `linear-gradient(135deg, ${color}15 0%, transparent 60%)` }}>
@@ -615,12 +607,12 @@ export default function PredictorSection() {
                       {data.pred ? (
                         <div className="p-5">
                           <div className="text-center mb-5">
-                            <p className="text-[9px] text-zinc-600 uppercase font-black tracking-widest mb-1">Pos. Stimata</p>
+                            <p className="text-[9px] text-white-600 uppercase font-black tracking-widest mb-1">Pos. Stimata</p>
                             <motion.span key={data.pred.estPos} initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
                               className="text-6xl font-black leading-none" style={{ color }}>
                               {data.pred.estPos}°
                             </motion.span>
-                            <p className="text-zinc-600 text-[10px] mt-1 font-mono">
+                            <p className="text-white-600 text-[10px] mt-1 font-mono">
                               range {data.pred.posLow}° – {data.pred.posHigh}°
                             </p>
                           </div>
@@ -631,10 +623,10 @@ export default function PredictorSection() {
                             ].map((b, i) => (
                               <div key={i}>
                                 <div className="flex justify-between text-[10px] font-black uppercase mb-1">
-                                  <span className="text-zinc-600">{b.label}</span>
+                                  <span className="text-white-600">{b.label}</span>
                                   <span style={{ color }}>{b.val}%</span>
                                 </div>
-                                <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                                <div className="h-1.5 bg-white-800 rounded-full overflow-hidden">
                                   <motion.div className="h-full rounded-full" style={{ backgroundColor: color }}
                                     initial={{ width: 0 }}
                                     animate={{ width: `${Math.min(100, b.val)}%` }}
@@ -644,18 +636,18 @@ export default function PredictorSection() {
                             ))}
                           </div>
                           <div className="grid grid-cols-2 gap-2 text-center">
-                            <div className="bg-zinc-800/40 rounded-xl p-2 border border-white/5">
-                              <p className="text-[8px] text-zinc-600 uppercase font-bold">Pts stimati</p>
+                            <div className="bg-white-800/40 rounded-xl p-2 border border-white/5">
+                              <p className="text-[8px] text-white-600 uppercase font-bold">Pts stimati</p>
                               <p className="font-black text-sm" style={{ color }}>{data.pred.estPts}</p>
                             </div>
-                            <div className="bg-zinc-800/40 rounded-xl p-2 border border-white/5">
-                              <p className="text-[8px] text-zinc-600 uppercase font-bold">Pts 2026</p>
+                            <div className="bg-white-800/40 rounded-xl p-2 border border-white/5">
+                              <p className="text-[8px] text-white-600 uppercase font-bold">Pts 2026</p>
                               <p className="font-black text-sm text-white">{data.champ?.current ?? 0}</p>
                             </div>
                           </div>
                         </div>
                       ) : (
-                        <div className="p-6 text-center text-zinc-600 text-xs">Dati insufficienti</div>
+                        <div className="p-6 text-center text-white-600 text-xs">Dati insufficienti</div>
                       )}
                     </motion.div>
                   );
@@ -670,16 +662,16 @@ export default function PredictorSection() {
                   const color = DRIVER_COLOR[key];
                   const data  = predictions[key];
                   if (!data.circuit) return (
-                    <div key={key} className="bg-zinc-900/30 border border-white/5 rounded-3xl p-5 flex flex-col items-center justify-center text-center gap-2">
-                      <Target className="w-6 h-6 text-zinc-800" />
-                      <p className="text-zinc-700 text-[10px] uppercase font-bold">Nessuno storico su<br/>{targetRace.name.replace(' GP','')}</p>
+                    <div key={key} className="bg-white-900/30 border border-white/5 rounded-3xl p-5 flex flex-col items-center justify-center text-center gap-2">
+                      <Target className="w-6 h-6 text-white-800" />
+                      <p className="text-white-700 text-[10px] uppercase font-bold">Nessuno storico su<br/>{targetRace.name.replace(' GP','')}</p>
                     </div>
                   );
                   return (
-                    <div key={key} className="bg-zinc-900/60 border border-white/5 rounded-3xl p-5">
+                    <div key={key} className="bg-white-900/60 border border-white/5 rounded-3xl p-5">
                       <div className="flex items-center gap-2 mb-4">
                         <MapPin className="w-3.5 h-3.5" style={{ color }} />
-                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest truncate">
+                        <p className="text-[10px] font-black text-white-500 uppercase tracking-widest truncate">
                           {drv?.id?.split('-').pop()} su {targetRace.name.replace(' GP', '')}
                         </p>
                       </div>
@@ -691,7 +683,7 @@ export default function PredictorSection() {
                           { label: 'Podi',            val: data.circuit.podiums },
                         ].map((s, i) => (
                           <div key={i} className="flex justify-between items-center py-1 border-b border-white/5 last:border-0">
-                            <span className="text-[9px] text-zinc-600 uppercase font-bold">{s.label}</span>
+                            <span className="text-[9px] text-white-600 uppercase font-bold">{s.label}</span>
                             <span className="font-black text-sm text-white">{s.val}</span>
                           </div>
                         ))}
@@ -703,10 +695,10 @@ export default function PredictorSection() {
               )}
 
               {/* PROIEZIONE CAMPIONATO */}
-              <div className="bg-zinc-900/60 border border-white/5 rounded-3xl p-6">
+              <div className="bg-white-900/60 border border-white/5 rounded-3xl p-6">
                 <div className="flex items-center gap-2 mb-5">
                   <TrendingUp className="w-4 h-4 text-blue-400" />
-                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                  <p className="text-[10px] font-black text-white-500 uppercase tracking-widest">
                     Proiezione Campionato 2026 · {predictions.racesLeft} gare rimanenti
                   </p>
                 </div>
@@ -718,18 +710,18 @@ export default function PredictorSection() {
                     if (!champ) return null;
                     return (
                       <div key={key} className="text-center">
-                        <p className="text-[9px] text-zinc-600 uppercase font-black mb-2">{drv?.id?.split('-').pop()}</p>
+                        <p className="text-[9px] text-white-600 uppercase font-black mb-2">{drv?.id?.split('-').pop()}</p>
                         <p className="text-5xl font-black mb-1" style={{ color }}>{champ.projected}</p>
-                        <p className="text-[10px] font-mono text-zinc-600">
+                        <p className="text-[10px] font-mono text-white-600">
                           <span className="text-red-400">{champ.low}</span>{' – '}<span className="text-green-400">{champ.high}</span> pts
                         </p>
-                        <div className="mt-3 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                        <div className="mt-3 h-1.5 bg-white-800 rounded-full overflow-hidden">
                           <motion.div className="h-full rounded-full" style={{ backgroundColor: color }}
                             initial={{ width: 0 }}
                             animate={{ width: `${Math.min(100, (champ.projected / 500) * 100)}%` }}
                             transition={{ delay: 0.5, duration: 0.8 }} />
                         </div>
-                        <p className="text-[9px] text-zinc-700 mt-1">su 500 pts max stimati</p>
+                        <p className="text-[9px] text-white-700 mt-1">su 500 pts max stimati</p>
                       </div>
                     );
                   })}
@@ -743,10 +735,10 @@ export default function PredictorSection() {
                   const color = DRIVER_COLOR[key];
                   const data  = predictions[key];
                   return (
-                    <div key={key} className="bg-zinc-900/60 border border-white/5 rounded-3xl p-5">
+                    <div key={key} className="bg-white-900/60 border border-white/5 rounded-3xl p-5">
                       <div className="flex items-center gap-2 mb-3">
                         <Zap className="w-3.5 h-3.5" style={{ color }} />
-                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                        <p className="text-[10px] font-black text-white-500 uppercase tracking-widest">
                           Ultimi risultati · {drv?.id?.split('-').pop()}
                         </p>
                       </div>
@@ -757,7 +749,7 @@ export default function PredictorSection() {
                               r.positionNumber === 1 ? 'bg-yellow-500/20 text-yellow-400' :
                               r.positionNumber <= 3  ? 'bg-orange-500/20 text-orange-400' :
                               r.positionNumber <= 10 ? 'bg-green-500/10 text-green-500' :
-                              'bg-zinc-800 text-zinc-500'
+                              'bg-white-800 text-white-500'
                             }`}>{r.positionNumber}</div>
                             {/* Bandierina circuito */}
                             {CIRCUIT_COUNTRY[r._circuitId] ? (
@@ -768,11 +760,11 @@ export default function PredictorSection() {
                             ) : null}
                             <div className="flex-1 min-w-0">
                               <p className="font-black text-[11px] truncate">{r._circuitId ?? '—'}</p>
-                              <p className="text-zinc-700 text-[9px]">{r.year} R{r.round}</p>
+                              <p className="text-white-700 text-[9px]">{r.year} R{r.round}</p>
                             </div>
                             <p className="font-black text-[11px] text-yellow-400 shrink-0">{ptsFor(r.positionNumber)}p</p>
                           </div>
-                        )) ?? <p className="text-zinc-700 text-xs">Nessun dato</p>}
+                        )) ?? <p className="text-white-700 text-xs">Nessun dato</p>}
                       </div>
                     </div>
                   );
@@ -780,11 +772,11 @@ export default function PredictorSection() {
               </div>
 
               {/* NOTA */}
-              <div className="bg-zinc-900/20 border border-white/5 rounded-2xl p-4">
-                <p className="text-[9px] text-zinc-700 leading-relaxed uppercase tracking-wider font-bold">
+              <div className="bg-white-900/20 border border-white/5 rounded-2xl p-4">
+                <p className="text-[9px] text-white-700 leading-relaxed uppercase tracking-wider font-bold">
                   ⚙️ Media ponderata ultimi 7 anni (anno corrente = 3×, -1 anno = 2×, -2 = 1.5×, oltre = 0.5×).
                   Blend storico circuito (60%) + forma recente ultimi 5 risultati (40%).
-                  Intervallo confidenza ±0.7σ. Si aggiorna automaticamente aggiungendo risultati ai JSON in <code className="text-zinc-500">public/data/</code>. Dati: F1DB (f1db.com).
+                  Intervallo confidenza ±0.7σ. Si aggiorna automaticamente aggiungendo risultati ai JSON in <code className="text-white-500">public/data/</code>. Dati: F1DB (f1db.com).
                 </p>
               </div>
             </div>
