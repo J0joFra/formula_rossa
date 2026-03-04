@@ -1,3 +1,21 @@
+/**
+ * PredictorSection.jsx
+ *
+ * Self-updating Race Predictor basato sui JSON locali F1DB.
+ *
+ * LOGICA AUTO-AGGIORNANTE:
+ *  - Legge f1db-races-race-results.json → trova l'ultima gara disponibile
+ *  - La prossima gara da predire è automaticamente la successiva nel calendario
+ *  - Quando aggiungi un risultato 2026 al JSON, la predizione avanza alla gara dopo
+ *
+ * ALGORITMO (tutto sui dati storici reali):
+ *  1. Filtra risultati del pilota negli ultimi 5 anni (peso maggiore agli anni recenti)
+ *  2. Statistiche specifiche per circuito se disponibili
+ *  3. Trend forma: ultimi 5 risultati vs media storica
+ *  4. Stima posizione finale con intervallo di confidenza
+ *  5. Proiezione punti campionato 2026
+ */
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -12,6 +30,7 @@ const PTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
 const ptsFor = (p) => (p >= 1 && p <= 10) ? PTS[p - 1] : 0;
 
 // ─── CALENDARIO 2026 ──────────────────────────────────────────────────────────
+// circuitId deve corrispondere agli id in f1db-races.json/f1db-circuits.json
 const CALENDAR_2026 = [
   { round: 1,  circuitId: 'albert-park',       name: 'Australian GP',     country: '🇦🇺', date: '2026-03-15' },
   { round: 2,  circuitId: 'shanghai',           name: 'Chinese GP',        country: '🇨🇳', date: '2026-03-22' },
@@ -56,7 +75,7 @@ function yearWeight(year, currentYear) {
   if (delta === 1) return 2.0;
   if (delta === 2) return 1.5;
   if (delta <= 5)  return 1.0;
-  return 0.5; 
+  return 0.5; // dati storici lontani contano meno
 }
 
 // ─── ENGINE STATISTICO ────────────────────────────────────────────────────────
@@ -214,11 +233,10 @@ export default function PredictorSection() {
           .filter(([, count]) => count >= 20)
           .map(([id]) => ({
             id,
-            name:   driverMap[id]?.fullName ?? driverMap[id]?.name ?? id,
-            short:  driverMap[id]?.abbreviation ?? id.split('-').pop().toUpperCase(),
+            
             number: driverMap[id]?.permanentNumber ?? null,
           }))
-          .sort((a, b) => a.name.localeCompare(b.name));
+          .sort((a, b) => a.id.localeCompare(b.id));
 
         // Trova la prima gara 2026 senza risultato → gara da predire
         const results2026 = results.filter(r => r.year === 2026);
@@ -274,7 +292,7 @@ export default function PredictorSection() {
     if (!dbData) return [];
     const q = driverSearch.toLowerCase();
     return dbData.activeDrivers.filter(d =>
-      d.name.toLowerCase().includes(q) || d.short.toLowerCase().includes(q)
+      d.id.toLowerCase().includes(q)
     );
   }, [dbData, driverSearch]);
 
@@ -368,10 +386,10 @@ export default function PredictorSection() {
                     >
                       <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0"
                         style={{ backgroundColor: color + '22', color, border: `2px solid ${color}44` }}>
-                        {drv?.short?.slice(0, 3) ?? '?'}
+                        {drv?.id?.split('-').pop().slice(0, 3).toUpperCase() ?? '?'}
                       </div>
                       <div className="flex-1 text-left min-w-0">
-                        <p className="font-black text-sm truncate">{drv?.name ?? '—'}</p>
+                        <p className="font-black text-sm truncate">{drv?.id ?? '—'}</p>
                         {predictions[target]?.global && (
                           <p className="text-zinc-600 text-[9px] uppercase">
                             Avg {predictions[target].global.avgPos.toFixed(1)}° · {predictions[target].global.n} gare
@@ -410,7 +428,7 @@ export default function PredictorSection() {
                             className="w-full px-4 py-2.5 hover:bg-zinc-800 transition-all flex items-center gap-3 text-left"
                           >
                             <span className="text-[10px] font-black text-zinc-500 w-8">{d.short}</span>
-                            <span className="text-sm font-bold truncate">{d.name}</span>
+                            <span className="text-sm font-bold truncate">{d.id}</span>
                           </button>
                         ))}
                         {filteredDrivers.length === 0 && (
@@ -542,10 +560,10 @@ export default function PredictorSection() {
                       style={{ background: `linear-gradient(135deg, ${color}15 0%, transparent 60%)` }}>
                       <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0"
                         style={{ backgroundColor: color + '22', color, border: `2px solid ${color}44` }}>
-                        {drv?.short?.slice(0, 3) ?? '?'}
+                        {drv?.id?.split('-').pop().slice(0, 3).toUpperCase() ?? '?'}
                       </div>
                       <div>
-                        <p className="font-black text-sm">{drv?.name ?? '—'}</p>
+                        <p className="font-black text-sm">{drv?.id ?? '—'}</p>
                         {data.global && (
                           <p className={`text-[9px] font-black ${trendColor(data.global.formTrend)}`}>
                             {trendLabel(data.global.formTrend)}
@@ -628,7 +646,7 @@ export default function PredictorSection() {
                     <div className="flex items-center gap-2 mb-4">
                       <MapPin className="w-3.5 h-3.5" style={{ color }} />
                       <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest truncate">
-                        {drv?.name?.split(' ')[1] ?? '—'} su {targetRace.name.replace(' GP', '')}
+                        {drv?.id ?? '—'} su {targetRace.name.replace(' GP', '')}
                       </p>
                     </div>
                     {data.circuit ? (
@@ -666,7 +684,7 @@ export default function PredictorSection() {
                     { driver: secondaryDriver, color: '#FFD700', champ: predictions.secondary.champ },
                   ].map(({ driver: drv, color, champ }, i) => champ && (
                     <div key={i} className="text-center">
-                      <p className="text-[9px] text-zinc-600 uppercase font-black mb-2">{drv?.name?.split(' ')[1] ?? '—'}</p>
+                      <p className="text-[9px] text-zinc-600 uppercase font-black mb-2">{drv?.id ?? '—'}</p>
                       <p className="text-5xl font-black mb-1" style={{ color }}>{champ.projected}</p>
                       <p className="text-[10px] font-mono text-zinc-600">
                         <span className="text-red-400">{champ.low}</span>
@@ -698,7 +716,7 @@ export default function PredictorSection() {
                     <div className="flex items-center gap-2 mb-3">
                       <Zap className="w-3.5 h-3.5" style={{ color }} />
                       <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
-                        Ultimi risultati · {drv?.name?.split(' ')[1] ?? '—'}
+                        Ultimi risultati · {drv?.id ?? '—'}
                       </p>
                     </div>
                     <div className="space-y-1.5">
