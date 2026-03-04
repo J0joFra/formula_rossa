@@ -21,7 +21,8 @@
     "maplibre-gl": "^3.6.0",
     "@tanstack/react-virtual": "^3.0.0",
     "zustand": "^4.4.7",
-    "date-fns": "^3.0.0"    
+    "date-fns": "^3.0.0",
+    "firebase": "^11.0.0"
   },
   "devDependencies": {
     "tailwindcss": "^3.3.6",
