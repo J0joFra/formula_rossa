@@ -1,71 +1,34 @@
-import { db, signInToFirebase } from './firebase';
-import {
-  doc, getDoc, setDoc, increment,
-  collection, query, orderBy, limit, getDocs
-} from 'firebase/firestore';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "./auth/[...nextauth]";
+import admin from "firebase-admin";
 
-async function ensureAuth() {
-  await signInToFirebase();
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    }),
+  });
 }
 
-export async function initUser(session) {
-  if (!session?.user?.email) return;
-  await ensureAuth();
+export default async function handler(req, res) {
+  if (req.method !== 'GET') return res.status(405).end();
 
-  const uid = session.user.email.replace(/[^a-zA-Z0-9_.-]/g, '_');
-  const userRef = doc(db, 'users', uid);
-  const snap = await getDoc(userRef);
+  const session = await getServerSession(req, res, authOptions);
+  if (!session?.user?.email) {
+    return res.status(401).json({ error: 'Non autenticato' });
+  }
 
-  if (!snap.exists()) {
-    await setDoc(userRef, {
+  try {
+    const uid = session.user.email.replace(/[^a-zA-Z0-9_.-]/g, '_');
+    const token = await admin.auth().createCustomToken(uid, {
       email: session.user.email,
       name: session.user.name,
-      avatar: session.user.image,
-      tokens: 0,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
     });
+    return res.status(200).json({ token });
+  } catch (error) {
+    console.error('Errore generazione token Firebase:', error);
+    return res.status(500).json({ error: 'Errore interno' });
   }
-}
-
-export async function addTokens(session, amount) {
-  if (!session?.user?.email) return;
-  await ensureAuth();
-
-  const uid = session.user.email.replace(/[^a-zA-Z0-9_.-]/g, '_');
-  const userRef = doc(db, 'users', uid);
-
-  await setDoc(userRef, {
-    email: session.user.email,
-    name: session.user.name,
-    avatar: session.user.image,
-    tokens: increment(amount),
-    updatedAt: Date.now(),
-  }, { merge: true });
-}
-
-export async function getTokens(session) {
-  if (!session?.user?.email) return 0;
-  await ensureAuth();
-
-  const uid = session.user.email.replace(/[^a-zA-Z0-9_.-]/g, '_');
-  const userRef = doc(db, 'users', uid);
-  const snap = await getDoc(userRef);
-
-  if (!snap.exists()) return 0;
-  return snap.data().tokens ?? 0;
-}
-
-export async function getLeaderboard(topN = 10) {
-  const usersRef = collection(db, 'users');
-  const q = query(usersRef, orderBy('tokens', 'desc'), limit(topN));
-  const snapshot = await getDocs(q);
-
-  return snapshot.docs.map((doc, i) => ({
-    rank: i + 1,
-    email: doc.data().email,
-    name: doc.data().name,
-    avatar: doc.data().avatar,
-    tokens: doc.data().tokens ?? 0,
-  }));
 }
