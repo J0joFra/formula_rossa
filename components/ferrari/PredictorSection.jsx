@@ -16,7 +16,7 @@ import {
 const PTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
 const ptsFor = (p) => (p >= 1 && p <= 10) ? PTS[p - 1] : 0;
 
-// ─── ALIAS circuitId 2026 → id reale nei JSON storici F1DB ───────────────────
+// ─── ALIAS circuitId 2026 → id reale nei JSON storici F1DB ─────────────────
 const CIRCUIT_ALIAS = {
   'albert-park':      'albert-park',
   'shanghai':         'shanghai',
