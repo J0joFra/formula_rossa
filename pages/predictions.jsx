@@ -27,13 +27,11 @@ export default function PredictionsPage() {
                   Race <span className="text-red-600">Predictor</span>
                 </h2>
                 <div className="flex flex-col items-center gap-4 max-w-3xl mx-auto">
-                  <p className="text-gray-400 text-base leading-relaxed">
-                    Sistema avanzato di predizione basato sull'analisi statistica dei dati storici F1DB dal 1950 al 2026. 
-                    L'algoritmo utilizza una media ponderata che privilegia gli anni più recenti, combina lo storico 
-                    specifico di ogni circuito con la forma attuale dei piloti, e considera fattori come trend di rendimento, 
+                  <p className="text-gray-400 text-justify leading-relaxed">
+                    L'algoritmo utilizza una media ponderata che privilegia gli anni più recenti, combina lo storico specifico di ogni circuito con la forma attuale dei piloti, e considera fattori come trend di rendimento, 
                     percentuali di podio e vittorie, consistenza nei risultati e proiezioni per il campionato in corso.
                   </p>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-gray-500 text-justify">
                     I dati vengono aggiornati automaticamente e includono confronti testa a testa tra piloti, 
                     analisi per circuito, proiezioni punti e intervalli di confidenza statistica.
                   </p>
