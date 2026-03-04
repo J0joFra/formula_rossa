@@ -9,7 +9,7 @@ import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
 import { useSession } from "next-auth/react";
-import { getTokens, initUser, addTokens, getLeaderboard } from '../lib/tokens';
+import { getTokens, initUser, claimDailyBonus, hasDailyClaimed, getLeaderboard } from '../lib/tokens';
 
 const LIVE_NEWS = [
   "🏎️  SF-25 conquista la pole position a Barcellona",
@@ -35,8 +35,12 @@ export default function FanZonePage() {
     if (!session) return;
     const init = async () => {
       await initUser(session);
-      const t = await getTokens(session);
+      const [t, claimed] = await Promise.all([
+        getTokens(session),
+        hasDailyClaimed(session), // ← controlla Firestore, non solo stato locale
+      ]);
       setTokens(t);
+      setDailyClaimed(claimed);
     };
     init();
   }, [session]);
@@ -86,9 +90,11 @@ export default function FanZonePage() {
 
   const claimDaily = async () => {
     if (dailyClaimed || !session) return;
-    await addTokens(session, 75);
-    setTokens(t => t + 75);
-    setDailyClaimed(true);
+    const success = await claimDailyBonus(session, 75); // ← salva data su Firestore
+    if (success) {
+      setTokens(t => t + 75);
+      setDailyClaimed(true);
+    }
   };
 
   return (
@@ -197,7 +203,7 @@ export default function FanZonePage() {
             </div>
             <div className="relative z-10 flex flex-col items-center gap-3">
               <div className="text-center">
-                <p className="text-[9px] text-zinc-600 uppercase tracking-widest font-bold mb-1">Si resetta tra</p>
+                <p className="text-[9px] text-zinc-600 uppercase tracking-widest font-bold mb-1">{dailyClaimed ? "Torna domani tra" : "Si resetta tra"}</p>
                 <p className="text-2xl font-black font-mono text-orange-400 tabular-nums">{dailyCountdown}</p>
               </div>
               <button
@@ -209,7 +215,7 @@ export default function FanZonePage() {
                     : 'bg-gradient-to-r from-orange-500 to-red-600 text-white hover:scale-105 shadow-orange-500/20 hover:shadow-orange-500/40'
                 }`}
               >
-                {!session ? 'Login richiesto' : dailyClaimed ? '✓ Riscattato' : 'Riscatta +75 SFT'}
+                {!session ? 'Login richiesto' : dailyClaimed ? '✓ Già riscattato oggi' : 'Riscatta +75 SFT'}
               </button>
             </div>
           </motion.div>
