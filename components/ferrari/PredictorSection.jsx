@@ -1,577 +1,745 @@
-/**
- * PredictorSection.jsx
- */
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp, Trophy, Target, Loader2,
   ChevronLeft, ChevronRight, BarChart3,
-  Flag, Zap, AlertCircle, MapPin, Activity
+  Flag, Zap, AlertCircle, MapPin, Activity,
+  ChevronDown, Users, RefreshCw
 } from 'lucide-react';
 
 // ─── PUNTI F1 ─────────────────────────────────────────────────────────────────
 const PTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
-const pointsForPos = (p) => PTS[p - 1] ?? 0;
+const ptsFor = (p) => (p >= 1 && p <= 10) ? PTS[p - 1] : 0;
 
-// ─── PILOTI FERRARI DA ANALIZZARE ────────────────────────────────────────────
-const FERRARI_DRIVERS = [
-  { id: 'charles-leclerc', name: 'Charles Leclerc', short: 'Leclerc', number: 16, color: '#DC0000' },
-  { id: 'lewis-hamilton',  name: 'Lewis Hamilton',  short: 'Hamilton', number: 44, color: '#FFD700' },
-  { id: 'carlos-sainz',    name: 'Carlos Sainz',    short: 'Sainz',    number: 55, color: '#FF6B35' },
+// ─── CALENDARIO 2026 ──────────────────────────────────────────────────────────
+const CALENDAR_2026 = [
+  { round: 1,  circuitId: 'albert-park',       name: 'Australian GP',     country: '🇦🇺', date: '2026-03-15' },
+  { round: 2,  circuitId: 'shanghai',           name: 'Chinese GP',        country: '🇨🇳', date: '2026-03-22' },
+  { round: 3,  circuitId: 'suzuka',             name: 'Japanese GP',       country: '🇯🇵', date: '2026-04-05' },
+  { round: 4,  circuitId: 'bahrain',            name: 'Bahrain GP',        country: '🇧🇭', date: '2026-04-19' },
+  { round: 5,  circuitId: 'jeddah',             name: 'Saudi Arabia GP',   country: '🇸🇦', date: '2026-04-26' },
+  { round: 6,  circuitId: 'miami',              name: 'Miami GP',          country: '🇺🇸', date: '2026-05-10' },
+  { round: 7,  circuitId: 'imola',              name: 'Emilia Romagna GP', country: '🇮🇹', date: '2026-05-24' },
+  { round: 8,  circuitId: 'monte-carlo',        name: 'Monaco GP',         country: '🇲🇨', date: '2026-05-31' },
+  { round: 9,  circuitId: 'barcelona',          name: 'Spanish GP',        country: '🇪🇸', date: '2026-06-14' },
+  { round: 10, circuitId: 'villeneuve',         name: 'Canadian GP',       country: '🇨🇦', date: '2026-06-21' },
+  { round: 11, circuitId: 'red-bull-ring',      name: 'Austrian GP',       country: '🇦🇹', date: '2026-07-05' },
+  { round: 12, circuitId: 'silverstone',        name: 'British GP',        country: '🇬🇧', date: '2026-07-19' },
+  { round: 13, circuitId: 'hungaroring',        name: 'Hungarian GP',      country: '🇭🇺', date: '2026-08-02' },
+  { round: 14, circuitId: 'spa-francorchamps',  name: 'Belgian GP',        country: '🇧🇪', date: '2026-08-30' },
+  { round: 15, circuitId: 'zandvoort',          name: 'Dutch GP',          country: '🇳🇱', date: '2026-09-06' },
+  { round: 16, circuitId: 'monza',              name: 'Italian GP',        country: '🇮🇹', date: '2026-09-13' },
+  { round: 17, circuitId: 'baku',               name: 'Azerbaijan GP',     country: '🇦🇿', date: '2026-09-27' },
+  { round: 18, circuitId: 'marina-bay',         name: 'Singapore GP',      country: '🇸🇬', date: '2026-10-04' },
+  { round: 19, circuitId: 'austin',             name: 'US GP',             country: '🇺🇸', date: '2026-10-18' },
+  { round: 20, circuitId: 'rodriguez',          name: 'Mexico City GP',    country: '🇲🇽', date: '2026-10-25' },
+  { round: 21, circuitId: 'interlagos',         name: 'Brazilian GP',      country: '🇧🇷', date: '2026-11-08' },
+  { round: 22, circuitId: 'las-vegas',          name: 'Las Vegas GP',      country: '🇺🇸', date: '2026-11-21' },
+  { round: 23, circuitId: 'lusail',             name: 'Qatar GP',          country: '🇶🇦', date: '2026-11-29' },
+  { round: 24, circuitId: 'yas-marina',         name: 'Abu Dhabi GP',      country: '🇦🇪', date: '2026-12-06' },
 ];
 
-// ─── CALENDARIO 2025 (round, circuitId) ──────────────────────────────────────
-const CALENDAR_2025 = [
-  { round: 1,  circuitId: 'bahrain',           name: 'Bahrain GP',       country: '🇧🇭' },
-  { round: 2,  circuitId: 'jeddah',            name: 'Saudi Arabia GP',  country: '🇸🇦' },
-  { round: 3,  circuitId: 'albert-park',       name: 'Australian GP',    country: '🇦🇺' },
-  { round: 4,  circuitId: 'suzuka',            name: 'Japanese GP',      country: '🇯🇵' },
-  { round: 5,  circuitId: 'shanghai',          name: 'Chinese GP',       country: '🇨🇳' },
-  { round: 6,  circuitId: 'miami',             name: 'Miami GP',         country: '🇺🇸' },
-  { round: 7,  circuitId: 'imola',             name: 'Emilia Romagna GP',country: '🇮🇹' },
-  { round: 8,  circuitId: 'monte-carlo',       name: 'Monaco GP',        country: '🇲🇨' },
-  { round: 9,  circuitId: 'villeneuve',        name: 'Canadian GP',      country: '🇨🇦' },
-  { round: 10, circuitId: 'barcelona',         name: 'Spanish GP',       country: '🇪🇸' },
-  { round: 11, circuitId: 'red-bull-ring',     name: 'Austrian GP',      country: '🇦🇹' },
-  { round: 12, circuitId: 'silverstone',       name: 'British GP',       country: '🇬🇧' },
-  { round: 13, circuitId: 'hungaroring',       name: 'Hungarian GP',     country: '🇭🇺' },
-  { round: 14, circuitId: 'spa-francorchamps', name: 'Belgian GP',       country: '🇧🇪' },
-  { round: 15, circuitId: 'zandvoort',         name: 'Dutch GP',         country: '🇳🇱' },
-  { round: 16, circuitId: 'monza',             name: 'Italian GP',       country: '🇮🇹' },
-  { round: 17, circuitId: 'baku',              name: 'Azerbaijan GP',    country: '🇦🇿' },
-  { round: 18, circuitId: 'marina-bay',        name: 'Singapore GP',     country: '🇸🇬' },
-  { round: 19, circuitId: 'austin',            name: 'US GP',            country: '🇺🇸' },
-  { round: 20, circuitId: 'rodriguez',         name: 'Mexico City GP',   country: '🇲🇽' },
-  { round: 21, circuitId: 'interlagos',        name: 'Brazilian GP',     country: '🇧🇷' },
-  { round: 22, circuitId: 'las-vegas',         name: 'Las Vegas GP',     country: '🇺🇸' },
-  { round: 23, circuitId: 'lusail',            name: 'Qatar GP',         country: '🇶🇦' },
-  { round: 24, circuitId: 'yas-marina',        name: 'Abu Dhabi GP',     country: '🇦🇪' },
-];
+// ─── PILOTI FERRARI 2026 (default) ───────────────────────────────────────────
+const FERRARI_DEFAULT = ['charles-leclerc', 'lewis-hamilton'];
 
-// ─── CARICAMENTO JSON LOCALI ──────────────────────────────────────────────────
+// ─── CARICA JSON ──────────────────────────────────────────────────────────────
 async function loadJSON(path) {
   const res = await fetch(path);
-  if (!res.ok) throw new Error(`Failed to load ${path}`);
+  if (!res.ok) throw new Error(`Cannot load ${path}`);
   return res.json();
 }
 
-// ─── ENGINE PREDITTIVO ────────────────────────────────────────────────────────
-function buildStats(results, driverId, circuitId = null) {
+// ─── PESI ANNO (più recente = più peso) ───────────────────────────────────────
+function yearWeight(year, currentYear) {
+  const delta = currentYear - year;
+  if (delta === 0) return 3.0;
+  if (delta === 1) return 2.0;
+  if (delta === 2) return 1.5;
+  if (delta <= 5)  return 1.0;
+  return 0.5; 
+}
+
+// ─── ENGINE STATISTICO ────────────────────────────────────────────────────────
+function buildDriverStats(results, driverId, circuitId = null) {
+  const currentYear = Math.max(...results.map(r => r.year));
+  const MIN_YEAR = currentYear - 7; // ultimi 7 anni
+
   const filtered = results.filter(r =>
     r.driverId === driverId &&
-    r.year >= 2022 &&
+    r.year >= MIN_YEAR &&
     r.positionNumber != null &&
     (circuitId == null || r._circuitId === circuitId)
   );
+
   if (!filtered.length) return null;
 
-  const positions = filtered.map(r => r.positionNumber);
-  const wins    = positions.filter(p => p === 1).length;
-  const podiums = positions.filter(p => p <= 3).length;
-  const top5    = positions.filter(p => p <= 5).length;
-  const avgPos  = positions.reduce((s, p) => s + p, 0) / positions.length;
-  const avgPts  = filtered.reduce((s, r) => s + (r.points ?? pointsForPos(r.positionNumber)), 0) / filtered.length;
+  // Calcola medie pesate per anno
+  let weightedPosSum = 0, weightSum = 0;
+  let wins = 0, podiums = 0, top5 = 0, top10 = 0;
+  let totalPoints = 0;
 
-  // Forma recente: ultime 5 gare globali (non filtrate per circuito)
-  const globalRecent = results
-    .filter(r => r.driverId === driverId && r.positionNumber != null && r.year >= 2022)
+  filtered.forEach(r => {
+    const w = yearWeight(r.year, currentYear);
+    weightedPosSum += r.positionNumber * w;
+    weightSum += w;
+    totalPoints += ptsFor(r.positionNumber) * w;
+    if (r.positionNumber === 1) wins++;
+    if (r.positionNumber <= 3) podiums++;
+    if (r.positionNumber <= 5) top5++;
+    if (r.positionNumber <= 10) top10++;
+  });
+
+  const avgPos  = weightedPosSum / weightSum;
+  const avgPts  = totalPoints / weightSum;
+  const n       = filtered.length;
+
+  // Forma recente: ultimi 5 risultati (non filtrati per circuito)
+  const allRecent = results
+    .filter(r => r.driverId === driverId && r.positionNumber != null)
     .sort((a, b) => b.year - a.year || b.round - a.round)
     .slice(0, 5);
-  const recentAvgPos = globalRecent.length
-    ? globalRecent.reduce((s, r) => s + r.positionNumber, 0) / globalRecent.length
+
+  const recentAvgPos = allRecent.length
+    ? allRecent.reduce((s, r) => s + r.positionNumber, 0) / allRecent.length
     : avgPos;
 
+  // Deviazione standard (per intervallo confidenza)
+  const variance = filtered.reduce((s, r) => s + Math.pow(r.positionNumber - avgPos, 2), 0) / n;
+  const stdDev = Math.sqrt(variance);
+
   return {
-    races: filtered.length,
-    wins, podiums, top5, avgPos, avgPts,
+    n, avgPos, avgPts, stdDev,
+    wins, podiums, top5, top10,
+    winRate:    (wins    / n) * 100,
+    podiumRate: (podiums / n) * 100,
+    top5Rate:   (top5   / n) * 100,
     recentAvgPos,
-    winRate:    (wins    / filtered.length) * 100,
-    podiumRate: (podiums / filtered.length) * 100,
-    top5Rate:   (top5   / filtered.length) * 100,
-    recent: globalRecent,
+    recent: allRecent,
+    formTrend: recentAvgPos < avgPos - 0.5 ? 'up' :
+               recentAvgPos > avgPos + 0.5 ? 'down' : 'stable',
   };
 }
 
-function predict(globalStats, circuitStats, circuitType) {
+function computePrediction(globalStats, circuitStats) {
   if (!globalStats) return null;
 
-  // Peso: storico sul circuito (60%) + forma recente (40%)
+  // Stima posizione: blend storico circuito (60%) + forma recente (40%)
   const historicPos = circuitStats?.avgPos ?? globalStats.avgPos;
-  const blendedPos  = historicPos * 0.6 + globalStats.recentAvgPos * 0.4;
+  const blended     = historicPos * 0.6 + globalStats.recentAvgPos * 0.4;
+  const estPos      = Math.max(1, Math.min(20, Math.round(blended)));
 
-  // Boost per tipo circuito (Ferrari storicamente forte su certi tracciati)
-  const typeBoost = { STREET: 0.93, RACE: 1.0 }[circuitType] ?? 1.0;
-  const estPos = Math.max(1, Math.min(20, Math.round(blendedPos * typeBoost)));
+  // Intervallo confidenza ±1σ
+  const sigma = circuitStats?.stdDev ?? globalStats.stdDev;
+  const posLow  = Math.max(1,  Math.round(estPos - sigma * 0.7));
+  const posHigh = Math.min(20, Math.round(estPos + sigma * 0.7));
 
-  // Probabilità
-  const podiumBase = circuitStats?.podiumRate ?? globalStats.podiumRate;
-  const winBase    = circuitStats?.winRate    ?? globalStats.winRate;
-
-  // Forma recente: se stai andando meglio della media, aumenta le probabilità
+  // Probabilità: storico base + boost/malus dalla forma recente
   const formFactor = globalStats.avgPos / Math.max(1, globalStats.recentAvgPos);
-  const podiumChance = Math.min(95, Math.round(podiumBase * formFactor));
-  const winChance    = Math.min(70, Math.round(winBase    * formFactor));
-  const estPoints    = pointsForPos(estPos);
+  const podiumChance = Math.min(95, Math.max(0, Math.round(
+    (circuitStats?.podiumRate ?? globalStats.podiumRate) * Math.min(formFactor, 1.5)
+  )));
+  const winChance = Math.min(70, Math.max(0, Math.round(
+    (circuitStats?.winRate ?? globalStats.winRate) * Math.min(formFactor, 1.5)
+  )));
+  const estPts = ptsFor(estPos);
 
-  // Trend forma (ultimi 5 vs media storica)
-  const formTrend = globalStats.recentAvgPos < globalStats.avgPos ? 'up' :
-                    globalStats.recentAvgPos > globalStats.avgPos ? 'down' : 'stable';
-
-  return { estPos, podiumChance, winChance, estPoints, formTrend, blendedPos };
+  return { estPos, posLow, posHigh, podiumChance, winChance, estPts, sigma };
 }
 
-function projectChampionship(currentPoints, avgPtsPerRace, racesLeft) {
-  const projected = Math.round(currentPoints + avgPtsPerRace * racesLeft);
-  const sigma = Math.sqrt(racesLeft) * 4; // spread stimato ±4 pts/gara
+function projectChampionship(results2026, driverId, racesLeft, globalStats) {
+  const pts2026 = results2026
+    .filter(r => r.driverId === driverId && r.positionNumber != null)
+    .reduce((s, r) => s + ptsFor(r.positionNumber), 0);
+
+  const avgPts = globalStats?.avgPts ?? 8;
+  const projected = Math.round(pts2026 + avgPts * racesLeft);
+  const sigma = Math.sqrt(racesLeft) * 4;
   return {
+    current: pts2026,
     projected,
     low:  Math.max(0, Math.round(projected - sigma)),
     high: Math.round(projected + sigma),
   };
 }
 
-// ─── COMPONENTE ────────────────────────────────────────────────────────────────
+// ─── COMPONENTE ───────────────────────────────────────────────────────────────
 export default function PredictorSection() {
-  const [driver, setDriver]         = useState(FERRARI_DRIVERS[0]);
-  const [race, setRace]             = useState(CALENDAR_2025[2]);
-  const [page, setPage]             = useState(0);
-  const PER_PAGE = 6;
+  // ── State ──
+  const [dbData, setDbData]           = useState(null);
+  const [loadingDB, setLoadingDB]     = useState(true);
+  const [loadError, setLoadError]     = useState(null);
 
-  const [data, setData]             = useState(null);   // JSON caricati
-  const [loadingData, setLoadingData] = useState(true);
-  const [loadError, setLoadError]   = useState(null);
-  const [result, setResult]         = useState(null);
+  // Piloti selezionati (default: Leclerc + Hamilton)
+  const [primaryDriver, setPrimaryDriver]     = useState(null);
+  const [secondaryDriver, setSecondaryDriver] = useState(null);
+  const [showDriverPicker, setShowDriverPicker] = useState(false);
+  const [pickerTarget, setPickerTarget]       = useState('primary'); // 'primary' | 'secondary'
+  const [driverSearch, setDriverSearch]       = useState('');
 
-  // Carica tutti i JSON una sola volta
+  // Gara target (auto: prima gara senza risultato)
+  const [targetRace, setTargetRace]   = useState(CALENDAR_2026[0]);
+  const [racePage, setRacePage]       = useState(0);
+  const RACES_PER_PAGE = 6;
+
+  // ── Carica JSON al mount ──
   useEffect(() => {
     async function load() {
-      setLoadingData(true);
+      setLoadingDB(true);
       try {
-        const [results, races, circuits, standings] = await Promise.all([
+        const [rawResults, rawRaces, rawCircuits, rawDrivers] = await Promise.all([
           loadJSON('/data/f1db-races-race-results.json'),
           loadJSON('/data/f1db-races.json'),
           loadJSON('/data/f1db-circuits.json'),
-          loadJSON('/data/f1db-races-driver-standings.json'),
+          loadJSON('/data/f1db-drivers.json'),
         ]);
 
-        // Arricchisce i risultati con circuitId
-        const racesMap = Object.fromEntries(races.map(r => [r.id, r]));
-        const circuitsMap = Object.fromEntries(circuits.map(c => [c.id, c]));
-        const enriched = results.map(r => ({
+        // Mappa gare → circuito
+        const racesMap    = Object.fromEntries(rawRaces.map(r => [r.id, r]));
+        const circuitsMap = Object.fromEntries(rawCircuits.map(c => [c.id, c]));
+
+        // Arricchisci risultati con circuitId + circuitType
+        const results = rawResults.map(r => ({
           ...r,
-          _circuitId: racesMap[r.raceId]?.circuitId ?? null,
+          _circuitId:   racesMap[r.raceId]?.circuitId ?? null,
           _circuitType: circuitsMap[racesMap[r.raceId]?.circuitId]?.type ?? 'RACE',
         }));
 
-        setData({ results: enriched, races, racesMap, circuitsMap, standings });
+        // Estrai tutti i piloti con almeno 20 gare (per evitare piloti con 1 gara)
+        const driverMap = Object.fromEntries(rawDrivers.map(d => [d.id, d]));
+        const driverRaceCounts = results.reduce((acc, r) => {
+          acc[r.driverId] = (acc[r.driverId] ?? 0) + 1;
+          return acc;
+        }, {});
+        const activeDrivers = Object.entries(driverRaceCounts)
+          .filter(([, count]) => count >= 20)
+          .map(([id]) => ({
+            id,
+            name:   driverMap[id]?.fullName ?? driverMap[id]?.name ?? id,
+            short:  driverMap[id]?.abbreviation ?? id.split('-').pop().toUpperCase(),
+            number: driverMap[id]?.permanentNumber ?? null,
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name));
+
+        // Trova la prima gara 2026 senza risultato → gara da predire
+        const results2026 = results.filter(r => r.year === 2026);
+        const completedRounds2026 = new Set(results2026.map(r => r.round));
+        const nextRace = CALENDAR_2026.find(r => !completedRounds2026.has(r.round)) ?? CALENDAR_2026[0];
+
+        setTargetRace(nextRace);
+        setRacePage(Math.floor((nextRace.round - 1) / RACES_PER_PAGE));
+
+        // Imposta default drivers
+        const lec = activeDrivers.find(d => d.id === 'charles-leclerc');
+        const ham = activeDrivers.find(d => d.id === 'lewis-hamilton');
+        setPrimaryDriver(lec ?? activeDrivers[0]);
+        setSecondaryDriver(ham ?? activeDrivers[1]);
+
+        setDbData({ results, results2026, activeDrivers, circuitsMap, completedRounds2026 });
       } catch (e) {
         setLoadError(e.message);
       } finally {
-        setLoadingData(false);
+        setLoadingDB(false);
       }
     }
     load();
   }, []);
 
-  // Calcola predizione ogni volta che cambia pilota o gara
-  useEffect(() => {
-    if (!data) return;
-    const { results, circuitsMap, standings } = data;
+  // ── Calcola predizioni ──
+  const predictions = useMemo(() => {
+    if (!dbData || !primaryDriver || !secondaryDriver) return null;
+    const { results, results2026, circuitsMap } = dbData;
+    const circuitInfo = circuitsMap[targetRace.circuitId];
+    const circuitId   = targetRace.circuitId;
 
-    const circuitId = race.circuitId;
-    const circuitInfo = circuitsMap[circuitId];
+    const calc = (dId) => {
+      const global  = buildDriverStats(results, dId);
+      const circuit = buildDriverStats(results, dId, circuitId);
+      const pred    = computePrediction(global, circuit);
+      const racesLeft = CALENDAR_2026.length - targetRace.round + 1;
+      const champ   = projectChampionship(results2026, dId, racesLeft, global);
+      return { global, circuit, pred, champ };
+    };
 
-    // Stats globali pilota (tutti i circuiti)
-    const globalStats = buildStats(results, driver.id);
-    // Stats specifiche per questo circuito
-    const circuitStats = buildStats(results, driver.id, circuitId);
-
-    const pred = predict(globalStats, circuitStats, circuitInfo?.type);
-
-    // Punti campionato attuali (ultima voce 2024)
-    const driverStandings2024 = standings
-      .filter(s => s.driverId === driver.id && s.year === 2024)
-      .sort((a, b) => b.round - a.round);
-    const currentPoints = driverStandings2024[0]?.points ?? 0;
-    const racesLeft = CALENDAR_2025.length - race.round;
-    const champ = globalStats
-      ? projectChampionship(currentPoints, globalStats.avgPts, racesLeft)
-      : null;
-
-    setResult({
-      pred,
-      globalStats,
-      circuitStats,
+    return {
+      primary:   calc(primaryDriver.id),
+      secondary: calc(secondaryDriver.id),
       circuitInfo,
-      currentPoints,
-      champ,
-      racesLeft,
-    });
-  }, [data, driver, race]);
+      racesLeft: CALENDAR_2026.length - targetRace.round + 1,
+      completedRounds: dbData.completedRounds2026,
+    };
+  }, [dbData, primaryDriver, secondaryDriver, targetRace]);
 
-  const pagedRaces = CALENDAR_2025.slice(page * PER_PAGE, (page + 1) * PER_PAGE);
-  const totalPages = Math.ceil(CALENDAR_2025.length / PER_PAGE);
+  // ── Driver picker filtrato ──
+  const filteredDrivers = useMemo(() => {
+    if (!dbData) return [];
+    const q = driverSearch.toLowerCase();
+    return dbData.activeDrivers.filter(d =>
+      d.name.toLowerCase().includes(q) || d.short.toLowerCase().includes(q)
+    );
+  }, [dbData, driverSearch]);
 
-  const trendIcon  = result?.pred?.formTrend === 'up'   ? '↑' :
-                     result?.pred?.formTrend === 'down'  ? '↓' : '→';
-  const trendColor = result?.pred?.formTrend === 'up'   ? 'text-green-400' :
-                     result?.pred?.formTrend === 'down'  ? 'text-red-400'   : 'text-zinc-400';
+  const pagedRaces    = CALENDAR_2026.slice(racePage * RACES_PER_PAGE, (racePage + 1) * RACES_PER_PAGE);
+  const totalRacePages = Math.ceil(CALENDAR_2026.length / RACES_PER_PAGE);
 
+  const trendLabel = (t) => t === 'up' ? '↑ In forma' : t === 'down' ? '↓ In calo' : '→ Stabile';
+  const trendColor = (t) => t === 'up' ? 'text-green-400' : t === 'down' ? 'text-red-400' : 'text-zinc-400';
+
+  // ─────────────────────────────────────────────────────────────────────────────
   return (
     <section className="py-20 px-4 bg-[#080808] text-white">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
 
         {/* HEADER */}
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-14">
-          <p className="text-red-600 text-[10px] font-black uppercase tracking-[0.5em] mb-3">Scuderia Ferrari · Analisi Statistica</p>
+          <p className="text-red-600 text-[10px] font-black uppercase tracking-[0.5em] mb-3">
+            Scuderia Ferrari · Predizione 2026
+          </p>
           <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter leading-none mb-4">
             Race<br /><span className="text-red-600">Predictor</span>
           </h2>
-          <p className="text-zinc-500 max-w-xl text-sm leading-relaxed">
-            Predizioni basate su dati storici F1DB reali — risultati dal 2022 ad oggi.
-            Algoritmo: media storica · forma recente · tipo circuito.
-          </p>
+          <div className="flex flex-wrap items-center gap-4">
+            <p className="text-zinc-500 text-sm leading-relaxed max-w-xl">
+              Predizioni statistiche basate su dati F1DB (1950→2026). Si aggiorna automaticamente
+              ogni volta che aggiungi risultati al JSON.
+            </p>
+            {predictions?.completedRounds && (
+              <div className="flex items-center gap-2 bg-zinc-900/60 border border-white/5 px-4 py-2 rounded-full">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                  {predictions.completedRounds.size} gare 2026 completate
+                </span>
+              </div>
+            )}
+          </div>
         </motion.div>
 
+        {/* ERRORE */}
         {loadError && (
           <div className="bg-red-900/20 border border-red-500/30 rounded-3xl p-6 flex items-center gap-4 mb-8">
             <AlertCircle className="w-6 h-6 text-red-400 shrink-0" />
             <div>
-              <p className="font-black text-red-400">Errore nel caricamento dei JSON</p>
+              <p className="font-black text-red-400">Errore nel caricamento dei dati</p>
               <p className="text-zinc-500 text-sm mt-1">{loadError}</p>
-              <p className="text-zinc-600 text-xs mt-1">Verifica che i file siano in <code className="text-zinc-400">public/data/</code></p>
+              <p className="text-zinc-600 text-xs mt-1">Verifica che i JSON siano in <code className="text-zinc-400 bg-zinc-800 px-1 rounded">public/data/</code></p>
             </div>
           </div>
         )}
 
-        <div className="grid lg:grid-cols-5 gap-8">
-
-          {/* ── LEFT: CONFIG ── */}
-          <div className="lg:col-span-2 space-y-5">
-
-            {/* Pilota */}
-            <div className="bg-zinc-900/60 border border-white/5 rounded-3xl p-6">
-              <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4">Pilota Ferrari</p>
-              <div className="space-y-2">
-                {FERRARI_DRIVERS.map(d => (
-                  <button key={d.id} onClick={() => setDriver(d)}
-                    className={`w-full p-4 rounded-2xl border-2 transition-all flex items-center gap-4 ${
-                      driver.id === d.id ? 'border-red-500 bg-red-500/10' : 'border-zinc-800 hover:border-zinc-600'
-                    }`}
-                  >
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-base shrink-0"
-                      style={{ backgroundColor: d.color + '22', color: d.color, border: `2px solid ${d.color}44` }}>
-                      {d.number}
-                    </div>
-                    <div className="text-left">
-                      <p className="font-black text-sm">{d.short}</p>
-                      <p className="text-zinc-600 text-[10px] uppercase tracking-wider">{d.name.split(' ')[0]}</p>
-                    </div>
-                    {driver.id === d.id && result?.globalStats && (
-                      <div className="ml-auto text-right">
-                        <p className="text-[9px] text-zinc-500 uppercase font-bold">Avg Pos</p>
-                        <p className="font-black text-sm" style={{ color: d.color }}>
-                          {result.globalStats.avgPos.toFixed(1)}°
-                        </p>
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
+        {loadingDB && (
+          <div className="flex flex-col items-center justify-center py-32 gap-5">
+            <div className="relative w-16 h-16">
+              <div className="absolute inset-0 border-4 border-zinc-800 rounded-full" />
+              <div className="absolute inset-0 border-4 border-transparent border-t-red-600 rounded-full animate-spin" />
             </div>
-
-            {/* Circuito */}
-            <div className="bg-zinc-900/60 border border-white/5 rounded-3xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Gara Target 2025</p>
-                <div className="flex items-center gap-1">
-                  <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-                    className="w-6 h-6 rounded-lg bg-zinc-800 hover:bg-zinc-700 disabled:opacity-30 flex items-center justify-center transition-all">
-                    <ChevronLeft className="w-3 h-3" />
-                  </button>
-                  <span className="text-[9px] text-zinc-600 font-bold px-1">{page + 1}/{totalPages}</span>
-                  <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page === totalPages - 1}
-                    className="w-6 h-6 rounded-lg bg-zinc-800 hover:bg-zinc-700 disabled:opacity-30 flex items-center justify-center transition-all">
-                    <ChevronRight className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {pagedRaces.map(r => (
-                  <button key={r.round} onClick={() => setRace(r)}
-                    className={`p-3 rounded-xl border transition-all text-left ${
-                      race.round === r.round
-                        ? 'border-red-500 bg-red-500/10'
-                        : 'border-zinc-800 hover:border-zinc-600 bg-zinc-800/20'
-                    }`}
-                  >
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <span className="text-sm">{r.country}</span>
-                      <span className="text-[9px] text-zinc-600 font-black">R{r.round}</span>
-                    </div>
-                    <p className="font-black text-[11px] truncate">{r.name.replace(' GP', '')}</p>
-                  </button>
-                ))}
-              </div>
+            <div className="text-center">
+              <p className="font-black text-sm uppercase tracking-widest mb-1">Caricamento database F1</p>
+              <p className="text-zinc-600 text-xs">1950 → 2026 · Risultati · Circuiti · Piloti</p>
             </div>
-
-            {/* Info circuito */}
-            {result?.circuitInfo && (
-              <motion.div
-                key={race.circuitId}
-                initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                className="bg-zinc-900/40 border border-white/5 rounded-3xl p-5"
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <MapPin className="w-4 h-4 text-zinc-500" />
-                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">{result.circuitInfo.name}</p>
-                </div>
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <div>
-                    <p className="text-lg font-black text-white">{result.circuitInfo.length?.toFixed(2) ?? '—'}</p>
-                    <p className="text-[9px] text-zinc-600 uppercase font-bold">km/giro</p>
-                  </div>
-                  <div>
-                    <p className="text-lg font-black text-white">{result.circuitInfo.turns ?? '—'}</p>
-                    <p className="text-[9px] text-zinc-600 uppercase font-bold">curve</p>
-                  </div>
-                  <div>
-                    <p className={`text-sm font-black ${result.circuitInfo.type === 'STREET' ? 'text-orange-400' : 'text-blue-400'}`}>
-                      {result.circuitInfo.type === 'STREET' ? '🏙️' : '🏁'}
-                    </p>
-                    <p className="text-[9px] text-zinc-600 uppercase font-bold">{result.circuitInfo.type === 'STREET' ? 'Street' : 'Race'}</p>
-                  </div>
-                </div>
-                {result.circuitStats && (
-                  <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
-                    <span className="text-[9px] text-zinc-600 uppercase font-bold">Storico su questa pista</span>
-                    <span className="text-xs font-black text-white">
-                      {result.circuitStats.races} gare · avg {result.circuitStats.avgPos.toFixed(1)}°
-                    </span>
-                  </div>
-                )}
-              </motion.div>
-            )}
           </div>
+        )}
 
-          {/* ── RIGHT: RISULTATI ── */}
-          <div className="lg:col-span-3">
-            <AnimatePresence mode="wait">
+        {!loadingDB && !loadError && predictions && (
+          <div className="grid lg:grid-cols-12 gap-8">
 
-              {loadingData && (
-                <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  className="bg-zinc-900/40 border border-white/5 rounded-3xl p-16 flex flex-col items-center justify-center gap-5"
-                >
-                  <div className="relative w-16 h-16">
-                    <div className="absolute inset-0 border-4 border-zinc-800 rounded-full" />
-                    <div className="absolute inset-0 border-4 border-transparent border-t-red-600 rounded-full animate-spin" />
+            {/* ── COLONNA SINISTRA: CONFIG ── */}
+            <div className="lg:col-span-4 space-y-5">
+
+              {/* SELEZIONE PILOTI */}
+              <div className="bg-zinc-900/60 border border-white/5 rounded-3xl p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Users className="w-4 h-4 text-zinc-500" />
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Piloti a confronto</p>
+                </div>
+
+                {/* Pilota primario */}
+                {[
+                  { label: 'Pilota A', driver: primaryDriver, target: 'primary',   color: '#DC0000' },
+                  { label: 'Pilota B', driver: secondaryDriver, target: 'secondary', color: '#FFD700' },
+                ].map(({ label, driver: drv, target, color }) => (
+                  <div key={target} className="mb-3">
+                    <p className="text-[9px] text-zinc-700 uppercase font-bold mb-1">{label}</p>
+                    <button
+                      onClick={() => {
+                        setPickerTarget(target);
+                        setDriverSearch('');
+                        setShowDriverPicker(p => pickerTarget === target ? !p : true);
+                      }}
+                      className="w-full p-3 rounded-2xl border border-zinc-800 hover:border-zinc-600 transition-all flex items-center gap-3"
+                    >
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0"
+                        style={{ backgroundColor: color + '22', color, border: `2px solid ${color}44` }}>
+                        {drv?.short?.slice(0, 3) ?? '?'}
+                      </div>
+                      <div className="flex-1 text-left min-w-0">
+                        <p className="font-black text-sm truncate">{drv?.name ?? '—'}</p>
+                        {predictions[target]?.global && (
+                          <p className="text-zinc-600 text-[9px] uppercase">
+                            Avg {predictions[target].global.avgPos.toFixed(1)}° · {predictions[target].global.n} gare
+                          </p>
+                        )}
+                      </div>
+                      <ChevronDown className="w-4 h-4 text-zinc-600 shrink-0" />
+                    </button>
                   </div>
-                  <div className="text-center">
-                    <p className="font-black text-sm uppercase tracking-widest mb-1">Caricamento dati F1DB</p>
-                    <p className="text-zinc-600 text-xs">Risultati · Circuiti · Classifiche</p>
+                ))}
+
+                {/* Driver picker dropdown */}
+                <AnimatePresence>
+                  {showDriverPicker && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                      className="mt-2 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden"
+                    >
+                      <div className="p-3 border-b border-zinc-800">
+                        <input
+                          autoFocus
+                          value={driverSearch}
+                          onChange={e => setDriverSearch(e.target.value)}
+                          placeholder="Cerca pilota..."
+                          className="w-full bg-zinc-800 rounded-xl px-3 py-2 text-sm outline-none text-white placeholder-zinc-600 font-bold"
+                        />
+                      </div>
+                      <div className="max-h-48 overflow-y-auto">
+                        {filteredDrivers.slice(0, 30).map(d => (
+                          <button key={d.id}
+                            onClick={() => {
+                              if (pickerTarget === 'primary') setPrimaryDriver(d);
+                              else setSecondaryDriver(d);
+                              setShowDriverPicker(false);
+                            }}
+                            className="w-full px-4 py-2.5 hover:bg-zinc-800 transition-all flex items-center gap-3 text-left"
+                          >
+                            <span className="text-[10px] font-black text-zinc-500 w-8">{d.short}</span>
+                            <span className="text-sm font-bold truncate">{d.name}</span>
+                          </button>
+                        ))}
+                        {filteredDrivers.length === 0 && (
+                          <p className="text-center text-zinc-600 text-xs py-4">Nessun pilota trovato</p>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* SELEZIONE GARA */}
+              <div className="bg-zinc-900/60 border border-white/5 rounded-3xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Calendario 2026</p>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => setRacePage(p => Math.max(0, p - 1))} disabled={racePage === 0}
+                      className="w-6 h-6 rounded-lg bg-zinc-800 hover:bg-zinc-700 disabled:opacity-30 flex items-center justify-center transition-all">
+                      <ChevronLeft className="w-3 h-3" />
+                    </button>
+                    <span className="text-[9px] text-zinc-600 font-bold px-1">{racePage + 1}/{totalRacePages}</span>
+                    <button onClick={() => setRacePage(p => Math.min(totalRacePages - 1, p + 1))} disabled={racePage === totalRacePages - 1}
+                      className="w-6 h-6 rounded-lg bg-zinc-800 hover:bg-zinc-700 disabled:opacity-30 flex items-center justify-center transition-all">
+                      <ChevronRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {pagedRaces.map(r => {
+                    const isDone = predictions.completedRounds.has(r.round);
+                    const isNext = !isDone && CALENDAR_2026.find(c =>
+                      !predictions.completedRounds.has(c.round))?.round === r.round;
+                    return (
+                      <button key={r.round} onClick={() => setTargetRace(r)}
+                        className={`p-3 rounded-xl border transition-all text-left relative ${
+                          targetRace.round === r.round
+                            ? 'border-red-500 bg-red-500/10'
+                            : isDone
+                            ? 'border-green-500/30 bg-green-500/5 opacity-70'
+                            : 'border-zinc-800 hover:border-zinc-600 bg-zinc-800/20'
+                        }`}
+                      >
+                        {isNext && (
+                          <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+                        )}
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-sm">{r.country}</span>
+                          <span className="text-[9px] text-zinc-600 font-black">R{r.round}</span>
+                          {isDone && <span className="text-[8px] text-green-500 font-black ml-auto">✓</span>}
+                        </div>
+                        <p className="font-black text-[11px] truncate">{r.name.replace(' GP', '')}</p>
+                        <p className="text-zinc-700 text-[9px]">{new Date(r.date).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* INFO CIRCUITO */}
+              {predictions.circuitInfo && (
+                <motion.div key={targetRace.circuitId} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  className="bg-zinc-900/40 border border-white/5 rounded-3xl p-5"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <MapPin className="w-4 h-4 text-zinc-600" />
+                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                      {predictions.circuitInfo.fullName ?? predictions.circuitInfo.name}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 text-center">
+                    <div>
+                      <p className="text-lg font-black">{predictions.circuitInfo.length?.toFixed(3) ?? '—'}</p>
+                      <p className="text-[9px] text-zinc-600 uppercase font-bold">km/giro</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-black">{predictions.circuitInfo.turns ?? '—'}</p>
+                      <p className="text-[9px] text-zinc-600 uppercase font-bold">curve</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-black">{predictions.circuitInfo.type === 'STREET' ? '🏙️' : '🏁'}</p>
+                      <p className="text-[9px] text-zinc-600 uppercase font-bold">{predictions.circuitInfo.type === 'STREET' ? 'Street' : 'Race'}</p>
+                    </div>
                   </div>
                 </motion.div>
               )}
+            </div>
 
-              {!loadingData && result && result.pred && (
-                <motion.div key={`${driver.id}-${race.round}`}
-                  initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                  className="space-y-5"
-                >
-                  {/* PREDIZIONE PRINCIPALE */}
-                  <div className="bg-zinc-900/60 border border-white/5 rounded-3xl overflow-hidden">
-                    <div className="p-5 border-b border-white/5 flex items-center justify-between bg-gradient-to-r from-red-950/20 to-transparent">
-                      <div className="flex items-center gap-3">
-                        <Flag className="w-5 h-5 text-red-500" />
-                        <div>
-                          <p className="font-black text-sm">{race.name}</p>
-                          <p className="text-zinc-500 text-[10px] uppercase tracking-widest">
-                            Round {race.round} · 2025 · {result.circuitInfo?.name ?? race.circuitId}
-                          </p>
-                        </div>
+            {/* ── COLONNA DESTRA: RISULTATI ── */}
+            <div className="lg:col-span-8 space-y-5">
+
+              {/* HEADER GARA TARGET */}
+              <motion.div key={targetRace.round}
+                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                className="bg-gradient-to-r from-red-950/30 to-zinc-900/60 border border-red-500/20 rounded-3xl p-6"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="text-4xl">{targetRace.country}</div>
+                    <div>
+                      <p className="text-[10px] text-red-400 font-black uppercase tracking-widest mb-1">
+                        Prossima predizione
+                      </p>
+                      <h3 className="text-2xl font-black uppercase italic tracking-tight">{targetRace.name}</h3>
+                      <p className="text-zinc-500 text-xs uppercase tracking-widest">
+                        Round {targetRace.round} · {new Date(targetRace.date).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' })}
+                      </p>
+                    </div>
+                  </div>
+                  {predictions.completedRounds.has(targetRace.round) && (
+                    <div className="bg-green-500/10 border border-green-500/30 px-4 py-2 rounded-full">
+                      <p className="text-green-400 text-xs font-black uppercase tracking-widest">✓ Completata</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+
+              {/* CONFRONTO PILOTI */}
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { key: 'primary',   driver: primaryDriver,   color: '#DC0000', data: predictions.primary },
+                  { key: 'secondary', driver: secondaryDriver, color: '#FFD700', data: predictions.secondary },
+                ].map(({ key, driver: drv, color, data }) => (
+                  <motion.div key={`${key}-${drv?.id}-${targetRace.round}`}
+                    initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
+                    className="bg-zinc-900/60 border border-white/5 rounded-3xl overflow-hidden"
+                  >
+                    {/* Header pilota */}
+                    <div className="p-4 border-b border-white/5 flex items-center gap-3"
+                      style={{ background: `linear-gradient(135deg, ${color}15 0%, transparent 60%)` }}>
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0"
+                        style={{ backgroundColor: color + '22', color, border: `2px solid ${color}44` }}>
+                        {drv?.short?.slice(0, 3) ?? '?'}
                       </div>
-                      <div className="flex items-center gap-1.5 bg-zinc-800/60 px-3 py-1 rounded-full">
-                        <Activity className="w-3 h-3 text-zinc-400" />
-                        <span className={`text-xs font-black ${trendColor}`}>Forma {trendIcon}</span>
+                      <div>
+                        <p className="font-black text-sm">{drv?.name ?? '—'}</p>
+                        {data.global && (
+                          <p className={`text-[9px] font-black ${trendColor(data.global.formTrend)}`}>
+                            {trendLabel(data.global.formTrend)}
+                          </p>
+                        )}
                       </div>
                     </div>
 
-                    <div className="p-6">
-                      <div className="flex items-start gap-8 mb-6">
+                    {data.pred ? (
+                      <div className="p-5">
                         {/* Posizione stimata */}
-                        <div className="text-center shrink-0">
-                          <p className="text-[9px] text-zinc-600 uppercase font-black tracking-widest mb-1">Posizione Stimata</p>
-                          <motion.span
-                            key={result.pred.estPos}
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="text-8xl font-black leading-none"
-                            style={{ color: driver.color }}
-                          >
-                            {result.pred.estPos}°
-                          </motion.span>
-                          <p className="text-[9px] text-zinc-600 uppercase font-bold mt-1">
-                            {result.pred.estPoints} pts stimati
+                        <div className="text-center mb-5">
+                          <p className="text-[9px] text-zinc-600 uppercase font-black tracking-widest mb-1">Pos. Stimata</p>
+                          <div className="flex items-end justify-center gap-1">
+                            <motion.span
+                              key={data.pred.estPos}
+                              initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                              className="text-6xl font-black leading-none"
+                              style={{ color }}
+                            >
+                              {data.pred.estPos}°
+                            </motion.span>
+                          </div>
+                          <p className="text-zinc-600 text-[10px] mt-1 font-mono">
+                            range {data.pred.posLow}° – {data.pred.posHigh}°
                           </p>
                         </div>
 
-                        {/* Barre probabilità */}
-                        <div className="flex-1 space-y-4">
+                        {/* Barre */}
+                        <div className="space-y-3 mb-5">
                           {[
-                            { label: '% Podio',   value: result.pred.podiumChance, color: 'bg-yellow-500' },
-                            { label: '% Vittoria', value: result.pred.winChance,   color: 'bg-red-500' },
-                            { label: '% Top 5',   value: result.globalStats?.top5Rate ?? 0, color: 'bg-blue-500' },
-                          ].map((bar, i) => (
+                            { label: '% Podio',   val: data.pred.podiumChance },
+                            { label: '% Vittoria', val: data.pred.winChance },
+                          ].map((b, i) => (
                             <div key={i}>
-                              <div className="flex justify-between text-[10px] font-black uppercase mb-1.5">
-                                <span className="text-zinc-500">{bar.label}</span>
-                                <span className="text-white">{Math.round(bar.value)}%</span>
+                              <div className="flex justify-between text-[10px] font-black uppercase mb-1">
+                                <span className="text-zinc-600">{b.label}</span>
+                                <span style={{ color }}>{b.val}%</span>
                               </div>
-                              <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                                <motion.div className={`h-full rounded-full ${bar.color}`}
+                              <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                                <motion.div className="h-full rounded-full"
+                                  style={{ backgroundColor: color }}
                                   initial={{ width: 0 }}
-                                  animate={{ width: `${Math.min(100, bar.value)}%` }}
-                                  transition={{ delay: i * 0.1 + 0.2, duration: 0.7, ease: 'easeOut' }}
+                                  animate={{ width: `${Math.min(100, b.val)}%` }}
+                                  transition={{ delay: 0.2 + i * 0.1, duration: 0.7 }}
                                 />
                               </div>
                             </div>
                           ))}
                         </div>
-                      </div>
 
-                      {/* Fonte dati */}
-                      <div className="flex items-center gap-2 text-[9px] text-zinc-700 uppercase tracking-widest font-bold border-t border-white/5 pt-4">
-                        <BarChart3 className="w-3 h-3" />
-                        {result.globalStats.races} gare analizzate (2022–2024) ·
-                        {result.circuitStats ? ` ${result.circuitStats.races} su questo circuito` : ' nessuna storia su questa pista'}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* STORICO + CAMPIONATO */}
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Storico */}
-                    <div className="bg-zinc-900/60 border border-white/5 rounded-3xl p-5">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Trophy className="w-4 h-4 text-yellow-400" />
-                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Storico 2022–24</p>
-                      </div>
-                      {result.globalStats ? (
-                        <div className="space-y-2">
-                          {[
-                            { label: 'Gare',      val: result.globalStats.races,               color: 'text-zinc-300' },
-                            { label: 'Vittorie',  val: result.globalStats.wins,                color: 'text-yellow-400' },
-                            { label: 'Podi',      val: result.globalStats.podiums,             color: 'text-orange-400' },
-                            { label: 'Avg Pos',   val: result.globalStats.avgPos.toFixed(1) + '°', color: 'text-white' },
-                            { label: 'Avg Punti', val: result.globalStats.avgPts.toFixed(1),   color: 'text-green-400' },
-                          ].map((s, i) => (
-                            <div key={i} className="flex justify-between items-center py-1.5 border-b border-white/5 last:border-0">
-                              <span className="text-[10px] text-zinc-600 uppercase font-bold">{s.label}</span>
-                              <span className={`font-black text-sm ${s.color}`}>{s.val}</span>
-                            </div>
-                          ))}
+                        {/* Mini stats */}
+                        <div className="grid grid-cols-2 gap-2 text-center">
+                          <div className="bg-zinc-800/40 rounded-xl p-2 border border-white/5">
+                            <p className="text-[8px] text-zinc-600 uppercase font-bold">Pts stimati</p>
+                            <p className="font-black text-sm" style={{ color }}>{data.pred.estPts}</p>
+                          </div>
+                          <div className="bg-zinc-800/40 rounded-xl p-2 border border-white/5">
+                            <p className="text-[8px] text-zinc-600 uppercase font-bold">Pts 2026</p>
+                            <p className="font-black text-sm text-white">{data.champ?.current ?? 0}</p>
+                          </div>
                         </div>
-                      ) : <p className="text-zinc-600 text-sm">Nessun dato</p>}
-                    </div>
-
-                    {/* Proiezione campionato */}
-                    <div className="bg-zinc-900/60 border border-white/5 rounded-3xl p-5">
-                      <div className="flex items-center gap-2 mb-4">
-                        <TrendingUp className="w-4 h-4 text-blue-400" />
-                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Campionato 2025</p>
                       </div>
-                      {result.champ ? (
-                        <>
-                          <div className="text-center mb-4">
-                            <p className="text-[9px] text-zinc-600 uppercase font-black mb-1">Punti Finali Stimati</p>
-                            <motion.p key={result.champ.projected}
-                              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                              className="text-5xl font-black text-white">
-                              {result.champ.projected}
-                            </motion.p>
-                          </div>
-                          <div className="bg-zinc-800/40 rounded-2xl p-3 text-center mb-3 border border-white/5">
-                            <p className="text-[9px] text-zinc-600 uppercase font-black mb-1">Range confidenza</p>
-                            <p className="font-black font-mono text-sm">
-                              <span className="text-red-400">{result.champ.low}</span>
-                              <span className="text-zinc-600"> – </span>
-                              <span className="text-green-400">{result.champ.high}</span>
-                            </p>
-                          </div>
-                          <div className="flex justify-between text-[9px] text-zinc-600 uppercase font-bold">
-                            <span>Attuali: {result.currentPoints} pts</span>
-                            <span>{result.racesLeft} gare left</span>
-                          </div>
-                        </>
-                      ) : <p className="text-zinc-600 text-sm">Nessun dato</p>}
-                    </div>
-                  </div>
-
-                  {/* ULTIMI RISULTATI */}
-                  {result.globalStats?.recent?.length > 0 && (
-                    <div className="bg-zinc-900/60 border border-white/5 rounded-3xl p-5">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Zap className="w-4 h-4 text-zinc-400" />
-                        <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Ultimi 5 Risultati</p>
+                    ) : (
+                      <div className="p-6 text-center">
+                        <p className="text-zinc-600 text-xs">Dati insufficienti</p>
                       </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* STORICO SUL CIRCUITO */}
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { key: 'primary',   driver: primaryDriver,   color: '#DC0000', data: predictions.primary },
+                  { key: 'secondary', driver: secondaryDriver, color: '#FFD700', data: predictions.secondary },
+                ].map(({ key, driver: drv, color, data }) => (
+                  <div key={key} className="bg-zinc-900/60 border border-white/5 rounded-3xl p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <MapPin className="w-3.5 h-3.5" style={{ color }} />
+                      <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest truncate">
+                        {drv?.name?.split(' ')[1] ?? '—'} su {targetRace.name.replace(' GP', '')}
+                      </p>
+                    </div>
+                    {data.circuit ? (
                       <div className="space-y-2">
-                        {result.globalStats.recent.map((r, i) => (
-                          <div key={i} className="flex items-center gap-3 py-2 border-b border-white/5 last:border-0">
-                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm shrink-0 ${
-                              r.positionNumber === 1  ? 'bg-yellow-500/20 text-yellow-400' :
-                              r.positionNumber <= 3   ? 'bg-orange-500/20 text-orange-400' :
-                              r.positionNumber <= 10  ? 'bg-green-500/10 text-green-500'   :
-                              'bg-zinc-800 text-zinc-500'
-                            }`}>
-                              {r.positionNumber ?? 'DNF'}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-black text-xs truncate">{r._circuitId ?? 'Gara'}</p>
-                              <p className="text-zinc-600 text-[9px]">{r.year} · Round {r.round}</p>
-                            </div>
-                            <div className="shrink-0 text-right">
-                              <p className="font-black text-xs text-yellow-400">
-                                {r.points ?? pointsForPos(r.positionNumber)} pts
-                              </p>
-                              {r.gridPositionNumber && (
-                                <p className="text-zinc-700 text-[9px]">Grid {r.gridPositionNumber}</p>
-                              )}
-                            </div>
+                        {[
+                          { label: 'Gare su questo circuito', val: data.circuit.n },
+                          { label: 'Media posizione',         val: data.circuit.avgPos.toFixed(1) + '°' },
+                          { label: 'Vittorie',                val: data.circuit.wins },
+                          { label: 'Podi',                    val: data.circuit.podiums },
+                        ].map((s, i) => (
+                          <div key={i} className="flex justify-between items-center py-1 border-b border-white/5 last:border-0">
+                            <span className="text-[9px] text-zinc-600 uppercase font-bold">{s.label}</span>
+                            <span className="font-black text-sm text-white">{s.val}</span>
                           </div>
                         ))}
                       </div>
-                    </div>
-                  )}
-
-                  {/* Nota metodologia */}
-                  <div className="bg-zinc-900/30 border border-white/5 rounded-2xl p-4">
-                    <p className="text-[9px] text-zinc-700 leading-relaxed uppercase tracking-wider font-bold">
-                      ⚙️ Metodologia: media posizioni 2022–2024 (peso 60%) + forma recente ultimi 5 risultati (peso 40%).
-                      Tipo circuito (street/race) applica un coefficiente correttivo basato su performance storiche Ferrari.
-                      Proiezione campionato: punti attuali + media punti/gara × gare rimanenti con intervallo ±σ.
-                      I dati sono forniti da F1DB (f1db.com).
-                    </p>
+                    ) : (
+                      <p className="text-zinc-700 text-xs">Nessuno storico su questo circuito</p>
+                    )}
                   </div>
-                </motion.div>
-              )}
+                ))}
+              </div>
 
-              {!loadingData && result && !result.pred && (
-                <motion.div key="nodata" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                  className="bg-zinc-900/40 border border-white/5 rounded-3xl p-16 flex flex-col items-center justify-center text-center"
-                >
-                  <Target className="w-12 h-12 text-zinc-700 mb-4" />
-                  <p className="font-black text-sm uppercase tracking-widest mb-2">Dati insufficienti</p>
-                  <p className="text-zinc-600 text-xs max-w-xs">
-                    Non ci sono abbastanza dati storici per {driver.short} su questo circuito.
-                    Prova un altro pilota o un circuito con più storia.
+              {/* PROIEZIONE CAMPIONATO */}
+              <div className="bg-zinc-900/60 border border-white/5 rounded-3xl p-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <TrendingUp className="w-4 h-4 text-blue-400" />
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                    Proiezione Campionato 2026 · {predictions.racesLeft} gare rimanenti
                   </p>
-                </motion.div>
-              )}
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                  {[
+                    { driver: primaryDriver,   color: '#DC0000', champ: predictions.primary.champ },
+                    { driver: secondaryDriver, color: '#FFD700', champ: predictions.secondary.champ },
+                  ].map(({ driver: drv, color, champ }, i) => champ && (
+                    <div key={i} className="text-center">
+                      <p className="text-[9px] text-zinc-600 uppercase font-black mb-2">{drv?.name?.split(' ')[1] ?? '—'}</p>
+                      <p className="text-5xl font-black mb-1" style={{ color }}>{champ.projected}</p>
+                      <p className="text-[10px] font-mono text-zinc-600">
+                        <span className="text-red-400">{champ.low}</span>
+                        {' – '}
+                        <span className="text-green-400">{champ.high}</span>
+                        {' pts'}
+                      </p>
+                      <div className="mt-3 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                        <motion.div className="h-full rounded-full"
+                          style={{ backgroundColor: color }}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(100, (champ.projected / 500) * 100)}%` }}
+                          transition={{ delay: 0.5, duration: 0.8 }}
+                        />
+                      </div>
+                      <p className="text-[9px] text-zinc-700 mt-1">su 500 pts max stagione</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-            </AnimatePresence>
+              {/* ULTIMI 5 RISULTATI */}
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { key: 'primary',   driver: primaryDriver,   color: '#DC0000', data: predictions.primary },
+                  { key: 'secondary', driver: secondaryDriver, color: '#FFD700', data: predictions.secondary },
+                ].map(({ key, driver: drv, color, data }) => (
+                  <div key={key} className="bg-zinc-900/60 border border-white/5 rounded-3xl p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Zap className="w-3.5 h-3.5" style={{ color }} />
+                      <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                        Ultimi risultati · {drv?.name?.split(' ')[1] ?? '—'}
+                      </p>
+                    </div>
+                    <div className="space-y-1.5">
+                      {data.global?.recent?.map((r, i) => (
+                        <div key={i} className="flex items-center gap-2.5 py-1.5 border-b border-white/5 last:border-0">
+                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
+                            r.positionNumber === 1 ? 'bg-yellow-500/20 text-yellow-400' :
+                            r.positionNumber <= 3  ? 'bg-orange-500/20 text-orange-400' :
+                            r.positionNumber <= 10 ? 'bg-green-500/10 text-green-500'   :
+                            'bg-zinc-800 text-zinc-500'
+                          }`}>
+                            {r.positionNumber}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-black text-[11px] truncate">{r._circuitId ?? '—'}</p>
+                            <p className="text-zinc-700 text-[9px]">{r.year} R{r.round}</p>
+                          </div>
+                          <p className="font-black text-[11px] text-yellow-400 shrink-0">
+                            {ptsFor(r.positionNumber)}p
+                          </p>
+                        </div>
+                      )) ?? <p className="text-zinc-700 text-xs">Nessun dato</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* NOTA METODOLOGIA */}
+              <div className="bg-zinc-900/20 border border-white/5 rounded-2xl p-4">
+                <p className="text-[9px] text-zinc-700 leading-relaxed uppercase tracking-wider font-bold">
+                  ⚙️ Algoritmo: media ponderata per anno (recente = peso maggiore) degli ultimi 7 anni.
+                  Blend storico circuito (60%) + forma recente ultimi 5 risultati (40%).
+                  Intervallo confidenza ±0.7σ. Proiezione campionato: punti attuali +
+                  media pts/gara × gare rimanenti.
+                  Il predictor si aggiorna automaticamente aggiungendo risultati ai file JSON in <code className="text-zinc-500">public/data/</code>.
+                  Dati: F1DB (f1db.com) · 1950–2026.
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

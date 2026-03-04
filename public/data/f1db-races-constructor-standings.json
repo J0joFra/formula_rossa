@@ -139225,7 +139225,7 @@
     "positionText": "2",
     "constructorId": "mercedes",
     "engineManufacturerId": "mercedes",
-    "points": 459,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": false
   },
@@ -139238,7 +139238,7 @@
     "positionText": "3",
     "constructorId": "red-bull",
     "engineManufacturerId": "honda-rbpt",
-    "points": 426,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": false
   },
@@ -139251,7 +139251,7 @@
     "positionText": "4",
     "constructorId": "ferrari",
     "engineManufacturerId": "ferrari",
-    "points": 382,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": false
   },
@@ -139264,7 +139264,7 @@
     "positionText": "5",
     "constructorId": "williams",
     "engineManufacturerId": "mercedes",
-    "points": 137,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": false
   },
@@ -139277,7 +139277,7 @@
     "positionText": "6",
     "constructorId": "racing-bulls",
     "engineManufacturerId": "honda-rbpt",
-    "points": 92,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": false
   },
@@ -139290,7 +139290,7 @@
     "positionText": "7",
     "constructorId": "aston-martin",
     "engineManufacturerId": "mercedes",
-    "points": 80,
+    "points": 0,
     "positionsGained": 1,
     "championshipWon": false
   },
@@ -139303,7 +139303,7 @@
     "positionText": "8",
     "constructorId": "haas",
     "engineManufacturerId": "ferrari",
-    "points": 73,
+    "points": 0,
     "positionsGained": -1,
     "championshipWon": false
   },
@@ -139316,7 +139316,7 @@
     "positionText": "9",
     "constructorId": "audi",
     "engineManufacturerId": "ferrari",
-    "points": 68,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": false
   },
@@ -139329,7 +139329,7 @@
     "positionText": "10",
     "constructorId": "alpine",
     "engineManufacturerId": "renault",
-    "points": 22,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": false
   },
@@ -139342,7 +139342,7 @@
     "positionText": "1",
     "constructorId": "mclaren",
     "engineManufacturerId": "mercedes",
-    "points": 833,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": true
   },
@@ -139355,7 +139355,7 @@
     "positionText": "2",
     "constructorId": "mercedes",
     "engineManufacturerId": "mercedes",
-    "points": 469,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": false
   },
@@ -139368,7 +139368,7 @@
     "positionText": "3",
     "constructorId": "red-bull",
     "engineManufacturerId": "honda-rbpt",
-    "points": 451,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": false
   },
@@ -139381,7 +139381,7 @@
     "positionText": "4",
     "constructorId": "ferrari",
     "engineManufacturerId": "ferrari",
-    "points": 398,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": false
   },
@@ -139394,7 +139394,7 @@
     "positionText": "5",
     "constructorId": "williams",
     "engineManufacturerId": "mercedes",
-    "points": 137,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": false
   },
@@ -139407,7 +139407,7 @@
     "positionText": "6",
     "constructorId": "racing-bulls",
     "engineManufacturerId": "honda-rbpt",
-    "points": 92,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": false
   },
@@ -139420,7 +139420,7 @@
     "positionText": "7",
     "constructorId": "aston-martin",
     "engineManufacturerId": "mercedes",
-    "points": 89,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": false
   },
@@ -139433,7 +139433,7 @@
     "positionText": "8",
     "constructorId": "haas",
     "engineManufacturerId": "ferrari",
-    "points": 79,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": false
   },
@@ -139446,7 +139446,7 @@
     "positionText": "9",
     "constructorId": "audi",
     "engineManufacturerId": "ferrari",
-    "points": 70,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": false
   },
@@ -139459,7 +139459,7 @@
     "positionText": "10",
     "constructorId": "alpine",
     "engineManufacturerId": "renault",
-    "points": 22,
+    "points": 0,
     "positionsGained": 0,
     "championshipWon": false
   }
