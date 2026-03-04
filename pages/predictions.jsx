@@ -7,9 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Lista delle immagini dei piloti
 const driverImages = [
   '/data/ferrari-drivers/2025alpinepiegas01right.avif',
-  '/data/ferrari-drivers/2025alpinepiegas02right.avif',
-  '/data/ferrari-drivers/2025alpinepiegas03right.avif',
-  '/data/ferrari-drivers/2026astonmartinlanstr01right.avif',
+  '/data/ferrari-drivers/2025alpinefracol01right.avif',
+  '/data/ferrari-drivers/2026astonmartinferalo01right.avif',
+  '/data/ferrari-drivers/2026astonmartinlanstr02right.avif',
   '/data/ferrari-drivers/2026audigabbor01right.avif',
   '/data/ferrari-drivers/2026audinichul01right.avif',
   '/data/ferrari-drivers/2026cadillacserper01right.avif',
