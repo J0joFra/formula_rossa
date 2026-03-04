@@ -17,8 +17,6 @@ const PTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
 const ptsFor = (p) => (p >= 1 && p <= 10) ? PTS[p - 1] : 0;
 
 // ─── ALIAS circuitId 2026 → id reale nei JSON storici F1DB ───────────────────
-// I JSON usano id come "albert-park", "marina-bay" ecc.
-// Questa mappa risolve eventuali discrepanze di naming
 const CIRCUIT_ALIAS = {
   'albert-park':      'albert-park',
   'shanghai':         'shanghai',
@@ -282,10 +280,15 @@ export default function PredictorSection() {
 
         // Tutti i piloti con almeno 20 gare
         const driverMap = Object.fromEntries(rawDrivers.map(d => [d.id, d]));
-        const counts    = results.reduce((acc, r) => { acc[r.driverId] = (acc[r.driverId] ?? 0) + 1; return acc; }, {});
-        const activeDrivers = Object.entries(counts)
-          .filter(([, c]) => c >= 20)
-          .map(([id]) => ({ id, number: driverMap[id]?.permanentNumber ?? null }))
+        // Solo piloti che hanno gareggiato nel 2026
+        const drivers2026Ids = [...new Set(results.filter(r => r.year === 2026).map(r => r.driverId))];
+        // Fallback: se non ci sono dati 2026, usa piloti con ≥20 gare totali
+        const driverPool = drivers2026Ids.length > 0
+          ? drivers2026Ids
+          : Object.entries(results.reduce((acc, r) => { acc[r.driverId] = (acc[r.driverId] ?? 0) + 1; return acc; }, {}))
+              .filter(([, c]) => c >= 20).map(([id]) => id);
+        const activeDrivers = driverPool
+          .map(id => ({ id, number: driverMap[id]?.permanentNumber ?? null }))
           .sort((a, b) => a.id.localeCompare(b.id));
 
         // Gare 2026 già completate
@@ -659,12 +662,19 @@ export default function PredictorSection() {
                 })}
               </div>
 
-              {/* STORICO SUL CIRCUITO */}
+              {/* STORICO SUL CIRCUITO — mostrato solo se ci sono dati */}
+              {(predictions.primary.circuit || predictions.secondary.circuit) && (
               <div className="grid grid-cols-2 gap-4">
                 {(['primary', 'secondary']).map((key) => {
                   const drv   = key === 'primary' ? primaryDriver : secondaryDriver;
                   const color = DRIVER_COLOR[key];
                   const data  = predictions[key];
+                  if (!data.circuit) return (
+                    <div key={key} className="bg-zinc-900/30 border border-white/5 rounded-3xl p-5 flex flex-col items-center justify-center text-center gap-2">
+                      <Target className="w-6 h-6 text-zinc-800" />
+                      <p className="text-zinc-700 text-[10px] uppercase font-bold">Nessuno storico su<br/>{targetRace.name.replace(' GP','')}</p>
+                    </div>
+                  );
                   return (
                     <div key={key} className="bg-zinc-900/60 border border-white/5 rounded-3xl p-5">
                       <div className="flex items-center gap-2 mb-4">
@@ -673,33 +683,24 @@ export default function PredictorSection() {
                           {drv?.id?.split('-').pop()} su {targetRace.name.replace(' GP', '')}
                         </p>
                       </div>
-                      {data.circuit ? (
-                        <div className="space-y-2">
-                          {[
-                            { label: 'Gare disputate', val: data.circuit.n },
-                            { label: 'Media posizione', val: data.circuit.avgPos.toFixed(1) + '°' },
-                            { label: 'Vittorie',        val: data.circuit.wins },
-                            { label: 'Podi',            val: data.circuit.podiums },
-                          ].map((s, i) => (
-                            <div key={i} className="flex justify-between items-center py-1 border-b border-white/5 last:border-0">
-                              <span className="text-[9px] text-zinc-600 uppercase font-bold">{s.label}</span>
-                              <span className="font-black text-sm text-white">{s.val}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center py-4 gap-2 text-center">
-                          <Target className="w-8 h-8 text-zinc-800" />
-                          <p className="text-zinc-600 text-xs leading-relaxed">
-                            Nessun risultato storico trovato<br />
-                            <span className="text-zinc-700">per <span className="text-zinc-500">{drv?.id}</span> su questo circuito</span>
-                          </p>
-                        </div>
-                      )}
+                      <div className="space-y-2">
+                        {[
+                          { label: 'Gare disputate', val: data.circuit.n },
+                          { label: 'Media posizione', val: data.circuit.avgPos.toFixed(1) + '°' },
+                          { label: 'Vittorie',        val: data.circuit.wins },
+                          { label: 'Podi',            val: data.circuit.podiums },
+                        ].map((s, i) => (
+                          <div key={i} className="flex justify-between items-center py-1 border-b border-white/5 last:border-0">
+                            <span className="text-[9px] text-zinc-600 uppercase font-bold">{s.label}</span>
+                            <span className="font-black text-sm text-white">{s.val}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   );
                 })}
               </div>
+              )}
 
               {/* PROIEZIONE CAMPIONATO */}
               <div className="bg-zinc-900/60 border border-white/5 rounded-3xl p-6">
@@ -758,6 +759,13 @@ export default function PredictorSection() {
                               r.positionNumber <= 10 ? 'bg-green-500/10 text-green-500' :
                               'bg-zinc-800 text-zinc-500'
                             }`}>{r.positionNumber}</div>
+                            {/* Bandierina circuito */}
+                            {CIRCUIT_COUNTRY[r._circuitId] ? (
+                              <div className="w-7 h-5 rounded overflow-hidden shrink-0 border border-white/10">
+                                <img src={`https://flagcdn.com/w40/${CIRCUIT_COUNTRY[r._circuitId]}.png`}
+                                  className="w-full h-full object-cover" alt="" />
+                              </div>
+                            ) : null}
                             <div className="flex-1 min-w-0">
                               <p className="font-black text-[11px] truncate">{r._circuitId ?? '—'}</p>
                               <p className="text-zinc-700 text-[9px]">{r.year} R{r.round}</p>
