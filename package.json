@@ -22,7 +22,8 @@
     "@tanstack/react-virtual": "^3.0.0",
     "zustand": "^4.4.7",
     "date-fns": "^3.0.0",
-    "firebase": "^11.0.0"
+    "firebase": "^11.0.0",
+    "firebase-admin": "^12.0.0"
   },
   "devDependencies": {
     "tailwindcss": "^3.3.6",
