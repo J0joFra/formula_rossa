@@ -17,6 +17,8 @@ const PTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
 const ptsFor = (p) => (p >= 1 && p <= 10) ? PTS[p - 1] : 0;
 
 // ─── ALIAS circuitId 2026 → id reale nei JSON storici F1DB ───────────────────
+// I JSON usano id come "albert-park", "marina-bay" ecc.
+// Questa mappa risolve eventuali discrepanze di naming
 const CIRCUIT_ALIAS = {
   'albert-park':      'albert-park',
   'shanghai':         'shanghai',
@@ -44,44 +46,51 @@ const CIRCUIT_ALIAS = {
   'yas-marina':       'yas-marina',
 };
 
-// ─── CODICI PAESE per flagcdn.com ─────────────────────────────────────────────
-const circuitToCountry = {
-  'monza': 'it', 'autodromo-nazionale-di-monza': 'it', 'milan': 'it', 'imola': 'it', 'enzo-e-dino-ferrari': 'it',
-  'mugello': 'it', 'bologna': 'it', 'pescara': 'it', 'silverstone': 'gb', 'silverstone-circuit': 'gb',
-  'northamptonshire': 'gb', 'brands-hatch': 'gb', 'kent': 'gb', 'donington': 'gb', 'aintree': 'gb',
-  'liverpool': 'gb', 'spa': 'be', 'spa-francorchamps': 'be', 'stavelot': 'be', 'zolder': 'be',
-  'heusden-zolder': 'be', 'nivelles': 'be', 'brussels': 'be', 'zandvoort': 'nl', 'circuit-zandvoort': 'nl',
-  'catalunya': 'es', 'barcelona': 'es', 'montmelo': 'es', 'jerez': 'es', 'valencia': 'es',
-  'valencia-street-circuit': 'es', 'pedralbes': 'es', 'montjuic': 'es', 'madrid': 'es', 'madring': 'es', 'jarama': 'es',
-  'hungaroring': 'hu', 'budapest': 'hu', 'mogyorod': 'hu', 'red-bull-ring': 'at', 'spielberg': 'at',
-  'zeltweg': 'at', 'oesterreichring': 'at', 'styria': 'at', 'magny-cours': 'fr', 'nevers': 'fr',
-  'paul-ricard': 'fr', 'le-castellet': 'fr', 'ricard': 'fr', 'reims': 'fr', 'dijon': 'fr',
-  'dijon-prenois': 'fr', 'rouen': 'fr', 'essarts': 'fr', 'charade': 'fr', 'clermont-ferrand': 'fr',
-  'lemans': 'fr', 'nurburgring': 'de', 'nurburg': 'de', 'hockenheimring': 'de', 'hockenheim': 'de',
-  'avus': 'de', 'berlin': 'de', 'estoril': 'pt', 'cascais': 'pt', 'portimao': 'pt',
-  'algarve': 'pt', 'boavista': 'pt', 'oporto': 'pt', 'monsanto': 'pt', 'lisbon': 'pt',
-  'bremgarten': 'ch', 'bern': 'ch', 'anderstorp': 'se', 'scandinavian-raceway': 'se', 'monaco': 'mc',
-  'monte-carlo': 'mc', 'circuit-de-monaco': 'mc', 'bakú': 'az', 'baku': 'az', 'azerbaijan': 'az',
-  'americas': 'us', 'cota': 'us', 'austin': 'us', 'circuit-of-the-americas': 'us', 'miami': 'us',
-  'miami-international-autodrome': 'us', 'vegas': 'us', 'las-vegas': 'us', 'las-vegas-strip': 'us', 'caesars-palace': 'us',
-  'indianapolis': 'us', 'indianapolis-motor-speedway': 'us', 'watkins-glen': 'us', 'long-beach': 'us', 'phoenix': 'us',
-  'detroit': 'us', 'dallas': 'us', 'sebring': 'us', 'riverside': 'us', 'villeneuve': 'ca',
-  'montreal': 'ca', 'circuit-gilles-villeneuve': 'ca', 'mosport': 'ca', 'bowmanville': 'ca', 'tremblant': 'ca',
-  'st-jovite': 'ca', 'interlagos': 'br', 'sao-paulo': 'br', 'são-paulo': 'br', 'jose-carlos-pace': 'br',
-  'jacarepagua': 'br', 'rio-de-janeiro': 'br', 'rodriguez': 'mx', 'hermanos-rodriguez': 'mx', 'mexico-city': 'mx',
-  'galvez': 'ar', 'buenos-aires': 'ar', 'oscar-galvez': 'ar',
-  'juan-y-oscar-galvez': 'ar', 'juan-y-ignacio-cobos': 'ar', 'carlos-pace': 'br', 'juan-y-ignacio-cobos': 'ar',
-  'suzuka': 'jp', 'suzuka-circuit': 'jp', 'mie': 'jp', 'fuji': 'jp', 'fuji-speedway': 'jp',
-  'oyama': 'jp', 'okayama': 'jp', 'ti-circuit': 'jp', 'shanghai': 'cn', 'shanghai-international-circuit': 'cn',
-  'marina-bay': 'sg', 'singapore': 'sg', 'sepang': 'my', 'kuala-lumpur': 'my', 'yeongam': 'kr',
-  'korea-international-circuit': 'kr', 'buddh': 'in', 'greater-noida': 'in', 'bahrain': 'bh', 'sakhir': 'bh',
-  'manama': 'bh', 'bahrain-international-circuit': 'bh', 'losail': 'qa', 'lusail': 'qa', 'lusail-international-circuit': 'qa',
-  'jeddah': 'sa', 'jeddah-corniche-circuit': 'sa', 'yas-marina': 'ae', 'abu-dhabi': 'ae', 'yas-marina-circuit': 'ae',
-  'istanbul': 'tr', 'istanbul-park': 'tr', 'sochi': 'ru', 'sochi-autodrom': 'ru', 'kyalami': 'za',
-  'midrand': 'za', 'george': 'za', 'prince-george': 'za', 'adelaide': 'au', 'albert-park': 'au',
-  'melbourne': 'au', 'ain-diab': 'ma', 'casablanca': 'ma', 'albert_park': 'au', 'marina_bay': 'sg', 'yas_marina': 'ae', 'paul_ricard': 'fr', 'watkins_glen': 'us',
-  'long_beach': 'us', 'las_vegas': 'us', 'jose_carlos_pace': 'br', 'hermanos_rodriguez': 'mx', 'mexico_city': 'mx',
-  'red_bull_ring': 'at', 'silverstone_circuit': 'gb', 'spa_francorchamps': 'be', 'circuit_de_monaco': 'mc', 'fuji_speedway': 'jp'
+// ─── CODICI PAESE per flagcdn.com (mappa completa, include varianti storiche) ──
+const CIRCUIT_COUNTRY = {
+  // 2026 calendar
+  'albert-park':'au','shanghai':'cn','suzuka':'jp','bahrain':'bh','jeddah':'sa',
+  'miami':'us','imola':'it','monte-carlo':'mc','barcelona':'es','villeneuve':'ca',
+  'red-bull-ring':'at','silverstone':'gb','hungaroring':'hu','spa-francorchamps':'be',
+  'zandvoort':'nl','monza':'it','baku':'az','marina-bay':'sg','austin':'us',
+  'rodriguez':'mx','interlagos':'br','las-vegas':'us','lusail':'qa','yas-marina':'ae',
+  // varianti storiche F1DB
+  'autodromo-nazionale-di-monza':'it','milan':'it','enzo-e-dino-ferrari':'it','mugello':'it',
+  'bologna':'it','pescara':'it','silverstone-circuit':'gb','northamptonshire':'gb',
+  'brands-hatch':'gb','kent':'gb','donington':'gb','aintree':'gb','liverpool':'gb',
+  'spa':'be','stavelot':'be','zolder':'be','heusden-zolder':'be','nivelles':'be','brussels':'be',
+  'circuit-zandvoort':'nl','catalunya':'es','montmelo':'es','jerez':'es','valencia':'es',
+  'valencia-street-circuit':'es','pedralbes':'es','montjuic':'es','madrid':'es','jarama':'es',
+  'madring':'es','budapest':'hu','mogyorod':'hu','spielberg':'at','zeltweg':'at',
+  'oesterreichring':'at','styria':'at','magny-cours':'fr','nevers':'fr','paul-ricard':'fr',
+  'le-castellet':'fr','ricard':'fr','reims':'fr','dijon':'fr','dijon-prenois':'fr',
+  'rouen':'fr','essarts':'fr','charade':'fr','clermont-ferrand':'fr','lemans':'fr',
+  'nurburgring':'de','nurburg':'de','hockenheimring':'de','hockenheim':'de','avus':'de','berlin':'de',
+  'estoril':'pt','cascais':'pt','portimao':'pt','algarve':'pt','boavista':'pt',
+  'oporto':'pt','monsanto':'pt','lisbon':'pt','bremgarten':'ch','bern':'ch',
+  'anderstorp':'se','scandinavian-raceway':'se','monaco':'mc','circuit-de-monaco':'mc',
+  'bakú':'az','azerbaijan':'az','americas':'us','cota':'us','circuit-of-the-americas':'us',
+  'miami-international-autodrome':'us','vegas':'us','las-vegas-strip':'us','caesars-palace':'us',
+  'indianapolis':'us','indianapolis-motor-speedway':'us','watkins-glen':'us',
+  'long-beach':'us','phoenix':'us','detroit':'us','dallas':'us','sebring':'us','riverside':'us',
+  'montreal':'ca','circuit-gilles-villeneuve':'ca','mosport':'ca','bowmanville':'ca',
+  'tremblant':'ca','st-jovite':'ca','sao-paulo':'br','são-paulo':'br','jose-carlos-pace':'br',
+  'jacarepagua':'br','rio-de-janeiro':'br','hermanos-rodriguez':'mx','mexico-city':'mx',
+  'galvez':'ar','buenos-aires':'ar','oscar-galvez':'ar','juan-y-oscar-galvez':'ar',
+  'suzuka-circuit':'jp','mie':'jp','fuji':'jp','fuji-speedway':'jp','oyama':'jp',
+  'okayama':'jp','ti-circuit':'jp','shanghai-international-circuit':'cn',
+  'singapore':'sg','sepang':'my','kuala-lumpur':'my','yeongam':'kr',
+  'korea-international-circuit':'kr','buddh':'in','greater-noida':'in',
+  'sakhir':'bh','manama':'bh','bahrain-international-circuit':'bh',
+  'losail':'qa','lusail-international-circuit':'qa','jeddah-corniche-circuit':'sa',
+  'abu-dhabi':'ae','yas-marina-circuit':'ae','istanbul':'tr','istanbul-park':'tr',
+  'sochi':'ru','sochi-autodrom':'ru','kyalami':'za','midrand':'za','george':'za',
+  'adelaide':'au','melbourne':'au','ain-diab':'ma','casablanca':'ma',
+  // varianti underscore
+  'albert_park':'au','marina_bay':'sg','yas_marina':'ae','paul_ricard':'fr',
+  'watkins_glen':'us','long_beach':'us','las_vegas':'us','jose_carlos_pace':'br',
+  'hermanos_rodriguez':'mx','mexico_city':'mx','red_bull_ring':'at',
+  'silverstone_circuit':'gb','spa_francorchamps':'be','circuit_de_monaco':'mc','fuji_speedway':'jp',
 };
 
 // ─── CALENDARIO 2026 ──────────────────────────────────────────────────────────
@@ -114,9 +123,10 @@ const CALENDAR_2026 = [
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
 async function loadJSON(path) {
-  const res = await fetch(path);
-  if (!res.ok) throw new Error(`Cannot load ${path}`);
-  return res.json();
+  try {
+    const res = await fetch(path);
+    return res.ok ? await res.json() : null;
+  } catch { return null; }
 }
 
 function yearWeight(year, currentYear) {
@@ -256,6 +266,10 @@ export default function PredictorSection() {
           loadJSON('/data/f1db-circuits.json'),
           loadJSON('/data/f1db-drivers.json'),
         ]);
+
+        if (!rawResults || !rawRaces || !rawCircuits || !rawDrivers) {
+          throw new Error('Uno o più file JSON non trovati in public/data/');
+        }
 
         const racesMap    = Object.fromEntries(rawRaces.map(r => [r.id, r]));
         const circuitsMap = Object.fromEntries(rawCircuits.map(c => [c.id, c]));
