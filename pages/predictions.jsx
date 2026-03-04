@@ -7,9 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Lista delle immagini dei piloti
 const driverImages = [
   '/data/ferrari-drivers/2025alpinepiegas01right.avif',
-  '/data/ferrari-drivers/2025alpinefracol01right.avif',
-  '/data/ferrari-drivers/2026astonmartinferalo01right.avif',
-  '/data/ferrari-drivers/2026astonmartinlanstr02right.avif',
+  '/data/ferrari-drivers/2026alpinefracol01right.avif',
+  '/data/ferrari-drivers/2025astonmartinferalo01right.avif',
+  '/data/ferrari-drivers/2026astonmartinlanstr01right.avif',
   '/data/ferrari-drivers/2026audigabbor01right.avif',
   '/data/ferrari-drivers/2026audinichul01right.avif',
   '/data/ferrari-drivers/2026cadillacserper01right.avif',
@@ -105,21 +105,6 @@ export default function PredictionsPage() {
                             alt="Ferrari Driver"
                             className="w-full h-full object-contain drop-shadow-2xl"
                           />
-                          
-                          {/* Indicatori di cambiamento immagine */}
-                          <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2">
-                            {driverImages.map((_, index) => (
-                              <button
-                                key={index}
-                                onClick={() => setCurrentImageIndex(index)}
-                                className={`w-2 h-2 rounded-full transition-all ${
-                                  index === currentImageIndex 
-                                    ? 'bg-red-600 w-4' 
-                                    : 'bg-gray-600 hover:bg-gray-400'
-                                }`}
-                              />
-                            ))}
-                          </div>
                         </motion.div>
                       </AnimatePresence>
                     </div>
