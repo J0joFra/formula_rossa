@@ -166,9 +166,9 @@ export default function QualifyingToRaceProgression({ raceResults, year, grandPr
       <div className="flex flex-wrap items-start justify-between mb-5 gap-4">
         <div>
           <h2 className="text-xl font-black tracking-tight">
-            QUALIFYING → RACE <span className="text-red-600">PROGRESSION</span>
+            QUALIFYING → RACE <span className="text-red-450">PROGRESSION</span>
           </h2>
-          <p className="text-xs text-zinc-600 font-mono mt-1">
+          <p className="text-xs text-zinc-450 font-mono mt-1">
             {year} {grandPrix} · Grid vs Race finish
           </p>
         </div>

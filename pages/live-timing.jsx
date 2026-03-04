@@ -20,10 +20,8 @@ import {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 var SESSION_TYPES = [
-  { id: 'FP1', name: 'Practice 1' }, { id: 'FP2', name: 'Practice 2' },
-  { id: 'FP3', name: 'Practice 3' }, { id: 'Q',   name: 'Qualifying'  },
-  { id: 'R',   name: 'Race'        }, { id: 'S',   name: 'Sprint'      },
-  { id: 'SQ',  name: 'Sprint Qualifying' },
+  { id: 'R',   name: 'Race'},
+  { id: 'S',   name: 'Sprint'}
 ];
 var AVAILABLE_YEARS = [2026, 2025, 2024, 2023];
 
@@ -885,7 +883,7 @@ export default function LiveTimingPage() {
   const [year, setYear]               = useState(null);
   const [meetings, setMeetings]       = useState([]);
   const [meeting, setMeeting]         = useState(null);
-  const [sessionType, setSessionType] = useState('Q');
+  const [sessionType, setSessionType] = useState('R');
   const [sessionInfo, setSessionInfo] = useState(null);
   const [drivers, setDrivers]         = useState([]);
   const [driverCode, setDriverCode]   = useState(null);
@@ -924,7 +922,7 @@ export default function LiveTimingPage() {
   useEffect(() => {
     (async () => {
       try {
-        const latest = await getLatestSession('Q');
+        const latest = await getLatestSession('R');
         if (!latest?.year) return;
         const ms = await getMeetings(latest.year);
         setYear(latest.year); setMeetings(ms);
