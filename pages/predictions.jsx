@@ -13,6 +13,17 @@ export default function PredictionsPage() {
         <div className="max-w-7xl mx-auto px-4">
           {/* componente PredictorSection*/}
           <div className="bg-zinc-900/50 rounded-3xl border border-white/5 overflow-hidden">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-14">
+              <p className="text-red-600 text-[10px] font-black uppercase tracking-[0.5em] mb-3">Scuderia Ferrari · Predizione 2026</p>
+              <h2 className="text-red-600 font-black text-xs uppercase tracking-[0.4em] mb-4">
+                Race <span className="text-yellow-600"> Predictor</span>
+              </h2>
+              <div className="flex flex-wrap items-center gap-4">
+                <p className="text-white-500 text-sm max-w-xl leading-relaxed">
+                  Predizioni statistiche basate su dati F1DB (1950→2026). Media ponderata per anno, storico circuito, forma recente.
+                </p>
+              </div>
+            </motion.div>
             <PredictorSection />
           </div>
         </div>
