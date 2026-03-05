@@ -466,10 +466,10 @@ export default function AboutPage({ heroImages = [] }) {
                     </p>
                     <div className="flex flex-wrap gap-1.5 my-4">
                       {['Design', 'Performance', 'UX'].map(t => (
-                        <span key={t} className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-zinc-700/50 text-zinc-400/70 bg-zinc-800/30">{t}</span>
+                        <span key={t} className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-white-700/50 text-zinc-400/70 bg-zinc-800/30">{t}</span>
                       ))}
                     </div>
-                    <Link href="/statistics" className="mt-auto flex items-center justify-between px-4 py-3 rounded-xl border border-zinc-700/40 hover:border-zinc-500/60 hover:bg-zinc-700/20 text-zinc-400 hover:text-zinc-200 transition-all duration-200 group/btn">
+                    <Link href="/statistics" className="mt-auto flex items-center justify-between px-4 py-3 rounded-xl border border-white-700/40 hover:border-zinc-500/60 hover:bg-zinc-700/20 text-zinc-400 hover:text-zinc-200 transition-all duration-200 group/btn">
                       <span className="text-[10px] font-black uppercase tracking-widest">Scopri la piattaforma</span>
                       <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
                     </Link>
