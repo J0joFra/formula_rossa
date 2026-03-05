@@ -213,7 +213,7 @@ export default function AboutPage({ heroImages = [] }) {
           ══════════════════════════════════════ */}
           <section
             ref={heroRef}
-            className="relative min-h-[92vh] flex items-center py-24 px-4 overflow-hidden"
+            className="relative min-h-[92vh] flex items-center py-15 px-4 overflow-hidden"
             aria-label="Presentazione Formula Rossa"
           >
             {/* Sfondi stratificati (rimangono invariati) */}
@@ -321,7 +321,7 @@ export default function AboutPage({ heroImages = [] }) {
           {/* ══════════════════════════════════════
               2. IL NOSTRO IMPEGNO — card premium
           ══════════════════════════════════════ */}
-          <section className="py-16 px-4 relative overflow-hidden" aria-label="Il nostro impegno">
+          <section className="py-12 px-4 relative overflow-hidden" aria-label="Il nostro impegno">
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-600/40 to-transparent" />
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-32 bg-gradient-to-b from-red-600/50 to-transparent" />
 
@@ -527,7 +527,7 @@ export default function AboutPage({ heroImages = [] }) {
           {/* ══════════════════════════════════════
               4. FEATURES
           ══════════════════════════════════════ */}
-          <section className="py-16 px-4 relative overflow-hidden" aria-label="Funzionalità">
+          <section className="py-12 px-4 relative overflow-hidden" aria-label="Funzionalità">
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
             {/* Glow background destro */}
             <div className="absolute -right-32 top-1/2 -translate-y-1/2 w-96 h-96 bg-red-600/5 rounded-full blur-[120px] pointer-events-none" />
@@ -591,7 +591,7 @@ export default function AboutPage({ heroImages = [] }) {
           {/* ══════════════════════════════════════
               5. TIMELINE
           ══════════════════════════════════════ */}
-          <section className="py-16 px-4 relative overflow-hidden" aria-label="Storia del progetto">
+          <section className="py-12 px-4 relative overflow-hidden" aria-label="Storia del progetto">
             {/* Sfondo uniforme come le altre sezioni */}
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
@@ -738,7 +738,7 @@ export default function AboutPage({ heroImages = [] }) {
           {/* ══════════════════════════════════════
               6. FOUNDER
           ══════════════════════════════════════ */}
-          <section className="py-16 px-4 relative overflow-hidden" aria-label="Il fondatore">
+          <section className="py-12 px-4 relative overflow-hidden" aria-label="Il fondatore">
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
             {/* Glow sinistra */}
             <div className="absolute -left-32 top-1/2 -translate-y-1/2 w-96 h-96 bg-red-600/[0.06] rounded-full blur-[120px] pointer-events-none" />
@@ -856,7 +856,7 @@ export default function AboutPage({ heroImages = [] }) {
           {/* ══════════════════════════════════════
               7. YOUTUBE
           ══════════════════════════════════════ */}
-          <section className="py-16 px-4 relative overflow-hidden" aria-label="Video YouTube">
+          <section className="py-12 px-4 relative overflow-hidden" aria-label="Video YouTube">
             <div className="absolute inset-0 bg-[#060606]" />
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-600/40 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
@@ -909,7 +909,7 @@ export default function AboutPage({ heroImages = [] }) {
           {/* ══════════════════════════════════════
               8. TECH STACK
           ══════════════════════════════════════ */}
-          <section className="py-20 px-4 relative overflow-hidden" aria-label="Tecnologie">
+          <section className="py-12 px-4 relative overflow-hidden" aria-label="Tecnologie">
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
 
             <div className="max-w-3xl mx-auto text-center">
@@ -951,7 +951,7 @@ export default function AboutPage({ heroImages = [] }) {
           {/* ══════════════════════════════════════
               9. CTA
           ══════════════════════════════════════ */}
-          <section className="py-36 px-4 relative overflow-hidden" aria-label="Esplora la piattaforma">
+          <section className="py-12 px-4 relative overflow-hidden" aria-label="Esplora la piattaforma">
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-600/30 to-transparent" />
             {/* Glow radiale pulsante */}
             <div className="absolute inset-0 pointer-events-none">
