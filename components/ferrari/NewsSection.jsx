@@ -3,9 +3,9 @@ import { motion } from 'framer-motion';
 import { ExternalLink, RefreshCw, Newspaper } from 'lucide-react';
 
 const CATEGORY_STYLES = {
-  SCUDERIA: { bg: 'bg-red-600/15', border: 'border-red-500/30', text: 'text-red-400' },
-  PILOTI:   { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-400' },
-  'F1 NEWS':{ bg: 'bg-zinc-700/40', border: 'border-zinc-500/30', text: 'text-zinc-300' },
+  SCUDERIA:  { bg: 'bg-red-600/15',    border: 'border-red-500/30',    text: 'text-red-400'    },
+  PILOTI:    { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-400' },
+  'F1 NEWS': { bg: 'bg-zinc-700/40',   border: 'border-zinc-500/30',   text: 'text-zinc-300'   },
 };
 
 export default function NewsSection() {
@@ -34,7 +34,7 @@ export default function NewsSection() {
           if (t.includes("ferrari")) category = "SCUDERIA";
           if (t.includes("leclerc") || t.includes("hamilton")) category = "PILOTI";
 
-          // Estrae la prima immagine dall'enclosure o dal content
+          // Estrae thumbnail: enclosure → content img tag → item.thumbnail
           let thumbnail = item.enclosure?.link || null;
           if (!thumbnail && item.content) {
             const match = item.content.match(/<img[^>]+src="([^">]+)"/);
@@ -55,7 +55,7 @@ export default function NewsSection() {
         setNews(formattedNews);
       }
     } catch (error) {
-      console.error("Errore rapido o timeout:", error);
+      console.error("Errore o timeout news:", error);
     } finally {
       setIsLoading(false);
     }
@@ -84,7 +84,7 @@ export default function NewsSection() {
             viewport={{ once: true }}
             className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6"
           >
-            <div className="text-left">
+            <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-600/10 text-red-500 text-[10px] font-black uppercase tracking-widest mb-4">
                 <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
                 Live Updates
@@ -93,17 +93,16 @@ export default function NewsSection() {
                 Flash <span className="text-red-600">News</span>
               </h2>
               <p className="mt-2 text-zinc-500 text-sm max-w-md">
-                Le ultime notizie dalla Formula 1 e dalla Scuderia Ferrari, aggiornate in tempo reale
-                direttamente dal paddock.
+                Le ultime notizie dalla Formula 1 e dalla Scuderia Ferrari, aggiornate in tempo reale.
               </p>
             </div>
-            <p className="text-zinc-500 text-sm max-w-xs border-l border-zinc-800 pl-4 font-medium italic hidden md:block">
+            <p className="text-zinc-500 text-sm max-w-xs border-l border-zinc-800 pl-4 italic hidden md:block">
               Ultime 3 notizie in tempo reale dal paddock di Motorsport.com
             </p>
           </motion.div>
 
           {isLoading && news.length === 0 ? (
-            <div className="grid md:grid-cols-3 gap-6" aria-label="Caricamento notizie in corso">
+            <div className="grid md:grid-cols-3 gap-6" aria-label="Caricamento notizie">
               {[1, 2, 3].map(i => (
                 <div key={i} className="h-64 bg-zinc-900/50 animate-pulse rounded-2xl border border-white/5" aria-hidden="true" />
               ))}
@@ -127,19 +126,20 @@ export default function NewsSection() {
                         {item.thumbnail ? (
                           <img
                             src={item.thumbnail}
-                            alt={`Immagine articolo: ${item.title}`}
+                            alt={`Immagine per: ${item.title}`}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             loading="lazy"
-                            onError={(e) => { e.currentTarget.parentElement.classList.add('thumb-fallback'); e.currentTarget.style.display = 'none'; }}
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900">
                             <Newspaper className="w-10 h-10 text-zinc-600" aria-hidden="true" />
                           </div>
                         )}
-                        {/* Gradient overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent" aria-hidden="true" />
-                        {/* Categoria badge sovrapposta */}
+                        {/* Badge categoria sovrapposto */}
                         <span className={`absolute top-3 left-3 text-[9px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full border backdrop-blur-sm ${catStyle.bg} ${catStyle.border} ${catStyle.text}`}>
                           {item.category}
                         </span>
@@ -162,7 +162,7 @@ export default function NewsSection() {
                             href={item.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            aria-label={`Leggi l'articolo: ${item.title}`}
+                            aria-label={`Leggi articolo completo: ${item.title}`}
                             className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500 hover:text-red-400 transition-colors"
                           >
                             Leggi
