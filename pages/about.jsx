@@ -25,70 +25,70 @@ const FOUNDER = {
 };
 
 const STATS = [
-  { value: '75+',   label: 'Anni di storia Ferrari', icon: Trophy   },
-  { value: '1000+', label: 'Gare analizzate',         icon: Flag     },
-  { value: '100+',  label: 'Piloti nel database',     icon: Users    },
-  { value: '500K+', label: 'Datapoint elaborati',     icon: Database },
+  { value: '75+',   label: 'Anni di storia Ferrari', icon: Trophy,   glow: 'shadow-red-600/40',   ring: 'from-red-500 to-red-700',   num: 'text-red-500'    },
+  { value: '1000+', label: 'Gare analizzate',         icon: Flag,     glow: 'shadow-yellow-500/30', ring: 'from-yellow-400 to-amber-600', num: 'text-yellow-400' },
+  { value: '100+',  label: 'Piloti nel database',     icon: Users,    glow: 'shadow-red-600/40',   ring: 'from-red-500 to-red-700',   num: 'text-red-500'    },
+  { value: '500K+', label: 'Datapoint elaborati',     icon: Database, glow: 'shadow-yellow-500/30', ring: 'from-yellow-400 to-amber-600', num: 'text-yellow-400' },
 ];
 
 const VALUES = [
-  { icon: Target, title: 'Trasparenza',  desc: 'Tutti i dati sono verificabili e tracciabili, con fonti ufficiali citate.' },
-  { icon: Heart,  title: 'Passione',     desc: 'Costruito da tifosi per tifosi, con attenzione ai dettagli che contano.' },
-  { icon: Award,  title: 'Qualità',      desc: 'Design curato, performance ottimizzata, esperienza utente premium.' },
-  { icon: Users,  title: 'Community',    desc: 'Uno spazio dove i tifosi possono interagire, competere e condividere.' },
+  { icon: Target, title: 'Trasparenza', desc: 'Tutti i dati sono verificabili e tracciabili, con fonti ufficiali citate.',          color: 'from-red-600/20 to-transparent',    border: 'hover:border-red-600/40',    iconBg: 'bg-red-600/15',    iconColor: 'text-red-500'    },
+  { icon: Heart,  title: 'Passione',    desc: 'Costruito da tifosi per tifosi, con attenzione ai dettagli che contano.',             color: 'from-yellow-500/15 to-transparent', border: 'hover:border-yellow-500/40', iconBg: 'bg-yellow-500/10', iconColor: 'text-yellow-400' },
+  { icon: Award,  title: 'Qualità',     desc: 'Design curato, performance ottimizzata, esperienza utente premium.',                  color: 'from-red-600/20 to-transparent',    border: 'hover:border-red-600/40',    iconBg: 'bg-red-600/15',    iconColor: 'text-red-500'    },
+  { icon: Users,  title: 'Community',   desc: 'Uno spazio dove i tifosi possono interagire, competere e condividere.',               color: 'from-yellow-500/15 to-transparent', border: 'hover:border-yellow-500/40', iconBg: 'bg-yellow-500/10', iconColor: 'text-yellow-400' },
 ];
 
 const FEATURES = [
   {
-    icon: BarChart3,
-    title: 'Statistiche Storiche',
-    accent: 'from-red-600/20',
+    icon: BarChart3, title: 'Statistiche Storiche',
+    gradient: 'from-red-600 to-red-900', glow: 'group-hover:shadow-red-600/20',
     desc: 'Dal 1950 ad oggi: vittorie, pole position, giri veloci e punti campionato per ogni stagione Ferrari. Dati verificati e aggiornati ad ogni Gran Premio.',
     highlights: ['245 vittorie', '243 pole position', '16 titoli costruttori'],
+    tag: 'Storico',
   },
   {
-    icon: Zap,
-    title: 'AI Predictor',
-    accent: 'from-yellow-500/10',
-    desc: "Un algoritmo che analizza dati storici, condizioni meteo e forma recente per generare previsioni sul prossimo Gran Premio con accuratezza superiore all'80%.",
-    highlights: ['80% accuratezza', 'Machine Learning', 'Analisi real-time'],
+    icon: Zap, title: 'AI Predictor',
+    gradient: 'from-yellow-500 to-amber-700', glow: 'group-hover:shadow-yellow-500/20',
+    desc: "Algoritmo che analizza dati storici, meteo e forma recente per generare previsioni con accuratezza superiore all'80%.",
+    highlights: ['80% accuratezza', 'Machine Learning', 'Real-time'],
+    tag: 'AI',
   },
   {
-    icon: Users,
-    title: 'Fan Zone & Community',
-    accent: 'from-red-600/20',
-    desc: 'Mini-games, classifiche globali e SF Tokens. Un luogo dove la passione per la Ferrari diventa esperienza interattiva con migliaia di tifosi.',
-    highlights: ['10K+ utenti', 'Mini-games', 'Rewards esclusivi'],
+    icon: Users, title: 'Fan Zone',
+    gradient: 'from-red-500 to-rose-700', glow: 'group-hover:shadow-rose-600/20',
+    desc: 'Mini-games, classifiche globali e SF Tokens. La passione Ferrari diventa esperienza interattiva con migliaia di tifosi.',
+    highlights: ['10K+ utenti', 'Mini-games', 'Rewards'],
+    tag: 'Community',
   },
   {
-    icon: Database,
-    title: 'Database F1DB',
-    accent: 'from-zinc-500/10',
-    desc: 'I dati provengono dal progetto open-source F1DB, arricchiti con fonti ufficiali FIA. Ogni record è tracciabile e verificabile.',
-    highlights: ['Open source', 'Verificato FIA', '60+ anni dati'],
+    icon: Database, title: 'Database F1DB',
+    gradient: 'from-zinc-500 to-zinc-700', glow: 'group-hover:shadow-zinc-500/20',
+    desc: 'Dati dal progetto open-source F1DB, arricchiti con fonti ufficiali FIA. Ogni record è tracciabile e verificabile.',
+    highlights: ['Open source', 'Verificato FIA', '60+ anni'],
+    tag: 'Dati',
   },
   {
-    icon: Activity,
-    title: 'Live Timing',
-    accent: 'from-red-600/20',
-    desc: 'Durante i weekend di gara, aggiornamenti in tempo reale su classifiche, tempi sul giro e radiocomandi dal box Ferrari.',
-    highlights: ['Real-time', 'Team radio', 'Settori cronometrati'],
+    icon: Activity, title: 'Live Timing',
+    gradient: 'from-red-600 to-red-900', glow: 'group-hover:shadow-red-600/20',
+    desc: 'Durante i weekend di gara, aggiornamenti in tempo reale su classifiche, tempi e radiocomandi dal box Ferrari.',
+    highlights: ['Real-time', 'Team radio', 'Settori'],
+    tag: 'Live',
   },
   {
-    icon: Globe,
-    title: 'Multipiattaforma',
-    accent: 'from-zinc-500/10',
-    desc: 'Formula Rossa è ottimizzata per ogni dispositivo: desktop, tablet e mobile. Accessibile ovunque tu stia seguendo il Gran Premio.',
+    icon: Globe, title: 'Multipiattaforma',
+    gradient: 'from-amber-500 to-yellow-700', glow: 'group-hover:shadow-amber-500/20',
+    desc: 'Formula Rossa è ottimizzata per ogni dispositivo: desktop, tablet e mobile. Accessibile ovunque.',
     highlights: ['Responsive', 'PWA ready', 'Mobile first'],
+    tag: 'UX',
   },
 ];
 
 const TIMELINE = [
-  { year: 'Dic 2025', event: 'Idea e primo prototipo', desc: "Nasce l'idea di creare la piattaforma dati Ferrari definitiva per i tifosi.",    icon: '💡' },
-  { year: 'Gen 2026', event: 'Lancio Beta',              desc: 'Prima versione pubblica con statistiche storiche e confronto piloti.',             icon: '🚀' },
-  { year: 'Feb 2026', event: 'AI Predictor',             desc: "Integrazione dell'algoritmo di previsione basato su machine learning.",            icon: '🤖' },
-  { year: 'Feb 2026', event: 'Fan Zone',                 desc: 'Lancio della community interattiva con mini-games e sistema di reward.',            icon: '🏆' },
-  { year: 'Mar 2026', event: 'Versione ufficiale',       desc: 'Prima versione completa con dati real-time e integrazione app.',                   icon: '🏎️' },
+  { year: 'Dic 2025', event: 'Idea e primo prototipo', desc: "Nasce l'idea di creare la piattaforma dati Ferrari definitiva per i tifosi.", icon: '💡', color: 'border-yellow-500/40 bg-yellow-500/10', dot: 'bg-yellow-500' },
+  { year: 'Gen 2026', event: 'Lancio Beta',              desc: 'Prima versione pubblica con statistiche storiche e confronto piloti.',          icon: '🚀', color: 'border-red-600/40 bg-red-600/10',    dot: 'bg-red-500'    },
+  { year: 'Feb 2026', event: 'AI Predictor',             desc: "Integrazione dell'algoritmo di previsione basato su machine learning.",          icon: '🤖', color: 'border-yellow-500/40 bg-yellow-500/10', dot: 'bg-yellow-500' },
+  { year: 'Feb 2026', event: 'Fan Zone',                 desc: 'Lancio della community interattiva con mini-games e sistema di reward.',          icon: '🏆', color: 'border-red-600/40 bg-red-600/10',    dot: 'bg-red-500'    },
+  { year: 'Mar 2026', event: 'Versione ufficiale',       desc: 'Prima versione completa con dati real-time e integrazione app.',                 icon: '🏎️', color: 'border-yellow-500/40 bg-yellow-500/10', dot: 'bg-yellow-500' },
 ];
 
 const YOUTUBE_VIDEOS = [
@@ -98,21 +98,21 @@ const YOUTUBE_VIDEOS = [
 ];
 
 const TECH_STACK = [
-  { name: 'Next.js 14', category: 'Framework'  },
-  { name: 'React 18',   category: 'UI Library' },
-  { name: 'Tailwind',   category: 'Styling'    },
-  { name: 'Framer',     category: 'Animations' },
-  { name: 'Recharts',   category: 'Data Viz'   },
-  { name: 'F1DB',       category: 'Data'       },
-  { name: 'Next-Auth',  category: 'Auth'       },
-  { name: 'Vercel',     category: 'Hosting'    },
+  { name: 'Next.js 14', category: 'Framework',  color: 'hover:border-white/30 hover:text-white'     },
+  { name: 'React 18',   category: 'UI Library', color: 'hover:border-sky-500/40 hover:text-sky-300' },
+  { name: 'Tailwind',   category: 'Styling',    color: 'hover:border-cyan-500/40 hover:text-cyan-300' },
+  { name: 'Framer',     category: 'Animations', color: 'hover:border-purple-500/40 hover:text-purple-300' },
+  { name: 'Recharts',   category: 'Data Viz',   color: 'hover:border-green-500/40 hover:text-green-300' },
+  { name: 'F1DB',       category: 'Data',       color: 'hover:border-red-500/40 hover:text-red-300'  },
+  { name: 'Next-Auth',  category: 'Auth',       color: 'hover:border-yellow-500/40 hover:text-yellow-300' },
+  { name: 'Vercel',     category: 'Hosting',    color: 'hover:border-white/30 hover:text-white'      },
 ];
 
 /* ─────────────────────── COMPONENTI ─────────────────────── */
 
-function SectionLabel({ children }) {
+function SectionLabel({ children, color = 'text-red-500/60' }) {
   return (
-    <span className="block text-[10px] font-black uppercase tracking-[0.3em] text-red-600/50 mb-4">
+    <span className={`block text-[10px] font-black uppercase tracking-[0.3em] ${color} mb-4`}>
       {children}
     </span>
   );
@@ -126,21 +126,16 @@ function SectionTitle({ children, className = '' }) {
   );
 }
 
-function Divider() {
-  return <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />;
-}
-
 function YouTubeEmbed({ videoId, title, views, duration, index }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: index * 0.1, duration: 0.5 }}
+      transition={{ delay: index * 0.12, duration: 0.5 }}
       className="group"
     >
-      <div className="rounded-2xl overflow-hidden border border-white/[0.06] bg-zinc-900/50 transition-all duration-500 group-hover:border-red-600/25 group-hover:shadow-xl group-hover:shadow-red-600/5">
-        {/* Video embed */}
+      <div className="rounded-2xl overflow-hidden border border-white/[0.06] bg-zinc-900/60 transition-all duration-500 group-hover:border-red-600/30 group-hover:shadow-2xl group-hover:shadow-red-600/10">
         <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
           <iframe
             src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&color=red`}
@@ -151,23 +146,21 @@ function YouTubeEmbed({ videoId, title, views, duration, index }) {
             className="absolute inset-0 w-full h-full"
           />
         </div>
-        {/* Footer */}
-        <div className="px-4 py-3 border-t border-white/[0.04] flex items-center justify-between gap-3">
+        <div className="px-4 py-3 border-t border-white/[0.05] flex items-center justify-between gap-3 bg-zinc-900/40">
           <div className="min-w-0">
-            <p className="text-white/70 text-[11px] font-semibold truncate leading-tight">{title}</p>
-            <div className="flex items-center gap-3 mt-0.5">
-              <span className="text-zinc-600 text-[10px]">👁 {views}</span>
-              <span className="text-zinc-600 text-[10px]">⏱ {duration}</span>
+            <p className="text-white/80 text-[11px] font-bold truncate leading-tight">{title}</p>
+            <div className="flex items-center gap-3 mt-1">
+              <span className="text-zinc-500 text-[10px] font-mono">👁 {views}</span>
+              <span className="text-zinc-500 text-[10px] font-mono">⏱ {duration}</span>
             </div>
           </div>
           <a
             href={`https://www.youtube.com/watch?v=${videoId}`}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={`Guarda su YouTube: ${title}`}
-            className="flex-shrink-0 text-red-600/30 hover:text-red-500 transition-colors"
+            className="flex-shrink-0 w-7 h-7 rounded-lg bg-red-600/10 hover:bg-red-600 border border-red-600/20 hover:border-red-600 flex items-center justify-center transition-all duration-200"
           >
-            <ExternalLink className="w-3.5 h-3.5" />
+            <ExternalLink className="w-3 h-3 text-red-500 group-hover:text-white" />
           </a>
         </div>
       </div>
@@ -180,10 +173,9 @@ function YouTubeEmbed({ videoId, title, views, duration, index }) {
 export default function AboutPage({ heroImages = [] }) {
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
-  const heroY       = useTransform(scrollYProgress, [0, 1], ['0%', '18%']);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.85], [1, 0]);
+  const heroY       = useTransform(scrollYProgress, [0, 1], ['0%', '15%']);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.9], [1, 0]);
 
-  // Filtra solo immagini reali (no placeholder/pinterest)
   const realImages = heroImages.filter(
     (img) => img?.urls?.regular && !img.urls.regular.includes('pinterest')
   );
@@ -207,7 +199,7 @@ export default function AboutPage({ heroImages = [] }) {
     <>
       <SEO
         title="Chi Siamo"
-        description="Formula Rossa è una piattaforma indipendente di data intelligence dedicata alla Scuderia Ferrari in Formula 1. Scopri la storia del progetto, il team e la missione."
+        description="Formula Rossa è una piattaforma indipendente di data intelligence dedicata alla Scuderia Ferrari in Formula 1."
         path="/about"
         jsonLd={jsonLd}
       />
@@ -216,39 +208,50 @@ export default function AboutPage({ heroImages = [] }) {
         <Navigation />
         <main className="pt-20">
 
-          {/* ═══════════════════════════════════
+          {/* ══════════════════════════════════════
               1. HERO
-          ═══════════════════════════════════ */}
+          ══════════════════════════════════════ */}
           <section
             ref={heroRef}
-            className="relative min-h-[90vh] flex items-center py-24 px-4 overflow-hidden"
+            className="relative min-h-[92vh] flex items-center py-24 px-4 overflow-hidden"
             aria-label="Presentazione Formula Rossa"
           >
-            {/* Background */}
+            {/* Sfondi stratificati */}
             <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-              <div className="absolute inset-0 opacity-[0.035]" style={{
+              {/* Dot grid */}
+              <div className="absolute inset-0 opacity-[0.03]" style={{
                 backgroundImage: 'radial-gradient(circle at 1px 1px, #DC0000 1px, transparent 0)',
                 backgroundSize: '40px 40px',
               }} />
+              {/* Glow rosso pulsante */}
               <motion.div
-                animate={{ scale: [1, 1.1, 1], opacity: [0.07, 0.12, 0.07] }}
-                transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -top-40 -left-40 w-[700px] h-[700px] bg-red-600 rounded-full blur-[180px]"
+                animate={{ scale: [1, 1.15, 1], opacity: [0.12, 0.2, 0.12] }}
+                transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute -top-48 -left-48 w-[800px] h-[800px] bg-red-600 rounded-full blur-[200px]"
               />
-              <div className="absolute bottom-0 right-0 w-72 h-72 bg-yellow-500/[0.04] rounded-full blur-[100px]" />
-              <div className="absolute top-0 left-1/3 w-px h-full bg-gradient-to-b from-transparent via-red-600/10 to-transparent" />
+              {/* Glow oro */}
+              <motion.div
+                animate={{ scale: [1, 1.1, 1], opacity: [0.05, 0.1, 0.05] }}
+                transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+                className="absolute -bottom-32 right-0 w-[500px] h-[500px] bg-yellow-500 rounded-full blur-[160px]"
+              />
+              {/* Linee verticali decorative */}
+              <div className="absolute top-0 left-1/3 w-px h-full bg-gradient-to-b from-transparent via-red-600/15 to-transparent" />
+              <div className="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-transparent via-yellow-500/8 to-transparent" />
+              {/* Striscia diagonale decorativa */}
+              <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-red-600/[0.03] to-transparent" />
             </div>
 
             <div className="relative max-w-7xl mx-auto w-full">
               <div className="grid lg:grid-cols-2 gap-16 items-center">
 
-                {/* Testo */}
+                {/* Testo hero */}
                 <motion.div style={{ y: heroY, opacity: heroOpacity }}>
                   <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5 }}
-                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-600/10 border border-red-600/20 text-red-500 text-[10px] font-black uppercase tracking-[0.3em] mb-8"
+                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-red-600/20 to-red-600/5 border border-red-600/30 text-red-400 text-[10px] font-black uppercase tracking-[0.3em] mb-8"
                   >
                     <Heart className="w-3 h-3 fill-red-500" />
                     Il Progetto
@@ -263,16 +266,18 @@ export default function AboutPage({ heroImages = [] }) {
                     Una piattaforma<br />
                     per i{' '}
                     <span className="relative inline-block">
-                      <span className="text-red-600">Tifosi</span>
+                      <span className="bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">Tifosi</span>
                       <motion.span
                         initial={{ scaleX: 0 }}
                         animate={{ scaleX: 1 }}
                         transition={{ duration: 0.8, delay: 0.9 }}
-                        className="absolute -bottom-1 left-0 w-full h-0.5 bg-red-600 origin-left"
+                        className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-red-600 to-red-400 origin-left"
                       />
                     </span>
                     <br />
-                    <span className="text-red-600">Ferrari</span>
+                    <span className="bg-gradient-to-r from-red-500 via-red-600 to-yellow-500 bg-clip-text text-transparent">
+                      Ferrari
+                    </span>
                   </motion.h1>
 
                   <motion.p
@@ -294,68 +299,54 @@ export default function AboutPage({ heroImages = [] }) {
                   >
                     <Link
                       href="/statistics"
-                      className="inline-flex items-center gap-2 px-7 py-3.5 bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[11px] tracking-widest rounded-xl transition-all shadow-xl shadow-red-600/20 hover:shadow-red-600/35 hover:scale-[1.02]"
+                      className="inline-flex items-center gap-2 px-7 py-3.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-black uppercase text-[11px] tracking-widest rounded-xl transition-all shadow-xl shadow-red-600/30 hover:shadow-red-600/50 hover:scale-[1.02]"
                     >
                       Esplora le Statistiche <ChevronRight className="w-4 h-4" />
                     </Link>
                     <Link
                       href="/fanzone"
-                      className="inline-flex items-center gap-2 px-7 py-3.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 text-white font-black uppercase text-[11px] tracking-widest rounded-xl transition-all"
+                      className="inline-flex items-center gap-2 px-7 py-3.5 bg-white/[0.05] hover:bg-white/[0.09] border border-white/15 hover:border-yellow-500/40 text-white hover:text-yellow-300 font-black uppercase text-[11px] tracking-widest rounded-xl transition-all"
                     >
                       Fan Zone
                     </Link>
                   </motion.div>
                 </motion.div>
 
-                {/* Griglia immagini — solo immagini reali, stessa struttura */}
+                {/* Griglia immagini */}
                 <motion.div
                   initial={{ opacity: 0, x: 40 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
-                  className="grid grid-cols-2 gap-3"
+                  className="relative"
                 >
-                  <div className="space-y-3">
-                    {/* Grande */}
-                    <div className="aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.05]">
-                      {realImages[0] && (
-                        <img
-                          src={realImages[0].urls.regular}
-                          alt={realImages[0].alt_description ?? 'Ferrari F1'}
-                          className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                        />
-                      )}
-                    </div>
-                    {/* Landscape */}
-                    <div className="aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.05]">
-                      {realImages[1] && (
-                        <img
-                          src={realImages[1].urls.regular}
-                          alt={realImages[1].alt_description ?? 'Ferrari F1'}
-                          className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                        />
-                      )}
-                    </div>
+                  {/* Numero "75" decorativo */}
+                  <div className="absolute -top-8 -right-4 text-[180px] font-black leading-none select-none pointer-events-none italic bg-gradient-to-b from-red-600/10 to-transparent bg-clip-text text-transparent">
+                    75
                   </div>
-                  <div className="space-y-3 pt-6">
-                    {/* Landscape */}
-                    <div className="aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.05]">
-                      {realImages[2] && (
-                        <img
-                          src={realImages[2].urls.regular}
-                          alt={realImages[2].alt_description ?? 'Ferrari F1'}
-                          className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                        />
-                      )}
+                  <div className="relative z-10 grid grid-cols-2 gap-3">
+                    <div className="space-y-3">
+                      <div className="aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50 ring-1 ring-white/5">
+                        {realImages[0] && (
+                          <img src={realImages[0].urls.regular} alt={realImages[0].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+                        )}
+                      </div>
+                      <div className="aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50">
+                        {realImages[1] && (
+                          <img src={realImages[1].urls.regular} alt={realImages[1].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+                        )}
+                      </div>
                     </div>
-                    {/* Grande */}
-                    <div className="aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.05]">
-                      {realImages[3] && (
-                        <img
-                          src={realImages[3].urls.regular}
-                          alt={realImages[3].alt_description ?? 'Ferrari F1'}
-                          className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                        />
-                      )}
+                    <div className="space-y-3 pt-6">
+                      <div className="aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50">
+                        {realImages[2] && (
+                          <img src={realImages[2].urls.regular} alt={realImages[2].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+                        )}
+                      </div>
+                      <div className="aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50">
+                        {realImages[3] && (
+                          <img src={realImages[3].urls.regular} alt={realImages[3].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+                        )}
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -364,100 +355,125 @@ export default function AboutPage({ heroImages = [] }) {
             </div>
           </section>
 
-          {/* ═══════════════════════════════════
+          {/* ══════════════════════════════════════
               2. MISSIONE + VALORI
-          ═══════════════════════════════════ */}
-          <section className="py-28 px-4 relative" aria-label="Missione e valori">
-            <Divider />
-            <div className="max-w-5xl mx-auto">
+          ══════════════════════════════════════ */}
+          <section className="py-28 px-4 relative overflow-hidden" aria-label="Missione e valori">
+            {/* Separatore top */}
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-600/40 to-transparent" />
+            {/* Glow centrale */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-32 bg-gradient-to-b from-red-600/50 to-transparent" />
 
+            <div className="max-w-5xl mx-auto">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="text-center mb-6"
+                className="text-center mb-16"
               >
                 <SectionLabel>La nostra missione</SectionLabel>
                 <SectionTitle className="mb-6">
                   Democratizzare l'accesso<br />
-                  <span className="text-red-600">ai dati F1</span>
+                  <span className="bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text text-transparent">
+                    ai dati F1
+                  </span>
                 </SectionTitle>
-                <p className="text-zinc-400 text-[15px] leading-relaxed max-w-2xl mx-auto mb-14">
+                <p className="text-zinc-400 text-[15px] leading-relaxed max-w-2xl mx-auto">
                   Formula Rossa è un progetto indipendente, creato da appassionati per gli appassionati.
                   Non siamo affiliati alla Ferrari S.p.A. — siamo semplicemente tifosi che credono
                   che i dati possano rendere la Formula 1 ancora più affascinante.
                 </p>
               </motion.div>
 
-              {/* Valori */}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Valori — card colorate */}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 {VALUES.map((value, i) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 24 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: i * 0.08 }}
-                    className="group bg-zinc-900/40 border border-white/[0.06] hover:border-red-600/20 rounded-2xl p-6 transition-all duration-300"
+                    transition={{ delay: i * 0.09 }}
+                    className={`group relative rounded-2xl overflow-hidden border border-white/[0.07] ${value.border} transition-all duration-300 cursor-default`}
                   >
-                    <div className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-red-600/10 border border-red-600/20 mb-4 group-hover:bg-red-600/20 transition-colors">
-                      <value.icon className="w-4 h-4 text-red-600" />
+                    {/* Gradient di sfondo */}
+                    <div className={`absolute inset-0 bg-gradient-to-b ${value.color} opacity-100`} />
+                    <div className="absolute inset-0 bg-zinc-900/70" />
+                    <div className="relative p-6">
+                      <div className={`inline-flex items-center justify-center w-9 h-9 rounded-xl ${value.iconBg} border border-white/10 mb-4`}>
+                        <value.icon className={`w-4 h-4 ${value.iconColor}`} />
+                      </div>
+                      <h3 className="font-black text-white text-sm uppercase tracking-wide mb-2">{value.title}</h3>
+                      <p className="text-zinc-500 text-xs leading-relaxed">{value.desc}</p>
                     </div>
-                    <h3 className="font-black text-white text-sm uppercase tracking-wide mb-2">{value.title}</h3>
-                    <p className="text-zinc-500 text-xs leading-relaxed">{value.desc}</p>
                   </motion.div>
                 ))}
               </div>
 
               {/* Badge indipendente */}
               <motion.div
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="mt-6 flex items-center justify-center gap-3 px-5 py-3 rounded-2xl bg-zinc-900/40 border border-white/[0.05] max-w-sm mx-auto"
+                className="flex items-center justify-center gap-3 px-5 py-3 rounded-2xl bg-gradient-to-r from-green-500/5 to-transparent border border-green-500/15 max-w-xs mx-auto"
               >
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
-                <p className="text-zinc-500 text-xs">
-                  Progetto <span className="text-white/70 font-bold">100% indipendente</span> — non affiliato a Ferrari S.p.A.
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0 shadow-sm shadow-green-500/50" />
+                <p className="text-zinc-400 text-xs">
+                  <span className="text-green-400 font-bold">100% indipendente</span> — non affiliato a Ferrari S.p.A.
                 </p>
               </motion.div>
             </div>
           </section>
 
-          {/* ═══════════════════════════════════
+          {/* ══════════════════════════════════════
               3. NUMERI
-          ═══════════════════════════════════ */}
-          <section className="py-20 px-4 relative overflow-hidden" aria-label="Numeri del progetto">
-            <div className="absolute inset-0 bg-[#060606]" />
-            <Divider />
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-red-600/[0.04] via-transparent to-transparent pointer-events-none" />
+          ══════════════════════════════════════ */}
+          <section className="py-24 px-4 relative overflow-hidden" aria-label="Numeri del progetto">
+            <div className="absolute inset-0 bg-gradient-to-b from-[#060606] to-[#080808]" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-600/20 to-transparent" />
+            {/* Glow sfondo */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(220,0,0,0.04)_0%,transparent_70%)]" />
 
-            <div className="relative max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-              {STATS.map((stat, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="text-center group"
-                >
-                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-red-600/10 border border-red-600/20 mb-4 group-hover:bg-red-600/20 transition-colors duration-300">
-                    <stat.icon className="w-4 h-4 text-red-600" />
-                  </div>
-                  <div className="text-4xl md:text-5xl font-black text-white tracking-tighter tabular-nums">{stat.value}</div>
-                  <div className="text-[10px] text-zinc-500 mt-2 uppercase tracking-[0.15em]">{stat.label}</div>
-                </motion.div>
-              ))}
+            <div className="relative max-w-5xl mx-auto">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {STATS.map((stat, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className="group relative"
+                  >
+                    {/* Card con glow */}
+                    <div className={`relative rounded-2xl border border-white/[0.06] group-hover:border-white/15 bg-zinc-900/50 p-6 text-center transition-all duration-300 shadow-lg group-hover:shadow-2xl ${stat.glow} overflow-hidden`}>
+                      {/* Top gradient line */}
+                      <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r ${stat.ring}`} />
+                      {/* Icon */}
+                      <div className={`inline-flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br ${stat.ring} bg-opacity-10 mb-4 shadow-sm`}>
+                        <stat.icon className="w-5 h-5 text-white" />
+                      </div>
+                      {/* Numero */}
+                      <div className={`text-4xl md:text-5xl font-black tracking-tighter tabular-nums mb-1 ${stat.num}`}>
+                        {stat.value}
+                      </div>
+                      <div className="text-[10px] text-zinc-500 uppercase tracking-[0.15em]">{stat.label}</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </section>
 
-          {/* ═══════════════════════════════════
+          {/* ══════════════════════════════════════
               4. FEATURES
-          ═══════════════════════════════════ */}
-          <section className="py-28 px-4 relative" aria-label="Funzionalità della piattaforma">
-            <Divider />
+          ══════════════════════════════════════ */}
+          <section className="py-28 px-4 relative overflow-hidden" aria-label="Funzionalità">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
+            {/* Glow background destro */}
+            <div className="absolute -right-32 top-1/2 -translate-y-1/2 w-96 h-96 bg-red-600/5 rounded-full blur-[120px] pointer-events-none" />
+
             <div className="relative max-w-6xl mx-auto">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -467,7 +483,10 @@ export default function AboutPage({ heroImages = [] }) {
               >
                 <SectionLabel>Funzionalità</SectionLabel>
                 <SectionTitle>
-                  Tutto su <span className="text-red-600">Formula Rossa</span>
+                  Tutto su{' '}
+                  <span className="bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">
+                    Formula Rossa
+                  </span>
                 </SectionTitle>
               </motion.div>
 
@@ -475,24 +494,29 @@ export default function AboutPage({ heroImages = [] }) {
                 {FEATURES.map((f, i) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, y: 24 }}
+                    initial={{ opacity: 0, y: 28 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.08 }}
-                    className="group relative rounded-2xl overflow-hidden"
+                    className={`group relative rounded-2xl overflow-hidden border border-white/[0.06] hover:border-white/15 bg-zinc-900/40 transition-all duration-300 shadow-md hover:shadow-2xl ${f.glow} flex flex-col`}
                   >
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/[0.04] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="relative bg-zinc-900/40 border border-white/[0.06] group-hover:border-red-600/20 rounded-2xl p-6 transition-all duration-300 h-full flex flex-col">
-                      <div className={`absolute top-0 left-0 right-0 h-20 bg-gradient-to-b ${f.accent} to-transparent rounded-t-2xl opacity-50`} />
-                      <div className="relative flex-1">
-                        <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-red-600/10 border border-red-600/20 mb-5 group-hover:bg-red-600/20 transition-colors">
-                          <f.icon className="w-5 h-5 text-red-600" />
-                        </div>
-                        <h3 className="font-black text-white text-sm uppercase tracking-wide mb-3">{f.title}</h3>
-                        <p className="text-zinc-500 text-xs leading-relaxed mb-5">{f.desc}</p>
+                    {/* Header colorato */}
+                    <div className={`relative h-2 bg-gradient-to-r ${f.gradient}`} />
+
+                    {/* Badge tag */}
+                    <div className="absolute top-4 right-4">
+                      <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-gradient-to-r ${f.gradient} text-white/90`}>
+                        {f.tag}
+                      </span>
+                    </div>
+
+                    <div className="p-6 flex flex-col flex-1">
+                      <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br ${f.gradient} bg-opacity-20 mb-5 shadow-sm`}>
+                        <f.icon className="w-5 h-5 text-white" />
                       </div>
-                      {/* Highlights */}
-                      <div className="relative flex flex-wrap gap-1.5">
+                      <h3 className="font-black text-white text-sm uppercase tracking-wide mb-3">{f.title}</h3>
+                      <p className="text-zinc-500 text-xs leading-relaxed mb-5 flex-1">{f.desc}</p>
+                      <div className="flex flex-wrap gap-1.5">
                         {f.highlights.map((h, j) => (
                           <span key={j} className="text-[10px] px-2 py-1 bg-zinc-800/80 border border-white/[0.06] rounded-lg text-zinc-400 font-mono">
                             {h}
@@ -506,13 +530,15 @@ export default function AboutPage({ heroImages = [] }) {
             </div>
           </section>
 
-          {/* ═══════════════════════════════════
+          {/* ══════════════════════════════════════
               5. TIMELINE
-          ═══════════════════════════════════ */}
-          <section className="py-28 px-4 relative" aria-label="Storia del progetto">
+          ══════════════════════════════════════ */}
+          <section className="py-28 px-4 relative overflow-hidden" aria-label="Storia del progetto">
             <div className="absolute inset-0 bg-[#060606]" />
-            <Divider />
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-600/20 to-transparent" />
+            {/* Glow sfondo */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-red-600/[0.04] rounded-full blur-[100px] pointer-events-none" />
 
             <div className="relative max-w-4xl mx-auto">
               <motion.div
@@ -521,15 +547,18 @@ export default function AboutPage({ heroImages = [] }) {
                 viewport={{ once: true }}
                 className="mb-16 text-center"
               >
-                <SectionLabel>Roadmap</SectionLabel>
+                <SectionLabel color="text-yellow-500/60">Roadmap</SectionLabel>
                 <SectionTitle>
-                  Storia del <span className="text-red-600">Progetto</span>
+                  Storia del{' '}
+                  <span className="bg-gradient-to-r from-yellow-400 to-red-500 bg-clip-text text-transparent">
+                    Progetto
+                  </span>
                 </SectionTitle>
               </motion.div>
 
               <div className="relative">
-                {/* Linea verticale centrata (desktop) */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-red-600/30 via-white/10 to-transparent hidden md:block" />
+                {/* Linea centrale desktop */}
+                <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-yellow-500/40 via-red-600/30 to-transparent hidden md:block" />
 
                 <div className="space-y-0">
                   {TIMELINE.map((item, i) => {
@@ -537,34 +566,42 @@ export default function AboutPage({ heroImages = [] }) {
                     return (
                       <motion.div
                         key={i}
-                        initial={{ opacity: 0, x: isLeft ? -24 : 24 }}
+                        initial={{ opacity: 0, x: isLeft ? -28 : 28 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: i * 0.1 }}
                         className="relative pb-10"
                       >
-                        {/* Desktop */}
-                        <div className={`hidden md:flex items-start gap-6 w-full ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}>
-                          <div className={`w-[calc(50%-2rem)] ${isLeft ? 'text-right' : 'text-left'}`}>
-                            <div className="text-[10px] font-black uppercase tracking-widest text-red-600/50 font-mono mb-1">{item.year}</div>
-                            <h4 className="text-white font-bold text-sm mb-1">{item.event}</h4>
-                            <p className="text-zinc-500 text-xs leading-relaxed">{item.desc}</p>
+                        {/* Desktop: alternato */}
+                        <div className={`hidden md:flex items-center gap-6 w-full ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}>
+                          {/* Card testo */}
+                          <div className={`w-[calc(50%-2.5rem)] ${isLeft ? 'text-right' : 'text-left'}`}>
+                            <div className={`inline-block rounded-xl border ${item.color} p-4 transition-all duration-300`}>
+                              <div className="text-[10px] font-black uppercase tracking-widest text-yellow-400/70 font-mono mb-1">{item.year}</div>
+                              <h4 className="text-white font-bold text-sm mb-1">{item.event}</h4>
+                              <p className="text-zinc-500 text-xs leading-relaxed">{item.desc}</p>
+                            </div>
                           </div>
-                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-zinc-900 border border-zinc-700 hover:border-red-600/50 flex items-center justify-center z-10 transition-colors">
-                            <span className="text-base">{item.icon}</span>
+                          {/* Dot centrale */}
+                          <div className="flex-shrink-0 relative z-10">
+                            <div className="w-12 h-12 rounded-full bg-zinc-900 border-2 border-zinc-700 flex items-center justify-center shadow-lg">
+                              <span className="text-xl">{item.icon}</span>
+                            </div>
+                            <div className={`absolute inset-0 rounded-full ${item.dot} opacity-20 blur-md`} />
                           </div>
-                          <div className="w-[calc(50%-2rem)]" />
+                          <div className="w-[calc(50%-2.5rem)]" />
                         </div>
+
                         {/* Mobile */}
                         <div className="flex md:hidden gap-4">
                           <div className="flex flex-col items-center">
-                            <div className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center flex-shrink-0">
-                              <span className="text-sm">{item.icon}</span>
+                            <div className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center flex-shrink-0 text-base">
+                              {item.icon}
                             </div>
-                            {i < TIMELINE.length - 1 && <div className="w-px flex-1 mt-2 bg-zinc-800" />}
+                            {i < TIMELINE.length - 1 && <div className="w-px flex-1 mt-2 bg-gradient-to-b from-zinc-700 to-transparent" />}
                           </div>
-                          <div className="pb-2">
-                            <div className="text-[10px] font-black uppercase tracking-widest text-red-600/50 font-mono mb-1">{item.year}</div>
+                          <div className={`pb-4 rounded-xl border ${item.color} p-4 flex-1`}>
+                            <div className="text-[10px] font-black uppercase tracking-widest text-yellow-400/70 font-mono mb-1">{item.year}</div>
                             <h4 className="text-white font-bold text-sm mb-1">{item.event}</h4>
                             <p className="text-zinc-500 text-xs leading-relaxed">{item.desc}</p>
                           </div>
@@ -577,11 +614,14 @@ export default function AboutPage({ heroImages = [] }) {
             </div>
           </section>
 
-          {/* ═══════════════════════════════════
+          {/* ══════════════════════════════════════
               6. FOUNDER
-          ═══════════════════════════════════ */}
-          <section className="py-28 px-4 relative" aria-label="Il fondatore">
-            <Divider />
+          ══════════════════════════════════════ */}
+          <section className="py-28 px-4 relative overflow-hidden" aria-label="Il fondatore">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
+            {/* Glow sinistra */}
+            <div className="absolute -left-32 top-1/2 -translate-y-1/2 w-96 h-96 bg-red-600/[0.06] rounded-full blur-[120px] pointer-events-none" />
+
             <div className="max-w-4xl mx-auto">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -591,7 +631,10 @@ export default function AboutPage({ heroImages = [] }) {
               >
                 <SectionLabel>Il team</SectionLabel>
                 <SectionTitle>
-                  Chi c'è <span className="text-red-600">dietro</span>
+                  Chi c'è{' '}
+                  <span className="bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">
+                    dietro
+                  </span>
                 </SectionTitle>
               </motion.div>
 
@@ -600,82 +643,88 @@ export default function AboutPage({ heroImages = [] }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
-                className="relative rounded-3xl overflow-hidden"
+                className="relative"
               >
-                {/* Bordo gradient */}
-                <div className="absolute inset-0 rounded-3xl p-px bg-gradient-to-br from-red-600/25 via-white/[0.04] to-transparent">
-                  <div className="absolute inset-0 rounded-3xl bg-zinc-900/90" />
-                </div>
+                {/* Bordo gradient animato */}
+                <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-red-600/40 via-yellow-500/10 to-transparent" />
+                <div className="relative rounded-3xl bg-zinc-900/95 overflow-hidden">
+                  {/* Stripe superiore */}
+                  <div className="h-1 bg-gradient-to-r from-red-600 via-yellow-500 to-red-600" />
 
-                <div className="relative p-8 md:p-12">
-                  <div className="flex flex-col md:flex-row gap-8 items-start">
-                    {/* Avatar */}
-                    <div className="flex-shrink-0">
-                      <div className="relative">
-                        <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-red-600/35 to-transparent blur-sm" />
-                        <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden border border-white/10 shadow-xl shadow-red-600/15">
-                          <img
-                            src="https://github.com/J0joFra.png"
-                            alt={`Foto profilo di ${FOUNDER.name}`}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                              e.currentTarget.parentElement.innerHTML =
-                                '<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-600 to-red-900 text-white text-2xl font-black">JF</div>';
-                            }}
-                          />
+                  <div className="p-8 md:p-12">
+                    <div className="flex flex-col md:flex-row gap-8 items-start">
+
+                      {/* Avatar */}
+                      <div className="flex-shrink-0 text-center md:text-left">
+                        <div className="relative inline-block">
+                          <div className="absolute -inset-1.5 rounded-2xl bg-gradient-to-br from-red-600/50 via-yellow-500/20 to-transparent blur-sm" />
+                          <div className="relative w-32 h-32 rounded-2xl overflow-hidden border border-white/15 shadow-2xl shadow-red-600/20">
+                            <img
+                              src="https://github.com/J0joFra.png"
+                              alt={`Foto profilo di ${FOUNDER.name}`}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                e.currentTarget.parentElement.innerHTML =
+                                  '<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-600 to-red-900 text-white text-3xl font-black">JF</div>';
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Info */}
-                    <div className="flex-1">
-                      <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
-                        <div>
-                          <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight">{FOUNDER.name}</h3>
-                          <p className="text-red-500 text-[10px] font-black uppercase tracking-[0.25em] mt-1">{FOUNDER.role}</p>
+                      {/* Info */}
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+                          <div>
+                            <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight">{FOUNDER.name}</h3>
+                            <p className="text-[10px] font-black uppercase tracking-[0.25em] mt-1 bg-gradient-to-r from-red-400 to-yellow-400 bg-clip-text text-transparent">
+                              {FOUNDER.role}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {['Next.js', 'React', 'TypeScript'].map((t) => (
+                              <span key={t} className="px-2.5 py-1 bg-zinc-800 border border-white/[0.08] rounded-lg text-[10px] font-mono text-zinc-400">
+                                {t}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          {['Next.js', 'React', 'TypeScript'].map((t) => (
-                            <span key={t} className="px-2.5 py-1 bg-zinc-800/80 border border-white/[0.06] rounded-lg text-[10px] font-mono text-zinc-400">
-                              {t}
-                            </span>
+
+                        <div className="space-y-3 text-zinc-400 text-sm leading-relaxed mb-8 border-t border-white/[0.06] pt-6">
+                          <p>
+                            Sviluppatore full-stack e tifoso Ferrari da sempre. Ho iniziato questo progetto perché
+                            volevo un modo migliore di rivivere la storia della Scuderia attraverso i dati — e alla
+                            fine ho deciso di costruirlo io stesso.
+                          </p>
+                          <p>
+                            Formula Rossa è costruita con Next.js, React e una pipeline di dati che aggrega
+                            informazioni da F1DB, Motorsport.com e sorgenti ufficiali FIA. Ogni feature è pensata
+                            per rendere i dati accessibili, belli e utili per tutti i tifosi.
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap gap-3">
+                          {[
+                            { icon: Github,    href: FOUNDER.github,    name: 'J0joFra',         hoverClass: 'hover:bg-zinc-700 hover:border-zinc-500' },
+                            { icon: Linkedin,  href: FOUNDER.linkedin,  name: 'Formula Rossa',   hoverClass: 'hover:bg-blue-600 hover:border-blue-500' },
+                            { icon: Youtube,   href: FOUNDER.youtube,   name: '@jofrancalanci',  hoverClass: 'hover:bg-red-600 hover:border-red-500'   },
+                            { icon: Instagram, href: FOUNDER.instagram, name: '@formularossa.it', hoverClass: 'hover:bg-pink-600 hover:border-pink-500' },
+                          ].map((s, i) => (
+                            <a
+                              key={i}
+                              href={s.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`flex items-center gap-2.5 px-4 py-2.5 bg-zinc-800/70 ${s.hoverClass} border border-white/[0.07] rounded-xl text-zinc-300 hover:text-white text-[11px] font-bold transition-all duration-200`}
+                            >
+                              <s.icon className="w-3.5 h-3.5" />
+                              {s.name}
+                            </a>
                           ))}
                         </div>
                       </div>
 
-                      <div className="space-y-3 text-zinc-400 text-sm leading-relaxed mb-8 border-t border-white/[0.06] pt-6">
-                        <p>
-                          Sviluppatore full-stack e tifoso Ferrari da sempre. Ho iniziato questo progetto perché
-                          volevo un modo migliore di rivivere la storia della Scuderia attraverso i dati — e alla
-                          fine ho deciso di costruirlo io stesso.
-                        </p>
-                        <p>
-                          Formula Rossa è costruita con Next.js, React e una pipeline di dati che aggrega
-                          informazioni da F1DB, Motorsport.com e sorgenti ufficiali FIA. Ogni feature è pensata
-                          per rendere i dati accessibili, belli e utili per tutti i tifosi.
-                        </p>
-                      </div>
-
-                      <div className="flex flex-wrap gap-3">
-                        {[
-                          { icon: Github,    href: FOUNDER.github,    name: 'J0joFra'          },
-                          { icon: Linkedin,  href: FOUNDER.linkedin,  name: 'Formula Rossa'    },
-                          { icon: Youtube,   href: FOUNDER.youtube,   name: '@jofrancalanci'   },
-                          { icon: Instagram, href: FOUNDER.instagram, name: '@formularossa.it' },
-                        ].map((s, i) => (
-                          <a
-                            key={i}
-                            href={s.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2.5 px-4 py-2.5 bg-zinc-800/60 hover:bg-red-600 border border-white/[0.06] hover:border-red-600 rounded-xl text-zinc-300 hover:text-white text-[11px] font-bold transition-all duration-200"
-                          >
-                            <s.icon className="w-3.5 h-3.5" />
-                            {s.name}
-                          </a>
-                        ))}
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -683,14 +732,15 @@ export default function AboutPage({ heroImages = [] }) {
             </div>
           </section>
 
-          {/* ═══════════════════════════════════
+          {/* ══════════════════════════════════════
               7. YOUTUBE
-          ═══════════════════════════════════ */}
-          <section className="py-28 px-4 relative overflow-hidden" aria-label="Video dal canale YouTube">
+          ══════════════════════════════════════ */}
+          <section className="py-28 px-4 relative overflow-hidden" aria-label="Video YouTube">
             <div className="absolute inset-0 bg-[#060606]" />
-            <Divider />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-600/40 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[200px] bg-red-600/[0.04] rounded-full blur-[120px] pointer-events-none" />
+            {/* Glow rosso YouTube */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[250px] bg-red-600/[0.06] rounded-full blur-[120px] pointer-events-none" />
 
             <div className="relative max-w-6xl mx-auto">
               <motion.div
@@ -702,14 +752,17 @@ export default function AboutPage({ heroImages = [] }) {
                 <div>
                   <SectionLabel>YouTube</SectionLabel>
                   <SectionTitle>
-                    I nostri <span className="text-red-600">Video</span>
+                    I nostri{' '}
+                    <span className="bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">
+                      Video
+                    </span>
                   </SectionTitle>
                 </div>
                 <a
                   href={FOUNDER.youtube}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600/10 hover:bg-red-600 border border-red-600/30 hover:border-red-600 rounded-xl text-red-400 hover:text-white font-black uppercase text-[10px] tracking-widest transition-all duration-200 self-start sm:self-auto"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600/15 hover:bg-red-600 border border-red-600/40 hover:border-red-600 rounded-xl text-red-400 hover:text-white font-black uppercase text-[10px] tracking-widest transition-all duration-200 shadow-lg shadow-red-600/10 hover:shadow-red-600/30 self-start sm:self-auto"
                 >
                   <Youtube className="w-4 h-4" />
                   Vai al canale
@@ -732,35 +785,40 @@ export default function AboutPage({ heroImages = [] }) {
             </div>
           </section>
 
-          {/* ═══════════════════════════════════
+          {/* ══════════════════════════════════════
               8. TECH STACK
-          ═══════════════════════════════════ */}
-          <section className="py-20 px-4 relative" aria-label="Tecnologie usate">
-            <Divider />
+          ══════════════════════════════════════ */}
+          <section className="py-20 px-4 relative overflow-hidden" aria-label="Tecnologie">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
+
             <div className="max-w-3xl mx-auto text-center">
               <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
               >
-                <SectionLabel>Open Source</SectionLabel>
+                <SectionLabel color="text-zinc-500">Open Source</SectionLabel>
                 <h2 className="text-2xl font-black uppercase italic tracking-tighter mb-2">
-                  Costruito con <span className="text-red-600">passione</span> e tecnologia
+                  Costruito con{' '}
+                  <span className="bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text text-transparent">
+                    passione
+                  </span>{' '}
+                  e tecnologia
                 </h2>
-                <p className="text-zinc-600 text-xs mb-8">
+                <p className="text-zinc-600 text-xs mb-10">
                   Stack tecnico open-source, dati verificabili, performance ottimizzata.
                 </p>
-                <div className="flex flex-wrap justify-center gap-2.5">
+                <div className="flex flex-wrap justify-center gap-3">
                   {TECH_STACK.map((tech, i) => (
                     <motion.div
                       key={tech.name}
-                      initial={{ opacity: 0, scale: 0.9 }}
+                      initial={{ opacity: 0, scale: 0.85 }}
                       whileInView={{ opacity: 1, scale: 1 }}
                       viewport={{ once: true }}
-                      transition={{ delay: i * 0.04 }}
-                      className="group flex flex-col items-center gap-1 px-4 py-2.5 bg-zinc-900/80 border border-white/[0.06] hover:border-red-600/30 rounded-xl transition-all duration-200 cursor-default"
+                      transition={{ delay: i * 0.05 }}
+                      className={`group flex flex-col items-center gap-1 px-4 py-3 bg-zinc-900/80 border border-white/[0.06] ${tech.color} rounded-xl transition-all duration-200 cursor-default`}
                     >
-                      <span className="font-mono text-xs font-bold text-zinc-300 group-hover:text-white transition-colors">{tech.name}</span>
+                      <span className="font-mono text-xs font-bold text-zinc-300 group-hover:text-current transition-colors">{tech.name}</span>
                       <span className="text-[9px] text-zinc-600 uppercase tracking-wider">{tech.category}</span>
                     </motion.div>
                   ))}
@@ -769,16 +827,22 @@ export default function AboutPage({ heroImages = [] }) {
             </div>
           </section>
 
-          {/* ═══════════════════════════════════
+          {/* ══════════════════════════════════════
               9. CTA
-          ═══════════════════════════════════ */}
+          ══════════════════════════════════════ */}
           <section className="py-36 px-4 relative overflow-hidden" aria-label="Esplora la piattaforma">
-            <Divider />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-600/30 to-transparent" />
+            {/* Glow radiale pulsante */}
             <div className="absolute inset-0 pointer-events-none">
               <motion.div
-                animate={{ scale: [1, 1.25, 1], opacity: [0.03, 0.07, 0.03] }}
+                animate={{ scale: [1, 1.3, 1], opacity: [0.04, 0.1, 0.04] }}
                 transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#DC0000_0%,transparent_65%)]"
+                className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#DC0000_0%,transparent_60%)]"
+              />
+              <motion.div
+                animate={{ scale: [1.2, 1, 1.2], opacity: [0.02, 0.06, 0.02] }}
+                transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
+                className="absolute inset-0 bg-[radial-gradient(ellipse_at_60%_40%,#f59e0b_0%,transparent_55%)]"
               />
             </div>
 
@@ -792,7 +856,9 @@ export default function AboutPage({ heroImages = [] }) {
                 <SectionLabel>Inizia ora</SectionLabel>
                 <h2 className="text-5xl md:text-6xl font-black uppercase italic tracking-tighter mb-6 leading-[0.92]">
                   Pronto a<br />
-                  <span className="text-red-600">esplorare?</span>
+                  <span className="bg-gradient-to-r from-red-500 via-red-600 to-yellow-500 bg-clip-text text-transparent">
+                    esplorare?
+                  </span>
                 </h2>
                 <p className="text-zinc-500 text-sm mb-10 leading-relaxed max-w-md mx-auto">
                   Immergiti in 75 anni di storia Ferrari. Statistiche, analisi,
@@ -801,13 +867,13 @@ export default function AboutPage({ heroImages = [] }) {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Link
                     href="/statistics"
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[11px] tracking-widest rounded-2xl transition-all shadow-2xl shadow-red-600/25 hover:shadow-red-600/45 hover:scale-[1.02]"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-black uppercase text-[11px] tracking-widest rounded-2xl transition-all shadow-2xl shadow-red-600/30 hover:shadow-red-600/50 hover:scale-[1.02]"
                   >
                     Esplora le Statistiche <ChevronRight className="w-4 h-4" />
                   </Link>
                   <Link
                     href="/fanzone"
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-zinc-900/80 hover:bg-zinc-800 border border-white/10 hover:border-white/20 text-white font-black uppercase text-[11px] tracking-widest rounded-2xl transition-all"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-zinc-900/80 hover:bg-zinc-800 border border-white/10 hover:border-yellow-500/30 text-white hover:text-yellow-300 font-black uppercase text-[11px] tracking-widest rounded-2xl transition-all"
                   >
                     Entra nella Fan Zone
                   </Link>
