@@ -216,24 +216,29 @@ export default function AboutPage({ heroImages = [] }) {
             className="relative min-h-[92vh] flex items-center py-24 px-4 overflow-hidden"
             aria-label="Presentazione Formula Rossa"
           >
-            {/* Sfondi stratificati (rimangono invariati) */}
+            {/* Sfondi stratificati */}
             <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+              {/* Dot grid */}
               <div className="absolute inset-0 opacity-[0.03]" style={{
                 backgroundImage: 'radial-gradient(circle at 1px 1px, #DC0000 1px, transparent 0)',
                 backgroundSize: '40px 40px',
               }} />
+              {/* Glow rosso pulsante */}
               <motion.div
                 animate={{ scale: [1, 1.15, 1], opacity: [0.12, 0.2, 0.12] }}
                 transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
                 className="absolute -top-48 -left-48 w-[800px] h-[800px] bg-red-600 rounded-full blur-[200px]"
               />
+              {/* Glow oro */}
               <motion.div
                 animate={{ scale: [1, 1.1, 1], opacity: [0.05, 0.1, 0.05] }}
                 transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
                 className="absolute -bottom-32 right-0 w-[500px] h-[500px] bg-yellow-500 rounded-full blur-[160px]"
               />
+              {/* Linee verticali decorative */}
               <div className="absolute top-0 left-1/3 w-px h-full bg-gradient-to-b from-transparent via-red-600/15 to-transparent" />
               <div className="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-transparent via-yellow-500/8 to-transparent" />
+              {/* Striscia diagonale decorativa */}
               <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-red-600/[0.03] to-transparent" />
             </div>
 
@@ -256,9 +261,23 @@ export default function AboutPage({ heroImages = [] }) {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.1 }}
-                    className="text-3xl md:text-4xl lg:text-5xl font-black uppercase italic tracking-tighter whitespace-nowrap mb-6"
+                    className="text-5xl md:text-6xl xl:text-7xl font-black uppercase italic tracking-tighter leading-[0.9] mb-8"
                   >
-                    Una piattaforma <span className="text-red-600">rampante</span>
+                    Una piattaforma<br />
+                    per i{' '}
+                    <span className="relative inline-block">
+                      <span className="text-red-600">Tifosi</span>
+                      <motion.span
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        transition={{ duration: 0.8, delay: 0.9 }}
+                        className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-red-600 to-red-400 origin-left"
+                      />
+                    </span>
+                    <br />
+                    <span className="text-red-600">
+                      Ferrari
+                    </span>
                   </motion.h1>
 
                   <motion.p
@@ -293,29 +312,42 @@ export default function AboutPage({ heroImages = [] }) {
                   </motion.div>
                 </motion.div>
 
-                {/* Immagine Singola [3] */}
+                {/* Griglia immagini */}
                 <motion.div
                   initial={{ opacity: 0, x: 40 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
-                  className="relative flex justify-center lg:justify-end"
+                  className="relative"
                 >
                   {/* Numero "75" decorativo */}
-                  <div className="absolute -top-12 -right-6 text-[180px] font-black leading-none select-none pointer-events-none italic bg-gradient-to-b from-red-600/10 to-transparent bg-clip-text text-transparent z-0">
+                  <div className="absolute -top-8 -right-4 text-[180px] font-black leading-none select-none pointer-events-none italic bg-gradient-to-b from-red-600/10 to-transparent bg-clip-text text-transparent">
                     75
                   </div>
-
-                  {/* Contenitore Immagine [3] */}
-                  <div className="relative z-10 w-[200px] md:w-[280px] aspect-[3/4] rounded-3xl overflow-hidden bg-zinc-900 border border-white/[0.08] shadow-2xl shadow-black/60 ring-1 ring-white/10">
-                    {realImages[3] && (
-                      <img 
-                        src={realImages[3].urls.regular} 
-                        alt={realImages[3].alt_description ?? 'Ferrari F1 Detail'} 
-                        className="w-full h-full object-cover transition-transform duration-1000 hover:scale-110" 
-                      />
-                    )}
-                    {/* Overlay per profondità */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                  <div className="relative z-10 grid grid-cols-2 gap-3">
+                    <div className="space-y-3">
+                      <div className="aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50 ring-1 ring-white/5">
+                        {realImages[0] && (
+                          <img src={realImages[0].urls.regular} alt={realImages[0].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+                        )}
+                      </div>
+                      <div className="aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50">
+                        {realImages[1] && (
+                          <img src={realImages[1].urls.regular} alt={realImages[1].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-3 pt-6">
+                      <div className="aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50">
+                        {realImages[2] && (
+                          <img src={realImages[2].urls.regular} alt={realImages[2].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+                        )}
+                      </div>
+                      <div className="aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50">
+                        {realImages[3] && (
+                          <img src={realImages[3].urls.regular} alt={realImages[3].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
 
@@ -441,36 +473,36 @@ export default function AboutPage({ heroImages = [] }) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.2 }}
-                  className="group relative rounded-2xl overflow-hidden border border-white-600/40 hover:border-white transition-all duration-300 flex flex-col"
+                  className="group relative rounded-2xl overflow-hidden border border-yellow-900/50 hover:border-yellow-500/60 transition-all duration-300 flex flex-col"
                   style={{ background: 'linear-gradient(160deg, #111114 0%, #0c0c0f 60%, #080808 100%)' }}
                 >
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(161,161,170,0.08)_0%,transparent_60%)]" />
                   <div className="relative flex flex-col flex-1 p-6">
                     <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400/70">
+                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-yellow-500/70">
                         <Award className="w-3.5 h-3.5" />
                         Premium
                       </div>
-                      <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-zinc-400/60">
-                        <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-pulse" />
+                      <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-yellow-400/60">
+                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
                         Pro
                       </div>
                     </div>
-                    <div className="text-[56px] font-black leading-none tracking-tighter text-zinc-600/30 mb-2 select-none">★</div>
+                    <div className="text-[56px] font-black leading-none tracking-tighter text-yellow-600/20 mb-2 select-none">★</div>
                     <h3 className="text-2xl font-black text-white leading-tight mb-3">
                       Qualità<br />
-                      <span className="text-zinc-300">premium</span>
+                      <span className="text-yellow-400">premium</span>
                     </h3>
                     <p className="text-zinc-500 text-xs leading-relaxed flex-1">
                       Design curato, performance ottimizzata e un'esperienza utente pensata per ogni tifoso.
                     </p>
                     <div className="flex flex-wrap gap-1.5 my-4">
                       {['Design', 'Performance', 'UX'].map(t => (
-                        <span key={t} className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-zinc-700/50 text-zinc-400/70 bg-zinc-800/30">{t}</span>
+                        <span key={t} className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-yellow-800/50 text-yellow-400/70 bg-yellow-900/20">{t}</span>
                       ))}
                     </div>
-                    <Link href="/statistics" className="mt-auto flex items-center justify-between px-4 py-3 rounded-xl border border-zinc-700/40 hover:border-zinc-500/60 hover:bg-zinc-700/20 text-zinc-400 hover:text-zinc-200 transition-all duration-200 group/btn">
-                      <span className="text-[10px] font-black uppercase tracking-widest">Scopri la piattaforma</span>
+                    <Link href="/predictions" className="mt-auto flex items-center justify-between px-4 py-3 rounded-xl border border-yellow-800/40 hover:border-yellow-500/60 hover:bg-yellow-500/10 text-yellow-400 hover:text-yellow-300 transition-all duration-200 group/btn">
+                      <span className="text-[10px] font-black uppercase tracking-widest">Vai alle Predizioni</span>
                       <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
                     </Link>
                   </div>
