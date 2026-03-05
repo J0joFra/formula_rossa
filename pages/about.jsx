@@ -258,7 +258,7 @@ export default function AboutPage({ heroImages = [] }) {
                     transition={{ duration: 0.7, delay: 0.1 }}
                     className="text-3xl md:text-4xl lg:text-5xl font-black uppercase italic tracking-tighter whitespace-nowrap mb-6"
                   >
-                    Una piattaforma <span className="text-red-600">rampante</span>
+                    Una piattaforma <span className="text-red-600"> rampante </span>🐎
                   </motion.h1>
 
                   <motion.p
@@ -300,11 +300,6 @@ export default function AboutPage({ heroImages = [] }) {
                   transition={{ duration: 0.8, delay: 0.2 }}
                   className="relative flex justify-center lg:justify-end"
                 >
-                  {/* Numero "75" decorativo */}
-                  <div className="absolute -top-12 -right-6 text-[180px] font-black leading-none select-none pointer-events-none italic bg-gradient-to-b from-red-600/10 to-transparent bg-clip-text text-transparent z-0">
-                    75
-                  </div>
-
                   {/* Contenitore Immagine [3] */}
                   <div className="relative z-10 w-[200px] md:w-[280px] aspect-[3/4] rounded-3xl overflow-hidden bg-zinc-900 border border-white/[0.08] shadow-2xl shadow-black/60 ring-1 ring-white/10">
                     {realImages[3] && (
@@ -526,19 +521,6 @@ export default function AboutPage({ heroImages = [] }) {
                 </motion.div>
 
               </div>
-
-              {/* Badge indipendente */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="mt-8 flex items-center justify-center gap-3 px-5 py-3 rounded-2xl bg-gradient-to-r from-green-500/5 to-transparent border border-green-500/15 max-w-xs mx-auto"
-              >
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0 shadow-sm shadow-green-500/50" />
-                <p className="text-zinc-400 text-xs">
-                  <span className="text-green-400 font-bold">100% indipendente</span> — non affiliato a Ferrari S.p.A.
-                </p>
-              </motion.div>
             </div>
           </section>
 
