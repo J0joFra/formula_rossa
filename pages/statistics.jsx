@@ -118,37 +118,168 @@ const circuitToCountry = {
 
 const getFlagCode = (circuitName) => {
   if (!circuitName) return '';
-  const n = circuitName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').trim();
+  
+  // Normalizzazione del nome del circuito
+  const n = circuitName.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+  
+  // Controllo nel mapping diretto
   const country = circuitToCountry[n];
   if (country) return countryConfig[country]?.code || '';
+  
   const l = circuitName.toLowerCase();
-  if (l.includes('monza')||l.includes('imola')||l.includes('mugello')||l.includes('italian')) return 'it';
-  if (l.includes('silverstone')||l.includes('brands')||l.includes('british')) return 'gb';
-  if (l.includes('spa')||l.includes('belgian')) return 'be';
-  if (l.includes('barcelona')||l.includes('catalun')||l.includes('spanish')) return 'es';
-  if (l.includes('monaco')||l.includes('monte carlo')) return 'mc';
-  if (l.includes('nurburgring')||l.includes('hockenheim')||l.includes('german')) return 'de';
-  if (l.includes('interlagos')||l.includes('brazilian')||l.includes('sao paulo')) return 'br';
-  if (l.includes('suzuka')||l.includes('japanese')) return 'jp';
-  if (l.includes('montreal')||l.includes('canadian')) return 'ca';
-  if (l.includes('melbourne')||l.includes('australian')||l.includes('albert')) return 'au';
-  if (l.includes('miami')||l.includes('austin')||l.includes('americas')||l.includes('las vegas')||l.includes('united states')) return 'us';
-  if (l.includes('hungaroring')||l.includes('hungarian')) return 'hu';
-  if (l.includes('red bull ring')||l.includes('austrian')||l.includes('spielberg')) return 'at';
-  if (l.includes('zandvoort')||l.includes('dutch')) return 'nl';
-  if (l.includes('baku')||l.includes('azerbaijan')) return 'az';
-  if (l.includes('marina bay')||l.includes('singapore')) return 'sg';
-  if (l.includes('bahrain')||l.includes('sakhir')) return 'bh';
-  if (l.includes('jeddah')||l.includes('saudi')) return 'sa';
-  if (l.includes('yas')||l.includes('abu dhabi')) return 'ae';
-  if (l.includes('lusail')||l.includes('qatar')) return 'qa';
-  if (l.includes('shanghai')||l.includes('chinese')) return 'cn';
-  if (l.includes('paul ricard')||l.includes('magny')||l.includes('french')||l.includes('france')) return 'fr';
-  if (l.includes('estoril')||l.includes('portimao')||l.includes('portuguese')) return 'pt';
-  if (l.includes('kyalami')||l.includes('south african')) return 'za';
-  if (l.includes('ain-diab')||l.includes('moroccan')) return 'ma';
-  if (l.includes('istanbul')||l.includes('turkish')) return 'tr';
-  if (l.includes('sochi')||l.includes('russian')) return 'ru';
+  
+  // ITALIA
+  if (l.includes('monza') || l.includes('imola') || l.includes('mugello') || 
+      l.includes('italian') || l.includes('pescara') || l.includes('bologna') ||
+      l.includes('enna') || l.includes('pergusa') || l.includes('vallelunga') ||
+      l.includes('misano') || l.includes('santamonica')) return 'it';
+  
+  // REGNO UNITO
+  if (l.includes('silverstone') || l.includes('brands') || l.includes('british') ||
+      l.includes('donington') || l.includes('aintree') || l.includes('goodwood') ||
+      l.includes('crystal palace') || l.includes('mallory park') || l.includes('snetterton') ||
+      l.includes('oulton park') || l.includes('thurston') || l.includes('liverpool') ||
+      l.includes('northamptonshire') || l.includes('kent')) return 'gb';
+  
+  // BELGIO
+  if (l.includes('spa') || l.includes('belgian') || l.includes('francorchamps') ||
+      l.includes('zolder') || l.includes('nivelles') || l.includes('stavelot') ||
+      l.includes('brussels') || l.includes('heusden')) return 'be';
+  
+  // SPAGNA
+  if (l.includes('barcelona') || l.includes('catalun') || l.includes('spanish') ||
+      l.includes('jerez') || l.includes('valencia') || l.includes('pedralbes') ||
+      l.includes('montjuic') || l.includes('madrid') || l.includes('jarama') ||
+      l.includes('madring') || l.includes('guadalope') || l.includes('lasarte') ||
+      l.includes('sitges')) return 'es';
+  
+  // FRANCIA
+  if (l.includes('paul ricard') || l.includes('magny') || l.includes('french') ||
+      l.includes('france') || l.includes('le castellet') || l.includes('ricard') ||
+      l.includes('reims') || l.includes('dijon') || l.includes('prenois') ||
+      l.includes('rouen') || l.includes('les essarts') || l.includes('charade') ||
+      l.includes('clermont ferrand') || l.includes('lemans') || l.includes('bugatti') ||
+      l.includes('albi') || l.includes('lens') || l.includes('strasbourg') ||
+      l.includes('montlhery') || l.includes('pau') || l.includes('bois')) return 'fr';
+  
+  // GERMANIA
+  if (l.includes('nurburg') || l.includes('hockenheim') || l.includes('german') ||
+      l.includes('avus') || l.includes('berlin') || l.includes('norisring') ||
+      l.includes('grenzlandring') || l.includes('sachsenring') || l.includes('solitude')) return 'de';
+  
+  // PORTOGALLO
+  if (l.includes('estoril') || l.includes('portimao') || l.includes('portuguese') ||
+      l.includes('algarve') || l.includes('boavista') || l.includes('oporto') ||
+      l.includes('monsanto') || l.includes('lisbon')) return 'pt';
+  
+  // SVIZZERA
+  if (l.includes('bremgarten') || l.includes('bern') || l.includes('swiss') || l.includes('dijon')) return 'ch';
+  
+  // SVEZIA
+  if (l.includes('anderstorp') || l.includes('scandinavian') || l.includes('swedish') ||
+      l.includes('karlskoga')) return 'se';
+  
+  // MONACO
+  if (l.includes('monaco') || l.includes('monte carlo') || l.includes('circuit de monaco')) return 'mc';
+  
+  // AZERBAIJAN
+  if (l.includes('baku') || l.includes('azerbaijan') || l.includes('bakú')) return 'az';
+  
+  // USA
+  if (l.includes('americas') || l.includes('cota') || l.includes('austin') || 
+      l.includes('miami') || l.includes('vegas') || l.includes('las vegas') ||
+      l.includes('united states') || l.includes('indianapolis') || l.includes('watkins glen') ||
+      l.includes('long beach') || l.includes('phoenix') || l.includes('detroit') ||
+      l.includes('dallas') || l.includes('sebring') || l.includes('riverside') ||
+      l.includes('caesars palace') || l.includes('fair park') || l.includes('tampa') ||
+      l.includes('laguna seca') || l.includes('sonoma') || l.includes('road america')) return 'us';
+  
+  // CANADA
+  if (l.includes('villeneuve') || l.includes('montreal') || l.includes('canadian') ||
+      l.includes('mosport') || l.includes('bowmanville') || l.includes('tremblant') ||
+      l.includes('st jovite')) return 'ca';
+  
+  // BRASILE
+  if (l.includes('interlagos') || l.includes('brazilian') || l.includes('sao paulo') ||
+      l.includes('jose carlos pace') || l.includes('jacarepagua') || l.includes('rio de janeiro') ||
+      l.includes('galeão') || l.includes('carlos pace')) return 'br';
+  
+  // MESSICO
+  if (l.includes('rodriguez') || l.includes('hermanos') || l.includes('mexico') ||
+      l.includes('mexican') || l.includes('mexico city') || l.includes('avandaro')) return 'mx';
+  
+  // ARGENTINA
+  if (l.includes('galvez') || l.includes('buenos aires') || l.includes('argentine') ||
+      l.includes('oscar galvez') || l.includes('juan y oscar') || l.includes('cobos')) return 'ar';
+  
+  // GIAPPONE
+  if (l.includes('suzuka') || l.includes('japanese') || l.includes('fuji') ||
+      l.includes('okayama') || l.includes('ti circuit') || l.includes('aida') ||
+      l.includes('mine')) return 'jp';
+  
+  // CINA
+  if (l.includes('shanghai') || l.includes('chinese') || l.includes('china') ||
+      l.includes('zhuhai') || l.includes('beijing')) return 'cn';
+  
+  // SINGAPORE
+  if (l.includes('marina bay') || l.includes('singapore')) return 'sg';
+  
+  // MALESIA
+  if (l.includes('sepang') || l.includes('malaysian') || l.includes('kuala lumpur') ||
+      l.includes('johor')) return 'my';
+  
+  // COREA
+  if (l.includes('yeongam') || l.includes('korea') || l.includes('korean')) return 'kr';
+  
+  // INDIA
+  if (l.includes('buddh') || l.includes('greater noida') || l.includes('indian')) return 'in';
+  
+  // RUSSIA
+  if (l.includes('sochi') || l.includes('russian') || l.includes('moscow')) return 'ru';
+  
+  // BAHRAIN
+  if (l.includes('bahrain') || l.includes('sakhir') || l.includes('manama')) return 'bh';
+  
+  // QATAR
+  if (l.includes('lusail') || l.includes('qatar') || l.includes('losail')) return 'qa';
+  
+  // ARABIA SAUDITA
+  if (l.includes('jeddah') || l.includes('saudi') || l.includes('arabia')) return 'sa';
+  
+  // EMIRATI ARABI
+  if (l.includes('yas') || l.includes('abu dhabi') || l.includes('marina')) return 'ae';
+  
+  // TURCHIA
+  if (l.includes('istanbul') || l.includes('turkish') || l.includes('turkey')) return 'tr';
+  
+  // SUD AFRICA
+  if (l.includes('kyalami') || l.includes('south african') || l.includes('prince george') ||
+      l.includes('midrand') || l.includes('east london')) return 'za';
+  
+  // MAROCCO
+  if (l.includes('ain diab') || l.includes('ain-diab') || l.includes('moroccan') ||
+      l.includes('casablanca') || l.includes('ain-diab')) return 'ma';
+  
+  // AUSTRIA
+  if (l.includes('red bull ring') || l.includes('austrian') || l.includes('spielberg') ||
+      l.includes('zeltweg') || l.includes('oesterreichring') || l.includes('styria')) return 'at';
+  
+  // UNGHERIA
+  if (l.includes('hungaroring') || l.includes('hungarian') || l.includes('budapest') ||
+      l.includes('mogyorod')) return 'hu';
+  
+  // PAESI BASSI
+  if (l.includes('zandvoort') || l.includes('dutch') || l.includes('netherlands')) return 'nl';
+  if (l.includes('albert park') || l.includes('melbourne') || l.includes('australian') || l.includes('adelaide')) return 'au';
+  if (l.includes('finnish') || l.includes('helsinki') || l.includes('elaintarha')) return 'fi';
+  if (l.includes('ardmore') || l.includes('new zealand') || l.includes('pukekohe')) return 'nz';
+  if (l.includes('indonesian') || l.includes('jakarta') || l.includes('mandalika')) return 'id';
+  
   return '';
 };
 
@@ -190,11 +321,15 @@ function DarkTooltip({ active, payload, label, accentColor, extra }) {
 function AccordionSection({ id, title, subtitle, icon: Icon, children, isOpen, onToggle, accent = 'red' }) {
   const color = accent === 'gold' ? GOLD : RED;
   return (
-    <div className="rounded-2xl overflow-hidden transition-all duration-300"
+    <div 
+      className={`rounded-2xl overflow-hidden transition-all duration-300 group ${
+        !isOpen ? 'hover:border-red-600/30' : ''
+      }`}
       style={{
         background: 'rgba(6,6,6,0.95)',
-        border: `1px solid ${isOpen ? color + '35' : 'rgba(255,255,255,0.05)'}`,
+        border: `1px solid ${isOpen ? color : 'rgba(255,255,255,0.05)'}`,
         boxShadow: isOpen ? `0 0 60px ${color}08` : 'none',
+        transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
       }}
     >
       <button
