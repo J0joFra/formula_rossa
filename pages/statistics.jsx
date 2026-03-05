@@ -889,7 +889,7 @@ export default function StatisticsPage() {
               </div>
 
               {/* Nota esplicativa sul sistema di punteggio */}
-              <p className="text-[9px] text-white-600 text-center mt-4 italic border-t border-white/[0.04] pt-3">
+              <p className="text-[12px] text-white-600 text-center mt-4 italic border-t border-white/[0.04] pt-3">
                 ⚡ I punti riflettono i diversi sistemi di punteggio: 1950-59 (8 pt vittoria), 1960-90 (9 pt), 
                 1991-2009 (10 pt), 2010-oggi (25 pt + sprint)
               </p>
@@ -943,7 +943,7 @@ export default function StatisticsPage() {
                   <motion.div key={n.id}
                     initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl group hover:bg-white/[0.04] transition-colors"
-                    style={{ border: '1px solid rgba(255,255,255,0.04)' }}
+                    style={{ border: '1px solid rgba(255,255,255,0.5)' }}
                   >
                     <div className="w-7 h-4.5 rounded-sm overflow-hidden shrink-0 border border-white/10">
                       <img src={`https://flagcdn.com/w80/${n.flag}.png`} alt={n.name} className="w-full h-full object-cover" onError={e => { e.currentTarget.style.display = 'none'; }} />
