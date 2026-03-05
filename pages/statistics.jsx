@@ -960,7 +960,7 @@ export default function StatisticsPage() {
                             style={{ background: n.color }}
                           />
                         </div>
-                        <span className="text-xs font-black tabular-nums" style={{ color: 'rgba(255,255,255,0.7)' }}>{n.value}</span>
+                        <span className="text-xs font-black tabular-nums" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>{n.value}</span>
                       </div>
                     </div>
                   </motion.div>
@@ -1004,7 +1004,7 @@ export default function StatisticsPage() {
                     <XAxis type="number" stroke="rgba(255,255,255,0.08)" tick={{ fill: '#555', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
                     <YAxis dataKey="name" type="category" width={148} stroke="rgba(255,255,255,0.08)" tick={{ fill: '#ccc', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
                     <Tooltip
-                      cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+                      cursor={{ fill: 'rgba(255,255,255,0.7)' }}
                       content={({ active, payload }) => {
                         if (!active || !payload?.length) return null;
                         const c = payload[0].payload;
