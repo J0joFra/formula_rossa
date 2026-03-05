@@ -300,22 +300,22 @@ export default function AboutPage({ heroImages = [] }) {
                   transition={{ duration: 0.8, delay: 0.2 }}
                   className="relative flex justify-center lg:justify-end"
                 >
-                  {/* Numero "75" decorativo ingrandito */}
-                  <div className="absolute -top-16 -right-8 text-[220px] font-black leading-none select-none pointer-events-none italic bg-gradient-to-b from-red-600/10 to-transparent bg-clip-text text-transparent z-0">
+                  {/* Numero "75" decorativo */}
+                  <div className="absolute -top-12 -right-6 text-[180px] font-black leading-none select-none pointer-events-none italic bg-gradient-to-b from-red-600/10 to-transparent bg-clip-text text-transparent z-0">
                     75
                   </div>
 
                   {/* Contenitore Immagine [3] */}
-                  <div className="relative z-10 w-full max-w-[540px] aspect-[4/5] rounded-3xl overflow-hidden bg-zinc-900 border border-white/[0.08] shadow-2xl shadow-black/60 ring-1 ring-white/10">
+                  <div className="relative z-10 w-[300px] md:w-[380px] aspect-[3/4] rounded-3xl overflow-hidden bg-zinc-900 border border-white/[0.08] shadow-2xl shadow-black/60 ring-1 ring-white/10">
                     {realImages[3] && (
                       <img 
                         src={realImages[3].urls.regular} 
                         alt={realImages[3].alt_description ?? 'Ferrari F1 Detail'} 
-                        className="w-[200px] h-[300px] object-cover transition-transform duration-1000 hover:scale-110" 
+                        className="w-full h-full object-cover transition-transform duration-1000 hover:scale-110" 
                       />
                     )}
-                    {/* Overlay sottile per profondità */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+                    {/* Overlay per profondità */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
                   </div>
                 </motion.div>
 
