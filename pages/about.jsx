@@ -216,24 +216,29 @@ export default function AboutPage({ heroImages = [] }) {
             className="relative min-h-[92vh] flex items-center py-24 px-4 overflow-hidden"
             aria-label="Presentazione Formula Rossa"
           >
-            {/* Sfondi stratificati (rimangono invariati) */}
+            {/* Sfondi stratificati */}
             <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+              {/* Dot grid */}
               <div className="absolute inset-0 opacity-[0.03]" style={{
                 backgroundImage: 'radial-gradient(circle at 1px 1px, #DC0000 1px, transparent 0)',
                 backgroundSize: '40px 40px',
               }} />
+              {/* Glow rosso pulsante */}
               <motion.div
                 animate={{ scale: [1, 1.15, 1], opacity: [0.12, 0.2, 0.12] }}
                 transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
                 className="absolute -top-48 -left-48 w-[800px] h-[800px] bg-red-600 rounded-full blur-[200px]"
               />
+              {/* Glow oro */}
               <motion.div
                 animate={{ scale: [1, 1.1, 1], opacity: [0.05, 0.1, 0.05] }}
                 transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
                 className="absolute -bottom-32 right-0 w-[500px] h-[500px] bg-yellow-500 rounded-full blur-[160px]"
               />
+              {/* Linee verticali decorative */}
               <div className="absolute top-0 left-1/3 w-px h-full bg-gradient-to-b from-transparent via-red-600/15 to-transparent" />
               <div className="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-transparent via-yellow-500/8 to-transparent" />
+              {/* Striscia diagonale decorativa */}
               <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-red-600/[0.03] to-transparent" />
             </div>
 
@@ -256,9 +261,23 @@ export default function AboutPage({ heroImages = [] }) {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.1 }}
-                    className="text-3xl md:text-4xl lg:text-5xl font-black uppercase italic tracking-tighter whitespace-nowrap mb-6"
+                    className="text-5xl md:text-6xl xl:text-7xl font-black uppercase italic tracking-tighter leading-[0.9] mb-8"
                   >
-                    Una piattaforma <span className="text-red-600">rampante</span>
+                    Una piattaforma<br />
+                    per i{' '}
+                    <span className="relative inline-block">
+                      <span className="text-red-600">Tifosi</span>
+                      <motion.span
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        transition={{ duration: 0.8, delay: 0.9 }}
+                        className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-red-600 to-red-400 origin-left"
+                      />
+                    </span>
+                    <br />
+                    <span className="text-red-600">
+                      Ferrari
+                    </span>
                   </motion.h1>
 
                   <motion.p
@@ -293,29 +312,42 @@ export default function AboutPage({ heroImages = [] }) {
                   </motion.div>
                 </motion.div>
 
-                {/* Immagine Singola [3] */}
+                {/* Griglia immagini */}
                 <motion.div
                   initial={{ opacity: 0, x: 40 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
-                  className="relative flex justify-center lg:justify-end"
+                  className="relative"
                 >
                   {/* Numero "75" decorativo */}
-                  <div className="absolute -top-12 -right-6 text-[180px] font-black leading-none select-none pointer-events-none italic bg-gradient-to-b from-red-600/10 to-transparent bg-clip-text text-transparent z-0">
+                  <div className="absolute -top-8 -right-4 text-[180px] font-black leading-none select-none pointer-events-none italic bg-gradient-to-b from-red-600/10 to-transparent bg-clip-text text-transparent">
                     75
                   </div>
-
-                  {/* Contenitore Immagine [3] */}
-                  <div className="relative z-10 w-[200px] md:w-[280px] aspect-[3/4] rounded-3xl overflow-hidden bg-zinc-900 border border-white/[0.08] shadow-2xl shadow-black/60 ring-1 ring-white/10">
-                    {realImages[3] && (
-                      <img 
-                        src={realImages[3].urls.regular} 
-                        alt={realImages[3].alt_description ?? 'Ferrari F1 Detail'} 
-                        className="w-full h-full object-cover transition-transform duration-1000 hover:scale-110" 
-                      />
-                    )}
-                    {/* Overlay per profondità */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                  <div className="relative z-10 grid grid-cols-2 gap-3">
+                    <div className="space-y-3">
+                      <div className="aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50 ring-1 ring-white/5">
+                        {realImages[0] && (
+                          <img src={realImages[0].urls.regular} alt={realImages[0].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+                        )}
+                      </div>
+                      <div className="aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50">
+                        {realImages[1] && (
+                          <img src={realImages[1].urls.regular} alt={realImages[1].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-3 pt-6">
+                      <div className="aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50">
+                        {realImages[2] && (
+                          <img src={realImages[2].urls.regular} alt={realImages[2].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+                        )}
+                      </div>
+                      <div className="aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50">
+                        {realImages[3] && (
+                          <img src={realImages[3].urls.regular} alt={realImages[3].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
 
@@ -324,90 +356,221 @@ export default function AboutPage({ heroImages = [] }) {
           </section>
 
           {/* ══════════════════════════════════════
-              2. MISSIONE + VALORI
+              2. IL NOSTRO IMPEGNO — card premium
           ══════════════════════════════════════ */}
-          <section className="py-28 px-4 relative overflow-hidden" aria-label="Missione e valori">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-600/40 to-transparent" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-32 bg-gradient-to-b from-red-600/50 to-transparent" />
+          <section className="py-28 px-4 relative overflow-hidden" aria-label="Il nostro impegno">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-600/40 to-transparent" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-32 bg-gradient-to-b from-red-600/50 to-transparent" />
 
-          <div className="max-w-5xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-16"
-            >
-              <SectionLabel>Il nostro impegno</SectionLabel>
-              <SectionTitle>
-                Dati <span className="text-red-600">al servizio dei Tifosi</span>
-              </SectionTitle>
-            </motion.div>
+            <div className="max-w-6xl mx-auto">
+              {/* Header sezione */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="mb-12"
+              >
+                <SectionLabel>Il nostro impegno</SectionLabel>
+                <SectionTitle>
+                  Dati al servizio dei <span className="text-red-600">Tifosi</span>
+                </SectionTitle>
+              </motion.div>
 
-            {/* Valori — card colorate */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              {VALUES.map((value, i) => (
+              {/* Card grandi premium — stile screenshot */}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+                {/* CARD 1 — Trasparenza / rosso scuro */}
                 <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 24 }}
+                  initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.09 }}
-                  className={`group relative rounded-2xl overflow-hidden border border-white/[0.07] ${value.border} transition-all duration-300 cursor-default`}
+                  transition={{ delay: 0 }}
+                  className="group relative rounded-2xl overflow-hidden border border-red-900/50 hover:border-red-600/60 transition-all duration-300 flex flex-col"
+                  style={{ background: 'linear-gradient(160deg, #1a0505 0%, #0f0303 60%, #080808 100%)' }}
                 >
-                  {/* Gradient di sfondo */}
-                  <div className={`absolute inset-0 bg-gradient-to-b ${value.color} opacity-100`} />
-                  <div className="absolute inset-0 bg-zinc-900/70" />
-                  <div className="relative p-6">
-                    <div className={`inline-flex items-center justify-center w-9 h-9 rounded-xl ${value.iconBg} border border-white/10 mb-4`}>
-                      <value.icon className={`w-4 h-4 ${value.iconColor}`} />
+                  {/* Glow interno */}
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(220,0,0,0.18)_0%,transparent_60%)]" />
+                  <div className="relative flex flex-col flex-1 p-6">
+                    {/* Top bar */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-red-500/70">
+                        <Target className="w-3.5 h-3.5" />
+                        Dati verificati
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-red-400/60">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                        Sempre
+                      </div>
                     </div>
-                    <h3 className="font-black text-white text-sm uppercase tracking-wide mb-2">{value.title}</h3>
-                    <p className="text-zinc-500 text-xs leading-relaxed">{value.desc}</p>
+                    {/* Numero decorativo */}
+                    <div className="text-[56px] font-black leading-none tracking-tighter text-red-600/20 mb-2 select-none">100%</div>
+                    {/* Titolo grande */}
+                    <h3 className="text-2xl font-black text-white leading-tight mb-3">
+                      Trasparenza<br />
+                      <span className="text-red-500">totale</span>
+                    </h3>
+                    <p className="text-zinc-500 text-xs leading-relaxed flex-1">
+                      Tutti i dati sono verificabili e tracciabili, con fonti ufficiali citate per ogni record.
+                    </p>
+                    {/* Tag pills */}
+                    <div className="flex flex-wrap gap-1.5 my-4">
+                      {['FIA', 'Open Source', 'F1DB'].map(t => (
+                        <span key={t} className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-red-800/50 text-red-400/70 bg-red-900/20">{t}</span>
+                      ))}
+                    </div>
+                    {/* Bottom CTA */}
+                    <Link href="/statistics" className="mt-auto flex items-center justify-between px-4 py-3 rounded-xl border border-red-800/40 hover:border-red-600/60 hover:bg-red-600/10 text-red-400 hover:text-red-300 transition-all duration-200 group/btn">
+                      <span className="text-[10px] font-black uppercase tracking-widest">Esplora i dati</span>
+                      <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
+                    </Link>
                   </div>
                 </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
 
-          {/* ══════════════════════════════════════
-              3. NUMERI
-          ══════════════════════════════════════ */}
-          <section className="py-24 px-4 relative overflow-hidden" aria-label="Numeri del progetto">
-            <div className="absolute inset-0 bg-gradient-to-b from-[#060606] to-[#080808]" />
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-600/20 to-transparent" />
-            {/* Glow sfondo */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(220,0,0,0.04)_0%,transparent_70%)]" />
-
-            <div className="relative max-w-5xl mx-auto">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {STATS.map((stat, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                    className="group relative"
-                  >
-                    {/* Card con glow */}
-                    <div className={`relative rounded-2xl border border-white/[0.3] group-hover:border-white/15 bg-zinc-900/50 p-6 text-center transition-all duration-300 shadow-lg group-hover:shadow-2xl ${stat.glow} overflow-hidden`}>
-                      {/* Top gradient line */}
-                      <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r ${stat.ring}`} />
-                      {/* Icon */}
-                      <div className={`inline-flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br ${stat.ring} bg-opacity-10 mb-4 shadow-sm`}>
-                        <stat.icon className="w-5 h-5 text-white" />
+                {/* CARD 2 — Passione / oro scuro */}
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 }}
+                  className="group relative rounded-2xl overflow-hidden border border-yellow-900/50 hover:border-yellow-500/60 transition-all duration-300 flex flex-col"
+                  style={{ background: 'linear-gradient(160deg, #1a1200 0%, #0f0b00 60%, #080808 100%)' }}
+                >
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(234,179,8,0.15)_0%,transparent_60%)]" />
+                  <div className="relative flex flex-col flex-1 p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-yellow-500/70">
+                        <Heart className="w-3.5 h-3.5" />
+                        Dal 1950
                       </div>
-                      {/* Numero */}
-                      <div className={`text-4xl md:text-5xl font-black tracking-tighter tabular-nums mb-1 ${stat.num}`}>
-                        {stat.value}
+                      <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-yellow-400/60">
+                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
+                        Vivo
                       </div>
-                      <div className="text-[10px] text-zinc-500 uppercase tracking-[0.15em]">{stat.label}</div>
                     </div>
-                  </motion.div>
-                ))}
+                    <div className="text-[56px] font-black leading-none tracking-tighter text-yellow-600/20 mb-2 select-none">❤️</div>
+                    <h3 className="text-2xl font-black text-white leading-tight mb-3">
+                      Passione<br />
+                      <span className="text-yellow-400">Ferrari</span>
+                    </h3>
+                    <p className="text-zinc-500 text-xs leading-relaxed flex-1">
+                      Costruito da tifosi per tifosi, con attenzione ai dettagli che solo chi ama il Cavallino Rampante può capire.
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 my-4">
+                      {['Tifosi', 'Comunità', '75 anni'].map(t => (
+                        <span key={t} className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-yellow-800/50 text-yellow-400/70 bg-yellow-900/20">{t}</span>
+                      ))}
+                    </div>
+                    <Link href="/fanzone" className="mt-auto flex items-center justify-between px-4 py-3 rounded-xl border border-yellow-800/40 hover:border-yellow-500/60 hover:bg-yellow-500/10 text-yellow-400 hover:text-yellow-300 transition-all duration-200 group/btn">
+                      <span className="text-[10px] font-black uppercase tracking-widest">Fan Zone</span>
+                      <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
+                    </Link>
+                  </div>
+                </motion.div>
+
+                {/* CARD 3 — Qualità / zinc scuro */}
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2 }}
+                  className="group relative rounded-2xl overflow-hidden border border-zinc-700/40 hover:border-zinc-500/60 transition-all duration-300 flex flex-col"
+                  style={{ background: 'linear-gradient(160deg, #111114 0%, #0c0c0f 60%, #080808 100%)' }}
+                >
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(161,161,170,0.08)_0%,transparent_60%)]" />
+                  <div className="relative flex flex-col flex-1 p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400/70">
+                        <Award className="w-3.5 h-3.5" />
+                        Premium
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-zinc-400/60">
+                        <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-pulse" />
+                        Pro
+                      </div>
+                    </div>
+                    <div className="text-[56px] font-black leading-none tracking-tighter text-zinc-600/30 mb-2 select-none">★</div>
+                    <h3 className="text-2xl font-black text-white leading-tight mb-3">
+                      Qualità<br />
+                      <span className="text-zinc-300">premium</span>
+                    </h3>
+                    <p className="text-zinc-500 text-xs leading-relaxed flex-1">
+                      Design curato, performance ottimizzata e un'esperienza utente pensata per ogni tifoso.
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 my-4">
+                      {['Design', 'Performance', 'UX'].map(t => (
+                        <span key={t} className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-zinc-700/50 text-zinc-400/70 bg-zinc-800/30">{t}</span>
+                      ))}
+                    </div>
+                    <Link href="/statistics" className="mt-auto flex items-center justify-between px-4 py-3 rounded-xl border border-zinc-700/40 hover:border-zinc-500/60 hover:bg-zinc-700/20 text-zinc-400 hover:text-zinc-200 transition-all duration-200 group/btn">
+                      <span className="text-[10px] font-black uppercase tracking-widest">Scopri la piattaforma</span>
+                      <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
+                    </Link>
+                  </div>
+                </motion.div>
+
+                {/* CARD 4 — Community / rosso-scuro con numeri */}
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3 }}
+                  className="group relative rounded-2xl overflow-hidden border border-red-900/50 hover:border-red-500/60 transition-all duration-300 flex flex-col"
+                  style={{ background: 'linear-gradient(160deg, #150808 0%, #0e0505 60%, #080808 100%)' }}
+                >
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(220,0,0,0.12)_0%,transparent_55%)]" />
+                  <div className="relative flex flex-col flex-1 p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-red-400/70">
+                        <Users className="w-3.5 h-3.5" />
+                        Community
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-green-400/70">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        Live now
+                      </div>
+                    </div>
+                    {/* Mini stats inline */}
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      {[
+                        { val: '10K+', lbl: 'Utenti' },
+                        { val: '500K+', lbl: 'Dataset' },
+                        { val: '1000+', lbl: 'Gare' },
+                        { val: '75+', lbl: 'Anni' },
+                      ].map(s => (
+                        <div key={s.lbl} className="bg-red-900/20 border border-red-900/30 rounded-xl px-3 py-2 text-center">
+                          <div className="text-lg font-black text-red-400 leading-none">{s.val}</div>
+                          <div className="text-[9px] text-zinc-600 uppercase tracking-wider mt-0.5">{s.lbl}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <h3 className="text-2xl font-black text-white leading-tight mb-2">
+                      Entra nella<br />
+                      <span className="text-red-500">Community</span>
+                    </h3>
+                    <p className="text-zinc-500 text-xs leading-relaxed flex-1">
+                      Interagisci con migliaia di tifosi, guadagna SF Tokens e scala la classifica globale.
+                    </p>
+                    <Link href="/fanzone" className="mt-4 flex items-center justify-between px-4 py-3 rounded-xl border border-red-800/40 hover:border-red-500/60 hover:bg-red-600/10 text-red-400 hover:text-red-300 transition-all duration-200 group/btn">
+                      <span className="text-[10px] font-black uppercase tracking-widest">Inizia a giocare</span>
+                      <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
+                    </Link>
+                  </div>
+                </motion.div>
+
               </div>
+
+              {/* Badge indipendente */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="mt-8 flex items-center justify-center gap-3 px-5 py-3 rounded-2xl bg-gradient-to-r from-green-500/5 to-transparent border border-green-500/15 max-w-xs mx-auto"
+              >
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0 shadow-sm shadow-green-500/50" />
+                <p className="text-zinc-400 text-xs">
+                  <span className="text-green-400 font-bold">100% indipendente</span> — non affiliato a Ferrari S.p.A.
+                </p>
+              </motion.div>
             </div>
           </section>
 
