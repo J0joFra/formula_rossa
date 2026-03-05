@@ -53,12 +53,6 @@ const POINTS_PERIODS = [
   }
 ];
 
-// Funzione per determinare il periodo in base all'anno
-const getPeriodColor = (year) => {
-  const period = POINTS_PERIODS.find(p => year >= p.start && year <= p.end);
-  return period ? period.color : RED;
-};
-
 const MEDAL = [
   { color: RED,      label: '1ST' },
   { color: '#EBEBEB', label: '2ND' },
@@ -160,7 +154,6 @@ const circuitToCountry = {
 const getFlagCode = (circuitName) => {
   if (!circuitName) return '';
   
-  // Normalizzazione del nome del circuito
   const n = circuitName.toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9\s-]/g, '')
@@ -168,38 +161,27 @@ const getFlagCode = (circuitName) => {
     .replace(/-+/g, '-')
     .trim();
   
-  // Controllo nel mapping diretto
   const country = circuitToCountry[n];
   if (country) return countryConfig[country]?.code || '';
   
   const l = circuitName.toLowerCase();
   
-  // ITALIA
-  if (l.includes('monza') || l.includes('imola') || l.includes('mugello') || 
-      l.includes('italian') || l.includes('pescara') || l.includes('bologna') ||
+  if (l.includes('monza') || l.includes('imola') || l.includes('mugello') || l.includes('italian') || l.includes('pescara') || l.includes('bologna') ||
       l.includes('enna') || l.includes('pergusa') || l.includes('vallelunga') ||
       l.includes('misano') || l.includes('santamonica')) return 'it';
-  
-  // REGNO UNITO
   if (l.includes('silverstone') || l.includes('brands') || l.includes('british') ||
       l.includes('donington') || l.includes('aintree') || l.includes('goodwood') ||
       l.includes('crystal palace') || l.includes('mallory park') || l.includes('snetterton') ||
       l.includes('oulton park') || l.includes('thurston') || l.includes('liverpool') ||
       l.includes('northamptonshire') || l.includes('kent')) return 'gb';
-  
-  // BELGIO
   if (l.includes('spa') || l.includes('belgian') || l.includes('francorchamps') ||
       l.includes('zolder') || l.includes('nivelles') || l.includes('stavelot') ||
       l.includes('brussels') || l.includes('heusden')) return 'be';
-  
-  // SPAGNA
   if (l.includes('barcelona') || l.includes('catalun') || l.includes('spanish') ||
       l.includes('jerez') || l.includes('valencia') || l.includes('pedralbes') ||
       l.includes('montjuic') || l.includes('madrid') || l.includes('jarama') ||
       l.includes('madring') || l.includes('guadalope') || l.includes('lasarte') ||
       l.includes('sitges')) return 'es';
-  
-  // FRANCIA
   if (l.includes('paul ricard') || l.includes('magny') || l.includes('french') ||
       l.includes('france') || l.includes('le castellet') || l.includes('ricard') ||
       l.includes('reims') || l.includes('dijon') || l.includes('prenois') ||
@@ -207,31 +189,16 @@ const getFlagCode = (circuitName) => {
       l.includes('clermont ferrand') || l.includes('lemans') || l.includes('bugatti') ||
       l.includes('albi') || l.includes('lens') || l.includes('strasbourg') ||
       l.includes('montlhery') || l.includes('pau') || l.includes('bois')) return 'fr';
-  
-  // GERMANIA
   if (l.includes('nurburg') || l.includes('hockenheim') || l.includes('german') ||
       l.includes('avus') || l.includes('berlin') || l.includes('norisring') ||
       l.includes('grenzlandring') || l.includes('sachsenring') || l.includes('solitude')) return 'de';
-  
-  // PORTOGALLO
   if (l.includes('estoril') || l.includes('portimao') || l.includes('portuguese') ||
       l.includes('algarve') || l.includes('boavista') || l.includes('oporto') ||
       l.includes('monsanto') || l.includes('lisbon')) return 'pt';
-  
-  // SVIZZERA
   if (l.includes('bremgarten') || l.includes('bern') || l.includes('swiss') || l.includes('dijon')) return 'ch';
-  
-  // SVEZIA
-  if (l.includes('anderstorp') || l.includes('scandinavian') || l.includes('swedish') ||
-      l.includes('karlskoga')) return 'se';
-  
-  // MONACO
+  if (l.includes('anderstorp') || l.includes('scandinavian') || l.includes('swedish') || l.includes('karlskoga')) return 'se';
   if (l.includes('monaco') || l.includes('monte carlo') || l.includes('circuit de monaco')) return 'mc';
-  
-  // AZERBAIJAN
   if (l.includes('baku') || l.includes('azerbaijan') || l.includes('bakú')) return 'az';
-  
-  // USA
   if (l.includes('americas') || l.includes('cota') || l.includes('austin') || 
       l.includes('miami') || l.includes('vegas') || l.includes('las vegas') ||
       l.includes('united states') || l.includes('indianapolis') || l.includes('watkins glen') ||
@@ -239,82 +206,40 @@ const getFlagCode = (circuitName) => {
       l.includes('dallas') || l.includes('sebring') || l.includes('riverside') ||
       l.includes('caesars palace') || l.includes('fair park') || l.includes('tampa') ||
       l.includes('laguna seca') || l.includes('sonoma') || l.includes('road america')) return 'us';
-  
-  // CANADA
   if (l.includes('villeneuve') || l.includes('montreal') || l.includes('canadian') ||
       l.includes('mosport') || l.includes('bowmanville') || l.includes('tremblant') ||
       l.includes('st jovite')) return 'ca';
-  
-  // BRASILE
   if (l.includes('interlagos') || l.includes('brazilian') || l.includes('sao paulo') ||
       l.includes('jose carlos pace') || l.includes('jacarepagua') || l.includes('rio de janeiro') ||
       l.includes('galeão') || l.includes('carlos pace')) return 'br';
-  
-  // MESSICO
   if (l.includes('rodriguez') || l.includes('hermanos') || l.includes('mexico') ||
       l.includes('mexican') || l.includes('mexico city') || l.includes('avandaro')) return 'mx';
-  
-  // ARGENTINA
   if (l.includes('galvez') || l.includes('buenos aires') || l.includes('argentine') ||
       l.includes('oscar galvez') || l.includes('juan y oscar') || l.includes('cobos')) return 'ar';
-  
-  // GIAPPONE
   if (l.includes('suzuka') || l.includes('japanese') || l.includes('fuji') ||
       l.includes('okayama') || l.includes('ti circuit') || l.includes('aida') ||
       l.includes('mine')) return 'jp';
-  
-  // CINA
   if (l.includes('shanghai') || l.includes('chinese') || l.includes('china') ||
       l.includes('zhuhai') || l.includes('beijing')) return 'cn';
-  
-  // SINGAPORE
   if (l.includes('marina bay') || l.includes('singapore')) return 'sg';
-  
-  // MALESIA
   if (l.includes('sepang') || l.includes('malaysian') || l.includes('kuala lumpur') ||
       l.includes('johor')) return 'my';
-  
-  // COREA
   if (l.includes('yeongam') || l.includes('korea') || l.includes('korean')) return 'kr';
-  
-  // INDIA
   if (l.includes('buddh') || l.includes('greater noida') || l.includes('indian')) return 'in';
-  
-  // RUSSIA
   if (l.includes('sochi') || l.includes('russian') || l.includes('moscow')) return 'ru';
-  
-  // BAHRAIN
   if (l.includes('bahrain') || l.includes('sakhir') || l.includes('manama')) return 'bh';
-  
-  // QATAR
   if (l.includes('lusail') || l.includes('qatar') || l.includes('losail')) return 'qa';
-  
-  // ARABIA SAUDITA
   if (l.includes('jeddah') || l.includes('saudi') || l.includes('arabia')) return 'sa';
-  
-  // EMIRATI ARABI
   if (l.includes('yas') || l.includes('abu dhabi') || l.includes('marina')) return 'ae';
-  
-  // TURCHIA
   if (l.includes('istanbul') || l.includes('turkish') || l.includes('turkey')) return 'tr';
-  
-  // SUD AFRICA
   if (l.includes('kyalami') || l.includes('south african') || l.includes('prince george') ||
       l.includes('midrand') || l.includes('east london')) return 'za';
-  
-  // MAROCCO
   if (l.includes('ain diab') || l.includes('ain-diab') || l.includes('moroccan') ||
       l.includes('casablanca') || l.includes('ain-diab')) return 'ma';
-  
-  // AUSTRIA
   if (l.includes('red bull ring') || l.includes('austrian') || l.includes('spielberg') ||
       l.includes('zeltweg') || l.includes('oesterreichring') || l.includes('styria')) return 'at';
-  
-  // UNGHERIA
   if (l.includes('hungaroring') || l.includes('hungarian') || l.includes('budapest') ||
       l.includes('mogyorod')) return 'hu';
-  
-  // PAESI BASSI
   if (l.includes('zandvoort') || l.includes('dutch') || l.includes('netherlands')) return 'nl';
   if (l.includes('albert park') || l.includes('melbourne') || l.includes('australian') || l.includes('adelaide')) return 'au';
   if (l.includes('finnish') || l.includes('helsinki') || l.includes('elaintarha')) return 'fi';
@@ -335,19 +260,6 @@ const getCountryName = (code) => {
   return Object.values(countryConfig).find(v => v.code === code)?.name || code.toUpperCase();
 };
 
-const debugCircuits = (circuits) => {
-  console.log('🏁 DEBUG CIRCUITI:');
-  circuits.forEach(c => {
-    const flag = c.flag || getFlagCode(c.originalName || c.name);
-    console.log(`  ${c.name} (${c.originalName}) → flag: "${flag}"`);
-  });
-};
-
-useEffect(() => {
-  if (circuits.length > 0) {
-    debugCircuits(circuits);
-  }
-}, [circuits]);
 /* ─────────────────────────────────────────────────────────────────────────────
    DARK TOOLTIP
 ───────────────────────────────────────────────────────────────────────────── */
@@ -452,8 +364,6 @@ function WinnerRow({ driver, index, max }) {
   const accent = isTop3 ? MEDAL[index].color : 'rgba(255,255,255,0.18)';
   const label  = isTop3 ? MEDAL[index].label : null;
 
-  // Trofei: mostra max 10 icone, poi "×N" per i multipli di 10
-  const trophyBlocks = Math.min(driver.count, 10);
   const multiplier   = Math.floor(driver.count / 10);
   const remainder    = driver.count % 10;
   const trophyColor  = isTop3 ? accent : GOLD;
@@ -465,11 +375,9 @@ function WinnerRow({ driver, index, max }) {
       transition={{ duration: 0.35, delay: index * 0.045 }}
       className="group relative flex items-start gap-4 md:gap-5 py-5 px-1 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] transition-colors"
     >
-      {/* Left accent */}
       <div className="absolute left-0 top-3 bottom-3 w-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
         style={{ background: accent }} aria-hidden="true" />
 
-      {/* Rank */}
       <div className="shrink-0 w-9 text-right select-none pt-1">
         {label
           ? <span className="text-[10px] font-black tracking-widest" style={{ color: accent }}>{label}</span>
@@ -477,7 +385,6 @@ function WinnerRow({ driver, index, max }) {
         }
       </div>
 
-      {/* Photo */}
       <div className="relative shrink-0 w-11 h-11 md:w-13 md:h-13 rounded-xl overflow-hidden transition-transform duration-300 group-hover:scale-105 mt-0.5"
         style={{ border: `1.5px solid ${isTop3 ? accent : 'rgba(255,255,255,0.1)'}` }}>
         <img
@@ -491,9 +398,7 @@ function WinnerRow({ driver, index, max }) {
         </div>
       </div>
 
-      {/* Name + trophies + bar */}
       <div className="flex-1 min-w-0">
-        {/* Solo nome, senza anni attivi */}
         <div className="flex items-baseline gap-2 mb-2 flex-wrap">
           <span className="text-sm font-black uppercase tracking-tight truncate transition-colors group-hover:text-red-400"
             style={{ color: isTop3 ? accent : 'white' }}>
@@ -501,10 +406,8 @@ function WinnerRow({ driver, index, max }) {
           </span>
         </div>
 
-        {/* ── Trophies ── */}
         <div className="flex items-center gap-2 mb-2.5 flex-wrap" aria-label={`${driver.count} vittorie`}>
           {multiplier >= 1 ? (
-            /* Compressed view for large counts: show 10 trophies + "×N" badge */
             <>
               <div className="flex items-center gap-0.5">
                 {[...Array(10)].map((_, i) => (
@@ -543,7 +446,6 @@ function WinnerRow({ driver, index, max }) {
               )}
             </>
           ) : (
-            /* Direct view for counts ≤ 9 */
             <div className="flex items-center gap-0.5">
               {[...Array(driver.count)].map((_, i) => (
                 <motion.div
@@ -559,7 +461,6 @@ function WinnerRow({ driver, index, max }) {
           )}
         </div>
 
-        {/* Progress bar */}
         <div className="h-px w-full rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
           <motion.div
             initial={{ width: 0 }}
@@ -571,7 +472,6 @@ function WinnerRow({ driver, index, max }) {
         </div>
       </div>
 
-      {/* Count */}
       <div className="shrink-0 text-right min-w-[3rem] pt-0.5">
         <span className="text-2xl md:text-3xl font-black tabular-nums transition-colors"
           style={{ color: isTop3 ? accent : 'rgba(255,255,255,0.55)' }}>
@@ -655,7 +555,6 @@ export default function StatisticsPage() {
           const cId   = rd.grandPrixId || 'Unknown';
           const cName = rd.circuitName || cId;
           const flag  = getFlagCode(cName);
-          // Assicuriamoci che il flag esista in countryConfig
           const validFlag = flag && Object.values(countryConfig).some(v => v.code === flag) ? flag : '';
           if (!acc[cId]) acc[cId] = { 
             name: getCountryName(flag) || cId.replace(/-/g,' ').toUpperCase(), 
@@ -681,7 +580,6 @@ export default function StatisticsPage() {
 
   const toggle = (id) => setOpenSection(openSection === id ? null : id);
 
-  /* ── Loading ── */
   if (loading) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4">
       <div className="flex gap-1.5" aria-label="Caricamento dati">
@@ -702,7 +600,6 @@ export default function StatisticsPage() {
   return (
     <div className="min-h-screen bg-black text-white selection:bg-red-600/30">
 
-      {/* Background grid */}
       <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
         <div className="absolute inset-0 opacity-[0.025]"
           style={{ backgroundImage: 'linear-gradient(to right,#DC0000 1px,transparent 1px),linear-gradient(to bottom,#DC0000 1px,transparent 1px)', backgroundSize: '48px 48px' }}
@@ -716,7 +613,6 @@ export default function StatisticsPage() {
 
       <main className="relative z-10 max-w-5xl mx-auto pt-28 md:pt-36 px-4 pb-24">
 
-        {/* Back */}
         <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className="mb-10">
           <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.25em] text-white-600 hover:text-white transition-colors group">
             <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" aria-hidden="true" />
@@ -724,7 +620,6 @@ export default function StatisticsPage() {
           </Link>
         </motion.div>
 
-        {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
           className="mb-14 pl-6 relative"
@@ -742,7 +637,6 @@ export default function StatisticsPage() {
             75 anni di telemetria, vittorie e record storici. Ogni numero racconta una leggenda della Rossa.
           </p>
 
-          {/* Quick stats */}
           <div className="flex flex-wrap gap-8 mt-8 pt-8 border-t border-white/[0.06]">
             {[
               { label: 'Vittorie totali',  value: pilotWins.reduce((a,d) => a+d.count, 0).toLocaleString('it-IT') },
@@ -757,15 +651,13 @@ export default function StatisticsPage() {
           </div>
         </motion.header>
 
-        {/* Accordion sections */}
         <motion.div
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }}
           className="flex flex-col gap-3"
         >
 
-          {/* ── 1. WINNERS CIRCLE ── */}
+          {/* WINNERS CIRCLE */}
           <AccordionSection id="winners" title="Winners Circle" subtitle="Classifica vittorie per pilota" icon={Trophy} isOpen={openSection==='winners'} onToggle={()=>toggle('winners')} accent="gold">
-            {/* Table header - RIMOSSA LA COLONNA "Anni attivi" */}
             <div className="flex items-center gap-4 md:gap-5 px-1 pt-4 pb-2">
               <div className="w-9 shrink-0" />
               <div className="w-10 md:w-12 shrink-0" />
@@ -779,11 +671,10 @@ export default function StatisticsPage() {
             </div>
           </AccordionSection>
 
-          {/* ── 2. PERFORMANCE TIMELINE ── */}
+          {/* PERFORMANCE TIMELINE */}
           <AccordionSection id="timeline" title="Performance Timeline" subtitle="Evoluzione punti costruttori annuali" icon={Activity} isOpen={openSection==='timeline'} onToggle={()=>toggle('timeline')} accent="red">
             <div className="mt-6">
               
-              {/* LEGENDA DEI PERIODI */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
                 {POINTS_PERIODS.map((period) => (
                   <div 
@@ -810,12 +701,10 @@ export default function StatisticsPage() {
                 ))}
               </div>
 
-              {/* GRAFICO A BARRE CON COLORI PER PERIODO */}
               <div className="h-[380px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={history} margin={{ top: 10, right: 12, left: -10, bottom: 0 }}>
                     <defs>
-                      {/* Gradienti per ogni periodo - opzionali ma belli */}
                       {POINTS_PERIODS.map((period) => (
                         <linearGradient key={period.name} id={`gradient-${period.name}`} x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor={period.color} stopOpacity={0.9} />
@@ -901,7 +790,6 @@ export default function StatisticsPage() {
                 </ResponsiveContainer>
               </div>
 
-              {/* Nota esplicativa sul sistema di punteggio */}
               <p className="text-[12px] text-white-600 text-center mt-4 italic border-t border-white/[0.04] pt-3">
                 ⚡ I punti riflettono i diversi sistemi di punteggio: 1950-59 (8 pt vittoria), 1960-90 (9 pt), 
                 1991-2009 (10 pt), 2010-oggi (25 pt + sprint)
@@ -909,11 +797,10 @@ export default function StatisticsPage() {
             </div>
           </AccordionSection>
 
-          {/* ── 3. GLOBAL DNA ── */}
+          {/* GLOBAL DNA */}
           <AccordionSection id="dna" title="Global DNA" subtitle="Distribuzione geografica dei piloti" icon={Globe2} isOpen={openSection==='dna'} onToggle={()=>toggle('dna')} accent="red">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-6 items-center">
 
-              {/* Donut chart */}
               <div className="relative h-[320px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -943,14 +830,12 @@ export default function StatisticsPage() {
                     />
                   </PieChart>
                 </ResponsiveContainer>
-                {/* Center text */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <span className="text-3xl font-black">{nationalities.reduce((a,n) => a+n.value, 0)}</span>
                   <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: RED }}>piloti totali</span>
                 </div>
               </div>
 
-              {/* Legend */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {nationalities.map((n, i) => (
                   <motion.div key={n.id}
@@ -967,7 +852,7 @@ export default function StatisticsPage() {
                         <div className="flex-1 h-px rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
                           <motion.div
                             initial={{ width: 0 }}
-                            animate={{ width: `${(n.value / nationalities[0].value) * 100}%` }}
+                            animate={{ width: `${(n.value / nationalities[0]?.value || 1) * 100}%` }}
                             transition={{ duration: 0.8, delay: i * 0.05 + 0.2 }}
                             className="h-full rounded-full"
                             style={{ background: n.color }}
@@ -982,11 +867,13 @@ export default function StatisticsPage() {
             </div>
           </AccordionSection>
 
-          {/* ── 4. FORTRESS MARANELLO ── */}
+          {/* FORTRESS MARANELLO - CORRETTO CON GESTIONE DATI VUOTI */}
           <AccordionSection id="circuits" title="Fortress Maranello" subtitle="Circuiti con più vittorie Ferrari" icon={Landmark} isOpen={openSection==='circuits'} onToggle={()=>toggle('circuits')} accent="gold">
             <div className="mt-6 space-y-6">
+              
+              {/* Circuit chips - con controllo se circuits esiste e ha elementi */}
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                {circuits.map(c => {
+                {circuits && circuits.length > 0 ? circuits.map(c => {
                   const flagCode = c.flag || getFlagCode(c.originalName || c.name);
                   
                   return (
@@ -1001,7 +888,6 @@ export default function StatisticsPage() {
                             alt={c.name}
                             className="w-full h-full object-cover"
                             onError={(e) => { 
-                              // Fallback a dimensione più piccola
                               e.target.src = `https://flagcdn.com/24x18/${flagCode}.png`;
                               e.target.onerror = () => {
                                 e.target.style.display = 'none';
@@ -1020,7 +906,7 @@ export default function StatisticsPage() {
                             <div 
                               className="h-full rounded-full" 
                               style={{ 
-                                width: `${(c.wins / circuits[0].wins) * 100}%`,
+                                width: circuits[0]?.wins ? `${(c.wins / circuits[0].wins) * 100}%` : '0%',
                                 background: c.color || RED
                               }} 
                             />
@@ -1030,58 +916,65 @@ export default function StatisticsPage() {
                       </div>
                     </div>
                   );
-                })}
+                }) : (
+                  // Placeholder se non ci sono circuiti
+                  <div className="col-span-5 text-center py-8 text-white-500">Caricamento circuiti...</div>
+                )}
               </div>
 
-              {/* Bar chart - CON LO STESSO STILE NEL TOOLTIP */}
+              {/* Bar chart - con controllo se circuits esiste */}
               <div className="h-[460px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={circuits} layout="vertical" margin={{ left: 8, right: 48, top: 4, bottom: 4 }}>
-                    <XAxis type="number" stroke="rgba(255,255,255,0.08)" tick={{ fill: '#555', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
-                    <YAxis dataKey="name" type="category" width={148} stroke="rgba(255,255,255,0.08)" tick={{ fill: '#ccc', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
-                    <Tooltip
-                      cursor={{ fill: 'rgba(255,255,255,0.02)' }}
-                      content={({ active, payload }) => {
-                        if (!active || !payload?.length) return null;
-                        const c = payload[0].payload;
-                        const flagCode = c.flag || getFlagCode(c.originalName || c.name);
-                        
-                        return (
-                          <DarkTooltip
-                            active={active}
-                            payload={[{ value: c.wins, name: 'vittorie', color: c.color }]}
-                            accentColor={c.color}
-                            extra={
-                              <div className="flex items-center gap-2 mb-1">
-                                {flagCode && (
-                                  <div className="w-5 h-3.5 rounded-sm overflow-hidden border border-white/10">
-                                    <img 
-                                      src={`https://flagcdn.com/w40/${flagCode}.png`}
-                                      alt={c.name}
-                                      className="w-full h-full object-cover"
-                                      onError={(e) => { 
-                                        e.target.src = `https://flagcdn.com/24x18/${flagCode}.png`;
-                                        e.target.onerror = () => {
-                                          e.target.style.display = 'none';
-                                        };
-                                      }}
-                                    />
-                                  </div>
-                                )}
-                                <span className="text-[10px] font-black uppercase tracking-wider text-white-400">{c.name}</span>
-                              </div>
-                            }
-                          />
-                        );
-                      }}
-                    />
-                    <Bar dataKey="wins" radius={[0, 8, 8, 0]} barSize={20}>
-                      {circuits.map((c, i) => (
-                        <Cell key={i} fill={c.color || RED} style={{ filter: `drop-shadow(0 0 5px ${(c.color || RED)}44)` }} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+                {circuits && circuits.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={circuits} layout="vertical" margin={{ left: 8, right: 48, top: 4, bottom: 4 }}>
+                      <XAxis type="number" stroke="rgba(255,255,255,0.08)" tick={{ fill: '#555', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
+                      <YAxis dataKey="name" type="category" width={148} stroke="rgba(255,255,255,0.08)" tick={{ fill: '#ccc', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
+                      <Tooltip
+                        cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null;
+                          const c = payload[0].payload;
+                          const flagCode = c.flag || getFlagCode(c.originalName || c.name);
+                          
+                          return (
+                            <DarkTooltip
+                              active={active}
+                              payload={[{ value: c.wins, name: 'vittorie', color: c.color }]}
+                              accentColor={c.color}
+                              extra={
+                                <div className="flex items-center gap-2 mb-1">
+                                  {flagCode && (
+                                    <div className="w-5 h-3.5 rounded-sm overflow-hidden border border-white/10">
+                                      <img 
+                                        src={`https://flagcdn.com/w40/${flagCode}.png`}
+                                        alt={c.name}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => { 
+                                          e.target.src = `https://flagcdn.com/24x18/${flagCode}.png`;
+                                          e.target.onerror = () => {
+                                            e.target.style.display = 'none';
+                                          };
+                                        }}
+                                      />
+                                    </div>
+                                  )}
+                                  <span className="text-[10px] font-black uppercase tracking-wider text-white-400">{c.name}</span>
+                                </div>
+                              }
+                            />
+                          );
+                        }}
+                      />
+                      <Bar dataKey="wins" radius={[0, 8, 8, 0]} barSize={20}>
+                        {circuits.map((c, i) => (
+                          <Cell key={i} fill={c.color || RED} style={{ filter: `drop-shadow(0 0 5px ${(c.color || RED)}44)` }} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-full flex items-center justify-center text-white-500">Caricamento dati circuiti...</div>
+                )}
               </div>
             </div>
           </AccordionSection>
