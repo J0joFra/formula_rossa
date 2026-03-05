@@ -592,11 +592,13 @@ export default function AboutPage({ heroImages = [] }) {
               5. TIMELINE
           ══════════════════════════════════════ */}
           <section className="py-28 px-4 relative overflow-hidden" aria-label="Storia del progetto">
-            <div className="absolute inset-0 bg-[#060606]" />
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-600/20 to-transparent" />
-            {/* Glow sfondo */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-red-600/[0.04] rounded-full blur-[100px] pointer-events-none" />
+            {/* Sfondo uniforme come le altre sezioni - rimosso bg-[#060606] per mantenere consistenza */}
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
+            
+            {/* Glow sfondo come nelle altre sezioni */}
+            <div className="absolute -left-32 top-1/2 -translate-y-1/2 w-96 h-96 bg-red-600/[0.04] rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute -right-32 top-1/2 -translate-y-1/2 w-96 h-96 bg-yellow-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
 
             <div className="relative max-w-4xl mx-auto">
               <motion.div
@@ -605,7 +607,7 @@ export default function AboutPage({ heroImages = [] }) {
                 viewport={{ once: true }}
                 className="mb-16 text-center"
               >
-                <SectionLabel color="text-yellow-500/60">Roadmap</SectionLabel>
+                <SectionLabel>Roadmap</SectionLabel>
                 <SectionTitle>
                   Storia del{' '}
                   <span className="text-red-600">
@@ -615,12 +617,16 @@ export default function AboutPage({ heroImages = [] }) {
               </motion.div>
 
               <div className="relative">
-                {/* Linea centrale desktop */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-yellow-500/40 via-red-600/30 to-transparent hidden md:block" />
+                <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-red-600/40 via-yellow-500/30 to-transparent hidden md:block" />
 
                 <div className="space-y-0">
                   {TIMELINE.map((item, i) => {
                     const isLeft = i % 2 === 0;
+                    // Alterna colori hover: rosso per pari, giallo per dispari
+                    const hoverColor = i % 2 === 0 ? 'hover:border-red-600/40 hover:shadow-red-600/10' : 'hover:border-yellow-500/40 hover:shadow-yellow-500/10';
+                    const dotColor = i % 2 === 0 ? 'bg-red-500' : 'bg-yellow-500';
+                    const textColor = i % 2 === 0 ? 'group-hover:text-red-400' : 'group-hover:text-yellow-400';
+                    
                     return (
                       <motion.div
                         key={i}
@@ -632,36 +638,98 @@ export default function AboutPage({ heroImages = [] }) {
                       >
                         {/* Desktop: alternato */}
                         <div className={`hidden md:flex items-center gap-6 w-full ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}>
-                          {/* Card testo */}
                           <div className={`w-[calc(50%-2.5rem)] ${isLeft ? 'text-right' : 'text-left'}`}>
-                            <div className={`inline-block rounded-xl border ${item.color} p-4 transition-all duration-300`}>
-                              <div className="text-[10px] font-black uppercase tracking-widest text-yellow-400/70 font-mono mb-1">{item.year}</div>
-                              <h4 className="text-white font-bold text-sm mb-1">{item.event}</h4>
-                              <p className="text-zinc-500 text-xs leading-relaxed">{item.desc}</p>
+                            <div className={`
+                              group relative rounded-2xl overflow-hidden 
+                              bg-zinc-900/40 border border-white/[0.06] 
+                              ${hoverColor} transition-all duration-300 
+                              shadow-md hover:shadow-2xl p-5
+                            `}>
+                              {/* Header colorato come nelle features */}
+                              <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${i % 2 === 0 ? 'from-red-600 to-red-800' : 'from-yellow-500 to-amber-600'}`} />
+                              
+                              {/* Icona decorativa in alto a destra */}
+                              <div className="absolute top-3 right-3 text-2xl opacity-20 select-none">
+                                {item.icon}
+                              </div>
+                              
+                              <div className="relative">
+                                <div className="text-[10px] font-black uppercase tracking-widest text-red-500/70 font-mono mb-2">
+                                  {item.year}
+                                </div>
+                                <h4 className={`text-white font-bold text-base mb-2 transition-colors duration-300 ${textColor}`}>
+                                  {item.event}
+                                </h4>
+                                <p className="text-zinc-500 text-xs leading-relaxed">
+                                  {item.desc}
+                                </p>
+                                
+                                {/* Mini tag come nelle altre card */}
+                                <div className="flex flex-wrap gap-1.5 mt-3">
+                                  <span className={`text-[8px] px-2 py-0.5 rounded-full border ${i % 2 === 0 ? 'border-red-800/30 text-red-400/70 bg-red-900/20' : 'border-yellow-800/30 text-yellow-400/70 bg-yellow-900/20'}`}>
+                                    {item.year}
+                                  </span>
+                                  <span className={`text-[8px] px-2 py-0.5 rounded-full border ${i % 2 === 0 ? 'border-red-800/30 text-red-400/70 bg-red-900/20' : 'border-yellow-800/30 text-yellow-400/70 bg-yellow-900/20'}`}>
+                                    Tappa {i + 1}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          {/* Dot centrale */}
+                          
+                          {/* Dot centrale con effetto glow */}
                           <div className="flex-shrink-0 relative z-10">
-                            <div className="w-12 h-12 rounded-full bg-zinc-900 border-2 border-zinc-700 flex items-center justify-center shadow-lg">
-                              <span className="text-xl">{item.icon}</span>
+                            <div className={`
+                              w-14 h-14 rounded-full bg-zinc-900 border-2 
+                              ${i % 2 === 0 ? 'border-red-600/30 group-hover:border-red-500' : 'border-yellow-500/30 group-hover:border-yellow-400'} 
+                              flex items-center justify-center shadow-lg transition-all duration-300
+                            `}>
+                              <span className="text-2xl">{item.icon}</span>
                             </div>
-                            <div className={`absolute inset-0 rounded-full ${item.dot} opacity-20 blur-md`} />
+                            <div className={`absolute inset-0 rounded-full ${dotColor} opacity-20 blur-md group-hover:opacity-30 transition-opacity`} />
                           </div>
+                          
                           <div className="w-[calc(50%-2.5rem)]" />
                         </div>
 
-                        {/* Mobile */}
+                        {/* Mobile - stesso stile */}
                         <div className="flex md:hidden gap-4">
                           <div className="flex flex-col items-center">
-                            <div className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center flex-shrink-0 text-base">
+                            <div className={`
+                              w-12 h-12 rounded-full bg-zinc-900 border-2 
+                              ${i % 2 === 0 ? 'border-red-600/30' : 'border-yellow-500/30'} 
+                              flex items-center justify-center flex-shrink-0 text-xl
+                            `}>
                               {item.icon}
                             </div>
-                            {i < TIMELINE.length - 1 && <div className="w-px flex-1 mt-2 bg-gradient-to-b from-zinc-700 to-transparent" />}
+                            {i < TIMELINE.length - 1 && (
+                              <div className="w-px flex-1 mt-2 bg-gradient-to-b from-zinc-700 to-transparent" />
+                            )}
                           </div>
-                          <div className={`pb-4 rounded-xl border ${item.color} p-4 flex-1`}>
-                            <div className="text-[10px] font-black uppercase tracking-widest text-yellow-400/70 font-mono mb-1">{item.year}</div>
-                            <h4 className="text-white font-bold text-sm mb-1">{item.event}</h4>
-                            <p className="text-zinc-500 text-xs leading-relaxed">{item.desc}</p>
+                          
+                          <div className={`
+                            group flex-1 rounded-2xl overflow-hidden 
+                            bg-zinc-900/40 border border-white/[0.06] 
+                            ${hoverColor} transition-all duration-300 
+                            shadow-md hover:shadow-xl p-4 mb-4
+                          `}>
+                            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${i % 2 === 0 ? 'from-red-600 to-red-800' : 'from-yellow-500 to-amber-600'}`} />
+                            
+                            <div className="relative">
+                              <div className="text-[10px] font-black uppercase tracking-widest text-red-500/70 font-mono mb-1">
+                                {item.year}
+                              </div>
+                              <h4 className={`text-white font-bold text-sm mb-1 transition-colors duration-300 ${textColor}`}>
+                                {item.event}
+                              </h4>
+                              <p className="text-zinc-500 text-xs leading-relaxed">{item.desc}</p>
+                              
+                              <div className="flex flex-wrap gap-1.5 mt-2">
+                                <span className={`text-[8px] px-2 py-0.5 rounded-full border ${i % 2 === 0 ? 'border-red-800/30 text-red-400/70 bg-red-900/20' : 'border-yellow-800/30 text-yellow-400/70 bg-yellow-900/20'}`}>
+                                  {item.year}
+                                </span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </motion.div>
