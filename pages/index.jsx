@@ -351,9 +351,6 @@ export default function Home() {
 
         <main>
           <div ref={homeRef}><HeroSection /></div>
-          <div ref={statsRef}><StatsSection /></div>
-
-          {/* Esperienze Interattive */}
           <div ref={predictorRef} className="py-16 md:py-24 px-4">
             <div className="max-w-7xl mx-auto">
               <div className="text-center mb-10 md:mb-14">
@@ -372,7 +369,8 @@ export default function Home() {
                 <ArchiveCard />
               </div>
             </div>
-          </div>
+          </div>    
+          <div ref={statsRef}><StatsSection /></div>
 
           <div ref={newsRef}><NewsSection /></div>
         </main>
