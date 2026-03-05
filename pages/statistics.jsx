@@ -77,39 +77,43 @@ const countryConfig = {
 };
 
 const circuitToCountry = {
-  'monza':'italy','imola':'italy','mugello':'italy','pescara':'italy','enzo-e-dino-ferrari':'italy',
-  'silverstone':'united-kingdom','brands-hatch':'united-kingdom','donington':'united-kingdom','aintree':'united-kingdom',
-  'spa':'belgium','spa-francorchamps':'belgium','zolder':'belgium','nivelles':'belgium',
-  'catalunya':'spain','barcelona':'spain','montmelo':'spain','jerez':'spain','valencia':'spain','jarama':'spain',
-  'hungaroring':'hungary','budapest':'hungary',
-  'red-bull-ring':'austria','spielberg':'austria','zeltweg':'austria','oesterreichring':'austria',
-  'magny-cours':'france','paul-ricard':'france','reims':'france','dijon':'france','rouen':'france','charade':'france',
-  'nurburgring':'germany','hockenheimring':'germany','hockenheim':'germany','avus':'germany',
-  'estoril':'portugal','portimao':'portugal','boavista':'portugal',
-  'bremgarten':'switzerland',
-  'monaco':'monaco','monte-carlo':'monaco',
-  'baku':'azerbaijan',
-  'americas':'united-states','cota':'united-states','austin':'united-states','miami':'united-states','las-vegas':'united-states','indianapolis':'united-states','watkins-glen':'united-states',
-  'villeneuve':'canada','montreal':'canada','mosport':'canada',
-  'interlagos':'brazil','jacarepagua':'brazil',
-  'rodriguez':'mexico','hermanos-rodriguez':'mexico',
-  'galvez':'argentina','buenos-aires':'argentina',
-  'suzuka':'japan','fuji':'japan','okayama':'japan',
-  'shanghai':'china',
-  'marina-bay':'singapore',
-  'sepang':'malaysia',
-  'buddh':'india',
-  'yeongam':'korea',
-  'bahrain':'bahrain','sakhir':'bahrain',
-  'losail':'qatar','lusail':'qatar',
-  'jeddah':'saudi-arabia',
-  'yas-marina':'united-arab-emirates','abu-dhabi':'united-arab-emirates',
-  'istanbul':'turkey',
-  'sochi':'russia',
-  'kyalami':'south-africa',
-  'albert-park':'australia','adelaide':'australia',
-  'ain-diab':'morocco',
-  'zandvoort':'netherlands',
+  'monza': 'it', 'autodromo_nazionale_di_monza': 'it', 'milan': 'it', 'imola': 'it', 'enzo_e_dino_ferrari': 'it',
+  'mugello': 'it', 'bologna': 'it', 'pescara': 'it', 'silverstone': 'gb', 'silverstone_circuit': 'gb',
+  'northamptonshire': 'gb', 'brands_hatch': 'gb', 'kent': 'gb', 'donington': 'gb', 'aintree': 'gb',
+  'liverpool': 'gb', 'spa': 'be', 'spa_francorchamps': 'be', 'stavelot': 'be', 'zolder': 'be',
+  'heusden_zolder': 'be', 'nivelles': 'be', 'brussels': 'be', 'zandvoort': 'nl', 'circuit_zandvoort': 'nl',
+  'catalunya': 'es', 'barcelona': 'es', 'montmelo': 'es', 'jerez': 'es', 'valencia': 'es',
+  'valencia_street_circuit': 'es', 'pedralbes': 'es', 'montjuic': 'es', 'madrid': 'es', 'madring': 'es', 'jarama': 'es',
+  'hungaroring': 'hu', 'budapest': 'hu', 'mogyorod': 'hu', 'red_bull_ring': 'at', 'spielberg': 'at',
+  'zeltweg': 'at', 'oesterreichring': 'at', 'styria': 'at', 'magny_cours': 'fr', 'nevers': 'fr',
+  'paul_ricard': 'fr', 'le_castellet': 'fr', 'ricard': 'fr', 'reims': 'fr', 'dijon': 'fr',
+  'dijon_prenois': 'fr', 'rouen': 'fr', 'essarts': 'fr', 'charade': 'fr', 'clermont_ferrand': 'fr',
+  'lemans': 'fr', 'nurburgring': 'de', 'nurburg': 'de', 'hockenheimring': 'de', 'hockenheim': 'de',
+  'avus': 'de', 'berlin': 'de', 'estoril': 'pt', 'cascais': 'pt', 'portimao': 'pt',
+  'algarve': 'pt', 'boavista': 'pt', 'oporto': 'pt', 'monsanto': 'pt', 'lisbon': 'pt',
+  'bremgarten': 'ch', 'bern': 'ch', 'anderstorp': 'se', 'scandinavian_raceway': 'se', 'monaco': 'mc',
+  'monte_carlo': 'mc', 'circuit_de_monaco': 'mc', 'bakú': 'az', 'baku': 'az', 'azerbaijan': 'az',
+  'americas': 'us', 'cota': 'us', 'austin': 'us', 'circuit_of_the_americas': 'us', 'miami': 'us',
+  'miami_international_autodrome': 'us', 'vegas': 'us', 'las_vegas': 'us', 'las_vegas_strip': 'us', 'caesars_palace': 'us',
+  'indianapolis': 'us', 'indianapolis_motor_speedway': 'us', 'watkins_glen': 'us', 'long_beach': 'us', 'phoenix': 'us',
+  'detroit': 'us', 'dallas': 'us', 'sebring': 'us', 'riverside': 'us', 'villeneuve': 'ca',
+  'montreal': 'ca', 'circuit_gilles_villeneuve': 'ca', 'mosport': 'ca', 'bowmanville': 'ca', 'tremblant': 'ca',
+  'st_jovite': 'ca', 'interlagos': 'br', 'sao_paulo': 'br', 'são_paulo': 'br', 'jose_carlos_pace': 'br',
+  'jacarepagua': 'br', 'rio_de_janeiro': 'br', 'rodriguez': 'mx', 'hermanos_rodriguez': 'mx', 'mexico_city': 'mx',
+  'galvez': 'ar', 'buenos_aires': 'ar', 'oscar_galvez': 'ar',
+  'juan_y_oscar_galvez': 'ar', 'juan_y_ignacio_cobos': 'ar', 'carlos_pace': 'br', 'juan_y_ignacio_cobos': 'ar',
+  'suzuka': 'jp', 'suzuka_circuit': 'jp', 'mie': 'jp', 'fuji': 'jp', 'fuji_speedway': 'jp',
+  'oyama': 'jp', 'okayama': 'jp', 'ti_circuit': 'jp', 'shanghai': 'cn', 'shanghai_international_circuit': 'cn',
+  'marina_bay': 'sg', 'singapore': 'sg', 'sepang': 'my', 'kuala_lumpur': 'my', 'yeongam': 'kr',
+  'korea_international_circuit': 'kr', 'buddh': 'in', 'greater_noida': 'in', 'bahrain': 'bh', 'sakhir': 'bh',
+  'manama': 'bh', 'bahrain_international_circuit': 'bh', 'losail': 'qa', 'lusail': 'qa', 'lusail_international_circuit': 'qa',
+  'jeddah': 'sa', 'jeddah_corniche_circuit': 'sa', 'yas_marina': 'ae', 'abu_dhabi': 'ae', 'yas_marina_circuit': 'ae',
+  'istanbul': 'tr', 'istanbul_park': 'tr', 'sochi': 'ru', 'sochi_autodrom': 'ru', 'kyalami': 'za',
+  'midrand': 'za', 'george': 'za', 'prince_george': 'za', 'adelaide': 'au', 'albert_park': 'au',
+  'melbourne': 'au', 'ain_diab': 'ma', 'casablanca': 'ma',
+  'albert_park': 'au', 'marina_bay': 'sg', 'yas_marina': 'ae', 'paul_ricard': 'fr', 'watkins_glen': 'us',
+  'long_beach': 'us', 'las_vegas': 'us', 'jose_carlos_pace': 'br', 'hermanos_rodriguez': 'mx', 'mexico_city': 'mx',
+  'red_bull_ring': 'at', 'silverstone_circuit': 'gb', 'spa_francorchamps': 'be', 'circuit_de_monaco': 'mc', 'fuji_speedway': 'jp'
 };
 
 const getFlagCode = (circuitName) => {
@@ -160,7 +164,7 @@ const getCountryName = (code) => {
 };
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   DARK TOOLTIP — coerente col design
+   DARK TOOLTIP
 ───────────────────────────────────────────────────────────────────────────── */
 function DarkTooltip({ active, payload, label, accentColor, extra }) {
   if (!active || !payload?.length) return null;
@@ -240,27 +244,44 @@ function AccordionSection({ id, title, subtitle, icon: Icon, children, isOpen, o
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
+   TROPHY SVG
+───────────────────────────────────────────────────────────────────────────── */
+function TrophySVG({ size = 16, color = GOLD, opacity = 1 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill={color} style={{ opacity }} aria-hidden="true">
+      <path d="M3 1h10v3a5 5 0 0 1-4 4.9V11h2v2H5v-2h2V8.9A5 5 0 0 1 3 4V1zm1 1v2a4 4 0 0 0 8 0V2H4zM1 2h2v2.5A5.02 5.02 0 0 1 1 3V2zm12 0h2v1a5.02 5.02 0 0 1-2 1.5V2z" />
+    </svg>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
    WINNER ROW
 ───────────────────────────────────────────────────────────────────────────── */
 function WinnerRow({ driver, index, max }) {
-  const pct     = max > 0 ? (driver.count / max) * 100 : 0;
-  const isTop3  = index < 3;
-  const accent  = isTop3 ? MEDAL[index].color : 'rgba(255,255,255,0.18)';
-  const label   = isTop3 ? MEDAL[index].label : null;
+  const pct    = max > 0 ? (driver.count / max) * 100 : 0;
+  const isTop3 = index < 3;
+  const accent = isTop3 ? MEDAL[index].color : 'rgba(255,255,255,0.18)';
+  const label  = isTop3 ? MEDAL[index].label : null;
+
+  // Trofei: mostra max 10 icone, poi "×N" per i multipli di 10
+  const trophyBlocks = Math.min(driver.count, 10);
+  const multiplier   = Math.floor(driver.count / 10);
+  const remainder    = driver.count % 10;
+  const trophyColor  = isTop3 ? accent : GOLD;
 
   return (
     <motion.div
       initial={{ opacity: 0, x: -16 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.35, delay: index * 0.045 }}
-      className="group relative flex items-center gap-4 md:gap-5 py-4 px-1 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] transition-colors"
+      className="group relative flex items-start gap-4 md:gap-5 py-5 px-1 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] transition-colors"
     >
       {/* Left accent */}
-      <div className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+      <div className="absolute left-0 top-3 bottom-3 w-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
         style={{ background: accent }} aria-hidden="true" />
 
       {/* Rank */}
-      <div className="shrink-0 w-9 text-right select-none">
+      <div className="shrink-0 w-9 text-right select-none pt-1">
         {label
           ? <span className="text-[10px] font-black tracking-widest" style={{ color: accent }}>{label}</span>
           : <span className="text-xl font-black tabular-nums" style={{ color: 'rgba(255,255,255,0.08)' }}>{index + 1}</span>
@@ -268,7 +289,7 @@ function WinnerRow({ driver, index, max }) {
       </div>
 
       {/* Photo */}
-      <div className="relative shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden transition-transform duration-300 group-hover:scale-105"
+      <div className="relative shrink-0 w-11 h-11 md:w-13 md:h-13 rounded-xl overflow-hidden transition-transform duration-300 group-hover:scale-105 mt-0.5"
         style={{ border: `1.5px solid ${isTop3 ? accent : 'rgba(255,255,255,0.07)'}` }}>
         <img
           src={`/data/ferrari-drivers/${normalizeDriverName(driver.name)}.jpg`}
@@ -281,9 +302,10 @@ function WinnerRow({ driver, index, max }) {
         </div>
       </div>
 
-      {/* Name + bar + years */}
+      {/* Name + trophies + bar */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-2 mb-1.5 flex-wrap">
+        {/* Name + year range */}
+        <div className="flex items-baseline gap-2 mb-2 flex-wrap">
           <span className="text-sm font-black uppercase tracking-tight truncate transition-colors group-hover:text-red-400"
             style={{ color: isTop3 ? accent : 'white' }}>
             {driver.name}
@@ -292,6 +314,65 @@ function WinnerRow({ driver, index, max }) {
             {Math.min(...driver.yearsArray)}–{Math.max(...driver.yearsArray)}
           </span>
         </div>
+
+        {/* ── Trophies ── */}
+        <div className="flex items-center gap-2 mb-2.5 flex-wrap" aria-label={`${driver.count} vittorie`}>
+          {multiplier >= 1 ? (
+            /* Compressed view for large counts: show 10 trophies + "×N" badge */
+            <>
+              <div className="flex items-center gap-0.5">
+                {[...Array(10)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.045 + i * 0.03 + 0.15 }}
+                  >
+                    <TrophySVG size={15} color={trophyColor} />
+                  </motion.div>
+                ))}
+              </div>
+              <motion.span
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.045 + 0.45 }}
+                className="text-xs font-black italic"
+                style={{ color: trophyColor }}
+              >
+                ×{multiplier}
+              </motion.span>
+              {remainder > 0 && (
+                <div className="flex items-center gap-0.5 opacity-50">
+                  {[...Array(remainder)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 0.5, y: 0 }}
+                      transition={{ delay: index * 0.045 + i * 0.03 + 0.5 }}
+                    >
+                      <TrophySVG size={12} color={trophyColor} />
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            /* Direct view for counts ≤ 9 */
+            <div className="flex items-center gap-0.5">
+              {[...Array(driver.count)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.045 + i * 0.04 + 0.15 }}
+                >
+                  <TrophySVG size={15} color={trophyColor} />
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Progress bar */}
         <div className="h-px w-full rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
           <motion.div
@@ -299,19 +380,20 @@ function WinnerRow({ driver, index, max }) {
             animate={{ width: `${pct}%` }}
             transition={{ duration: 0.9, delay: index * 0.045 + 0.2, ease: 'easeOut' }}
             className="h-full rounded-full"
-            style={{ background: `linear-gradient(to right, ${accent}, ${accent}70)` }}
+            style={{ background: `linear-gradient(to right, ${accent}, ${accent}60)` }}
           />
         </div>
+
         {/* Year pills — desktop only, max 10 */}
         <div className="hidden lg:flex flex-wrap gap-1 mt-1.5">
           {driver.yearsArray.slice(0, 10).map((y) => (
             <span key={y} className="text-[9px] px-1.5 py-0.5 rounded font-black"
-              style={{ background: isTop3 ? accent + '18' : 'rgba(255,255,255,0.05)', color: isTop3 ? accent : 'rgba(255,255,255,0.3)' }}>
+              style={{ background: isTop3 ? accent + '15' : 'rgba(255,255,255,0.04)', color: isTop3 ? accent : 'rgba(255,255,255,0.25)' }}>
               {y}
             </span>
           ))}
           {driver.yearsArray.length > 10 && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded font-black text-zinc-700">
+            <span className="text-[9px] px-1.5 py-0.5 rounded font-black text-zinc-800">
               +{driver.yearsArray.length - 10}
             </span>
           )}
@@ -319,9 +401,9 @@ function WinnerRow({ driver, index, max }) {
       </div>
 
       {/* Count */}
-      <div className="shrink-0 text-right min-w-[3rem]">
+      <div className="shrink-0 text-right min-w-[3rem] pt-0.5">
         <span className="text-2xl md:text-3xl font-black tabular-nums transition-colors"
-          style={{ color: isTop3 ? accent : 'rgba(255,255,255,0.6)' }}>
+          style={{ color: isTop3 ? accent : 'rgba(255,255,255,0.55)' }}>
           {driver.count}
         </span>
         <p className="text-[9px] text-zinc-700 uppercase tracking-widest">vitt.</p>
