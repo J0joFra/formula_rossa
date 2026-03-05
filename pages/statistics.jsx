@@ -972,29 +972,35 @@ export default function StatisticsPage() {
           {/* ── 4. FORTRESS MARANELLO ── */}
           <AccordionSection id="circuits" title="Fortress Maranello" subtitle="Circuiti con più vittorie Ferrari" icon={Landmark} isOpen={openSection==='circuits'} onToggle={()=>toggle('circuits')} accent="gold">
             <div className="mt-6 space-y-6">
-
-              {/* Circuit chips - con bandiere visibili */}
               <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                {circuits.map(c => (
-                  <div key={c.name} className="flex items-center gap-2 px-3 py-2 rounded-lg"
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.6)' }}>
-                    {c.flag && (
-                      <img 
-                        src={`https://flagcdn.com/w40/${c.flag}.png`} 
-                        className="w-5 h-3.5 object-cover rounded-sm shrink-0" 
-                        alt={c.name}
-                        onError={(e) => { 
-                          // Se l'immagine non carica, prova con formato alternativo
-                          e.target.src = `https://flagcdn.com/24x18/${c.flag}.png`;
-                        }} 
-                      />
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-black uppercase text-white truncate">{c.name}</p>
-                      <p className="text-[9px] text-white-600">{c.wins} vitt.</p>
+                {circuits.map(c => {
+                  console.log('Circuito:', c.name, 'Flag:', c.flag);
+                  
+                  return (
+                    <div key={c.name} className="flex items-center gap-2 px-3 py-2 rounded-lg"
+                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.6)' }}>
+                      
+                      {c.flag && (
+                        <div className="w-7 h-4.5 rounded-sm overflow-hidden shrink-0 border border-white/10">
+                          <img 
+                            src={`https://flagcdn.com/w80/${c.flag}.png`}
+                            alt={c.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => { 
+                              console.log('Errore bandiera:', c.flag);
+                              e.currentTarget.style.display = 'none'; 
+                            }} 
+                          />
+                        </div>
+                      )}
+                      
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-black uppercase text-white truncate">{c.name}</p>
+                        <p className="text-[9px] text-white-600">{c.wins} vitt.</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Bar chart */}
@@ -1016,14 +1022,16 @@ export default function StatisticsPage() {
                             extra={
                               <div className="flex items-center gap-2 mb-1">
                                 {c.flag && (
-                                  <img 
-                                    src={`https://flagcdn.com/w40/${c.flag}.png`} 
-                                    className="w-5 h-3.5 object-cover rounded-sm" 
-                                    alt={c.name}
-                                    onError={(e) => { 
-                                      e.target.src = `https://flagcdn.com/24x18/${c.flag}.png`;
-                                    }}
-                                  />
+                                  <div className="w-5 h-3.5 rounded-sm overflow-hidden border border-white/10">
+                                    <img 
+                                      src={`https://flagcdn.com/w40/${c.flag}.png`}
+                                      alt={c.name}
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => { 
+                                        e.currentTarget.style.display = 'none'; 
+                                      }}
+                                    />
+                                  </div>
                                 )}
                                 <span className="text-[10px] font-black uppercase tracking-wider text-white-400">{c.name}</span>
                               </div>
@@ -1042,7 +1050,6 @@ export default function StatisticsPage() {
               </div>
             </div>
           </AccordionSection>
-
         </motion.div>
 
         <p className="text-center text-white-800 text-[11px] mt-8 tracking-wider">
