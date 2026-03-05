@@ -263,19 +263,7 @@ export default function AboutPage({ heroImages = [] }) {
                     transition={{ duration: 0.7, delay: 0.1 }}
                     className="text-5xl md:text-6xl xl:text-7xl font-black uppercase italic tracking-tighter leading-[0.9] mb-8"
                   >
-                    Una piattaforma<br />
-                    per i{' '}
-                    <span className="relative inline-block">
-                      <span className="bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">Tifosi</span>
-                      <motion.span
-                        initial={{ scaleX: 0 }}
-                        animate={{ scaleX: 1 }}
-                        transition={{ duration: 0.8, delay: 0.9 }}
-                        className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-red-600 to-red-400 origin-left"
-                      />
-                    </span>
-                    <br />
-                    <span className="bg-gradient-to-r from-red-500 via-red-600 to-yellow-500 bg-clip-text text-transparent">
+                    Una piattaforma per i <span className="text-red-600">Tifosi </span> <span className="text-red-600">
                       Ferrari
                     </span>
                   </motion.h1>
@@ -374,7 +362,7 @@ export default function AboutPage({ heroImages = [] }) {
                 <SectionLabel>La nostra missione</SectionLabel>
                 <SectionTitle className="mb-6">
                   Democratizzare l'accesso<br />
-                  <span className="bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text text-transparent">
+                  <span className="text-red-600">
                     ai dati F1
                   </span>
                 </SectionTitle>
@@ -484,7 +472,7 @@ export default function AboutPage({ heroImages = [] }) {
                 <SectionLabel>Funzionalità</SectionLabel>
                 <SectionTitle>
                   Tutto su{' '}
-                  <span className="bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">
+                  <span className="text-red-600">
                     Formula Rossa
                   </span>
                 </SectionTitle>
@@ -550,7 +538,7 @@ export default function AboutPage({ heroImages = [] }) {
                 <SectionLabel color="text-yellow-500/60">Roadmap</SectionLabel>
                 <SectionTitle>
                   Storia del{' '}
-                  <span className="bg-gradient-to-r from-yellow-400 to-red-500 bg-clip-text text-transparent">
+                  <span className="text-red-600">
                     Progetto
                   </span>
                 </SectionTitle>
@@ -632,7 +620,7 @@ export default function AboutPage({ heroImages = [] }) {
                 <SectionLabel>Il team</SectionLabel>
                 <SectionTitle>
                   Chi c'è{' '}
-                  <span className="bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">
+                  <span className="text-red-600">
                     dietro
                   </span>
                 </SectionTitle>
@@ -678,7 +666,7 @@ export default function AboutPage({ heroImages = [] }) {
                         <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
                           <div>
                             <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight">{FOUNDER.name}</h3>
-                            <p className="text-[10px] font-black uppercase tracking-[0.25em] mt-1 bg-gradient-to-r from-red-400 to-yellow-400 bg-clip-text text-transparent">
+                            <p className="text-[10px] font-black uppercase tracking-[0.25em] mt-1 text-red-500">
                               {FOUNDER.role}
                             </p>
                           </div>
@@ -753,7 +741,7 @@ export default function AboutPage({ heroImages = [] }) {
                   <SectionLabel>YouTube</SectionLabel>
                   <SectionTitle>
                     I nostri{' '}
-                    <span className="bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">
+                    <span className="text-red-600">
                       Video
                     </span>
                   </SectionTitle>
@@ -800,7 +788,7 @@ export default function AboutPage({ heroImages = [] }) {
                 <SectionLabel color="text-zinc-500">Open Source</SectionLabel>
                 <h2 className="text-2xl font-black uppercase italic tracking-tighter mb-2">
                   Costruito con{' '}
-                  <span className="bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text text-transparent">
+                  <span className="text-red-600">
                     passione
                   </span>{' '}
                   e tecnologia
@@ -856,7 +844,7 @@ export default function AboutPage({ heroImages = [] }) {
                 <SectionLabel>Inizia ora</SectionLabel>
                 <h2 className="text-5xl md:text-6xl font-black uppercase italic tracking-tighter mb-6 leading-[0.92]">
                   Pronto a<br />
-                  <span className="bg-gradient-to-r from-red-500 via-red-600 to-yellow-500 bg-clip-text text-transparent">
+                  <span className="text-red-600">
                     esplorare?
                   </span>
                 </h2>
