@@ -307,7 +307,8 @@ if (l.includes('monaco') || l.includes('monte carlo') || l.includes('circuit de 
 if (l.includes('baku') || l.includes('azerbaijan') || l.includes('bakú') || 
     l.includes('azeri') || l.includes('azero')) return 'az';
 
-if (l.includes('americas') || l.includes('cota') || l.includes('austin') || 
+if (l.includes('americas') || l.includes('cota') || l.includes('austin') || l.includes('united-states-of-america') ||
+     l.includes('united-states') || l.includes('u.s.a.') || l.includes('united states of america') || 
     l.includes('miami') || l.includes('vegas') || l.includes('las vegas') ||
     l.includes('united states') || l.includes('usa') || l.includes('u.s.a.') ||
     l.includes('america') || l.includes('american') || l.includes('indianapolis') || 
