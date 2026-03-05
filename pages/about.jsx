@@ -441,7 +441,7 @@ export default function AboutPage({ heroImages = [] }) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.2 }}
-                  className="group relative rounded-2xl overflow-hidden border border-zinc-700/40 hover:border-white-500/60 transition-all duration-300 flex flex-col"
+                  className="group relative rounded-2xl overflow-hidden border border-white-600/40 hover:border-white transition-all duration-300 flex flex-col"
                   style={{ background: 'linear-gradient(160deg, #111114 0%, #0c0c0f 60%, #080808 100%)' }}
                 >
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(161,161,170,0.08)_0%,transparent_60%)]" />
