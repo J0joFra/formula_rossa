@@ -592,7 +592,7 @@ export default function AboutPage({ heroImages = [] }) {
               5. TIMELINE
           ══════════════════════════════════════ */}
           <section className="py-16 px-4 relative overflow-hidden" aria-label="Storia del progetto">
-            {/* Sfondo uniforme come le altre sezioni - rimosso bg-[#060606] per mantenere consistenza */}
+            {/* Sfondo uniforme come le altre sezioni */}
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
             
@@ -649,19 +649,19 @@ export default function AboutPage({ heroImages = [] }) {
                               <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${i % 2 === 0 ? 'from-red-600 to-red-800' : 'from-yellow-500 to-amber-600'}`} />
                                                             
                               <div className="relative">
-                                <div className="text-[10px] font-black uppercase tracking-widest text-red-500/70 font-mono mb-2">
+                                <div className="text-[15px] font-black uppercase tracking-widest text-red-500/70 font-mono mb-2">
                                   {item.year}
                                 </div>
                                 <h4 className={`text-white font-bold text-base mb-2 transition-colors duration-300 ${textColor}`}>
                                   {item.event}
                                 </h4>
-                                <p className="text-zinc-500 text-xs leading-relaxed">
+                                <p className="text-zinc-500 text-sm leading-relaxed">
                                   {item.desc}
                                 </p>
                                 
                                 {/* Mini tag come nelle altre card */}
                                 <div className="flex flex-wrap gap-1.5 mt-3">
-                                  <span className={`text-[8px] px-2 py-0.5 rounded-full border ${i % 2 === 0 ? 'border-red-800/30 text-red-400/70 bg-red-900/20' : 'border-yellow-800/30 text-yellow-400/70 bg-yellow-900/20'}`}>
+                                  <span className={`text-[12px] px-2 py-0.5 rounded-full border ${i % 2 === 0 ? 'border-red-800/30 text-red-400/70 bg-red-900/20' : 'border-yellow-800/30 text-yellow-400/70 bg-yellow-900/20'}`}>
                                     {item.year}
                                   </span>
                                   <span className={`text-[8px] px-2 py-0.5 rounded-full border ${i % 2 === 0 ? 'border-red-800/30 text-red-400/70 bg-red-900/20' : 'border-yellow-800/30 text-yellow-400/70 bg-yellow-900/20'}`}>
@@ -711,7 +711,7 @@ export default function AboutPage({ heroImages = [] }) {
                             <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${i % 2 === 0 ? 'from-red-600 to-red-800' : 'from-yellow-500 to-amber-600'}`} />
                             
                             <div className="relative">
-                              <div className="text-[10px] font-black uppercase tracking-widest text-red-500/70 font-mono mb-1">
+                              <div className="text-[15px] font-black uppercase tracking-widest text-red-500/70 font-mono mb-1">
                                 {item.year}
                               </div>
                               <h4 className={`text-white font-bold text-sm mb-1 transition-colors duration-300 ${textColor}`}>
@@ -720,7 +720,7 @@ export default function AboutPage({ heroImages = [] }) {
                               <p className="text-zinc-500 text-xs leading-relaxed">{item.desc}</p>
                               
                               <div className="flex flex-wrap gap-1.5 mt-2">
-                                <span className={`text-[8px] px-2 py-0.5 rounded-full border ${i % 2 === 0 ? 'border-red-800/30 text-red-400/70 bg-red-900/20' : 'border-yellow-800/30 text-yellow-400/70 bg-yellow-900/20'}`}>
+                                <span className={`text-[12px] px-2 py-0.5 rounded-full border ${i % 2 === 0 ? 'border-red-800/30 text-red-400/70 bg-red-900/20' : 'border-yellow-800/30 text-yellow-400/70 bg-yellow-900/20'}`}>
                                   {item.year}
                                 </span>
                               </div>
