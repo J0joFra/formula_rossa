@@ -20,8 +20,8 @@ const GOLD = '#EAB308';
 
 const MEDAL = [
   { color: RED,      label: '1ST' },
-  { color: '#A8A9AD', label: '2ND' },
-  { color: '#CD7F32', label: '3RD' },
+  { color: '#EBEBEB', label: '2ND' },
+  { color: '#D58936', label: '3RD' },
 ];
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -172,12 +172,12 @@ function DarkTooltip({ active, payload, label, accentColor, extra }) {
   return (
     <div className="rounded-xl px-4 py-3 min-w-[160px]"
       style={{ background: '#0d0d0d', border: `1px solid ${color}40`, boxShadow: `0 16px 48px rgba(0,0,0,0.9), 0 0 20px ${color}15` }}>
-      {label && <p className="text-[10px] uppercase tracking-widest text-zinc-600 font-black mb-2">{label}</p>}
+      {label && <p className="text-[10px] uppercase tracking-widest text-white-600 font-black mb-2">{label}</p>}
       {extra && <div className="mb-2">{extra}</div>}
       {payload.map((p, i) => (
         <p key={i} className="font-black text-xl" style={{ color }}>
           {typeof p.value === 'number' ? p.value.toLocaleString('it-IT') : p.value}
-          {p.name && <span className="text-zinc-600 text-[10px] ml-2 font-black uppercase">{p.name}</span>}
+          {p.name && <span className="text-white-600 text-[10px] ml-2 font-black uppercase">{p.name}</span>}
         </p>
       ))}
     </div>
@@ -297,8 +297,8 @@ function WinnerRow({ driver, index, max }) {
           className="w-full h-full object-cover"
           onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'flex'; }}
         />
-        <div className="absolute inset-0 bg-zinc-900 items-center justify-center" style={{ display: 'none' }} aria-hidden="true">
-          <User className="w-4 h-4 text-zinc-700" />
+        <div className="absolute inset-0 bg-white-900 items-center justify-center" style={{ display: 'none' }} aria-hidden="true">
+          <User className="w-4 h-4 text-white-700" />
         </div>
       </div>
 
@@ -310,7 +310,7 @@ function WinnerRow({ driver, index, max }) {
             style={{ color: isTop3 ? accent : 'white' }}>
             {driver.name}
           </span>
-          <span className="text-[10px] font-mono text-zinc-700 shrink-0">
+          <span className="text-[10px] font-mono text-white-700 shrink-0">
             {Math.min(...driver.yearsArray)}–{Math.max(...driver.yearsArray)}
           </span>
         </div>
@@ -393,7 +393,7 @@ function WinnerRow({ driver, index, max }) {
             </span>
           ))}
           {driver.yearsArray.length > 10 && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded font-black text-zinc-800">
+            <span className="text-[9px] px-1.5 py-0.5 rounded font-black text-white-800">
               +{driver.yearsArray.length - 10}
             </span>
           )}
@@ -406,7 +406,7 @@ function WinnerRow({ driver, index, max }) {
           style={{ color: isTop3 ? accent : 'rgba(255,255,255,0.55)' }}>
           {driver.count}
         </span>
-        <p className="text-[9px] text-zinc-700 uppercase tracking-widest">vitt.</p>
+        <p className="text-[9px] text-white-700 uppercase tracking-widest">vitt.</p>
       </div>
     </motion.div>
   );
@@ -514,7 +514,7 @@ export default function StatisticsPage() {
           />
         ))}
       </div>
-      <p className="text-zinc-600 text-[11px] tracking-[0.4em] uppercase font-black">Accessing Ferrari Mainframe</p>
+      <p className="text-white-600 text-[11px] tracking-[0.4em] uppercase font-black">Accessing Ferrari Mainframe</p>
     </div>
   );
 
@@ -539,7 +539,7 @@ export default function StatisticsPage() {
 
         {/* Back */}
         <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className="mb-10">
-          <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.25em] text-zinc-600 hover:text-white transition-colors group">
+          <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.25em] text-white-600 hover:text-white transition-colors group">
             <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" aria-hidden="true" />
             Back to HQ
           </Link>
@@ -559,7 +559,7 @@ export default function StatisticsPage() {
           <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none mb-4">
             Data <span style={{ color: RED }}>Vault</span>
           </h1>
-          <p className="text-zinc-500 text-sm max-w-md leading-relaxed">
+          <p className="text-white-500 text-sm max-w-md leading-relaxed">
             75 anni di telemetria, vittorie e record storici. Ogni numero racconta una leggenda della Rossa.
           </p>
 
@@ -571,7 +571,7 @@ export default function StatisticsPage() {
               { label: 'Stagioni',         value: '75+' },
             ].map(s => (
               <div key={s.label}>
-                <p className="text-[10px] uppercase tracking-widest text-zinc-600 mb-0.5">{s.label}</p>
+                <p className="text-[10px] uppercase tracking-widest text-white-600 mb-0.5">{s.label}</p>
                 <p className="text-2xl font-black tabular-nums" style={{ color: RED }}>{s.value}</p>
               </div>
             ))}
@@ -590,9 +590,9 @@ export default function StatisticsPage() {
             <div className="flex items-center gap-4 md:gap-5 px-1 pt-4 pb-2">
               <div className="w-9 shrink-0" />
               <div className="w-10 md:w-12 shrink-0" />
-              <div className="flex-1 text-[10px] font-black uppercase tracking-widest text-zinc-700">Pilota</div>
-              <div className="hidden lg:block flex-1 text-[10px] font-black uppercase tracking-widest text-zinc-700 text-center">Anni attivi</div>
-              <div className="w-14 text-[10px] font-black uppercase tracking-widest text-zinc-700 text-right shrink-0">Totale</div>
+              <div className="flex-1 text-[10px] font-black uppercase tracking-widest text-white-700">Pilota</div>
+              <div className="hidden lg:block flex-1 text-[10px] font-black uppercase tracking-widest text-white-700 text-center">Anni attivi</div>
+              <div className="w-14 text-[10px] font-black uppercase tracking-widest text-white-700 text-right shrink-0">Totale</div>
             </div>
             <div>
               {pilotWins.map((driver, i) => (
@@ -650,7 +650,7 @@ export default function StatisticsPage() {
                               p.flag
                                 ? <div className="flex items-center gap-2">
                                     <img src={`https://flagcdn.com/w40/${p.flag}.png`} className="w-5 h-3.5 object-cover rounded-sm" alt={p.name} />
-                                    <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">{p.name}</span>
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-white-400">{p.name}</span>
                                   </div>
                                 : null
                             }
@@ -679,7 +679,7 @@ export default function StatisticsPage() {
                       <img src={`https://flagcdn.com/w80/${n.flag}.png`} alt={n.name} className="w-full h-full object-cover" onError={e => { e.currentTarget.style.display = 'none'; }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-black uppercase tracking-tight text-zinc-500 group-hover:text-white transition-colors truncate">{n.name}</p>
+                      <p className="text-[10px] font-black uppercase tracking-tight text-white-500 group-hover:text-white transition-colors truncate">{n.name}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <div className="flex-1 h-px rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
                           <motion.div
@@ -711,7 +711,7 @@ export default function StatisticsPage() {
                     {c.flag && <img src={`https://flagcdn.com/w40/${c.flag}.png`} className="w-5 h-3.5 object-cover rounded-sm shrink-0" alt={c.name} onError={e => { e.currentTarget.style.display = 'none'; }} />}
                     <div className="min-w-0">
                       <p className="text-[10px] font-black uppercase text-white truncate">{c.name}</p>
-                      <p className="text-[9px] text-zinc-600">{c.wins} vitt.</p>
+                      <p className="text-[9px] text-white-600">{c.wins} vitt.</p>
                     </div>
                   </div>
                 ))}
@@ -736,7 +736,7 @@ export default function StatisticsPage() {
                             extra={
                               <div className="flex items-center gap-2 mb-1">
                                 {c.flag && <img src={`https://flagcdn.com/w40/${c.flag}.png`} className="w-5 h-3.5 object-cover rounded-sm" alt={c.name} />}
-                                <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">{c.name}</span>
+                                <span className="text-[10px] font-black uppercase tracking-wider text-white-400">{c.name}</span>
                               </div>
                             }
                           />
@@ -756,7 +756,7 @@ export default function StatisticsPage() {
 
         </motion.div>
 
-        <p className="text-center text-zinc-800 text-[11px] mt-8 tracking-wider">
+        <p className="text-center text-white-800 text-[11px] mt-8 tracking-wider">
           Scuderia Ferrari F1 · 1950–{new Date().getFullYear()} · Dati aggiornati
         </p>
       </main>
