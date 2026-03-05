@@ -261,11 +261,9 @@ export default function AboutPage({ heroImages = [] }) {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.1 }}
-                    className="text-5xl md:text-6xl xl:text-7xl font-black uppercase italic tracking-tighter leading-[0.9] mb-8"
+                    className="text-3xl md:text-4xl lg:text-5xl font-black uppercase italic tracking-tighter whitespace-nowrap mb-6"
                   >
-                    Una piattaforma per i <span className="text-red-600">Tifosi </span> <span className="text-red-600">
-                      Ferrari
-                    </span>
+                    Una piattaforma per i <span className="text-red-600">Tifosi Ferrari</span>
                   </motion.h1>
 
                   <motion.p
@@ -314,19 +312,19 @@ export default function AboutPage({ heroImages = [] }) {
                   <div className="relative z-10 grid grid-cols-2 gap-3">
                     <div className="space-y-3">
                       <div className="aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50 ring-1 ring-white/5">
-                        {realImages[0] && (
+                        {realImages[4] && (
                           <img src={realImages[0].urls.regular} alt={realImages[0].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
                         )}
                       </div>
                       <div className="aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50">
-                        {realImages[1] && (
+                        {realImages[5] && (
                           <img src={realImages[1].urls.regular} alt={realImages[1].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
                         )}
                       </div>
                     </div>
                     <div className="space-y-3 pt-6">
                       <div className="aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50">
-                        {realImages[2] && (
+                        {realImages[6] && (
                           <img src={realImages[2].urls.regular} alt={realImages[2].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
                         )}
                       </div>
