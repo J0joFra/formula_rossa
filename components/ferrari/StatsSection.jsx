@@ -80,12 +80,6 @@ export default function StatsSection() {
           <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter">
             Engineering <span className="text-red-600">Legend</span>
           </h2>
-          {/* Testo SEO sotto il titolo */}
-          <p className="mt-4 text-zinc-500 text-sm max-w-2xl mx-auto">
-            Scopri la scheda tecnica completa della Ferrari SF-26, la monoposto progettata per la stagione 2026 
-            di Formula 1 con il nuovo regolamento tecnico. Power unit ibrida V6, ERS system avanzato e 
-            telai in fibra di carbonio per un'ingegneria d'eccellenza.
-          </p>
         </div>
 
         {/* SF-26 SHOWCASE IMAGE */}
@@ -171,27 +165,13 @@ export default function StatsSection() {
           </motion.div>
         </div>
 
-        {/* Testo descrittivo SEO — aumenta page text content */}
-        <div className="max-w-4xl mx-auto text-center mb-12 space-y-3">
-          <p className="text-zinc-500 text-sm leading-relaxed">
-            La Ferrari SF-26 rappresenta il punto di arrivo di anni di sviluppo ingegneristico da parte della 
-            Scuderia Ferrari. Con una power unit V6 turbo-ibrida da 1.600 cc e un sistema ERS che eroga fino 
-            a 350 kW, la vettura è progettata per dominare il nuovo regolamento tecnico 2026 della Formula 1.
-          </p>
-          <p className="text-zinc-600 text-xs leading-relaxed">
-            Il telaio monoscocca in fibra di carbonio pesa appena 770 kg con pilota e liquidi a bordo. 
-            Il cambio longitudinale a 8 marce più retromarcia è sviluppato internamente da Ferrari a Maranello. 
-            I freni Brembo in carbonio autoventilati garantiscono decelerazioni superiori a 5g.
-          </p>
-        </div>
-
         {/* Credit Link */}
         <div className="text-center mt-4">
           <a
             href="https://it.motorsport.com/f1/news/f1-ferrari-la-scheda-tecnica-della-sf-26-di-leclerc-e-hamilton/10792203/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-zinc-600 hover:text-red-500 font-bold uppercase text-[9px] tracking-[0.4em] transition-colors"
+            className="inline-flex items-center gap-2 text-yellow-600 hover:text-red-500 font-bold uppercase text-[9px] tracking-[0.4em] transition-colors"
           >
             Technical Reference: Motorsport.com
             <ChevronRight className="w-3 h-3" aria-hidden="true" />

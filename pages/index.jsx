@@ -392,23 +392,20 @@ export default function Home() {
 
         <main>
           <div ref={homeRef}><HeroSection /></div>
-          <div ref={statsRef}><StatsSection /></div>
-
           {/* ── SEZIONE ESPERIENZE INTERATTIVE ── */}
           <div ref={predictorRef} className="py-16 md:py-24 px-4">
             <div className="max-w-7xl mx-auto">
 
               {/* Heading */}
               <div className="text-center mb-10 md:mb-14">
-                <p className="text-[10px] tracking-[0.4em] uppercase text-zinc-600 mb-3 font-medium">
-                  Formula Rossa Platform
+                <p className="text-[10px] tracking-[0.4em] uppercase mb-3 font-medium">
+                  <span className="text-emerald-600">Formula </span>{' '}
+                  <span className="text-slate-100">Rossa </span>{' '}
+                  <span className="text-red-600">Platform</span>
                 </p>
                 <h2 className="text-3xl md:text-5xl font-black tracking-tight uppercase">
                   <span className="text-red-500">Esperienze</span> Interattive
                 </h2>
-                <p className="text-zinc-600 text-sm mt-4 max-w-lg mx-auto leading-relaxed">
-                  Tre strumenti unici per vivere la Ferrari F1 ad un livello completamente diverso.
-                </p>
               </div>
 
               {/* Three cards affiancate */}
@@ -420,8 +417,7 @@ export default function Home() {
 
             </div>
           </div>
-          {/* ─────────────────────────────────────── */}
-
+          <div ref={statsRef}><StatsSection /></div>
           <div ref={newsRef}><NewsSection /></div>
         </main>
 
