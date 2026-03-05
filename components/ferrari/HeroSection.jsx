@@ -146,7 +146,7 @@ export default function HeroSection() {
                   <div className="absolute inset-0 bg-black/10"></div>
                   <img 
                     src="/data/images/formula-rossa-logo.png" 
-                    alt="Formula Rossa" 
+                    alt="Formula Rossa — logo piattaforma dati Ferrari F1" 
                     className="w-full h-full object-contain p-2"
                     onError={(e) => {
                       e.target.style.display = 'none';
