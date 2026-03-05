@@ -167,10 +167,10 @@ const getFlagCode = (circuitName) => {
   const l = circuitName.toLowerCase();
   
   if (l.includes('monza') || l.includes('imola') || l.includes('mugello') || l.includes('italian') || l.includes('pescara') || l.includes('bologna') ||
-      l.includes('enna') || l.includes('pergusa') || l.includes('vallelunga') ||
+      l.includes('enna') || l.includes('pergusa') || l.includes('vallelunga') || l.includes('Italy') ||
       l.includes('misano') || l.includes('santamonica')) return 'it';
-  if (l.includes('silverstone') || l.includes('brands') || l.includes('british') ||
-      l.includes('donington') || l.includes('aintree') || l.includes('goodwood') ||
+  if (l.includes('silverstone') || l.includes('brands') || l.includes('british') || l.includes('britain') ||
+      l.includes('donington') || l.includes('aintree') || l.includes('goodwood') || l.includes('united kingdom') ||
       l.includes('crystal palace') || l.includes('mallory park') || l.includes('snetterton') ||
       l.includes('oulton park') || l.includes('thurston') || l.includes('liverpool') ||
       l.includes('northamptonshire') || l.includes('kent')) return 'gb';
@@ -245,6 +245,171 @@ const getFlagCode = (circuitName) => {
   if (l.includes('finnish') || l.includes('helsinki') || l.includes('elaintarha')) return 'fi';
   if (l.includes('ardmore') || l.includes('new zealand') || l.includes('pukekohe')) return 'nz';
   if (l.includes('indonesian') || l.includes('jakarta') || l.includes('mandalika')) return 'id';
+  if (l.includes('monza') || l.includes('imola') || l.includes('mugello') || 
+    l.includes('italian') || l.includes('italy') || l.includes('italia') || 
+    l.includes('pescara') || l.includes('bologna') || l.includes('enna') || 
+    l.includes('pergusa') || l.includes('vallelunga') || l.includes('misano') || 
+    l.includes('santamonica') || l.includes('san marino') || l.includes('toscana') ||
+    l.includes('tuscan')) return 'it';
+
+if (l.includes('silverstone') || l.includes('brands') || l.includes('british') || 
+    l.includes('britain') || l.includes('great britain') || l.includes('united kingdom') || 
+    l.includes('england') || l.includes('english') || l.includes('uk') || 
+    l.includes('donington') || l.includes('aintree') || l.includes('goodwood') || 
+    l.includes('crystal palace') || l.includes('mallory park') || l.includes('snetterton') ||
+    l.includes('oulton park') || l.includes('thurston') || l.includes('liverpool') ||
+    l.includes('northamptonshire') || l.includes('kent') || l.includes('londra') ||
+    l.includes('london')) return 'gb';
+
+if (l.includes('spa') || l.includes('belgian') || l.includes('belgium') || 
+    l.includes('belgique') || l.includes('belgie') || l.includes('francorchamps') ||
+    l.includes('zolder') || l.includes('nivelles') || l.includes('stavelot') ||
+    l.includes('brussels') || l.includes('bruxelles') || l.includes('heusden')) return 'be';
+
+if (l.includes('barcelona') || l.includes('catalun') || l.includes('catalonia') || 
+    l.includes('spanish') || l.includes('spain') || l.includes('españa') || 
+    l.includes('espanha') || l.includes('jerez') || l.includes('valencia') || 
+    l.includes('pedralbes') || l.includes('montjuic') || l.includes('madrid') || 
+    l.includes('jarama') || l.includes('madring') || l.includes('guadalope') || 
+    l.includes('lasarte') || l.includes('sitges')) return 'es';
+
+if (l.includes('paul ricard') || l.includes('magny') || l.includes('french') ||
+    l.includes('france') || l.includes('francia') || l.includes('le castellet') || 
+    l.includes('ricard') || l.includes('reims') || l.includes('dijon') || 
+    l.includes('prenois') || l.includes('rouen') || l.includes('les essarts') || 
+    l.includes('charade') || l.includes('clermont ferrand') || l.includes('lemans') || 
+    l.includes('bugatti') || l.includes('albi') || l.includes('lens') || 
+    l.includes('strasbourg') || l.includes('montlhery') || l.includes('pau') || 
+    l.includes('bois') || l.includes('paris') || l.includes('francese')) return 'fr';
+
+if (l.includes('nurburg') || l.includes('nürburg') || l.includes('hockenheim') || 
+    l.includes('german') || l.includes('germany') || l.includes('deutschland') || 
+    l.includes('deutsche') || l.includes('avus') || l.includes('berlin') || 
+    l.includes('norisring') || l.includes('grenzlandring') || l.includes('sachsenring') || 
+    l.includes('solitude') || l.includes('tedesca')) return 'de';
+
+if (l.includes('estoril') || l.includes('portimao') || l.includes('portuguese') ||
+    l.includes('portugal') || l.includes('portogallo') || l.includes('algarve') || 
+    l.includes('boavista') || l.includes('oporto') || l.includes('porto') ||
+    l.includes('monsanto') || l.includes('lisbon') || l.includes('lisbona')) return 'pt';
+
+if (l.includes('bremgarten') || l.includes('bern') || l.includes('berne') || 
+    l.includes('swiss') || l.includes('switzerland') || l.includes('suisse') || 
+    l.includes('schweiz') || l.includes('svizzera') || l.includes('elvetica')) return 'ch';
+
+if (l.includes('anderstorp') || l.includes('scandinavian') || l.includes('swedish') || 
+    l.includes('sweden') || l.includes('svezia') || l.includes('karlskoga') ||
+    l.includes('svedese')) return 'se';
+
+if (l.includes('monaco') || l.includes('monte carlo') || l.includes('circuit de monaco') ||
+    l.includes('monegasco')) return 'mc';
+
+if (l.includes('baku') || l.includes('azerbaijan') || l.includes('bakú') || 
+    l.includes('azeri') || l.includes('azero')) return 'az';
+
+if (l.includes('americas') || l.includes('cota') || l.includes('austin') || 
+    l.includes('miami') || l.includes('vegas') || l.includes('las vegas') ||
+    l.includes('united states') || l.includes('usa') || l.includes('u.s.a.') ||
+    l.includes('america') || l.includes('american') || l.includes('indianapolis') || 
+    l.includes('watkins glen') || l.includes('long beach') || l.includes('phoenix') || 
+    l.includes('detroit') || l.includes('dallas') || l.includes('sebring') || 
+    l.includes('riverside') || l.includes('caesars palace') || l.includes('fair park') || 
+    l.includes('tampa') || l.includes('laguna seca') || l.includes('sonoma') || 
+    l.includes('road america') || l.includes('california') || l.includes('texas')) return 'us';
+
+if (l.includes('villeneuve') || l.includes('montreal') || l.includes('canadian') ||
+    l.includes('canada') || l.includes('quebec') || l.includes('mosport') || 
+    l.includes('bowmanville') || l.includes('tremblant') || l.includes('st jovite') ||
+    l.includes('canadese')) return 'ca';
+
+if (l.includes('interlagos') || l.includes('brazilian') || l.includes('brazil') || 
+    l.includes('brasile') || l.includes('brasil') || l.includes('sao paulo') ||
+    l.includes('são paulo') || l.includes('jose carlos pace') || l.includes('jacarepagua') || 
+    l.includes('rio de janeiro') || l.includes('galeão') || l.includes('carlos pace') ||
+    l.includes('brasiliana')) return 'br';
+
+if (l.includes('rodriguez') || l.includes('hermanos') || l.includes('mexico') ||
+    l.includes('mexican') || l.includes('messico') || l.includes('mexico city') || 
+    l.includes('città del messico') || l.includes('avandaro')) return 'mx';
+
+if (l.includes('galvez') || l.includes('buenos aires') || l.includes('argentine') ||
+    l.includes('argentina') || l.includes('oscar galvez') || l.includes('juan y oscar') || 
+    l.includes('cobos') || l.includes('argentino')) return 'ar';
+
+if (l.includes('suzuka') || l.includes('japanese') || l.includes('japan') || 
+    l.includes('giappone') || l.includes('nippon') || l.includes('fuji') ||
+    l.includes('okayama') || l.includes('ti circuit') || l.includes('aida') ||
+    l.includes('mine') || l.includes('giapponese')) return 'jp';
+
+if (l.includes('shanghai') || l.includes('chinese') || l.includes('china') ||
+    l.includes('cina') || l.includes('zhuhai') || l.includes('beijing') ||
+    l.includes('pechino') || l.includes('cinese')) return 'cn';
+
+if (l.includes('marina bay') || l.includes('singapore') || l.includes('singapor') ||
+    l.includes('singapor')) return 'sg';
+
+if (l.includes('sepang') || l.includes('malaysian') || l.includes('malaysia') || 
+    l.includes('malesia') || l.includes('kuala lumpur') || l.includes('johor') ||
+    l.includes('malese')) return 'my';
+
+if (l.includes('yeongam') || l.includes('korea') || l.includes('korean') || 
+    l.includes('corea') || l.includes('sud corea') || l.includes('coreano')) return 'kr';
+
+if (l.includes('buddh') || l.includes('greater noida') || l.includes('indian') ||
+    l.includes('india') || l.includes('indiano')) return 'in';
+
+if (l.includes('sochi') || l.includes('russian') || l.includes('russia') || 
+    l.includes('moscow') || l.includes('mosca') || l.includes('russo')) return 'ru';
+
+if (l.includes('bahrain') || l.includes('sakhir') || l.includes('manama') || 
+    l.includes('bahrein') || l.includes('bahraini')) return 'bh';
+
+if (l.includes('lusail') || l.includes('qatar') || l.includes('losail') || 
+    l.includes('catari') || l.includes('qatari')) return 'qa';
+
+if (l.includes('jeddah') || l.includes('saudi') || l.includes('arabia') || 
+    l.includes('arabia saudita') || l.includes('saudita')) return 'sa';
+
+if (l.includes('yas') || l.includes('abu dhabi') || l.includes('marina') ||
+    l.includes('emirates') || l.includes('emirati') || l.includes('dubai') ||
+    l.includes('uae') || l.includes('emiratina')) return 'ae';
+
+if (l.includes('istanbul') || l.includes('turkish') || l.includes('turkey') || 
+    l.includes('turchia') || l.includes('turco')) return 'tr';
+
+if (l.includes('kyalami') || l.includes('south african') || l.includes('south africa') || 
+    l.includes('sudafrica') || l.includes('prince george') || l.includes('midrand') || 
+    l.includes('east london') || l.includes('sudafricano')) return 'za';
+
+if (l.includes('ain diab') || l.includes('ain-diab') || l.includes('moroccan') ||
+    l.includes('morocco') || l.includes('marocco') || l.includes('casablanca') || 
+    l.includes('marocchino')) return 'ma';
+
+if (l.includes('red bull ring') || l.includes('austrian') || l.includes('austria') || 
+    l.includes('spielberg') || l.includes('zeltweg') || l.includes('oesterreichring') || 
+    l.includes('österreichring') || l.includes('styria') || l.includes('stiria') ||
+    l.includes('austriaco')) return 'at';
+
+if (l.includes('hungaroring') || l.includes('hungarian') || l.includes('hungary') || 
+    l.includes('ungheria') || l.includes('budapest') || l.includes('mogyorod') ||
+    l.includes('ungherese')) return 'hu';
+
+if (l.includes('zandvoort') || l.includes('dutch') || l.includes('netherlands') || 
+    l.includes('olanda') || l.includes('paesi bassi') || l.includes('nederland') ||
+    l.includes('olandese')) return 'nl';
+
+if (l.includes('albert park') || l.includes('melbourne') || l.includes('australian') || 
+    l.includes('australia') || l.includes('adelaide') || l.includes('aussie') ||
+    l.includes('australiano')) return 'au';
+
+if (l.includes('finnish') || l.includes('finland') || l.includes('finlandia') || 
+    l.includes('helsinki') || l.includes('elaintarha') || l.includes('finlandese')) return 'fi';
+
+if (l.includes('ardmore') || l.includes('new zealand') || l.includes('nuova zelanda') || 
+    l.includes('pukekohe') || l.includes('neozelandese')) return 'nz';
+
+if (l.includes('indonesian') || l.includes('indonesia') || l.includes('jakarta') || 
+    l.includes('mandalika') || l.includes('indonesiano')) return 'id';
   
   return '';
 };
