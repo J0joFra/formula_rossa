@@ -306,7 +306,7 @@ export default function AboutPage({ heroImages = [] }) {
                   </div>
 
                   {/* Contenitore Immagine [3] */}
-                  <div className="relative z-10 w-[300px] md:w-[380px] aspect-[3/4] rounded-3xl overflow-hidden bg-zinc-900 border border-white/[0.08] shadow-2xl shadow-black/60 ring-1 ring-white/10">
+                  <div className="relative z-10 w-[200px] md:w-[280px] aspect-[3/4] rounded-3xl overflow-hidden bg-zinc-900 border border-white/[0.08] shadow-2xl shadow-black/60 ring-1 ring-white/10">
                     {realImages[3] && (
                       <img 
                         src={realImages[3].urls.regular} 
@@ -327,71 +327,48 @@ export default function AboutPage({ heroImages = [] }) {
               2. MISSIONE + VALORI
           ══════════════════════════════════════ */}
           <section className="py-28 px-4 relative overflow-hidden" aria-label="Missione e valori">
-            {/* Separatore top */}
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-600/40 to-transparent" />
-            {/* Glow centrale */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-32 bg-gradient-to-b from-red-600/50 to-transparent" />
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-600/40 to-transparent" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-32 bg-gradient-to-b from-red-600/50 to-transparent" />
 
-            <div className="max-w-5xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-center mb-16"
-              >
-                <SectionLabel>La nostra missione</SectionLabel>
-                <SectionTitle className="mb-6">
-                  Democratizzare l'accesso<br />
-                  <span className="text-red-600">
-                    ai dati F1
-                  </span>
-                </SectionTitle>
-                <p className="text-zinc-400 text-[15px] leading-relaxed max-w-2xl mx-auto">
-                  Formula Rossa è un progetto indipendente, creato da appassionati per gli appassionati.
-                  Non siamo affiliati alla Ferrari S.p.A. — siamo semplicemente tifosi che credono
-                  che i dati possano rendere la Formula 1 ancora più affascinante.
-                </p>
-              </motion.div>
+          <div className="max-w-5xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <SectionLabel>Il nostro impegno</SectionLabel>
+              <SectionTitle>
+                Dati <span className="text-red-600">al servizio dei Tifosi</span>
+              </SectionTitle>
+            </motion.div>
 
-              {/* Valori — card colorate */}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                {VALUES.map((value, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.09 }}
-                    className={`group relative rounded-2xl overflow-hidden border border-white/[0.07] ${value.border} transition-all duration-300 cursor-default`}
-                  >
-                    {/* Gradient di sfondo */}
-                    <div className={`absolute inset-0 bg-gradient-to-b ${value.color} opacity-100`} />
-                    <div className="absolute inset-0 bg-zinc-900/70" />
-                    <div className="relative p-6">
-                      <div className={`inline-flex items-center justify-center w-9 h-9 rounded-xl ${value.iconBg} border border-white/10 mb-4`}>
-                        <value.icon className={`w-4 h-4 ${value.iconColor}`} />
-                      </div>
-                      <h3 className="font-black text-white text-sm uppercase tracking-wide mb-2">{value.title}</h3>
-                      <p className="text-zinc-500 text-xs leading-relaxed">{value.desc}</p>
+            {/* Valori — card colorate */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              {VALUES.map((value, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.09 }}
+                  className={`group relative rounded-2xl overflow-hidden border border-white/[0.07] ${value.border} transition-all duration-300 cursor-default`}
+                >
+                  {/* Gradient di sfondo */}
+                  <div className={`absolute inset-0 bg-gradient-to-b ${value.color} opacity-100`} />
+                  <div className="absolute inset-0 bg-zinc-900/70" />
+                  <div className="relative p-6">
+                    <div className={`inline-flex items-center justify-center w-9 h-9 rounded-xl ${value.iconBg} border border-white/10 mb-4`}>
+                      <value.icon className={`w-4 h-4 ${value.iconColor}`} />
                     </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Badge indipendente */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="flex items-center justify-center gap-3 px-5 py-3 rounded-2xl bg-gradient-to-r from-green-500/5 to-transparent border border-green-500/15 max-w-xs mx-auto"
-              >
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0 shadow-sm shadow-green-500/50" />
-                <p className="text-zinc-400 text-xs">
-                  <span className="text-green-400 font-bold">100% indipendente</span> — non affiliato a Ferrari S.p.A.
-                </p>
-              </motion.div>
+                    <h3 className="font-black text-white text-sm uppercase tracking-wide mb-2">{value.title}</h3>
+                    <p className="text-zinc-500 text-xs leading-relaxed">{value.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
-          </section>
+          </div>
+        </section>
 
           {/* ══════════════════════════════════════
               3. NUMERI
@@ -415,7 +392,7 @@ export default function AboutPage({ heroImages = [] }) {
                     className="group relative"
                   >
                     {/* Card con glow */}
-                    <div className={`relative rounded-2xl border border-white/[0.06] group-hover:border-white/15 bg-zinc-900/50 p-6 text-center transition-all duration-300 shadow-lg group-hover:shadow-2xl ${stat.glow} overflow-hidden`}>
+                    <div className={`relative rounded-2xl border border-white/[0.3] group-hover:border-white/15 bg-zinc-900/50 p-6 text-center transition-all duration-300 shadow-lg group-hover:shadow-2xl ${stat.glow} overflow-hidden`}>
                       {/* Top gradient line */}
                       <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r ${stat.ring}`} />
                       {/* Icon */}
