@@ -216,29 +216,24 @@ export default function AboutPage({ heroImages = [] }) {
             className="relative min-h-[92vh] flex items-center py-24 px-4 overflow-hidden"
             aria-label="Presentazione Formula Rossa"
           >
-            {/* Sfondi stratificati */}
+            {/* Sfondi stratificati (rimangono invariati) */}
             <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-              {/* Dot grid */}
               <div className="absolute inset-0 opacity-[0.03]" style={{
                 backgroundImage: 'radial-gradient(circle at 1px 1px, #DC0000 1px, transparent 0)',
                 backgroundSize: '40px 40px',
               }} />
-              {/* Glow rosso pulsante */}
               <motion.div
                 animate={{ scale: [1, 1.15, 1], opacity: [0.12, 0.2, 0.12] }}
                 transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
                 className="absolute -top-48 -left-48 w-[800px] h-[800px] bg-red-600 rounded-full blur-[200px]"
               />
-              {/* Glow oro */}
               <motion.div
                 animate={{ scale: [1, 1.1, 1], opacity: [0.05, 0.1, 0.05] }}
                 transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
                 className="absolute -bottom-32 right-0 w-[500px] h-[500px] bg-yellow-500 rounded-full blur-[160px]"
               />
-              {/* Linee verticali decorative */}
               <div className="absolute top-0 left-1/3 w-px h-full bg-gradient-to-b from-transparent via-red-600/15 to-transparent" />
               <div className="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-transparent via-yellow-500/8 to-transparent" />
-              {/* Striscia diagonale decorativa */}
               <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-red-600/[0.03] to-transparent" />
             </div>
 
@@ -263,7 +258,7 @@ export default function AboutPage({ heroImages = [] }) {
                     transition={{ duration: 0.7, delay: 0.1 }}
                     className="text-3xl md:text-4xl lg:text-5xl font-black uppercase italic tracking-tighter whitespace-nowrap mb-6"
                   >
-                    Una piattaforma per i <span className="text-red-600">Tifosi Ferrari</span>
+                    Una piattaforma <span className="text-red-600">rampante</span>
                   </motion.h1>
 
                   <motion.p
@@ -298,42 +293,29 @@ export default function AboutPage({ heroImages = [] }) {
                   </motion.div>
                 </motion.div>
 
-                {/* Griglia immagini */}
+                {/* Immagine Singola [3] */}
                 <motion.div
                   initial={{ opacity: 0, x: 40 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
-                  className="relative"
+                  className="relative flex justify-center lg:justify-end"
                 >
-                  {/* Numero "75" decorativo */}
-                  <div className="absolute -top-8 -right-4 text-[180px] font-black leading-none select-none pointer-events-none italic bg-gradient-to-b from-red-600/10 to-transparent bg-clip-text text-transparent">
+                  {/* Numero "75" decorativo ingrandito */}
+                  <div className="absolute -top-16 -right-8 text-[220px] font-black leading-none select-none pointer-events-none italic bg-gradient-to-b from-red-600/10 to-transparent bg-clip-text text-transparent z-0">
                     75
                   </div>
-                  <div className="relative z-10 grid grid-cols-2 gap-3">
-                    <div className="space-y-3">
-                      <div className="aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50 ring-1 ring-white/5">
-                        {realImages[4] && (
-                          <img src={realImages[0].urls.regular} alt={realImages[0].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
-                        )}
-                      </div>
-                      <div className="aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50">
-                        {realImages[5] && (
-                          <img src={realImages[1].urls.regular} alt={realImages[1].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
-                        )}
-                      </div>
-                    </div>
-                    <div className="space-y-3 pt-6">
-                      <div className="aspect-video rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50">
-                        {realImages[6] && (
-                          <img src={realImages[2].urls.regular} alt={realImages[2].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
-                        )}
-                      </div>
-                      <div className="aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/[0.06] shadow-xl shadow-black/50">
-                        {realImages[3] && (
-                          <img src={realImages[3].urls.regular} alt={realImages[3].alt_description ?? 'Ferrari F1'} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
-                        )}
-                      </div>
-                    </div>
+
+                  {/* Contenitore Immagine [3] */}
+                  <div className="relative z-10 w-full max-w-[540px] aspect-[4/5] rounded-3xl overflow-hidden bg-zinc-900 border border-white/[0.08] shadow-2xl shadow-black/60 ring-1 ring-white/10">
+                    {realImages[3] && (
+                      <img 
+                        src={realImages[3].urls.regular} 
+                        alt={realImages[3].alt_description ?? 'Ferrari F1 Detail'} 
+                        className="w-full h-full object-cover transition-transform duration-1000 hover:scale-110" 
+                      />
+                    )}
+                    {/* Overlay sottile per profondità */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
                   </div>
                 </motion.div>
 
