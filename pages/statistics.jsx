@@ -335,6 +335,19 @@ const getCountryName = (code) => {
   return Object.values(countryConfig).find(v => v.code === code)?.name || code.toUpperCase();
 };
 
+const debugCircuits = (circuits) => {
+  console.log('🏁 DEBUG CIRCUITI:');
+  circuits.forEach(c => {
+    const flag = c.flag || getFlagCode(c.originalName || c.name);
+    console.log(`  ${c.name} (${c.originalName}) → flag: "${flag}"`);
+  });
+};
+
+useEffect(() => {
+  if (circuits.length > 0) {
+    debugCircuits(circuits);
+  }
+}, [circuits]);
 /* ─────────────────────────────────────────────────────────────────────────────
    DARK TOOLTIP
 ───────────────────────────────────────────────────────────────────────────── */
@@ -972,38 +985,55 @@ export default function StatisticsPage() {
           {/* ── 4. FORTRESS MARANELLO ── */}
           <AccordionSection id="circuits" title="Fortress Maranello" subtitle="Circuiti con più vittorie Ferrari" icon={Landmark} isOpen={openSection==='circuits'} onToggle={()=>toggle('circuits')} accent="gold">
             <div className="mt-6 space-y-6">
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 {circuits.map(c => {
-                  console.log('Circuito:', c.name, 'Flag:', c.flag);
+                  const flagCode = c.flag || getFlagCode(c.originalName || c.name);
                   
                   return (
-                    <div key={c.name} className="flex items-center gap-2 px-3 py-2 rounded-lg"
-                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.6)' }}>
-                      
-                      {c.flag && (
-                        <div className="w-7 h-4.5 rounded-sm overflow-hidden shrink-0 border border-white/10">
+                    <div 
+                      key={c.name} 
+                      className="flex items-center gap-3 bg-zinc-900/40 border border-white/5 p-3 rounded-2xl group hover:border-red-600/30 transition-all"
+                    >
+                      <div className="relative w-8 h-6 overflow-hidden rounded-sm shadow-sm shrink-0 border border-white/10">
+                        {flagCode && (
                           <img 
-                            src={`https://flagcdn.com/w80/${c.flag}.png`}
+                            src={`https://flagcdn.com/w80/${flagCode}.png`}
                             alt={c.name}
                             className="w-full h-full object-cover"
                             onError={(e) => { 
-                              console.log('Errore bandiera:', c.flag);
-                              e.currentTarget.style.display = 'none'; 
+                              // Fallback a dimensione più piccola
+                              e.target.src = `https://flagcdn.com/24x18/${flagCode}.png`;
+                              e.target.onerror = () => {
+                                e.target.style.display = 'none';
+                              };
                             }} 
                           />
-                        </div>
-                      )}
+                        )}
+                      </div>
                       
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-black uppercase text-white truncate">{c.name}</p>
-                        <p className="text-[9px] text-white-600">{c.wins} vitt.</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-black uppercase text-white truncate group-hover:text-red-400 transition-colors">
+                          {c.name}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="h-1 w-12 rounded-full bg-zinc-800 overflow-hidden">
+                            <div 
+                              className="h-full rounded-full" 
+                              style={{ 
+                                width: `${(c.wins / circuits[0].wins) * 100}%`,
+                                background: c.color || RED
+                              }} 
+                            />
+                          </div>
+                          <span className="text-[10px] font-black text-white-600">{c.wins}</span>
+                        </div>
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* Bar chart */}
+              {/* Bar chart - CON LO STESSO STILE NEL TOOLTIP */}
               <div className="h-[460px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={circuits} layout="vertical" margin={{ left: 8, right: 48, top: 4, bottom: 4 }}>
@@ -1014,6 +1044,8 @@ export default function StatisticsPage() {
                       content={({ active, payload }) => {
                         if (!active || !payload?.length) return null;
                         const c = payload[0].payload;
+                        const flagCode = c.flag || getFlagCode(c.originalName || c.name);
+                        
                         return (
                           <DarkTooltip
                             active={active}
@@ -1021,14 +1053,17 @@ export default function StatisticsPage() {
                             accentColor={c.color}
                             extra={
                               <div className="flex items-center gap-2 mb-1">
-                                {c.flag && (
+                                {flagCode && (
                                   <div className="w-5 h-3.5 rounded-sm overflow-hidden border border-white/10">
                                     <img 
-                                      src={`https://flagcdn.com/w40/${c.flag}.png`}
+                                      src={`https://flagcdn.com/w40/${flagCode}.png`}
                                       alt={c.name}
                                       className="w-full h-full object-cover"
                                       onError={(e) => { 
-                                        e.currentTarget.style.display = 'none'; 
+                                        e.target.src = `https://flagcdn.com/24x18/${flagCode}.png`;
+                                        e.target.onerror = () => {
+                                          e.target.style.display = 'none';
+                                        };
                                       }}
                                     />
                                   </div>
@@ -1042,7 +1077,7 @@ export default function StatisticsPage() {
                     />
                     <Bar dataKey="wins" radius={[0, 8, 8, 0]} barSize={20}>
                       {circuits.map((c, i) => (
-                        <Cell key={i} fill={c.color} style={{ filter: `drop-shadow(0 0 5px ${c.color}44)` }} />
+                        <Cell key={i} fill={c.color || RED} style={{ filter: `drop-shadow(0 0 5px ${(c.color || RED)}44)` }} />
                       ))}
                     </Bar>
                   </BarChart>
