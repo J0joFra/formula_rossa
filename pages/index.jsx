@@ -212,14 +212,14 @@ function FanZoneCard() {
 /* ─────────────────────────────────────────────────────────────────────────────
    CARD 3 – DEEP ANALYTICS ARCHIVE
 ───────────────────────────────────────────────────────────────────────────── */
-function StatsSection() {
+function ArchiveCard() {
   const stats = [
     { label: 'Stagioni', value: '74+' },
     { label: 'GP Analizzati', value: '1.1K+' },
     { label: 'Dataset', value: '48M' },
   ];
   return (
-    <Link href="/analytics" className="flex-1 min-w-0">
+    <Link href="/statistics" className="flex-1 min-w-0">
       <motion.div
         whileHover={{ scale: 1.025, y: -4 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
@@ -392,6 +392,7 @@ export default function Home() {
 
         <main>
           <div ref={homeRef}><HeroSection /></div>
+          <div ref={statsRef}><StatsSection /></div>
 
           {/* ── SEZIONE ESPERIENZE INTERATTIVE ── */}
           <div ref={predictorRef} className="py-16 md:py-24 px-4">
@@ -414,7 +415,7 @@ export default function Home() {
               <div className="flex flex-col md:flex-row gap-4 md:gap-5 items-stretch">
                 <OracleCard />
                 <FanZoneCard />
-                <StatsSection />
+                <ArchiveCard />
               </div>
 
             </div>
