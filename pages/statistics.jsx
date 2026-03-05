@@ -1,415 +1,345 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
-  AreaChart, Area, CartesianGrid, PieChart, Pie, Cell 
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  AreaChart, Area, CartesianGrid, PieChart, Pie, Cell
 } from 'recharts';
-import { 
-  Trophy, Activity, ChevronLeft, Star, ChevronDown, 
-  Globe2, Landmark, Timer, Award 
+import {
+  Trophy, Activity, ChevronLeft, ChevronDown,
+  Globe2, Landmark, User
 } from 'lucide-react';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
 
-// --- HELPERS ---
+/* ─────────────────────────────────────────────────────────────────────────────
+   CONSTANTS
+───────────────────────────────────────────────────────────────────────────── */
+const RED  = '#DC0000';
+const GOLD = '#EAB308';
+
+const MEDAL = [
+  { color: RED,      label: '1ST' },
+  { color: '#A8A9AD', label: '2ND' },
+  { color: '#CD7F32', label: '3RD' },
+];
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────────────────────────────────────────── */
 const normalizeDriverName = (name) => {
-  if (!name) return "";
+  if (!name) return '';
   return name.toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/\s+/g, '-')
     .replace(/[^\w-]/g, '');
 };
 
-const FERRARI_COLORS = ['#DC0000', '#FF2800', '#8a0000', '#4a0000', '#333333'];
-const GOLD = "#FFD700";
-
-function TrophySVG({ size, color }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill={color}>
-      <path d="M3 2h10v2a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V2zm3 10h4v1H6v-1zm1-4v4m2-4v4M2 3h1v2H2V3zm12 0h-1v2h1V3z" />
-    </svg>
-  );
-}
-
-// Mappa dei colori per le bandiere 
 const countryConfig = {
-  'germany': { code: 'de', color: '#FFCE00', name: 'GERMANY' },
-  'italy': { code: 'it', color: '#008C45', name: 'ITALY' },
-  'united-kingdom': { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
-  'france': { code: 'fr', color: '#0055A4', name: 'FRANCE' },
-  'brazil': { code: 'br', color: '#26D701', name: 'BRAZIL' },
-  'spain': { code: 'es', color: '#AA151B', name: 'SPAIN' },
-  'spagna': { code: 'es', color: '#AA151B', name: 'SPAIN' }, 
-  'united-kingdom': { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
-  'united kingdom': { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
-  'great-britain': { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
-  'great britain': { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
-  'england': { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
-  'britain': { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
-  'uk': { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
-  'united-states-of-america': { code: 'us', color: '#B22234', name: 'UNITED STATES' },
-  'united-states': { code: 'us', color: '#B22234', name: 'UNITED STATES' },
-  'united states of america': { code: 'us', color: '#B22234', name: 'UNITED STATES' },
-  'united states': { code: 'us', color: '#B22234', name: 'UNITED STATES' },
-  'usa': { code: 'us', color: '#B22234', name: 'UNITED STATES' },
-  'america': { code: 'us', color: '#B22234', name: 'UNITED STATES' },
-  'us': { code: 'us', color: '#B22234', name: 'UNITED STATES' },
-  'usa': { code: 'us', color: '#B22234', name: 'UNITED STATES' },
-  'finland': { code: 'fi', color: '#003580', name: 'FINLAND' },
-  'austria': { code: 'at', color: '#ED2939', name: 'AUSTRIA' },
-  'monaco': { code: 'mc', color: '#E20919', name: 'MONACO' },
-  'argentina': { code: 'ar', color: '#75AADB', name: 'ARGENTINA' },
-  'switzerland': { code: 'ch', color: '#D52B1E', name: 'SWITZERLAND' },
-  'belgium': { code: 'be', color: '#F1BF00', name: 'BELGIUM' },
-  'south-africa': { code: 'za', color: '#007A4D', name: 'SOUTH AFRICA' },
-  'mexico': { code: 'mx', color: '#006847', name: 'MEXICO' },
-  'netherlands': { code: 'nl', color: '#21468B', name: 'NETHERLANDS' },
-  'hungary': { code: 'hu', color: '#436F4D', name: 'HUNGARY' },
-  'portugal': { code: 'pt', color: '#006600', name: 'PORTUGAL' },
-  'turkey': { code: 'tr', color: '#E30A17', name: 'TURKEY' },
-  'japan': { code: 'jp', color: '#BC002D', name: 'JAPAN' },
-  'australia': { code: 'au', color: '#00008B', name: 'AUSTRALIA' },
-  'canada': { code: 'ca', color: '#D80621', name: 'CANADA' },
-  'china': { code: 'cn', color: '#DE2910', name: 'CHINA' },
-  'bahrain': { code: 'bh', color: '#C8102E', name: 'BAHRAIN' },
-  'saudi-arabia': { code: 'sa', color: '#006C35', name: 'SAUDI ARABIA' },
-  'azerbaijan': { code: 'az', color: '#00B5E2', name: 'AZERBAIJAN' },
-  'singapore': { code: 'sg', color: '#ED2939', name: 'SINGAPORE' },
-  'qatar': { code: 'qa', color: '#8D1B3D', name: 'QATAR' },
-  'abu-dhabi': { code: 'ae', color: '#00732F', name: 'UNITED ARAB EMIRATES' },
-  'united-arab-emirates': { code: 'ae', color: '#00732F', name: 'UNITED ARAB EMIRATES' },
-  'malaysia': { code: 'my', color: '#006233', name: 'MALAYSIA' },
-  'korea': { code: 'kr', color: '#CD2E3A', name: 'KOREA' },
-  'india': { code: 'in', color: '#FF9933', name: 'INDIA' },
-  'russia': { code: 'ru', color: '#D52B1E', name: 'RUSSIA' },
-  'morocco': { code: 'ma', color: '#C1272D', name: 'MOROCCO' },
-  'unknown': { code: 'un', color: '#333333', name: 'UNKNOWN' }
+  'germany':                  { code: 'de', color: '#FFCE00', name: 'GERMANY' },
+  'italy':                    { code: 'it', color: '#008C45', name: 'ITALY' },
+  'united-kingdom':           { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
+  'great-britain':            { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
+  'france':                   { code: 'fr', color: '#0055A4', name: 'FRANCE' },
+  'brazil':                   { code: 'br', color: '#26D701', name: 'BRAZIL' },
+  'spain':                    { code: 'es', color: '#AA151B', name: 'SPAIN' },
+  'united-states-of-america': { code: 'us', color: '#B22234', name: 'USA' },
+  'united-states':            { code: 'us', color: '#B22234', name: 'USA' },
+  'finland':                  { code: 'fi', color: '#003580', name: 'FINLAND' },
+  'austria':                  { code: 'at', color: '#ED2939', name: 'AUSTRIA' },
+  'monaco':                   { code: 'mc', color: '#E20919', name: 'MONACO' },
+  'argentina':                { code: 'ar', color: '#75AADB', name: 'ARGENTINA' },
+  'switzerland':              { code: 'ch', color: '#D52B1E', name: 'SWITZERLAND' },
+  'belgium':                  { code: 'be', color: '#F1BF00', name: 'BELGIUM' },
+  'south-africa':             { code: 'za', color: '#007A4D', name: 'SOUTH AFRICA' },
+  'mexico':                   { code: 'mx', color: '#006847', name: 'MEXICO' },
+  'netherlands':              { code: 'nl', color: '#21468B', name: 'NETHERLANDS' },
+  'hungary':                  { code: 'hu', color: '#436F4D', name: 'HUNGARY' },
+  'portugal':                 { code: 'pt', color: '#006600', name: 'PORTUGAL' },
+  'turkey':                   { code: 'tr', color: '#E30A17', name: 'TURKEY' },
+  'japan':                    { code: 'jp', color: '#BC002D', name: 'JAPAN' },
+  'australia':                { code: 'au', color: '#00008B', name: 'AUSTRALIA' },
+  'canada':                   { code: 'ca', color: '#D80621', name: 'CANADA' },
+  'china':                    { code: 'cn', color: '#DE2910', name: 'CHINA' },
+  'bahrain':                  { code: 'bh', color: '#C8102E', name: 'BAHRAIN' },
+  'saudi-arabia':             { code: 'sa', color: '#006C35', name: 'SAUDI ARABIA' },
+  'azerbaijan':               { code: 'az', color: '#00B5E2', name: 'AZERBAIJAN' },
+  'singapore':                { code: 'sg', color: '#ED2939', name: 'SINGAPORE' },
+  'qatar':                    { code: 'qa', color: '#8D1B3D', name: 'QATAR' },
+  'abu-dhabi':                { code: 'ae', color: '#00732F', name: 'UAE' },
+  'united-arab-emirates':     { code: 'ae', color: '#00732F', name: 'UAE' },
+  'malaysia':                 { code: 'my', color: '#006233', name: 'MALAYSIA' },
+  'korea':                    { code: 'kr', color: '#CD2E3A', name: 'KOREA' },
+  'india':                    { code: 'in', color: '#FF9933', name: 'INDIA' },
+  'russia':                   { code: 'ru', color: '#D52B1E', name: 'RUSSIA' },
+  'morocco':                  { code: 'ma', color: '#C1272D', name: 'MOROCCO' },
+  'unknown':                  { code: 'un', color: '#333333', name: 'UNKNOWN' },
 };
 
-// Mappatura circuiti - AGGIORNATA
 const circuitToCountry = {
-  // Italia
-  'monza': 'italy', 
-  'autodromo-nazionale-di-monza': 'italy', 
-  'milan': 'italy', 
-  'imola': 'italy', 
-  'enzo-e-dino-ferrari': 'italy',
-  'mugello': 'italy', 
-  'bologna': 'italy', 
-  'pescara': 'italy',
-  
-  // Gran Bretagna/UK
-  'silverstone': 'united-kingdom', 
-  'silverstone-circuit': 'united-kingdom',
-  'northamptonshire': 'united-kingdom', 
-  'brands-hatch': 'united-kingdom', 
-  'kent': 'united-kingdom', 
-  'donington': 'united-kingdom', 
-  'aintree': 'united-kingdom',
-  'liverpool': 'united-kingdom',
-  'british-grand-prix': 'united-kingdom',
-  
-  // Belgio
-  'spa': 'belgium', 
-  'spa-francorchamps': 'belgium', 
-  'stavelot': 'belgium', 
-  'zolder': 'belgium',
-  'heusden-zolder': 'belgium', 
-  'nivelles': 'belgium', 
-  'brussels': 'belgium',
-  
-  // Spagna - AGGIORNATO
-  'catalunya': 'spain', 
-  'barcelona': 'spain', 
-  'montmelo': 'spain', 
-  'jerez': 'spain', 
-  'valencia': 'spain',
-  'valencia-street-circuit': 'spain', 
-  'pedralbes': 'spain', 
-  'montjuic': 'spain', 
-  'madrid': 'spain', 
-  'jarama': 'spain',
-  'circuit-de-barcelona-catalunya': 'spain',
-  'spanish-grand-prix': 'spain',
-  
-  // Ungheria
-  'hungaroring': 'hungary', 
-  'budapest': 'hungary', 
-  'mogyorod': 'hungary',
-  
-  // Austria
-  'red-bull-ring': 'austria', 
-  'spielberg': 'austria',
-  'zeltweg': 'austria', 
-  'oesterreichring': 'austria', 
-  'styria': 'austria',
-  
-  // Francia
-  'magny-cours': 'france', 
-  'nevers': 'france',
-  'paul-ricard': 'france', 
-  'le-castellet': 'france', 
-  'ricard': 'france', 
-  'reims': 'france', 
-  'dijon': 'france',
-  'dijon-prenois': 'france', 
-  'rouen': 'france', 
-  'essarts': 'france', 
-  'charade': 'france', 
-  'clermont-ferrand': 'france',
-  'lemans': 'france',
-  
-  // Germania
-  'nurburgring': 'germany', 
-  'nurburg': 'germany', 
-  'hockenheimring': 'germany', 
-  'hockenheim': 'germany',
-  'avus': 'germany', 
-  'berlin': 'germany',
-  
-  // Portogallo
-  'estoril': 'portugal', 
-  'cascais': 'portugal', 
-  'portimao': 'portugal',
-  'algarve': 'portugal', 
-  'boavista': 'portugal', 
-  'oporto': 'portugal', 
-  'monsanto': 'portugal', 
-  'lisbon': 'portugal',
-  
-  // Svizzera
-  'bremgarten': 'switzerland', 
-  'bern': 'switzerland',
-  
-  // Svezia
-  'anderstorp': 'sweden', 
-  'scandinavian-raceway': 'sweden',
-  
-  // Monaco
-  'monaco': 'monaco',
-  'monte-carlo': 'monaco', 
-  'circuit-de-monaco': 'monaco',
-  
-  // Azerbaijan
-  'baku': 'azerbaijan', 
-  'azerbaijan': 'azerbaijan',
-  
-  // USA
-  'americas': 'united-states', 
-  'cota': 'united-states', 
-  'austin': 'united-states', 
-  'circuit-of-the-americas': 'united-states', 
-  'miami': 'united-states',
-  'miami-international-autodrome': 'united-states', 
-  'vegas': 'united-states', 
-  'las-vegas': 'united-states', 
-  'las-vegas-strip': 'united-states', 
-  'caesars-palace': 'united-states',
-  'indianapolis': 'united-states', 
-  'indianapolis-motor-speedway': 'united-states', 
-  'watkins-glen': 'united-states', 
-  'long-beach': 'united-states', 
-  'phoenix': 'united-states',
-  'detroit': 'united-states', 
-  'dallas': 'united-states', 
-  'sebring': 'united-states', 
-  'riverside': 'united-states',
-  
-  // Canada
-  'villeneuve': 'canada',
-  'montreal': 'canada', 
-  'circuit-gilles-villeneuve': 'canada', 
-  'mosport': 'canada', 
-  'bowmanville': 'canada', 
-  'tremblant': 'canada',
-  'st-jovite': 'canada',
-  
-  // Brasile
-  'interlagos': 'brazil', 
-  'sao-paulo': 'brazil', 
-  'são-paulo': 'brazil', 
-  'jose-carlos-pace': 'brazil',
-  'jacarepagua': 'brazil', 
-  'rio-de-janeiro': 'brazil',
-  
-  // Messico
-  'rodriguez': 'mexico', 
-  'hermanos-rodriguez': 'mexico', 
-  'mexico-city': 'mexico',
-  
-  // Argentina
-  'galvez': 'argentina', 
-  'buenos-aires': 'argentina', 
-  'oscar-galvez': 'argentina',
-  'juan-y-oscar-galvez': 'argentina', 
-  'juan-y-ignacio-cobos': 'argentina',
-  
-  // Giappone
-  'suzuka': 'japan', 
-  'suzuka-circuit': 'japan', 
-  'mie': 'japan', 
-  'fuji': 'japan', 
-  'fuji-speedway': 'japan',
-  'oyama': 'japan', 
-  'okayama': 'japan', 
-  'ti-circuit': 'japan',
-  
-  // Cina
-  'shanghai': 'china', 
-  'shanghai-international-circuit': 'china',
-  
-  // Singapore
-  'marina-bay': 'singapore', 
-  'singapore': 'singapore',
-  
-  // Malesia
-  'sepang': 'malaysia', 
-  'kuala-lumpur': 'malaysia',
-  
-  // Corea
-  'yeongam': 'korea', 
-  'korea-international-circuit': 'korea',
-  
-  // India
-  'buddh': 'india', 
-  'greater-noida': 'india',
-  
-  // Bahrain
-  'bahrain': 'bahrain', 
-  'sakhir': 'bahrain',
-  'manama': 'bahrain', 
-  'bahrain-international-circuit': 'bahrain',
-  
-  // Qatar
-  'losail': 'qatar', 
-  'lusail': 'qatar', 
-  'lusail-international-circuit': 'qatar',
-  
-  // Arabia Saudita
-  'jeddah': 'saudi-arabia', 
-  'jeddah-corniche-circuit': 'saudi-arabia',
-  
-  // Emirati Arabi
-  'yas-marina': 'united-arab-emirates', 
-  'abu-dhabi': 'united-arab-emirates', 
-  'yas-marina-circuit': 'united-arab-emirates',
-  
-  // Turchia
-  'istanbul': 'turkey', 
-  'istanbul-park': 'turkey',
-  
-  // Russia
-  'sochi': 'russia', 
-  'sochi-autodrom': 'russia',
-  
-  // Sudafrica
-  'kyalami': 'south-africa',
-  'midrand': 'south-africa', 
-  'george': 'south-africa', 
-  'prince-george': 'south-africa',
-  
-  // Australia
-  'adelaide': 'australia', 
-  'albert-park': 'australia',
-  'melbourne': 'australia',
-  
-  // Marocco
-  'ain-diab': 'morocco', 
-  'casablanca': 'morocco',
-  
-  // Paesi Bassi
-  'zandvoort': 'netherlands', 
-  'circuit-zandvoort': 'netherlands',
+  'monza':'italy','imola':'italy','mugello':'italy','pescara':'italy','enzo-e-dino-ferrari':'italy',
+  'silverstone':'united-kingdom','brands-hatch':'united-kingdom','donington':'united-kingdom','aintree':'united-kingdom',
+  'spa':'belgium','spa-francorchamps':'belgium','zolder':'belgium','nivelles':'belgium',
+  'catalunya':'spain','barcelona':'spain','montmelo':'spain','jerez':'spain','valencia':'spain','jarama':'spain',
+  'hungaroring':'hungary','budapest':'hungary',
+  'red-bull-ring':'austria','spielberg':'austria','zeltweg':'austria','oesterreichring':'austria',
+  'magny-cours':'france','paul-ricard':'france','reims':'france','dijon':'france','rouen':'france','charade':'france',
+  'nurburgring':'germany','hockenheimring':'germany','hockenheim':'germany','avus':'germany',
+  'estoril':'portugal','portimao':'portugal','boavista':'portugal',
+  'bremgarten':'switzerland',
+  'monaco':'monaco','monte-carlo':'monaco',
+  'baku':'azerbaijan',
+  'americas':'united-states','cota':'united-states','austin':'united-states','miami':'united-states','las-vegas':'united-states','indianapolis':'united-states','watkins-glen':'united-states',
+  'villeneuve':'canada','montreal':'canada','mosport':'canada',
+  'interlagos':'brazil','jacarepagua':'brazil',
+  'rodriguez':'mexico','hermanos-rodriguez':'mexico',
+  'galvez':'argentina','buenos-aires':'argentina',
+  'suzuka':'japan','fuji':'japan','okayama':'japan',
+  'shanghai':'china',
+  'marina-bay':'singapore',
+  'sepang':'malaysia',
+  'buddh':'india',
+  'yeongam':'korea',
+  'bahrain':'bahrain','sakhir':'bahrain',
+  'losail':'qatar','lusail':'qatar',
+  'jeddah':'saudi-arabia',
+  'yas-marina':'united-arab-emirates','abu-dhabi':'united-arab-emirates',
+  'istanbul':'turkey',
+  'sochi':'russia',
+  'kyalami':'south-africa',
+  'albert-park':'australia','adelaide':'australia',
+  'ain-diab':'morocco',
+  'zandvoort':'netherlands',
 };
 
-// Funzione per ottenere il codice bandiera da un circuito
-const getFlagCodeFromCircuit = (circuitName) => {
+const getFlagCode = (circuitName) => {
   if (!circuitName) return '';
-  const normalized = circuitName.toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim();
-  
-  // Cerca nella mappatura diretta
-  if (circuitToCountry[normalized]) {
-    const country = circuitToCountry[normalized];
-    return countryConfig[country]?.code || '';
-  }
-
-  const lowerName = circuitName.toLowerCase();
-  
-  // Logica di fallback migliorata
-  if (lowerName.includes('barcelona') || lowerName.includes('catalunya') || lowerName.includes('montmelo') || lowerName.includes('jerez') || lowerName.includes('valencia') || lowerName.includes('jarama') || lowerName.includes('spanish') || lowerName.includes('spain') || lowerName.includes('españa')) return 'es';
-  if (lowerName.includes('abu dhabi') || lowerName.includes('yas marina') || lowerName.includes('dubai') || lowerName.includes('emirates')) return 'ae';
-  if (lowerName.includes('silverstone') || lowerName.includes('brands') || lowerName.includes('donington') || lowerName.includes('aintree') || lowerName.includes('british') || lowerName.includes('england') || lowerName.includes('uk') || lowerName.includes('great britain') || lowerName.includes('great-britain')) return 'gb';
-  if (lowerName.includes('monza') || lowerName.includes('imola') || lowerName.includes('mugello') || lowerName.includes('pescara') || lowerName.includes('italian') || lowerName.includes('italy') || lowerName.includes('italia')) return 'it';
-  if (lowerName.includes('monaco') || lowerName.includes('monte carlo')) return 'mc';
-  if (lowerName.includes('spa') || lowerName.includes('francorchamps') || lowerName.includes('zolder') || lowerName.includes('nivelles') || lowerName.includes('belgian') || lowerName.includes('belgium')) return 'be';
-  if (lowerName.includes('nürburgring') || lowerName.includes('nurburgring') || lowerName.includes('hockenheim') || lowerName.includes('avus') || lowerName.includes('german') || lowerName.includes('germany') || lowerName.includes('deutschland')) return 'de';
-  if (lowerName.includes('montreal') || lowerName.includes('villeneuve') || lowerName.includes('bowmanville') || lowerName.includes('canadian') || lowerName.includes('canada')) return 'ca';
-  if (lowerName.includes('melbourne') || lowerName.includes('adelaide') || lowerName.includes('albert park') || lowerName.includes('australian') || lowerName.includes('australia')) return 'au';
-  if (lowerName.includes('interlagos') || lowerName.includes('jacarepagua') || lowerName.includes('galvez') || lowerName.includes('brazilian') || lowerName.includes('brazil') || lowerName.includes('são paulo') || lowerName.includes('sao paulo') || lowerName.includes('brasil')) return 'br';
-  if (lowerName.includes('mexico') || lowerName.includes('rodriguez') || lowerName.includes('mexican') || lowerName.includes('méxico')) return 'mx';
-  if (lowerName.includes('shanghai') || lowerName.includes('chinese') || lowerName.includes('china')) return 'cn';
-  if (lowerName.includes('suzuka') || lowerName.includes('fuji') || lowerName.includes('okayama') || lowerName.includes('japanese') || lowerName.includes('japan') || lowerName.includes('nippon')) return 'jp';
-  if (lowerName.includes('bahrain') || lowerName.includes('sakhir')) return 'bh';
-  if (lowerName.includes('jeddah') || lowerName.includes('saudi') || lowerName.includes('ksa')) return 'sa';
-  if (lowerName.includes('miami') || lowerName.includes('austin') || lowerName.includes('americas') || lowerName.includes('cota') || lowerName.includes('indianapolis') || lowerName.includes('sebring') || lowerName.includes('riverside') || lowerName.includes('watkins glen') || lowerName.includes('long beach') || lowerName.includes('phoenix') || lowerName.includes('detroit') || lowerName.includes('dallas') || lowerName.includes('caesars palace') || lowerName.includes('monterey') || lowerName.includes('laguna seca') || lowerName.includes('las vegas') || lowerName.includes('vegas') || lowerName.includes('united states') || lowerName.includes('usa') || lowerName.includes('us') 
-    || lowerName.includes('u.s.') || lowerName.includes('united states of america') || lowerName.includes('united-states')) return 'us';
-  if (lowerName.includes('red bull ring') || lowerName.includes('spielberg') || lowerName.includes('zeltweg') || lowerName.includes('österreichring') || lowerName.includes('austrian') || lowerName.includes('austria') || lowerName.includes('österreich')) return 'at';
-  if (lowerName.includes('hungaroring') || lowerName.includes('hungarian') || lowerName.includes('hungary') || lowerName.includes('magyarország')) return 'hu';
-  if (lowerName.includes('zandvoort') || lowerName.includes('dutch') || lowerName.includes('netherlands') || lowerName.includes('holland') || lowerName.includes('nederland')) return 'nl';
-  if (lowerName.includes('baku') || lowerName.includes('azerbaijan')) return 'az';
-  if (lowerName.includes('marina bay') || lowerName.includes('singapore')) return 'sg';
-  if (lowerName.includes('losail') || lowerName.includes('lusail') || lowerName.includes('qatar')) return 'qa';
-  if (lowerName.includes('le castellet') || lowerName.includes('paul ricard') || lowerName.includes('ricard') || lowerName.includes('rouen') || lowerName.includes('essarts') || lowerName.includes('reims') || lowerName.includes('charade') || lowerName.includes('dijon') || lowerName.includes('magny-cours') || lowerName.includes('lemans') || lowerName.includes('louvre') || lowerName.includes('french') || lowerName.includes('france') || lowerName.includes('france')) return 'fr';
-  if (lowerName.includes('bremgarten') || lowerName.includes('swiss') || lowerName.includes('switzerland') || lowerName.includes('suisse') || lowerName.includes('schweiz')) return 'ch';
-  if (lowerName.includes('boavista') || lowerName.includes('monsanto') || lowerName.includes('estoril') || lowerName.includes('portimao') || lowerName.includes('portuguese') || lowerName.includes('portugal') || lowerName.includes('portugal')) return 'pt';
-  if (lowerName.includes('ain-diab') || lowerName.includes('ain diab') || lowerName.includes('moroccan') || lowerName.includes('morocco') || lowerName.includes('maroc')) return 'ma';  
-  if (lowerName.includes('george') || lowerName.includes('kyalami') || lowerName.includes('south african') || lowerName.includes('south africa') || lowerName.includes('zuid-afrika')) return 'za';
-  if (lowerName.includes('sepang') || lowerName.includes('malaysian') || lowerName.includes('malaysia')) return 'my';
-  if (lowerName.includes('buddh') || lowerName.includes('indian') || lowerName.includes('india') || lowerName.includes('bharat')) return 'in';
-  if (lowerName.includes('yeongam') || lowerName.includes('korean') || lowerName.includes('korea') || lowerName.includes('south korea')) return 'kr';
-  if (lowerName.includes('istanbul') || lowerName.includes('turkish') || lowerName.includes('turkey') || lowerName.includes('türkiye')) return 'tr';
-  if (lowerName.includes('sochi') || lowerName.includes('russian') || lowerName.includes('russia') || lowerName.includes('россия')) return 'ru'; 
-  
+  const n = circuitName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').trim();
+  const country = circuitToCountry[n];
+  if (country) return countryConfig[country]?.code || '';
+  const l = circuitName.toLowerCase();
+  if (l.includes('monza')||l.includes('imola')||l.includes('mugello')||l.includes('italian')) return 'it';
+  if (l.includes('silverstone')||l.includes('brands')||l.includes('british')) return 'gb';
+  if (l.includes('spa')||l.includes('belgian')) return 'be';
+  if (l.includes('barcelona')||l.includes('catalun')||l.includes('spanish')) return 'es';
+  if (l.includes('monaco')||l.includes('monte carlo')) return 'mc';
+  if (l.includes('nurburgring')||l.includes('hockenheim')||l.includes('german')) return 'de';
+  if (l.includes('interlagos')||l.includes('brazilian')||l.includes('sao paulo')) return 'br';
+  if (l.includes('suzuka')||l.includes('japanese')) return 'jp';
+  if (l.includes('montreal')||l.includes('canadian')) return 'ca';
+  if (l.includes('melbourne')||l.includes('australian')||l.includes('albert')) return 'au';
+  if (l.includes('miami')||l.includes('austin')||l.includes('americas')||l.includes('las vegas')||l.includes('united states')) return 'us';
+  if (l.includes('hungaroring')||l.includes('hungarian')) return 'hu';
+  if (l.includes('red bull ring')||l.includes('austrian')||l.includes('spielberg')) return 'at';
+  if (l.includes('zandvoort')||l.includes('dutch')) return 'nl';
+  if (l.includes('baku')||l.includes('azerbaijan')) return 'az';
+  if (l.includes('marina bay')||l.includes('singapore')) return 'sg';
+  if (l.includes('bahrain')||l.includes('sakhir')) return 'bh';
+  if (l.includes('jeddah')||l.includes('saudi')) return 'sa';
+  if (l.includes('yas')||l.includes('abu dhabi')) return 'ae';
+  if (l.includes('lusail')||l.includes('qatar')) return 'qa';
+  if (l.includes('shanghai')||l.includes('chinese')) return 'cn';
+  if (l.includes('paul ricard')||l.includes('magny')||l.includes('french')||l.includes('france')) return 'fr';
+  if (l.includes('estoril')||l.includes('portimao')||l.includes('portuguese')) return 'pt';
+  if (l.includes('kyalami')||l.includes('south african')) return 'za';
+  if (l.includes('ain-diab')||l.includes('moroccan')) return 'ma';
+  if (l.includes('istanbul')||l.includes('turkish')) return 'tr';
+  if (l.includes('sochi')||l.includes('russian')) return 'ru';
   return '';
 };
 
-// Funzione per ottenere il colore dalla bandiera
 const getCountryColor = (circuitName) => {
-  if (!circuitName) return '#DC0000';
-  
-  const flagCode = getFlagCodeFromCircuit(circuitName);
-  if (!flagCode) return '#DC0000';
-  
-  // Trova il colore dalla configurazione
-  const countryEntry = Object.entries(countryConfig).find(([key, value]) => value.code === flagCode);
-  if (countryEntry) {
-    return countryEntry[1].color;
-  }
-  
-  return '#DC0000';
+  const code = getFlagCode(circuitName);
+  if (!code) return RED;
+  return Object.values(countryConfig).find(v => v.code === code)?.color || RED;
 };
 
-// Funzione per ottenere il nome del paese dal codice bandiera
-const getCountryNameFromFlagCode = (flagCode) => {
-  if (!flagCode) return '';
-  const countryEntry = Object.entries(countryConfig).find(([key, value]) => value.code === flagCode);
-  return countryEntry ? countryEntry[1].name : flagCode.toUpperCase();
+const getCountryName = (code) => {
+  if (!code) return '';
+  return Object.values(countryConfig).find(v => v.code === code)?.name || code.toUpperCase();
 };
 
-// --- MAIN PAGE ---
+/* ─────────────────────────────────────────────────────────────────────────────
+   DARK TOOLTIP — coerente col design
+───────────────────────────────────────────────────────────────────────────── */
+function DarkTooltip({ active, payload, label, accentColor, extra }) {
+  if (!active || !payload?.length) return null;
+  const color = accentColor || payload[0]?.color || RED;
+  return (
+    <div className="rounded-xl px-4 py-3 min-w-[160px]"
+      style={{ background: '#0d0d0d', border: `1px solid ${color}40`, boxShadow: `0 16px 48px rgba(0,0,0,0.9), 0 0 20px ${color}15` }}>
+      {label && <p className="text-[10px] uppercase tracking-widest text-zinc-600 font-black mb-2">{label}</p>}
+      {extra && <div className="mb-2">{extra}</div>}
+      {payload.map((p, i) => (
+        <p key={i} className="font-black text-xl" style={{ color }}>
+          {typeof p.value === 'number' ? p.value.toLocaleString('it-IT') : p.value}
+          {p.name && <span className="text-zinc-600 text-[10px] ml-2 font-black uppercase">{p.name}</span>}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ACCORDION SECTION
+───────────────────────────────────────────────────────────────────────────── */
+function AccordionSection({ id, title, subtitle, icon: Icon, children, isOpen, onToggle, accent = 'red' }) {
+  const color = accent === 'gold' ? GOLD : RED;
+  return (
+    <div className="rounded-2xl overflow-hidden transition-all duration-300"
+      style={{
+        background: 'rgba(6,6,6,0.95)',
+        border: `1px solid ${isOpen ? color + '35' : 'rgba(255,255,255,0.05)'}`,
+        boxShadow: isOpen ? `0 0 60px ${color}08` : 'none',
+      }}
+    >
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-6 md:px-8 py-5 md:py-6 text-left group"
+        aria-expanded={isOpen}
+        aria-controls={`section-${id}`}
+      >
+        <div className="flex items-center gap-4 md:gap-5">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110"
+            style={{ background: color + '15', border: `1px solid ${color}30` }}>
+            <Icon className="w-4.5 h-4.5" style={{ color }} aria-hidden="true" />
+          </div>
+          <div>
+            <h3 className="text-base md:text-lg font-black uppercase tracking-tight leading-none mb-0.5 transition-colors"
+              style={{ color: isOpen ? 'white' : 'rgba(255,255,255,0.7)' }}>
+              {title}
+            </h3>
+            <p className="text-[10px] font-black uppercase tracking-[0.25em] transition-colors"
+              style={{ color: isOpen ? color : 'rgba(255,255,255,0.2)' }}>
+              {subtitle}
+            </p>
+          </div>
+        </div>
+        <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.3 }}>
+          <ChevronDown className="w-5 h-5" style={{ color: isOpen ? color : 'rgba(255,255,255,0.2)' }} aria-hidden="true" />
+        </motion.div>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            id={`section-${id}`}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.45, ease: [0.04, 0.62, 0.23, 0.98] }}
+          >
+            <div className="px-4 md:px-8 pb-8 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   WINNER ROW
+───────────────────────────────────────────────────────────────────────────── */
+function WinnerRow({ driver, index, max }) {
+  const pct     = max > 0 ? (driver.count / max) * 100 : 0;
+  const isTop3  = index < 3;
+  const accent  = isTop3 ? MEDAL[index].color : 'rgba(255,255,255,0.18)';
+  const label   = isTop3 ? MEDAL[index].label : null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -16 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.35, delay: index * 0.045 }}
+      className="group relative flex items-center gap-4 md:gap-5 py-4 px-1 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] transition-colors"
+    >
+      {/* Left accent */}
+      <div className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{ background: accent }} aria-hidden="true" />
+
+      {/* Rank */}
+      <div className="shrink-0 w-9 text-right select-none">
+        {label
+          ? <span className="text-[10px] font-black tracking-widest" style={{ color: accent }}>{label}</span>
+          : <span className="text-xl font-black tabular-nums" style={{ color: 'rgba(255,255,255,0.08)' }}>{index + 1}</span>
+        }
+      </div>
+
+      {/* Photo */}
+      <div className="relative shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden transition-transform duration-300 group-hover:scale-105"
+        style={{ border: `1.5px solid ${isTop3 ? accent : 'rgba(255,255,255,0.07)'}` }}>
+        <img
+          src={`/data/ferrari-drivers/${normalizeDriverName(driver.name)}.jpg`}
+          alt={`Foto di ${driver.name}`}
+          className="w-full h-full object-cover"
+          onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'flex'; }}
+        />
+        <div className="absolute inset-0 bg-zinc-900 items-center justify-center" style={{ display: 'none' }} aria-hidden="true">
+          <User className="w-4 h-4 text-zinc-700" />
+        </div>
+      </div>
+
+      {/* Name + bar + years */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-2 mb-1.5 flex-wrap">
+          <span className="text-sm font-black uppercase tracking-tight truncate transition-colors group-hover:text-red-400"
+            style={{ color: isTop3 ? accent : 'white' }}>
+            {driver.name}
+          </span>
+          <span className="text-[10px] font-mono text-zinc-700 shrink-0">
+            {Math.min(...driver.yearsArray)}–{Math.max(...driver.yearsArray)}
+          </span>
+        </div>
+        {/* Progress bar */}
+        <div className="h-px w-full rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${pct}%` }}
+            transition={{ duration: 0.9, delay: index * 0.045 + 0.2, ease: 'easeOut' }}
+            className="h-full rounded-full"
+            style={{ background: `linear-gradient(to right, ${accent}, ${accent}70)` }}
+          />
+        </div>
+        {/* Year pills — desktop only, max 10 */}
+        <div className="hidden lg:flex flex-wrap gap-1 mt-1.5">
+          {driver.yearsArray.slice(0, 10).map((y) => (
+            <span key={y} className="text-[9px] px-1.5 py-0.5 rounded font-black"
+              style={{ background: isTop3 ? accent + '18' : 'rgba(255,255,255,0.05)', color: isTop3 ? accent : 'rgba(255,255,255,0.3)' }}>
+              {y}
+            </span>
+          ))}
+          {driver.yearsArray.length > 10 && (
+            <span className="text-[9px] px-1.5 py-0.5 rounded font-black text-zinc-700">
+              +{driver.yearsArray.length - 10}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Count */}
+      <div className="shrink-0 text-right min-w-[3rem]">
+        <span className="text-2xl md:text-3xl font-black tabular-nums transition-colors"
+          style={{ color: isTop3 ? accent : 'rgba(255,255,255,0.6)' }}>
+          {driver.count}
+        </span>
+        <p className="text-[9px] text-zinc-700 uppercase tracking-widest">vitt.</p>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   PAGE
+───────────────────────────────────────────────────────────────────────────── */
 export default function StatisticsPage() {
-  const [loading, setLoading] = useState(true);
-  const [pilotWins, setPilotWins] = useState([]);
-  const [history, setHistory] = useState([]);
+  const [loading,       setLoading]       = useState(true);
+  const [pilotWins,     setPilotWins]     = useState([]);
+  const [history,       setHistory]       = useState([]);
   const [nationalities, setNationalities] = useState([]);
-  const [circuits, setCircuits] = useState([]);
-  const [openSection, setOpenSection] = useState('winners');
+  const [circuits,      setCircuits]      = useState([]);
+  const [openSection,   setOpenSection]   = useState('winners');
 
   useEffect(() => {
     async function loadData() {
@@ -418,105 +348,69 @@ export default function StatisticsPage() {
           fetch('/data/f1db-races-race-results.json'),
           fetch('/data/f1db-drivers.json'),
           fetch('/data/ferrari_historical.json'),
-          fetch('/data/f1db-races.json')
+          fetch('/data/f1db-races.json'),
         ]);
-        
-        const results = await resultsRes.json();
+        const results     = await resultsRes.json();
         const driversData = await driversRes.json();
-        const historical = await historicalRes.json();
-        const racesData = await racesRes.json();
+        const historical  = await historicalRes.json();
+        const racesData   = await racesRes.json();
 
         const driverMap = {};
-        driversData.forEach(d => driverMap[d.id] = d);
+        driversData.forEach(d => { driverMap[d.id] = d; });
 
         const ferrariWins = results.filter(r => r.constructorId === 'ferrari' && r.positionNumber === 1);
 
-        // 1. Process Winners
-        const winnersAgg = ferrariWins.reduce((acc, curr) => {
+        // Winners
+        const wAgg = ferrariWins.reduce((acc, curr) => {
           const d = driverMap[curr.driverId];
           const name = d ? `${d.firstName} ${d.lastName}` : curr.driverId;
           if (!acc[name]) acc[name] = { name, id: curr.driverId, count: 0, years: new Set() };
-          acc[name].count += 1;
+          acc[name].count++;
           acc[name].years.add(curr.year);
           return acc;
         }, {});
-
-        setPilotWins(Object.values(winnersAgg)
-          .map(item => ({
-            ...item,
-            yearsArray: Array.from(item.years).sort((a,b) => b-a)
-          }))
-          .sort((a,b) => b.count - a.count)
-          .slice(0, 10)
+        setPilotWins(
+          Object.values(wAgg)
+            .map(x => ({ ...x, yearsArray: Array.from(x.years).sort((a,b) => b-a) }))
+            .sort((a,b) => b.count - a.count)
+            .slice(0, 10)
         );
 
-        // 2. Process Nationalities - CORRETTO
-        const ferrariDriverIds = [...new Set(results.filter(r => r.constructorId === 'ferrari').map(r => r.driverId))];
-
-        const natAgg = ferrariDriverIds.reduce((acc, dId) => {
-          const driver = driverMap[dId];
-          const natId = driver?.nationalityCountryId || 'unknown';
-          // Normalizza il nome della nazione
-          const normalizedNatId = natId.toLowerCase().trim();
-          acc[normalizedNatId] = (acc[normalizedNatId] || 0) + 1;
+        // Nationalities
+        const ferrariIds = [...new Set(results.filter(r => r.constructorId === 'ferrari').map(r => r.driverId))];
+        const nAgg = ferrariIds.reduce((acc, dId) => {
+          const nat = (driverMap[dId]?.nationalityCountryId || 'unknown').toLowerCase().trim();
+          acc[nat] = (acc[nat] || 0) + 1;
           return acc;
         }, {});
+        setNationalities(
+          Object.entries(nAgg)
+            .map(([id, value]) => {
+              const cfg = countryConfig[id] || countryConfig['unknown'];
+              return { id, name: cfg.name, value, color: cfg.color, flag: cfg.code };
+            })
+            .sort((a,b) => b.value - a.value)
+            .slice(0, 10)
+        );
 
-        const nationalityData = Object.entries(natAgg)
-          .map(([id, value]) => {
-            const normalizedId = id.toLowerCase();
-            const config = countryConfig[normalizedId] || countryConfig['unknown'];
-            return {
-              id: normalizedId,
-              name: config.name || normalizedId.replace(/-/g, ' ').toUpperCase(),
-              value,
-              color: config.color,
-              flag: config.code
-            };
-          })
-          .sort((a, b) => b.value - a.value)
-          .slice(0, 10);
-
-        setNationalities(nationalityData);
-
-        // 3. Process Circuits con bandiere
+        // Circuits
         const raceMap = {};
-        racesData.forEach(r => {
-          raceMap[r.id] = {
-            grandPrixId: r.grandPrixId,
-            circuitName: r.circuitName || r.grandPrixName
-          };
-        });
-
-        const circAgg = ferrariWins.reduce((acc, curr) => {
-          const circuitData = raceMap[curr.raceId];
-          if (!circuitData) return acc;
-          
-          const cId = circuitData.grandPrixId || "Unknown";
-          const circuitName = circuitData.circuitName || cId;
-          const flagCode = getFlagCodeFromCircuit(circuitName);
-          const countryName = getCountryNameFromFlagCode(flagCode);
-          
-          if (!acc[cId]) {
-            acc[cId] = {
-              name: countryName || cId.replace(/-/g, ' ').toUpperCase(),
-              originalName: circuitName,
-              wins: 0,
-              flag: flagCode,
-              countryName: countryName
-            };
-          }
-          acc[cId].wins += 1;
+        racesData.forEach(r => { raceMap[r.id] = { grandPrixId: r.grandPrixId, circuitName: r.circuitName || r.grandPrixName }; });
+        const cAgg = ferrariWins.reduce((acc, curr) => {
+          const rd = raceMap[curr.raceId];
+          if (!rd) return acc;
+          const cId   = rd.grandPrixId || 'Unknown';
+          const cName = rd.circuitName || cId;
+          const flag  = getFlagCode(cName);
+          if (!acc[cId]) acc[cId] = { name: getCountryName(flag) || cId.replace(/-/g,' ').toUpperCase(), originalName: cName, wins: 0, flag, color: getCountryColor(cName) };
+          acc[cId].wins++;
           return acc;
         }, {});
-
-        const sortedCircuits = Object.values(circAgg).sort((a, b) => b.wins - a.wins).slice(0, 10);
-        setCircuits(sortedCircuits);
+        setCircuits(Object.values(cAgg).sort((a,b) => b.wins - a.wins).slice(0, 10));
 
         setHistory(historical.filter(h => h.points !== null));
-
-      } catch (err) { 
-        console.error('Error loading data:', err); 
+      } catch (err) {
+        console.error('Error loading data:', err);
       } finally {
         setLoading(false);
       }
@@ -524,391 +418,268 @@ export default function StatisticsPage() {
     loadData();
   }, []);
 
-  const toggleSection = (id) => setOpenSection(openSection === id ? null : id);
+  const toggle = (id) => setOpenSection(openSection === id ? null : id);
 
-  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-red-600 font-black tracking-widest uppercase italic animate-pulse">Accessing Ferrari Mainframe...</div>;
+  /* ── Loading ── */
+  if (loading) return (
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4">
+      <div className="flex gap-1.5" aria-label="Caricamento dati">
+        {[0,1,2,3,4].map(i => (
+          <motion.div key={i} className="w-1 rounded-full"
+            style={{ background: RED }}
+            animate={{ height: ['12px','32px','12px'] }}
+            transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.12 }}
+          />
+        ))}
+      </div>
+      <p className="text-zinc-600 text-[11px] tracking-[0.4em] uppercase font-black">Accessing Ferrari Mainframe</p>
+    </div>
+  );
+
+  const maxWins = pilotWins[0]?.count ?? 1;
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-red-600">
+    <div className="min-h-screen bg-black text-white selection:bg-red-600/30">
+
+      {/* Background grid */}
+      <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
+        <div className="absolute inset-0 opacity-[0.025]"
+          style={{ backgroundImage: 'linear-gradient(to right,#DC0000 1px,transparent 1px),linear-gradient(to bottom,#DC0000 1px,transparent 1px)', backgroundSize: '48px 48px' }}
+        />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[280px] rounded-full blur-[120px] opacity-[0.06]"
+          style={{ background: RED }}
+        />
+      </div>
+
       <Navigation />
-      
-      <main className="max-w-7xl mx-auto px-4 pt-32 pb-20">
-        <Link href="/" className="group inline-flex items-center gap-2 text-zinc-600 hover:text-red-500 transition-all mb-12">
-          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-[10px] font-white uppercase tracking-widest italic font-mono">Back to HQ</span>
-        </Link>
 
-        <header className="mb-24 relative px-6">
-          <div className="absolute left-0 top-0 w-2 h-full bg-red-600 shadow-[0_0_25px_rgba(220,0,0,0.6)]" />
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <h2 className="text-red-600 font-black text-xs uppercase tracking-[0.6em] mb-4">Intelligence & Performance</h2>
-            <h3 className="text-6xl font-black uppercase italic tracking-tighter leading-[0.85]">
-              Scuderia <br /><span className="text-zinc-800">Data Vault</span>
-            </h3>
-          </motion.div>
-        </header>
+      <main className="relative z-10 max-w-5xl mx-auto pt-28 md:pt-36 px-4 pb-24">
 
-        <div className="flex flex-col gap-8">
-          
-          {/* --- SEZIONE 1: WINNERS CIRCLE --- */}
-          <AccordionSection 
-            id="winners" 
-            title="Winners Circle" 
-            subtitle="Classifica vittorie e cronologia per pilota"
-            icon={Trophy}
-            isOpen={openSection === 'winners'}
-            onToggle={() => toggleSection('winners')}
-            color="yellow"
-          >
-            <div className="overflow-x-auto">
-              <div className="min-w-[800px]">
-                <div className="grid grid-cols-12 gap-4 p-6 border-b border-white/10 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
-                  <div className="col-span-1 text-center italic">Pos</div>
-                  <div className="col-span-2 text-center">Driver</div>
-                  <div className="col-span-5 pl-4">Trophies</div>
-                  <div className="col-span-4 pl-4">Years</div>
-                </div>
-                <div className="divide-y divide-white/5">
-                  {pilotWins.map((driver, index) => (
-                    <div key={driver.id} className="grid grid-cols-12 gap-4 p-8 hover:bg-white/5 transition-all items-center">
-                      <div className="col-span-1 text-center text-3xl font-black italic text-zinc-800">{index + 1}</div>
-                      <div className="col-span-2 flex flex-col items-center gap-2">
-                        <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-zinc-800 shadow-xl bg-zinc-800">
-                          <img 
-                            src={`/data/ferrari-drivers/${normalizeDriverName(driver.name)}.jpg`} 
-                            className="w-full h-full object-cover" 
-                            onError={(e) => { e.target.src = "https://www.formula1.com/etc/designs/f1om/images/driver-listing-face-placeholder.png"; }}
-                            alt={driver.name}
-                          />
-                        </div>
-                        <span className="font-black uppercase italic text-[10px] text-white">{driver.name.split(' ').pop()}</span>
-                      </div>
-                      <div className="col-span-5 flex flex-col gap-3 pl-4">
-                        <div className="flex items-center flex-wrap gap-1.5">
-                          {[...Array(driver.count >= 10 ? 10 : driver.count)].map((_, i) => (
-                            <TrophySVG key={i} size={20} color={GOLD} />
-                          ))}
-                          {driver.count >= 10 && <span className="text-xl font-black italic text-yellow-500 ml-2">x{Math.floor(driver.count / 10)}</span>}
-                        </div>
-                        {driver.count > 10 && driver.count % 10 > 0 && (
-                          <div className="flex items-center flex-wrap gap-1.5 opacity-60">
-                            {[...Array(driver.count % 10)].map((_, i) => <TrophySVG key={i} size={16} color={GOLD} />)}
-                          </div>
-                        )}
-                      </div>
-                      <div className="col-span-4 flex flex-wrap gap-1.5 pl-4">
-                        {driver.yearsArray?.map(y => (
-                          <span key={y} className="px-2 py-1 bg-red-600 rounded text-[9px] font-black text-white shadow-md border border-red-500/20">{y}</span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+        {/* Back */}
+        <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className="mb-10">
+          <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.25em] text-zinc-600 hover:text-white transition-colors group">
+            <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" aria-hidden="true" />
+            Back to HQ
+          </Link>
+        </motion.div>
+
+        {/* Header */}
+        <motion.header
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+          className="mb-14 pl-6 relative"
+        >
+          <div className="absolute left-0 top-1 bottom-1 w-0.5 rounded-full"
+            style={{ background: `linear-gradient(to bottom, ${RED}, transparent)` }} aria-hidden="true" />
+
+          <p className="text-[10px] tracking-[0.45em] uppercase font-black mb-3" style={{ color: RED }}>
+            Scuderia Ferrari · Intelligence & Performance
+          </p>
+          <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none mb-4">
+            Data <span style={{ color: RED }}>Vault</span>
+          </h1>
+          <p className="text-zinc-500 text-sm max-w-md leading-relaxed">
+            75 anni di telemetria, vittorie e record storici. Ogni numero racconta una leggenda della Rossa.
+          </p>
+
+          {/* Quick stats */}
+          <div className="flex flex-wrap gap-8 mt-8 pt-8 border-t border-white/[0.06]">
+            {[
+              { label: 'Vittorie totali',  value: pilotWins.reduce((a,d) => a+d.count, 0).toLocaleString('it-IT') },
+              { label: 'Piloti vincitori', value: pilotWins.length },
+              { label: 'Stagioni',         value: '75+' },
+            ].map(s => (
+              <div key={s.label}>
+                <p className="text-[10px] uppercase tracking-widest text-zinc-600 mb-0.5">{s.label}</p>
+                <p className="text-2xl font-black tabular-nums" style={{ color: RED }}>{s.value}</p>
               </div>
+            ))}
+          </div>
+        </motion.header>
+
+        {/* Accordion sections */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }}
+          className="flex flex-col gap-3"
+        >
+
+          {/* ── 1. WINNERS CIRCLE ── */}
+          <AccordionSection id="winners" title="Winners Circle" subtitle="Classifica vittorie per pilota" icon={Trophy} isOpen={openSection==='winners'} onToggle={()=>toggle('winners')} accent="gold">
+            {/* Table header */}
+            <div className="flex items-center gap-4 md:gap-5 px-1 pt-4 pb-2">
+              <div className="w-9 shrink-0" />
+              <div className="w-10 md:w-12 shrink-0" />
+              <div className="flex-1 text-[10px] font-black uppercase tracking-widest text-zinc-700">Pilota</div>
+              <div className="hidden lg:block flex-1 text-[10px] font-black uppercase tracking-widest text-zinc-700 text-center">Anni attivi</div>
+              <div className="w-14 text-[10px] font-black uppercase tracking-widest text-zinc-700 text-right shrink-0">Totale</div>
+            </div>
+            <div>
+              {pilotWins.map((driver, i) => (
+                <WinnerRow key={driver.id} driver={driver} index={i} max={maxWins} />
+              ))}
             </div>
           </AccordionSection>
 
-          {/* --- SEZIONE 2: PERFORMANCE TIMELINE --- */}
-          <AccordionSection 
-            id="timeline" 
-            title="Performance Timeline" 
-            subtitle="Evoluzione punti costruttori annuali"
-            icon={Activity}
-            isOpen={openSection === 'timeline'}
-            onToggle={() => toggleSection('timeline')}
-            color="red"
-          >
-            <div className="h-[450px] w-full p-4">
+          {/* ── 2. PERFORMANCE TIMELINE ── */}
+          <AccordionSection id="timeline" title="Performance Timeline" subtitle="Evoluzione punti costruttori annuali" icon={Activity} isOpen={openSection==='timeline'} onToggle={()=>toggle('timeline')} accent="red">
+            <div className="h-[420px] w-full mt-6">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={history}>
+                <AreaChart data={history} margin={{ top: 10, right: 12, left: -10, bottom: 0 }}>
                   <defs>
-                    <linearGradient id="ferrariGlow" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#DC0000" stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor="#DC0000" stopOpacity={0}/>
+                    <linearGradient id="ferGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%"  stopColor={RED} stopOpacity={0.3} />
+                      <stop offset="95%" stopColor={RED} stopOpacity={0}   />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
-                  <XAxis dataKey="year" stroke="#444" fontSize={11} tickMargin={15} axisLine={false} />
-                  <YAxis stroke="#444" fontSize={11} axisLine={false} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#e0e0e0', // GRIGIO CHIARO
-                      border: '1px solid #999', 
-                      borderRadius: '12px',
-                      color: '#000',
-                      fontWeight: 'bold'
-                    }} 
-                    labelStyle={{ color: '#000', fontWeight: 'bold' }}
-                    itemStyle={{ color: '#000' }}
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                  <XAxis dataKey="year" stroke="rgba(255,255,255,0.08)" tick={{ fill: '#555', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} tickMargin={12} />
+                  <YAxis stroke="rgba(255,255,255,0.08)" tick={{ fill: '#555', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    content={({ active, payload, label }) => (
+                      <DarkTooltip active={active} payload={payload} label={label} accentColor={RED} />
+                    )}
                   />
-                  <Area type="monotone" dataKey="points" stroke="#DC0000" strokeWidth={3} fillOpacity={1} fill="url(#ferrariGlow)" />
+                  <Area type="monotone" dataKey="points" name="Punti" stroke={RED} strokeWidth={2.5} fillOpacity={1} fill="url(#ferGrad)" dot={false} activeDot={{ r: 5, fill: RED, stroke: '#000', strokeWidth: 2 }} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </AccordionSection>
 
-          {/* --- SEZIONE 3: GLOBAL DNA (NAZIONALITA') --- */}
-          <AccordionSection 
-            id="dna" 
-            title="Global DNA" 
-            subtitle="Distribuzione geografica dei piloti della Scuderia"
-            icon={Globe2}
-            isOpen={openSection === 'dna'}
-            onToggle={() => toggleSection('dna')}
-            color="red"
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12 p-4">
-              {/* Grafico a Torta */}
-              <div className="h-[400px] relative">
+          {/* ── 3. GLOBAL DNA ── */}
+          <AccordionSection id="dna" title="Global DNA" subtitle="Distribuzione geografica dei piloti" icon={Globe2} isOpen={openSection==='dna'} onToggle={()=>toggle('dna')} accent="red">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-6 items-center">
+
+              {/* Donut chart */}
+              <div className="relative h-[320px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie 
-                      data={nationalities} 
-                      innerRadius={90} 
-                      outerRadius={140} 
-                      paddingAngle={3} 
-                      dataKey="value" 
-                      nameKey="name"
-                      stroke="none"
-                    >
-                      {nationalities.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={entry.color} 
-                          className="hover:opacity-80 transition-opacity cursor-pointer outline-none"
-                        />
-                      ))}
+                    <Pie data={nationalities} innerRadius={88} outerRadius={130} paddingAngle={2} dataKey="value" stroke="none">
+                      {nationalities.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                     </Pie>
-                    <Tooltip 
-                      cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} 
+                    <Tooltip
                       content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          return (
-                            <div className="bg-gray-100 border border-gray-300 p-4 rounded-xl shadow-2xl">
-                              <div className="flex items-center gap-2 mb-2">
-                                {payload[0].payload.flag && (
-                                  <img 
-                                    src={`https://flagcdn.com/w40/${payload[0].payload.flag}.png`} 
-                                    className="w-6 h-4 object-cover rounded-sm"
-                                    alt="Flag"
-                                  />
-                                )}
-                                <p className="text-[10px] font-black text-gray-800 uppercase">{payload[0].payload.name}</p>
-                              </div>
-                              <p className="text-2xl font-black text-black italic">{payload[0].value} <span className="text-xs uppercase text-gray-600">Drivers</span></p>
-                            </div>
-                          );
-                        }
-                        return null;
+                        if (!active || !payload?.length) return null;
+                        const p = payload[0].payload;
+                        return (
+                          <DarkTooltip
+                            active={active}
+                            payload={payload}
+                            accentColor={p.color}
+                            extra={
+                              p.flag
+                                ? <div className="flex items-center gap-2">
+                                    <img src={`https://flagcdn.com/w40/${p.flag}.png`} className="w-5 h-3.5 object-cover rounded-sm" alt={p.name} />
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">{p.name}</span>
+                                  </div>
+                                : null
+                            }
+                          />
+                        );
                       }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
-                {/* Contatore Centrale */}
+                {/* Center text */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-4xl font-black italic tracking-tighter text-white">
-                    {nationalities.reduce((a, b) => a + b.value, 0)}
-                  </span>
-                  <span className="text-[8px] font-black uppercase tracking-widest text-red-600">Total Drivers</span>
+                  <span className="text-3xl font-black">{nationalities.reduce((a,n) => a+n.value, 0)}</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: RED }}>piloti totali</span>
                 </div>
               </div>
-              
-              {/* Legenda con Bandierine */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {nationalities.slice(0, 12).map((n) => (
-                  <div key={n.id} className="flex items-center gap-4 bg-zinc-900/40 border border-white/5 p-4 rounded-2xl group hover:border-red-600/30 transition-all">
-                    <div className="relative w-8 h-6 overflow-hidden rounded-sm shadow-sm">
-                      <img 
-                        src={`https://flagcdn.com/w80/${n.flag}.png`} 
-                        alt={n.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
-                      />
+
+              {/* Legend */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {nationalities.map((n, i) => (
+                  <motion.div key={n.id}
+                    initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl group hover:bg-white/[0.04] transition-colors"
+                    style={{ border: '1px solid rgba(255,255,255,0.04)' }}
+                  >
+                    <div className="w-7 h-4.5 rounded-sm overflow-hidden shrink-0 border border-white/10">
+                      <img src={`https://flagcdn.com/w80/${n.flag}.png`} alt={n.name} className="w-full h-full object-cover" onError={e => { e.currentTarget.style.display = 'none'; }} />
                     </div>
-                    <div className="flex flex-col">
-                      <span className="font-black uppercase text-[10px] tracking-tight text-zinc-400 group-hover:text-white transition-colors">
-                        {n.name}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <div className="h-1 w-12 rounded-full bg-zinc-800 overflow-hidden">
-                          <div className="h-full bg-current" style={{ width: `${(n.value / nationalities[0].value) * 100}%`, color: n.color }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-tight text-zinc-500 group-hover:text-white transition-colors truncate">{n.name}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <div className="flex-1 h-px rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(n.value / nationalities[0].value) * 100}%` }}
+                            transition={{ duration: 0.8, delay: i * 0.05 + 0.2 }}
+                            className="h-full rounded-full"
+                            style={{ background: n.color }}
+                          />
                         </div>
-                        <span className="font-mono text-xs text-white font-bold">{n.value}</span>
+                        <span className="text-xs font-black tabular-nums" style={{ color: 'rgba(255,255,255,0.7)' }}>{n.value}</span>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
           </AccordionSection>
 
-          {/* --- SEZIONE 4: Fortress Maranello --- */}
-          <AccordionSection 
-            id="circuits" 
-            title="Fortress Maranello" 
-            subtitle="I circuiti con il maggior numero di vittorie"
-            icon={Landmark}
-            isOpen={openSection === 'circuits'}
-            onToggle={() => toggleSection('circuits')}
-            color="yellow"
-          >
-            <div className="space-y-8">
-              {/* Legenda con bandiere sopra il grafico */}
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                {circuits.map((circuit) => {
-                  const flagCode = circuit.flag || getFlagCodeFromCircuit(circuit.originalName);
-                  return (
-                    <div key={circuit.name} className="flex items-center gap-3 bg-zinc-900/40 p-3 rounded-lg hover:bg-zinc-900/60 transition-colors">
-                      {flagCode && (
-                        <img 
-                          src={`https://flagcdn.com/w40/${flagCode}.png`} 
-                          className="w-6 h-4 object-cover rounded-sm" 
-                          alt="Flag"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                          }}
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs font-black uppercase text-white truncate">{circuit.name}</div>
-                        <div className="text-[10px] text-zinc-500">{circuit.wins} vittorie</div>
-                      </div>
+          {/* ── 4. FORTRESS MARANELLO ── */}
+          <AccordionSection id="circuits" title="Fortress Maranello" subtitle="Circuiti con più vittorie Ferrari" icon={Landmark} isOpen={openSection==='circuits'} onToggle={()=>toggle('circuits')} accent="gold">
+            <div className="mt-6 space-y-6">
+
+              {/* Circuit chips */}
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                {circuits.map(c => (
+                  <div key={c.name} className="flex items-center gap-2 px-3 py-2 rounded-lg"
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    {c.flag && <img src={`https://flagcdn.com/w40/${c.flag}.png`} className="w-5 h-3.5 object-cover rounded-sm shrink-0" alt={c.name} onError={e => { e.currentTarget.style.display = 'none'; }} />}
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase text-white truncate">{c.name}</p>
+                      <p className="text-[9px] text-zinc-600">{c.wins} vitt.</p>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
 
-              {/* Grafico a barre */}
-              <div className="h-[600px] w-full">
+              {/* Bar chart */}
+              <div className="h-[460px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart 
-                    data={circuits} 
-                    layout="vertical" 
-                    margin={{ left: 20, right: 60, top: 20, bottom: 20 }} 
-                  >
-                    <XAxis 
-                      type="number" 
-                      stroke="#666" 
-                      fontSize={11}
-                      axisLine={false}
-                      tick={{fill: '#ccc', fontWeight: '900'}}
-                      tickFormatter={(value) => `${value} vittorie`}
-                    />
-                    <YAxis 
-                      dataKey="name" 
-                      type="category" 
-                      stroke="#666"
-                      fontSize={11}
-                      width={180}
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: '#fff', fontWeight: '900' }}
-                    />
-                    <Tooltip 
-                      cursor={{ fill: 'rgba(255, 255, 255, 0.12)' }} 
+                  <BarChart data={circuits} layout="vertical" margin={{ left: 8, right: 48, top: 4, bottom: 4 }}>
+                    <XAxis type="number" stroke="rgba(255,255,255,0.08)" tick={{ fill: '#555', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
+                    <YAxis dataKey="name" type="category" width={148} stroke="rgba(255,255,255,0.08)" tick={{ fill: '#ccc', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
+                    <Tooltip
+                      cursor={{ fill: 'rgba(255,255,255,0.02)' }}
                       content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const circuit = payload[0].payload;
-                          const circuitName = circuit.originalName || circuit.name;
-                          const flagCode = circuit.flag || getFlagCodeFromCircuit(circuitName);
-                          const barColor = getCountryColor(circuitName);
-                          const countryName = circuit.countryName || getCountryNameFromFlagCode(flagCode);
-                          
-                          return (
-                            <div className="bg-gray-100 border border-gray-300 p-4 rounded-lg shadow-2xl min-w-[220px]">
-                              <div className="flex items-center gap-3 mb-3">
-                                {flagCode && (
-                                  <img 
-                                    src={`https://flagcdn.com/w80/${flagCode}.png`} 
-                                    className="w-8 h-5 object-cover rounded-sm" 
-                                    alt="Flag"
-                                  />
-                                )}
-                                <div>
-                                  <p className="text-lg font-black text-black italic">{countryName}</p>
-                                  <p className="text-xs text-gray-600">{circuitName}</p>
-                                </div>
-                              </div>
-                              <div className="flex justify-between items-end border-t border-gray-300 pt-3">
-                                <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest">Vittorie</span>
-                                <span className="text-2xl font-black italic" style={{ color: barColor }}>{circuit.wins}</span>
-                              </div>
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    
-                    <Bar dataKey="wins" radius={[0, 10, 10, 0]} barSize={25}>
-                      {circuits.map((entry, index) => {
-                        const circuitName = entry.originalName || entry.name;
-                        const barColor = getCountryColor(circuitName);
+                        if (!active || !payload?.length) return null;
+                        const c = payload[0].payload;
                         return (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={barColor} 
-                            style={{ filter: `drop-shadow(0 0 8px ${barColor}44)` }} 
+                          <DarkTooltip
+                            active={active}
+                            payload={[{ value: c.wins, name: 'vittorie', color: c.color }]}
+                            accentColor={c.color}
+                            extra={
+                              <div className="flex items-center gap-2 mb-1">
+                                {c.flag && <img src={`https://flagcdn.com/w40/${c.flag}.png`} className="w-5 h-3.5 object-cover rounded-sm" alt={c.name} />}
+                                <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">{c.name}</span>
+                              </div>
+                            }
                           />
                         );
-                      })}
+                      }}
+                    />
+                    <Bar dataKey="wins" radius={[0, 8, 8, 0]} barSize={20}>
+                      {circuits.map((c, i) => (
+                        <Cell key={i} fill={c.color} style={{ filter: `drop-shadow(0 0 5px ${c.color}44)` }} />
+                      ))}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
           </AccordionSection>
-        </div>
+
+        </motion.div>
+
+        <p className="text-center text-zinc-800 text-[11px] mt-8 tracking-wider">
+          Scuderia Ferrari F1 · 1950–{new Date().getFullYear()} · Dati aggiornati
+        </p>
       </main>
+
       <Footer />
-    </div>
-  );
-}
-
-// --- HELPER COMPONENT: ACCORDION SECTION ---
-function AccordionSection({ id, title, subtitle, icon: Icon, children, isOpen, onToggle, color }) {
-  const iconColor = color === 'yellow' ? 'bg-yellow-500 text-black' : 'bg-red-600 text-white';
-  const borderColor = isOpen ? 'border-red-600/50 shadow-[0_0_40px_rgba(220,0,0,0.1)]' : 'border-white/5';
-
-  return (
-    <div className={`transition-all duration-700 border ${borderColor} rounded-[32px] overflow-hidden bg-zinc-900/30 backdrop-blur-xl shadow-2xl`}>
-      <button 
-        onClick={onToggle}
-        className={`w-full flex items-center justify-between p-6 md:p-8 text-left transition-all duration-500 ${isOpen ? 'bg-white/5' : 'hover:bg-white/5'}`}
-        aria-expanded={isOpen}
-        aria-controls={`section-${id}`}
-      >
-        <div className="flex items-center gap-6">
-          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform duration-500 ${isOpen ? 'scale-110' : ''} ${iconColor}`}>
-            <Icon className="w-7 h-7" />
-          </div>
-          <div>
-            <h3 className="text-2xl font-black uppercase italic leading-none mb-1 tracking-tight">{title}</h3>
-            <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">{subtitle}</p>
-          </div>
-        </div>
-        <div className={`transition-transform duration-500 ${isOpen ? 'rotate-180' : 'rotate-0'}`}>
-          <ChevronDown className={`w-6 h-6 ${isOpen ? 'text-red-500' : 'text-zinc-700'}`} />
-        </div>
-      </button>
-
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.6, ease: [0.04, 0.62, 0.23, 0.98] }}
-            id={`section-${id}`}
-          >
-            <div className="p-4 md:p-10 border-t border-white/5 bg-black/20">
-              {children}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
