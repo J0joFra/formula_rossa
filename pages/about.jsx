@@ -507,7 +507,7 @@ export default function AboutPage({ heroImages = [] }) {
                       ].map(s => (
                         <div key={s.lbl} className="bg-red-900/20 border border-red-900/30 rounded-xl px-3 py-2 text-center">
                           <div className="text-lg font-black text-red-400 leading-none">{s.val}</div>
-                          <div className="text-[9px] text-zinc-600 uppercase tracking-wider mt-0.5">{s.lbl}</div>
+                          <div className="text-[9px] text-white-600 uppercase tracking-wider mt-0.5">{s.lbl}</div>
                         </div>
                       ))}
                     </div>
