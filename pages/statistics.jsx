@@ -18,6 +18,47 @@ import Link from 'next/link';
 const RED  = '#DC0000';
 const GOLD = '#EAB308';
 
+const POINTS_PERIODS = [
+  { 
+    name: '1950-1959', 
+    color: '#DC0000', // Rosso Ferrari
+    description: '8-6-4-3-2 · solo miglior risultato',
+    start: 1950, 
+    end: 1959,
+    icon: '🏁'
+  },
+  { 
+    name: '1960-1990', 
+    color: '#EAB308', // Oro
+    description: '9-6-4-3-2-1 · dal 1976 entrambi i piloti',
+    start: 1960, 
+    end: 1990,
+    icon: '⭐'
+  },
+  { 
+    name: '1991-2009', 
+    color: '#3B82F6', // Blu
+    description: '10-6-4-3-2-1 · tutti i risultati',
+    start: 1991, 
+    end: 2009,
+    icon: '🏆'
+  },
+  { 
+    name: '2010-oggi', 
+    color: '#22C55E', // Verde
+    description: '25-18-15-12-10-8-6-4-2-1 · sprint + giro veloce',
+    start: 2010, 
+    end: new Date().getFullYear(),
+    icon: '⚡'
+  }
+];
+
+// Funzione per determinare il periodo in base all'anno
+const getPeriodColor = (year) => {
+  const period = POINTS_PERIODS.find(p => year >= p.start && year <= p.end);
+  return period ? period.color : RED;
+};
+
 const MEDAL = [
   { color: RED,      label: '1ST' },
   { color: '#EBEBEB', label: '2ND' },
@@ -725,35 +766,133 @@ export default function StatisticsPage() {
             </div>
           </AccordionSection>
 
-          {/* ── 2. PERFORMANCE TIMELINE (ORA A BARRE) ── */}
+          {/* ── 2. PERFORMANCE TIMELINE ── */}
           <AccordionSection id="timeline" title="Performance Timeline" subtitle="Evoluzione punti costruttori annuali" icon={Activity} isOpen={openSection==='timeline'} onToggle={()=>toggle('timeline')} accent="red">
-            <div className="h-[420px] w-full mt-6">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={history} margin={{ top: 10, right: 12, left: -10, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={RED} stopOpacity={0.9} />
-                      <stop offset="100%" stopColor={RED} stopOpacity={0.4} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-                  <XAxis dataKey="year" stroke="rgba(255,255,255,0.08)" tick={{ fill: '#555', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} tickMargin={12} />
-                  <YAxis stroke="rgba(255,255,255,0.08)" tick={{ fill: '#555', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
-                  <Tooltip
-                    content={({ active, payload, label }) => (
-                      <DarkTooltip active={active} payload={payload} label={label} accentColor={RED} />
-                    )}
-                  />
-                  <Bar 
-                    dataKey="points" 
-                    name="Punti" 
-                    fill="url(#barGradient)"
-                    radius={[4, 4, 0, 0]}
-                    barSize={24}
-                    animationDuration={800}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="mt-6">
+              
+              {/* LEGENDA DEI PERIODI */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+                {POINTS_PERIODS.map((period) => (
+                  <div 
+                    key={period.name}
+                    className="flex items-start gap-2 p-3 rounded-lg"
+                    style={{ 
+                      background: `${period.color}10`, 
+                      border: `1px solid ${period.color}30`,
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <span className="text-lg" style={{ color: period.color }}>{period.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-black uppercase" style={{ color: period.color }}>
+                          {period.name}
+                        </span>
+                      </div>
+                      <p className="text-[9px] text-white-500 font-mono mt-1 leading-tight">
+                        {period.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* GRAFICO A BARRE CON COLORI PER PERIODO */}
+              <div className="h-[380px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={history} margin={{ top: 10, right: 12, left: -10, bottom: 0 }}>
+                    <defs>
+                      {/* Gradienti per ogni periodo - opzionali ma belli */}
+                      {POINTS_PERIODS.map((period) => (
+                        <linearGradient key={period.name} id={`gradient-${period.name}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={period.color} stopOpacity={0.9} />
+                          <stop offset="100%" stopColor={period.color} stopOpacity={0.4} />
+                        </linearGradient>
+                      ))}
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                    <XAxis 
+                      dataKey="year" 
+                      stroke="rgba(255,255,255,0.08)" 
+                      tick={{ fill: '#555', fontSize: 11, fontWeight: 900 }} 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tickMargin={12}
+                    />
+                    <YAxis 
+                      stroke="rgba(255,255,255,0.08)" 
+                      tick={{ fill: '#555', fontSize: 11, fontWeight: 900 }} 
+                      axisLine={false} 
+                      tickLine={false} 
+                    />
+                    <Tooltip
+                      content={({ active, payload, label }) => {
+                        if (!active || !payload?.length) return null;
+                        const data = payload[0].payload;
+                        const year = data.year;
+                        const period = POINTS_PERIODS.find(p => year >= p.start && year <= p.end);
+                        
+                        return (
+                          <DarkTooltip 
+                            active={active} 
+                            payload={payload} 
+                            label={label} 
+                            accentColor={period?.color || RED}
+                            extra={
+                              <div className="flex flex-col gap-1 mt-1 pt-1 border-t border-white/10">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] font-black" style={{ color: period?.color || RED }}>
+                                    {period?.name || 'Anni'}
+                                  </span>
+                                  <span className="text-[8px] text-white-400 font-mono">
+                                    {period?.description || ''}
+                                  </span>
+                                </div>
+                                <p className="text-[10px] text-white-500">
+                                  {data.points} punti totali
+                                </p>
+                              </div>
+                            }
+                          />
+                        );
+                      }}
+                    />
+                    <Bar 
+                      dataKey="points" 
+                      name="Punti" 
+                      radius={[4, 4, 0, 0]}
+                      barSize={24}
+                      animationDuration={800}
+                    >
+                      {history.map((entry, index) => {
+                        const period = POINTS_PERIODS.find(p => entry.year >= p.start && entry.year <= p.end);
+                        return (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={`url(#gradient-${period?.name || '2010-oggi'})`}
+                            style={{ 
+                              filter: `drop-shadow(0 0 4px ${period?.color || RED}40)`,
+                              transition: 'filter 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.filter = `drop-shadow(0 0 8px ${period?.color || RED})`;
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.filter = `drop-shadow(0 0 4px ${period?.color || RED}40)`;
+                            }}
+                          />
+                        );
+                      })}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Nota esplicativa sul sistema di punteggio */}
+              <p className="text-[9px] text-white-600 text-center mt-4 italic border-t border-white/[0.04] pt-3">
+                ⚡ I punti riflettono i diversi sistemi di punteggio: 1950-59 (8 pt vittoria), 1960-90 (9 pt), 
+                1991-2009 (10 pt), 2010-oggi (25 pt + sprint)
+              </p>
             </div>
           </AccordionSection>
 
