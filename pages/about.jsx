@@ -311,7 +311,7 @@ export default function AboutPage({ heroImages = [] }) {
                       <img 
                         src={realImages[3].urls.regular} 
                         alt={realImages[3].alt_description ?? 'Ferrari F1 Detail'} 
-                        className="w-full h-full object-cover transition-transform duration-1000 hover:scale-110" 
+                        className="w-[200px] h-[300px] object-cover transition-transform duration-1000 hover:scale-110" 
                       />
                     )}
                     {/* Overlay sottile per profondità */}
