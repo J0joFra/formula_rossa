@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  AreaChart, Area, CartesianGrid, PieChart, Pie, Cell
+  PieChart, Pie, Cell
 } from 'recharts';
 import {
   Trophy, Activity, ChevronLeft, ChevronDown,
@@ -255,7 +255,7 @@ function TrophySVG({ size = 16, color = GOLD, opacity = 1 }) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   WINNER ROW
+   WINNER ROW (senza anni attivi)
 ───────────────────────────────────────────────────────────────────────────── */
 function WinnerRow({ driver, index, max }) {
   const pct    = max > 0 ? (driver.count / max) * 100 : 0;
@@ -302,16 +302,13 @@ function WinnerRow({ driver, index, max }) {
         </div>
       </div>
 
-      {/* Name + trophies + bar */}
+      {/* Name + trophies + bar - RIMOSSA LA SEZIONE ANNI ATTIVI */}
       <div className="flex-1 min-w-0">
-        {/* Name + year range */}
+        {/* Solo nome, senza anni attivi */}
         <div className="flex items-baseline gap-2 mb-2 flex-wrap">
           <span className="text-sm font-black uppercase tracking-tight truncate transition-colors group-hover:text-red-400"
             style={{ color: isTop3 ? accent : 'white' }}>
             {driver.name}
-          </span>
-          <span className="text-[10px] font-mono text-white-700 shrink-0">
-            {Math.min(...driver.yearsArray)}–{Math.max(...driver.yearsArray)}
           </span>
         </div>
 
@@ -382,21 +379,6 @@ function WinnerRow({ driver, index, max }) {
             className="h-full rounded-full"
             style={{ background: `linear-gradient(to right, ${accent}, ${accent}60)` }}
           />
-        </div>
-
-        {/* Year pills — desktop only, max 10 */}
-        <div className="hidden lg:flex flex-wrap gap-1 mt-1.5">
-          {driver.yearsArray.slice(0, 10).map((y) => (
-            <span key={y} className="text-[9px] px-1.5 py-0.5 rounded font-black"
-              style={{ background: isTop3 ? accent + '15' : 'rgba(255,255,255,0.04)', color: isTop3 ? accent : 'rgba(255,255,255,0.25)' }}>
-              {y}
-            </span>
-          ))}
-          {driver.yearsArray.length > 10 && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded font-black text-white-800">
-              +{driver.yearsArray.length - 10}
-            </span>
-          )}
         </div>
       </div>
 
@@ -484,7 +466,15 @@ export default function StatisticsPage() {
           const cId   = rd.grandPrixId || 'Unknown';
           const cName = rd.circuitName || cId;
           const flag  = getFlagCode(cName);
-          if (!acc[cId]) acc[cId] = { name: getCountryName(flag) || cId.replace(/-/g,' ').toUpperCase(), originalName: cName, wins: 0, flag, color: getCountryColor(cName) };
+          // Assicuriamoci che il flag esista in countryConfig
+          const validFlag = flag && Object.values(countryConfig).some(v => v.code === flag) ? flag : '';
+          if (!acc[cId]) acc[cId] = { 
+            name: getCountryName(flag) || cId.replace(/-/g,' ').toUpperCase(), 
+            originalName: cName, 
+            wins: 0, 
+            flag: validFlag, 
+            color: getCountryColor(cName) 
+          };
           acc[cId].wins++;
           return acc;
         }, {});
@@ -586,12 +576,11 @@ export default function StatisticsPage() {
 
           {/* ── 1. WINNERS CIRCLE ── */}
           <AccordionSection id="winners" title="Winners Circle" subtitle="Classifica vittorie per pilota" icon={Trophy} isOpen={openSection==='winners'} onToggle={()=>toggle('winners')} accent="gold">
-            {/* Table header */}
+            {/* Table header - RIMOSSA LA COLONNA "Anni attivi" */}
             <div className="flex items-center gap-4 md:gap-5 px-1 pt-4 pb-2">
               <div className="w-9 shrink-0" />
               <div className="w-10 md:w-12 shrink-0" />
               <div className="flex-1 text-[10px] font-black uppercase tracking-widest text-white-700">Pilota</div>
-              <div className="hidden lg:block flex-1 text-[10px] font-black uppercase tracking-widest text-white-700 text-center">Anni attivi</div>
               <div className="w-14 text-[10px] font-black uppercase tracking-widest text-white-700 text-right shrink-0">Totale</div>
             </div>
             <div>
@@ -601,15 +590,15 @@ export default function StatisticsPage() {
             </div>
           </AccordionSection>
 
-          {/* ── 2. PERFORMANCE TIMELINE ── */}
+          {/* ── 2. PERFORMANCE TIMELINE (ORA A BARRE) ── */}
           <AccordionSection id="timeline" title="Performance Timeline" subtitle="Evoluzione punti costruttori annuali" icon={Activity} isOpen={openSection==='timeline'} onToggle={()=>toggle('timeline')} accent="red">
             <div className="h-[420px] w-full mt-6">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={history} margin={{ top: 10, right: 12, left: -10, bottom: 0 }}>
+                <BarChart data={history} margin={{ top: 10, right: 12, left: -10, bottom: 0 }}>
                   <defs>
-                    <linearGradient id="ferGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor={RED} stopOpacity={0.3} />
-                      <stop offset="95%" stopColor={RED} stopOpacity={0}   />
+                    <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={RED} stopOpacity={0.9} />
+                      <stop offset="100%" stopColor={RED} stopOpacity={0.4} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
@@ -620,8 +609,15 @@ export default function StatisticsPage() {
                       <DarkTooltip active={active} payload={payload} label={label} accentColor={RED} />
                     )}
                   />
-                  <Area type="monotone" dataKey="points" name="Punti" stroke={RED} strokeWidth={2.5} fillOpacity={1} fill="url(#ferGrad)" dot={false} activeDot={{ r: 5, fill: RED, stroke: '#000', strokeWidth: 2 }} />
-                </AreaChart>
+                  <Bar 
+                    dataKey="points" 
+                    name="Punti" 
+                    fill="url(#barGradient)"
+                    radius={[4, 4, 0, 0]}
+                    barSize={24}
+                    animationDuration={800}
+                  />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </AccordionSection>
@@ -703,12 +699,22 @@ export default function StatisticsPage() {
           <AccordionSection id="circuits" title="Fortress Maranello" subtitle="Circuiti con più vittorie Ferrari" icon={Landmark} isOpen={openSection==='circuits'} onToggle={()=>toggle('circuits')} accent="gold">
             <div className="mt-6 space-y-6">
 
-              {/* Circuit chips */}
+              {/* Circuit chips - con bandiere visibili */}
               <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                 {circuits.map(c => (
                   <div key={c.name} className="flex items-center gap-2 px-3 py-2 rounded-lg"
                     style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    {c.flag && <img src={`https://flagcdn.com/w40/${c.flag}.png`} className="w-5 h-3.5 object-cover rounded-sm shrink-0" alt={c.name} onError={e => { e.currentTarget.style.display = 'none'; }} />}
+                    {c.flag && (
+                      <img 
+                        src={`https://flagcdn.com/w40/${c.flag}.png`} 
+                        className="w-5 h-3.5 object-cover rounded-sm shrink-0" 
+                        alt={c.name}
+                        onError={(e) => { 
+                          // Se l'immagine non carica, prova con formato alternativo
+                          e.target.src = `https://flagcdn.com/24x18/${c.flag}.png`;
+                        }} 
+                      />
+                    )}
                     <div className="min-w-0">
                       <p className="text-[10px] font-black uppercase text-white truncate">{c.name}</p>
                       <p className="text-[9px] text-white-600">{c.wins} vitt.</p>
@@ -735,7 +741,16 @@ export default function StatisticsPage() {
                             accentColor={c.color}
                             extra={
                               <div className="flex items-center gap-2 mb-1">
-                                {c.flag && <img src={`https://flagcdn.com/w40/${c.flag}.png`} className="w-5 h-3.5 object-cover rounded-sm" alt={c.name} />}
+                                {c.flag && (
+                                  <img 
+                                    src={`https://flagcdn.com/w40/${c.flag}.png`} 
+                                    className="w-5 h-3.5 object-cover rounded-sm" 
+                                    alt={c.name}
+                                    onError={(e) => { 
+                                      e.target.src = `https://flagcdn.com/24x18/${c.flag}.png`;
+                                    }}
+                                  />
+                                )}
                                 <span className="text-[10px] font-black uppercase tracking-wider text-white-400">{c.name}</span>
                               </div>
                             }
