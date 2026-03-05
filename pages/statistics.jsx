@@ -977,7 +977,7 @@ export default function StatisticsPage() {
               <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                 {circuits.map(c => (
                   <div key={c.name} className="flex items-center gap-2 px-3 py-2 rounded-lg"
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.6)' }}>
                     {c.flag && (
                       <img 
                         src={`https://flagcdn.com/w40/${c.flag}.png`} 
@@ -1004,7 +1004,7 @@ export default function StatisticsPage() {
                     <XAxis type="number" stroke="rgba(255,255,255,0.08)" tick={{ fill: '#555', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
                     <YAxis dataKey="name" type="category" width={148} stroke="rgba(255,255,255,0.08)" tick={{ fill: '#ccc', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
                     <Tooltip
-                      cursor={{ fill: 'rgba(255,255,255,0.7)' }}
+                      cursor={{ fill: 'rgba(255,255,255,0.02)' }}
                       content={({ active, payload }) => {
                         if (!active || !payload?.length) return null;
                         const c = payload[0].payload;
