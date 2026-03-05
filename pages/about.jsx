@@ -321,7 +321,7 @@ export default function AboutPage({ heroImages = [] }) {
           {/* ══════════════════════════════════════
               2. IL NOSTRO IMPEGNO — card premium
           ══════════════════════════════════════ */}
-          <section className="py-28 px-4 relative overflow-hidden" aria-label="Il nostro impegno">
+          <section className="py-16 px-4 relative overflow-hidden" aria-label="Il nostro impegno">
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-600/40 to-transparent" />
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-32 bg-gradient-to-b from-red-600/50 to-transparent" />
 
@@ -527,7 +527,7 @@ export default function AboutPage({ heroImages = [] }) {
           {/* ══════════════════════════════════════
               4. FEATURES
           ══════════════════════════════════════ */}
-          <section className="py-28 px-4 relative overflow-hidden" aria-label="Funzionalità">
+          <section className="py-16 px-4 relative overflow-hidden" aria-label="Funzionalità">
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
             {/* Glow background destro */}
             <div className="absolute -right-32 top-1/2 -translate-y-1/2 w-96 h-96 bg-red-600/5 rounded-full blur-[120px] pointer-events-none" />
@@ -591,7 +591,7 @@ export default function AboutPage({ heroImages = [] }) {
           {/* ══════════════════════════════════════
               5. TIMELINE
           ══════════════════════════════════════ */}
-          <section className="py-28 px-4 relative overflow-hidden" aria-label="Storia del progetto">
+          <section className="py-16 px-4 relative overflow-hidden" aria-label="Storia del progetto">
             {/* Sfondo uniforme come le altre sezioni - rimosso bg-[#060606] per mantenere consistenza */}
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
@@ -647,12 +647,7 @@ export default function AboutPage({ heroImages = [] }) {
                             `}>
                               {/* Header colorato come nelle features */}
                               <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${i % 2 === 0 ? 'from-red-600 to-red-800' : 'from-yellow-500 to-amber-600'}`} />
-                              
-                              {/* Icona decorativa in alto a destra */}
-                              <div className="absolute top-3 right-3 text-2xl opacity-20 select-none">
-                                {item.icon}
-                              </div>
-                              
+                                                            
                               <div className="relative">
                                 <div className="text-[10px] font-black uppercase tracking-widest text-red-500/70 font-mono mb-2">
                                   {item.year}
@@ -743,7 +738,7 @@ export default function AboutPage({ heroImages = [] }) {
           {/* ══════════════════════════════════════
               6. FOUNDER
           ══════════════════════════════════════ */}
-          <section className="py-28 px-4 relative overflow-hidden" aria-label="Il fondatore">
+          <section className="py-16 px-4 relative overflow-hidden" aria-label="Il fondatore">
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
             {/* Glow sinistra */}
             <div className="absolute -left-32 top-1/2 -translate-y-1/2 w-96 h-96 bg-red-600/[0.06] rounded-full blur-[120px] pointer-events-none" />
@@ -861,7 +856,7 @@ export default function AboutPage({ heroImages = [] }) {
           {/* ══════════════════════════════════════
               7. YOUTUBE
           ══════════════════════════════════════ */}
-          <section className="py-28 px-4 relative overflow-hidden" aria-label="Video YouTube">
+          <section className="py-16 px-4 relative overflow-hidden" aria-label="Video YouTube">
             <div className="absolute inset-0 bg-[#060606]" />
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-600/40 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
