@@ -212,7 +212,7 @@ function FanZoneCard() {
 /* ─────────────────────────────────────────────────────────────────────────────
    CARD 3 – DEEP ANALYTICS ARCHIVE
 ───────────────────────────────────────────────────────────────────────────── */
-function ArchiveCard() {
+function StatsSection() {
   const stats = [
     { label: 'Stagioni', value: '74+' },
     { label: 'GP Analizzati', value: '1.1K+' },
@@ -392,7 +392,6 @@ export default function Home() {
 
         <main>
           <div ref={homeRef}><HeroSection /></div>
-          <div ref={statsRef}><StatsSection /></div>
 
           {/* ── SEZIONE ESPERIENZE INTERATTIVE ── */}
           <div ref={predictorRef} className="py-16 md:py-24 px-4">
@@ -415,7 +414,7 @@ export default function Home() {
               <div className="flex flex-col md:flex-row gap-4 md:gap-5 items-stretch">
                 <OracleCard />
                 <FanZoneCard />
-                <ArchiveCard />
+                <StatsSection />
               </div>
 
             </div>
