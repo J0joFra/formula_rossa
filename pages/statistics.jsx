@@ -327,7 +327,7 @@ function AccordionSection({ id, title, subtitle, icon: Icon, children, isOpen, o
       }`}
       style={{
         background: 'rgba(6,6,6,0.95)',
-        border: `1px solid ${isOpen ? color : 'rgba(255,255,255,0.05)'}`,
+        border: `1px solid ${isOpen ? color : 'rgb(248, 238, 238)'}`, 
         boxShadow: isOpen ? `0 0 60px ${color}08` : 'none',
         transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
       }}
@@ -390,7 +390,7 @@ function TrophySVG({ size = 16, color = GOLD, opacity = 1 }) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   WINNER ROW (senza anni attivi)
+   WINNER ROW
 ───────────────────────────────────────────────────────────────────────────── */
 function WinnerRow({ driver, index, max }) {
   const pct    = max > 0 ? (driver.count / max) * 100 : 0;
@@ -419,13 +419,13 @@ function WinnerRow({ driver, index, max }) {
       <div className="shrink-0 w-9 text-right select-none pt-1">
         {label
           ? <span className="text-[10px] font-black tracking-widest" style={{ color: accent }}>{label}</span>
-          : <span className="text-xl font-black tabular-nums" style={{ color: 'rgba(255,255,255,0.08)' }}>{index + 1}</span>
+          : <span className="text-xl font-black tabular-nums" style={{ color: 'rgba(255,255,255,0.1)' }}>{index + 1}</span>
         }
       </div>
 
       {/* Photo */}
       <div className="relative shrink-0 w-11 h-11 md:w-13 md:h-13 rounded-xl overflow-hidden transition-transform duration-300 group-hover:scale-105 mt-0.5"
-        style={{ border: `1.5px solid ${isTop3 ? accent : 'rgba(255,255,255,0.07)'}` }}>
+        style={{ border: `1.5px solid ${isTop3 ? accent : 'rgba(255,255,255,0.1)'}` }}>
         <img
           src={`/data/ferrari-drivers/${normalizeDriverName(driver.name)}.jpg`}
           alt={`Foto di ${driver.name}`}
@@ -437,7 +437,7 @@ function WinnerRow({ driver, index, max }) {
         </div>
       </div>
 
-      {/* Name + trophies + bar - RIMOSSA LA SEZIONE ANNI ATTIVI */}
+      {/* Name + trophies + bar */}
       <div className="flex-1 min-w-0">
         {/* Solo nome, senza anni attivi */}
         <div className="flex items-baseline gap-2 mb-2 flex-wrap">
