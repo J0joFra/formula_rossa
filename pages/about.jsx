@@ -441,7 +441,7 @@ export default function AboutPage({ heroImages = [] }) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.2 }}
-                  className="group relative rounded-2xl overflow-hidden border border-zinc-700/40 hover:border-zinc-500/60 transition-all duration-300 flex flex-col"
+                  className="group relative rounded-2xl overflow-hidden border border-zinc-700/40 hover:border-white-500/60 transition-all duration-300 flex flex-col"
                   style={{ background: 'linear-gradient(160deg, #111114 0%, #0c0c0f 60%, #080808 100%)' }}
                 >
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(161,161,170,0.08)_0%,transparent_60%)]" />
@@ -466,10 +466,10 @@ export default function AboutPage({ heroImages = [] }) {
                     </p>
                     <div className="flex flex-wrap gap-1.5 my-4">
                       {['Design', 'Performance', 'UX'].map(t => (
-                        <span key={t} className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-white-700/50 text-zinc-400/70 bg-zinc-800/30">{t}</span>
+                        <span key={t} className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-zinc-700/50 text-zinc-400/70 bg-zinc-800/30">{t}</span>
                       ))}
                     </div>
-                    <Link href="/statistics" className="mt-auto flex items-center justify-between px-4 py-3 rounded-xl border border-white-700/40 hover:border-zinc-500/60 hover:bg-zinc-700/20 text-zinc-400 hover:text-zinc-200 transition-all duration-200 group/btn">
+                    <Link href="/statistics" className="mt-auto flex items-center justify-between px-4 py-3 rounded-xl border border-zinc-700/40 hover:border-zinc-500/60 hover:bg-zinc-700/20 text-zinc-400 hover:text-zinc-200 transition-all duration-200 group/btn">
                       <span className="text-[10px] font-black uppercase tracking-widest">Scopri la piattaforma</span>
                       <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
                     </Link>
