@@ -156,12 +156,12 @@ function buildDriverStats(results, driverId, circuitId = null) {
            rid.replace(/_/g, '-') === circuitId.replace(/-/g, '-');
   };
 
-  // FILTRO PRINCIPALE
+  // FILTRO PRINCIPALE: solo RACE
   const filtered = results.filter(r =>
     r.driverId === driverId &&
     r.year >= MIN_YEAR &&
     r.positionNumber != null &&
-    r._circuitType === 'RACE' &&  
+    (r._entryType === 'RACE' || !r._entryType) && 
     matchCircuit(r)
   );
 
@@ -185,14 +185,15 @@ function buildDriverStats(results, driverId, circuitId = null) {
   const n      = filtered.length;
   const variance = filtered.reduce((s, r) => s + Math.pow(r.positionNumber - avgPos, 2), 0) / n;
 
+  // ULTIMI 5 RISULTATI: solo RACE
   const allRecent = results
     .filter(r => 
       r.driverId === driverId && 
       r.positionNumber != null &&
-      r._circuitType === 'RACE' 
+      (r._entryType === 'RACE' || !r._entryType)  
     )
     .sort((a, b) => b.year - a.year || b.round - a.round)
-    .slice(0, 5);
+    .slice(0, 7);
 
   const recentAvgPos = allRecent.length
     ? allRecent.reduce((s, r) => s + r.positionNumber, 0) / allRecent.length
