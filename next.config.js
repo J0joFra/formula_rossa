@@ -10,25 +10,24 @@ const nextConfig = {
 
   /* ── Ottimizzazione immagini ── */
   images: {
-    domains: [
-      'images.unsplash.com',
-      'flagcdn.com',              // bandiere circuiti in PredictorSection
-      'it.motorsport.com',        // thumbnail RSS news
-      'cdn.motorsport.com',       // CDN alternativo motorsport
-      'api.rss2json.com',         // eventuali immagini via proxy RSS
+    remotePatterns: [
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'flagcdn.com' },
+      { protocol: 'https', hostname: 'it.motorsport.com' },
+      { protocol: 'https', hostname: 'cdn.motorsport.com' },
+      { protocol: 'https', hostname: 'api.rss2json.com' },
     ],
     formats: ['image/avif', 'image/webp'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920], 
-    imageSizes: [16, 32, 48, 64, 96, 128, 256],      
-    minimumCacheTTL: 86400,                           
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    minimumCacheTTL: 86400,
   },
 
   /* ── Compressione ── */
   compress: true,
 
   /* ── Ottimizzazione bundle ── */
-  swcMinify: true,        
-  poweredByHeader: false,  
+  poweredByHeader: false,
 
   /* ── HTTP Headers ── */
   async headers() {
@@ -37,11 +36,12 @@ const nextConfig = {
         source: '/(.*)',
         headers: [
           // Sicurezza base
-          { key: 'X-Content-Type-Options',    value: 'nosniff' },
-          { key: 'X-Frame-Options',            value: 'DENY' },
-          { key: 'X-XSS-Protection',           value: '1; mode=block' },
-          { key: 'Referrer-Policy',            value: 'strict-origin-when-cross-origin' },
-          { key: 'Permissions-Policy',         value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'X-Content-Type-Options',  value: 'nosniff' },
+          { key: 'X-Frame-Options',          value: 'DENY' },
+          { key: 'X-XSS-Protection',         value: '1; mode=block' },
+          { key: 'Referrer-Policy',          value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy',       value: 'camera=(), microphone=(), geolocation=()' },
+          // HTTP/2 Server Push — preload risorse critiche
           {
             key: 'Link',
             value: [
@@ -60,7 +60,6 @@ const nextConfig = {
       {
         source: '/data/:path*.json',
         headers: [
-          // JSON dati F1: cache 1h
           { key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=86400' },
         ],
       },
@@ -68,6 +67,13 @@ const nextConfig = {
         source: '/_next/static/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/_next/image(.*)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },
+          { key: 'Vary',          value: 'Accept' },
         ],
       },
     ];
