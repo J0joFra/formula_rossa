@@ -17,6 +17,7 @@ import Link from 'next/link';
 ───────────────────────────────────────────────────────────────────────────── */
 const RED  = '#DC0000';
 const GOLD = '#EAB308';
+const COVID_ORANGE = '#F97316'
 
 const POINTS_PERIODS = [
   { 
@@ -900,24 +901,24 @@ export default function StatisticsPage() {
                         const year = data.year;
                         const period = POINTS_PERIODS.find(p => year >= p.start && year <= p.end);
                         
-                        // LOGICA AGGIUNTA PER IL 2020
                         const isCovidYear = year === 2020;
-
+                  
                         return (
                           <DarkTooltip 
                             active={active} 
                             payload={payload} 
                             label={label} 
-                            accentColor={isCovidYear ? GOLD : (period?.color || RED)}
+                            // Se è il 2020 usa l'arancione, altrimenti il colore del periodo
+                            accentColor={isCovidYear ? '#F97316' : (period?.color || RED)}
                             extra={
                               <div className="flex flex-col gap-1 mt-1 pt-1 border-t border-white/10">
                                 {isCovidYear && (
-                                  <div className="mb-2 px-2 py-1.5 rounded bg-yellow-500/10 border border-yellow-500/30">
-                                    <p className="text-[10px] font-black text-yellow-500 uppercase leading-tight mb-0.5">
-                                      ⚠️ Stagione anomala
+                                  <div className="mb-2 px-2 py-1.5 rounded bg-orange-500/10 border border-orange-500/30">
+                                    <p className="text-[9px] font-black text-orange-500 uppercase leading-tight mb-0.5">
+                                      ⚠️ Emergenza Sanitaria
                                     </p>
                                     <p className="text-[8px] text-white-400 leading-tight">
-                                      Campionato ridotto per emergenza COVID-19.
+                                      Campionato interrotto e ridotto per la pandemia di COVID-19.
                                     </p>
                                   </div>
                                 )}
@@ -947,16 +948,17 @@ export default function StatisticsPage() {
                     >
                       {history.map((entry, index) => {
                         const period = POINTS_PERIODS.find(p => entry.year >= p.start && entry.year <= p.end);
-                        // Coloriamo la barra 2020 in modo leggermente diverso se vogliamo evidenziarla visivamente
                         const is2020 = entry.year === 2020;
                         
                         return (
                           <Cell 
                             key={`cell-${index}`} 
-                            fill={is2020 ? GOLD : `url(#gradient-${period?.name || '2010-oggi'})`}
+                            // Applica l'arancione se l'anno è il 2020
+                            fill={is2020 ? '#F97316' : `url(#gradient-${period?.name || '2010-oggi'})`}
                             style={{ 
-                              filter: `drop-shadow(0 0 ${is2020 ? '8px' : '4px'} ${is2020 ? GOLD : (period?.color || RED)}40)`,
-                              transition: 'all 0.2s ease'
+                              filter: `drop-shadow(0 0 ${is2020 ? '10px' : '4px'} ${is2020 ? '#F97316' : (period?.color || RED)}40)`,
+                              transition: 'all 0.3s ease',
+                              cursor: 'pointer'
                             }}
                           />
                         );
