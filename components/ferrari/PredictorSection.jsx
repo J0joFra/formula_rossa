@@ -756,28 +756,39 @@ export default function PredictorSection() {
                         </p>
                       </div>
                       <div className="space-y-1.5">
-                        {data.global?.recent?.map((r, i) => (
-                          <div key={i} className="flex items-center gap-2.5 py-1.5 border-b border-white/5 last:border-0">
-                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
-                              r.positionNumber === 1 ? 'bg-yellow-500/20 text-yellow-400' :
-                              r.positionNumber <= 3  ? 'bg-orange-500/20 text-orange-400' :
-                              r.positionNumber <= 10 ? 'bg-green-500/10 text-green-500' :
-                              'bg-white-800 text-white-500'
-                            }`}>{r.positionNumber}</div>
-                            {/* Bandierina circuito */}
-                            {CIRCUIT_COUNTRY[r._circuitId] ? (
-                              <div className="w-7 h-5 rounded overflow-hidden shrink-0 border border-white/10">
-                                <img src={`https://flagcdn.com/w40/${CIRCUIT_COUNTRY[r._circuitId]}.png`}
-                                  className="w-full h-full object-cover" alt="" />
-                              </div>
-                            ) : null}
-                            <div className="flex-1 min-w-0">
-                              <p className="font-black text-[11px] truncate">{r._circuitId ?? '—'}</p>
-                              <p className="text-white-700 text-[9px]">{r.year} R{r.round}</p>
-                            </div>
-                            <p className="font-black text-[11px] text-yellow-400 shrink-0">{ptsFor(r.positionNumber)}p</p>
-                          </div>
-                        )) ?? <p className="text-white-700 text-xs">Nessun dato</p>}
+                        {data.global?.recent
+                          ?.filter(r => r._entryType === 'RACE' || !r._entryType)  
+                          ?.map((r, i) => {
+                            const entryType = r._entryType ?? 'RACE';
+                            const badge =
+                              entryType === 'QUALI'        ? { label: 'Q',  cls: 'bg-blue-500/20 text-blue-400'   } :
+                              entryType === 'SPRINT_RACE'  ? { label: 'SR', cls: 'bg-purple-500/20 text-purple-400'} :
+                              entryType === 'SPRINT_QUALI' ? { label: 'SQ', cls: 'bg-indigo-500/20 text-indigo-400'} :
+                                                            { label: 'R',  cls: 'bg-zinc-700/40 text-zinc-400'   };
+                              return (
+                                <div key={i} className="flex items-center gap-2.5 py-1.5 border-b border-white/5 last:border-0">
+                                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
+                                    r.positionNumber === 1 ? 'bg-yellow-500/20 text-yellow-400' :
+                                    r.positionNumber <= 3  ? 'bg-orange-500/20 text-orange-400' :
+                                    r.positionNumber <= 10 ? 'bg-green-500/10 text-green-500' :
+                                    'bg-white-800 text-white-500'
+                                  }`}>{r.positionNumber}</div>
+                                  {/* Bandierina circuito */}
+                                  {CIRCUIT_COUNTRY[r._circuitId] ? (
+                                    <div className="w-7 h-5 rounded overflow-hidden shrink-0 border border-white/10">
+                                      <img src={`https://flagcdn.com/w40/${CIRCUIT_COUNTRY[r._circuitId]}.png`}
+                                        className="w-full h-full object-cover" alt="" />
+                                    </div>
+                                  ) : null}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-black text-[11px] truncate">{r._circuitId ?? '—'}</p>
+                                    <p className="text-white-700 text-[9px]">{r.year} R{r.round}</p>
+                                  </div>
+                                  <p className="font-black text-[11px] text-yellow-400 shrink-0">{ptsFor(r.positionNumber)}p</p>
+                                </div>
+                              );
+                          }
+                        ) ?? <p className="text-white-700 text-xs">Nessun dato</p>}
                       </div>
                     </div>
                   );
@@ -787,9 +798,10 @@ export default function PredictorSection() {
               {/* NOTA */}
               <div className="bg-white-900/20 border border-white/5 rounded-2xl p-4">
                 <p className="text-[9px] text-white-700 leading-relaxed uppercase tracking-wider font-bold">
-                  ⚙️ Media ponderata ultimi 7 anni (anno corrente = 3×, -1 anno = 2×, -2 = 1.5×, oltre = 0.5×).
+                  ⚙️ Media ponderata ultimi 7 anni (anno corrente = 3×, -1 = 2×, -2 = 1.5×, oltre = 0.5×).
+                  Analisi basata ESCLUSIVAMENTE su gare principali (RACE). Sprint e qualifiche escluse.
                   Blend storico circuito (60%) + forma recente ultimi 5 risultati (40%).
-                  Intervallo confidenza ±0.7σ. Si aggiorna automaticamente aggiungendo risultati ai JSON in <code className="text-white-500">public/data/</code>. Dati: F1DB (f1db.com).
+                  Intervallo confidenza ±0.7σ. Dati: F1DB (f1db.com).
                 </p>
               </div>
             </div>
