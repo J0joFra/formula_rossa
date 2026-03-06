@@ -5,6 +5,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
+import Navigation from '../components/ferrari/Navigation';
+import Footer from '../components/ferrari/Footer';
 import {
   TrendingUp, Trophy, Target, Loader2,
   ChevronLeft, ChevronRight, BarChart3,
@@ -352,6 +355,7 @@ export default function PredictorSection() {
 
   return (
     <section className="py-20 px-4 bg-[#080808] text-white">
+      <Navigation activeSection="predictions" />
       <div className="max-w-7xl mx-auto">
 
         {/* HEADER */}
@@ -781,6 +785,7 @@ export default function PredictorSection() {
           </div>
         )}
       </div>
+      <Navigation activeSection="footer" />
     </section>
   );
 }
