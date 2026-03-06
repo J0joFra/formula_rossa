@@ -55,32 +55,36 @@ function posLabel(i) {
 }
 
 // ─── DRIVER ROW (drag & drop) ─────────────────────────────────────────────────
-function DriverRow({ driverId, index, zone }) {
+function DriverRow({ driverId, index }) {
   const d = driverById(driverId);
   const accent = posColor(index);
 
+  // Zone styling basata sulla posizione corrente
+  const isPodium = index < 3;
+  const isTop10  = index >= 3 && index < 10;
+
   return (
     <div
-      className="group flex items-center gap-3 px-3 py-2.5 rounded-2xl border transition-all duration-150 cursor-grab active:cursor-grabbing select-none"
+      className="group flex items-center gap-4 px-4 py-3.5 rounded-2xl border transition-all duration-150 cursor-grab active:cursor-grabbing select-none"
       style={{
-        background: zone === 'podium'
-          ? `linear-gradient(90deg, ${d.color}08 0%, transparent 60%)`
-          : zone === 'top10'
-          ? 'rgba(30,30,36,0.7)'
-          : 'rgba(24,24,28,0.6)',
-        borderColor: zone === 'podium'
-          ? `${accent}30`
-          : zone === 'top10'
-          ? 'rgba(255,255,255,0.06)'
+        background: isPodium
+          ? `linear-gradient(90deg, ${d.color}12 0%, rgba(20,20,24,0.8) 70%)`
+          : isTop10
+          ? 'rgba(28,28,34,0.8)'
+          : 'rgba(20,20,24,0.5)',
+        borderColor: isPodium
+          ? `${accent}35`
+          : isTop10
+          ? 'rgba(255,255,255,0.07)'
           : 'rgba(255,255,255,0.03)',
       }}
     >
       {/* Grip */}
-      <GripVertical className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500 transition-colors shrink-0" />
+      <GripVertical className="w-4 h-4 text-zinc-700 group-hover:text-zinc-500 transition-colors shrink-0" />
 
       {/* Numero posizione */}
       <span
-        className="text-[11px] font-black w-6 text-center shrink-0 tabular-nums"
+        className="text-sm font-black w-7 text-center shrink-0 tabular-nums"
         style={{ color: accent }}
       >
         {posLabel(index)}
@@ -88,20 +92,20 @@ function DriverRow({ driverId, index, zone }) {
 
       {/* Color dot team */}
       <div
-        className="w-2 h-2 rounded-full shrink-0 ring-1 ring-white/10"
+        className="w-3 h-3 rounded-full shrink-0 ring-1 ring-white/10"
         style={{ backgroundColor: d.color }}
       />
 
       {/* Nome */}
-      <span className="font-black text-[13px] flex-1 text-white tracking-tight">{d.name}</span>
+      <span className="font-black text-base flex-1 text-white tracking-tight">{d.name}</span>
 
-      {/* Team */}
+      {/* Team badge */}
       <span
-        className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+        className="text-[11px] font-bold px-2.5 py-1 rounded-xl hidden sm:inline"
         style={{
           color: d.color,
-          background: `${d.color}15`,
-          border: `1px solid ${d.color}25`,
+          background: `${d.color}18`,
+          border: `1px solid ${d.color}30`,
         }}
       >
         {d.team}
@@ -138,7 +142,7 @@ function DriverChip({ driverId, pos, onRemove, small = false }) {
 // ─── SECTION LABEL ────────────────────────────────────────────────────────────
 function SectionLabel({ children, color = 'text-zinc-500' }) {
   return (
-    <p className={`text-[9px] font-black uppercase tracking-[0.15em] mb-2 ${color}`}>
+    <p className={`text-xs font-black uppercase tracking-[0.12em] mb-2 ${color}`}>
       {children}
     </p>
   );
@@ -381,10 +385,10 @@ export default function FantaF1() {
                 { label: 'Giro veloce',           pts: POINTS.fastestLapExact,  color: '#fb923c' },
                 { label: 'Safety car',            pts: POINTS.safetyCarCorrect, color: '#22d3ee' },
               ].map((r, i) => (
-                <div key={i} className="flex justify-between items-center py-2 border-b border-white/[0.04] last:border-0">
-                  <span className="text-[11px] text-zinc-500">{r.label}</span>
+                <div key={i} className="flex justify-between items-center py-2.5 border-b border-white/[0.04] last:border-0">
+                  <span className="text-xs text-zinc-400">{r.label}</span>
                   <span
-                    className="text-[11px] font-black px-2 py-0.5 rounded-lg"
+                    className="text-xs font-black px-2.5 py-0.5 rounded-lg"
                     style={{ color: r.color, background: `${r.color}15` }}
                   >
                     +{r.pts} pt
@@ -428,13 +432,13 @@ export default function FantaF1() {
                             </div>
                           )
                         }
-                        <span className={`flex-1 text-[12px] font-bold truncate ${isMe ? 'text-yellow-400' : 'text-white'}`}>
+                        <span className={`flex-1 text-sm font-bold truncate ${isMe ? 'text-yellow-400' : 'text-white'}`}>
                           {p.name || 'Anonimo'}
                           {isMe && <span className="ml-1.5 text-[9px] text-yellow-600 font-black uppercase">tu</span>}
                         </span>
-                        <span className={`text-[12px] font-black tabular-nums ${isMe ? 'text-yellow-400' : 'text-zinc-300'}`}>
+                        <span className={`text-sm font-black tabular-nums ${isMe ? 'text-yellow-400' : 'text-zinc-300'}`}>
                           {p.totalPoints || 0}
-                          <span className="text-[9px] text-zinc-600 font-bold ml-0.5">pt</span>
+                          <span className="text-[10px] text-zinc-600 font-bold ml-0.5">pt</span>
                         </span>
                       </div>
                     );
@@ -539,10 +543,12 @@ export default function FantaF1() {
                     transition={{ duration: 0.2 }}
                   >
                     <div className="rounded-3xl border border-white/5 bg-zinc-900/20 overflow-hidden">
-                      <div className="px-5 pt-5 pb-3 sticky top-0 z-10 bg-zinc-950/95 backdrop-blur-sm border-b border-white/5">
-                        <SectionLabel>Trascina i piloti · Posizione 1 → 20</SectionLabel>
-                        {/* Zone legend */}
-                        <div className="flex gap-3 mt-2">
+                      {/* Header sticky */}
+                      <div className="px-5 pt-5 pb-4 sticky top-0 z-10 bg-zinc-950/95 backdrop-blur-sm border-b border-white/5">
+                        <p className="text-sm font-black text-white uppercase tracking-wide mb-2">
+                          Trascina i piloti · Posizione 1 → 20
+                        </p>
+                        <div className="flex gap-4">
                           {[
                             { color: '#FFD700', label: 'Podio +10pt' },
                             { color: '#3B82F6', label: 'Top 10 +2pt' },
@@ -550,52 +556,49 @@ export default function FantaF1() {
                           ].map(z => (
                             <div key={z.label} className="flex items-center gap-1.5">
                               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: z.color }} />
-                              <span className="text-[9px] text-zinc-600 font-bold">{z.label}</span>
+                              <span className="text-[10px] text-zinc-500 font-bold">{z.label}</span>
                             </div>
                           ))}
                         </div>
                       </div>
 
-                      <div className="p-3 max-h-[580px] overflow-y-auto">
-                        {/* Zone labels */}
-                        <p className="text-[9px] font-black uppercase tracking-widest text-yellow-600/60 px-2 mb-1.5 mt-1">🏆 Podio</p>
-                        <Reorder.Group axis="y" values={fullGrid} onReorder={setFullGrid} className="space-y-1 mb-3">
-                          {fullGrid.slice(0, 3).map((driverId, i) => (
-                            <Reorder.Item key={driverId} value={driverId}>
-                              <DriverRow driverId={driverId} index={i} zone="podium" />
-                            </Reorder.Item>
-                          ))}
-                        </Reorder.Group>
+                      {/* Unico Reorder.Group — tutti i 20 piloti insieme */}
+                      <div className="p-3 max-h-[620px] overflow-y-auto">
+                        <Reorder.Group axis="y" values={fullGrid} onReorder={setFullGrid} className="space-y-1.5">
+                          {fullGrid.map((driverId, i) => {
+                            // Separatori di zona (non draggabili, solo visivi)
+                            const zoneLabel =
+                              i === 0  ? { text: '🏆 Podio',         color: 'text-yellow-600/70' } :
+                              i === 3  ? { text: '🔵 Top 10',         color: 'text-blue-500/70'   } :
+                              i === 10 ? { text: 'Posizioni 11–20',   color: 'text-zinc-600'       } :
+                              null;
 
-                        <p className="text-[9px] font-black uppercase tracking-widest text-blue-500/60 px-2 mb-1.5">🔵 Top 10</p>
-                        <Reorder.Group axis="y" values={fullGrid} onReorder={setFullGrid} className="space-y-1 mb-3">
-                          {fullGrid.slice(3, 10).map((driverId, i) => (
-                            <Reorder.Item key={driverId} value={driverId}>
-                              <DriverRow driverId={driverId} index={i + 3} zone="top10" />
-                            </Reorder.Item>
-                          ))}
-                        </Reorder.Group>
-
-                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600 px-2 mb-1.5">Posizioni 11–20</p>
-                        <Reorder.Group axis="y" values={fullGrid} onReorder={setFullGrid} className="space-y-1">
-                          {fullGrid.slice(10).map((driverId, i) => (
-                            <Reorder.Item key={driverId} value={driverId}>
-                              <DriverRow driverId={driverId} index={i + 10} zone="tail" />
-                            </Reorder.Item>
-                          ))}
+                            return (
+                              <React.Fragment key={driverId}>
+                                {zoneLabel && (
+                                  <p className={`text-[10px] font-black uppercase tracking-widest px-2 pt-3 pb-1 ${zoneLabel.color}`}>
+                                    {zoneLabel.text}
+                                  </p>
+                                )}
+                                <Reorder.Item value={driverId} className="list-none">
+                                  <DriverRow driverId={driverId} index={i} />
+                                </Reorder.Item>
+                              </React.Fragment>
+                            );
+                          })}
                         </Reorder.Group>
                       </div>
 
                       <div className="px-5 py-4 border-t border-white/5 flex justify-between items-center bg-zinc-950/50">
                         <button
                           onClick={() => setFullGrid(DRIVERS_2026.map(d => d.id))}
-                          className="flex items-center gap-1.5 text-zinc-600 hover:text-white transition-colors text-[10px] font-black uppercase"
+                          className="flex items-center gap-1.5 text-zinc-600 hover:text-white transition-colors text-xs font-black uppercase"
                         >
-                          <RotateCcw className="w-3 h-3" /> Reset
+                          <RotateCcw className="w-3.5 h-3.5" /> Reset
                         </button>
                         <button
                           onClick={() => setStep('lastfive')}
-                          className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition-all shadow-lg shadow-red-600/20 hover:scale-[1.02]"
+                          className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-500 transition-all shadow-lg shadow-red-600/20 hover:scale-[1.02]"
                         >
                           Ultimi 5 →
                         </button>
@@ -616,7 +619,7 @@ export default function FantaF1() {
                     <div className="rounded-3xl border border-purple-500/15 bg-zinc-900/20 overflow-hidden">
                       <div className="px-5 pt-5 pb-4 border-b border-white/5">
                         <SectionLabel color="text-purple-500">Chi finirà in fondo? · Posizioni 16–20</SectionLabel>
-                        <p className="text-[11px] text-zinc-600">
+                        <p className="text-xs text-zinc-500">
                           Indovinare chi si ritira è la vera sfida — e vale punti extra.
                         </p>
                       </div>
@@ -628,15 +631,15 @@ export default function FantaF1() {
                             const d = driverById(driverId);
                             return (
                               <Reorder.Item key={driverId} value={driverId}>
-                                <div className="flex items-center gap-3 px-3 py-2.5 rounded-2xl border border-purple-500/15 bg-purple-500/5 cursor-grab active:cursor-grabbing">
-                                  <GripVertical className="w-3.5 h-3.5 text-zinc-700 shrink-0" />
-                                  <span className="text-[11px] font-black w-6 text-center shrink-0 text-purple-500">{16 + i}°</span>
-                                  <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
-                                  <span className="font-black text-[13px] flex-1">{d.name}</span>
-                                  <span className="text-[10px] font-semibold" style={{ color: `${d.color}99` }}>{d.team}</span>
+                                <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-purple-500/15 bg-purple-500/5 cursor-grab active:cursor-grabbing">
+                                  <GripVertical className="w-4 h-4 text-zinc-700 shrink-0" />
+                                  <span className="text-sm font-black w-7 text-center shrink-0 text-purple-400">{16 + i}°</span>
+                                  <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+                                  <span className="font-black text-base flex-1">{d.name}</span>
+                                  <span className="text-xs font-semibold hidden sm:inline" style={{ color: `${d.color}99` }}>{d.team}</span>
                                   <button
                                     onClick={() => setLastFive(lastFive.filter((_, idx) => idx !== i))}
-                                    className="text-zinc-700 hover:text-red-400 transition-colors text-xs ml-1 leading-none"
+                                    className="text-zinc-700 hover:text-red-400 transition-colors text-sm ml-1 leading-none"
                                   >✕</button>
                                 </div>
                               </Reorder.Item>
@@ -646,21 +649,21 @@ export default function FantaF1() {
 
                         {/* Piloti disponibili */}
                         <div className="rounded-2xl border border-white/5 bg-zinc-950/40 p-3">
-                          <p className="text-[9px] text-zinc-600 uppercase font-black tracking-widest mb-2.5">
+                          <p className="text-[10px] text-zinc-600 uppercase font-black tracking-widest mb-2.5">
                             Clicca per aggiungere · {lastFive.length}/5
                           </p>
-                          <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto">
+                          <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto">
                             {DRIVERS_2026.filter(d => !lastFive.includes(d.id)).map(d => (
                               <button
                                 key={d.id}
                                 onClick={() => { if (lastFive.length < 5) setLastFive(prev => [...prev, d.id]); }}
                                 disabled={lastFive.length >= 5}
-                                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border transition-all text-[10px] font-bold
+                                className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all text-xs font-bold
                                   ${lastFive.length >= 5
                                     ? 'border-white/5 bg-zinc-900/50 text-zinc-700 cursor-not-allowed'
                                     : 'border-white/10 bg-zinc-900 hover:border-purple-500/40 hover:bg-purple-500/5 text-zinc-400 hover:text-white'}`}
                               >
-                                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: d.color }} />
+                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: d.color }} />
                                 {d.name}
                               </button>
                             ))}
@@ -669,13 +672,13 @@ export default function FantaF1() {
                       </div>
 
                       <div className="px-5 py-4 border-t border-white/5 flex justify-between items-center bg-zinc-950/50">
-                        <button onClick={() => setStep('grid')} className="text-zinc-600 hover:text-white transition-colors text-[10px] font-black uppercase">
+                        <button onClick={() => setStep('grid')} className="text-zinc-600 hover:text-white transition-colors text-xs font-black uppercase">
                           ← Griglia
                         </button>
                         <button
                           onClick={() => setStep('bonus')}
                           disabled={lastFive.length !== 5}
-                          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all
+                          className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all
                             ${lastFive.length === 5
                               ? 'bg-red-600 text-white hover:bg-red-500 shadow-lg shadow-red-600/20 hover:scale-[1.02]'
                               : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'}`}
@@ -714,19 +717,19 @@ export default function FantaF1() {
                               +{POINTS.fastestLapExact} pt
                             </span>
                           </div>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-52 overflow-y-auto pr-1">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-52 overflow-y-auto pr-1">
                             {DRIVERS_2026.map(d => (
                               <button
                                 key={d.id}
                                 onClick={() => setFastestLap(d.id)}
-                                className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all text-[10px] font-bold
+                                className={`flex items-center gap-2 p-3 rounded-xl border text-left transition-all text-xs font-bold
                                   ${fastestLap === d.id
                                     ? 'border-orange-500/50 bg-orange-500/10 text-white'
-                                    : 'border-white/5 bg-zinc-900/60 text-zinc-500 hover:border-white/15 hover:text-zinc-300'}`}
+                                    : 'border-white/5 bg-zinc-900/60 text-zinc-400 hover:border-white/15 hover:text-zinc-200'}`}
                               >
-                                <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+                                <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
                                 <span>{d.name}</span>
-                                {fastestLap === d.id && <Zap className="w-2.5 h-2.5 text-orange-400 ml-auto" />}
+                                {fastestLap === d.id && <Zap className="w-3 h-3 text-orange-400 ml-auto" />}
                               </button>
                             ))}
                           </div>
@@ -761,12 +764,12 @@ export default function FantaF1() {
                       </div>
 
                       <div className="px-5 py-4 border-t border-white/5 flex justify-between items-center bg-zinc-950/50">
-                        <button onClick={() => setStep('lastfive')} className="text-zinc-600 hover:text-white transition-colors text-[10px] font-black uppercase">
+                        <button onClick={() => setStep('lastfive')} className="text-zinc-600 hover:text-white transition-colors text-xs font-black uppercase">
                           ← Ultimi 5
                         </button>
                         <button
                           onClick={() => setStep('confirm')}
-                          className="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 transition-all shadow-lg shadow-red-600/20 hover:scale-[1.02]"
+                          className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-500 transition-all shadow-lg shadow-red-600/20 hover:scale-[1.02]"
                         >
                           Conferma →
                         </button>
@@ -920,7 +923,7 @@ export default function FantaF1() {
                       </div>
 
                       <div className="px-5 py-4 border-t border-white/5 bg-zinc-950/50">
-                        <button onClick={() => setStep('bonus')} className="text-zinc-600 hover:text-white transition-colors text-[10px] font-black uppercase">
+                        <button onClick={() => setStep('bonus')} className="text-zinc-600 hover:text-white transition-colors text-xs font-black uppercase">
                           ← Bonus
                         </button>
                       </div>
