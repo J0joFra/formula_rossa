@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
+import FantaF1 from '../components/ferrari/FantaF1';
 import Link from 'next/link';
 import { useSession } from "next-auth/react";
 import { getTokens, initUser, claimDailyBonus, hasDailyClaimed, getLeaderboard } from '../lib/tokens';
@@ -230,7 +231,7 @@ export default function FanZonePage() {
             <GameCard title="F1 Trivia" reward="30" icon={Award} color="from-yellow-500 to-yellow-700" desc="Dimostra di conoscere ogni bullone della storia della Scuderia Ferrari." link="/games/trivia" />
           </div>
         </section>
-
+        <FantaF1 />
         {/* LEADERBOARD */}
         <section className="mb-24">
           <SectionHeader icon={<Trophy className="text-yellow-500 w-7 h-7" />} label="Top Fan" />
