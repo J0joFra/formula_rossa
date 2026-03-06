@@ -184,7 +184,7 @@ function buildDriverStats(results, driverId, circuitId = null) {
   const allRecent = results
     .filter(r => r.driverId === driverId && r.positionNumber != null)
     .sort((a, b) => b.year - a.year || b.round - a.round)
-    .slice(0, 5);
+    .slice(0, 10);
 
   const recentAvgPos = allRecent.length
     ? allRecent.reduce((s, r) => s + r.positionNumber, 0) / allRecent.length
@@ -763,7 +763,7 @@ export default function PredictorSection() {
               <div className="bg-white-900/20 border border-white/5 rounded-2xl p-4">
                 <p className="text-[9px] text-white-700 leading-relaxed uppercase tracking-wider font-bold">
                   ⚙️ Media ponderata ultimi 7 anni (anno corrente = 3×, -1 anno = 2×, -2 = 1.5×, oltre = 0.5×).
-                  Blend storico circuito (60%) + forma recente ultimi 5 risultati (40%).
+                  Blend storico circuito (60%) + forma recente ultimi 10 risultati (40%).
                   Intervallo confidenza ±0.7σ. Si aggiorna automaticamente aggiungendo risultati ai JSON in <code className="text-white-500">public/data/</code>. Dati: F1DB (f1db.com).
                 </p>
               </div>
