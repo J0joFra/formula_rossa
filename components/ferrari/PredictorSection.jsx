@@ -153,13 +153,15 @@ function buildDriverStats(results, driverId, circuitId = null) {
     return rid === canonical ||
            rid === circuitId ||
            rid.replace(/-/g, '_') === circuitId.replace(/-/g, '_') ||
-           rid.replace(/_/g, '-') === circuitId.replace(/_/g, '-');
+           rid.replace(/_/g, '-') === circuitId.replace(/-/g, '-');
   };
 
+  // FILTRO PRINCIPALE
   const filtered = results.filter(r =>
     r.driverId === driverId &&
     r.year >= MIN_YEAR &&
     r.positionNumber != null &&
+    r._circuitType === 'RACE' &&  
     matchCircuit(r)
   );
 
@@ -184,7 +186,11 @@ function buildDriverStats(results, driverId, circuitId = null) {
   const variance = filtered.reduce((s, r) => s + Math.pow(r.positionNumber - avgPos, 2), 0) / n;
 
   const allRecent = results
-    .filter(r => r.driverId === driverId && r.positionNumber != null)
+    .filter(r => 
+      r.driverId === driverId && 
+      r.positionNumber != null &&
+      r._circuitType === 'RACE' 
+    )
     .sort((a, b) => b.year - a.year || b.round - a.round)
     .slice(0, 5);
 
@@ -280,22 +286,30 @@ export default function PredictorSection() {
           _circuitType: circuitsMap[racesMap[r.raceId]?.circuitId]?.type ?? 'RACE',
         }));
 
-        // Tutti i piloti con almeno 20 gare
-        const driverMap = Object.fromEntries(rawDrivers.map(d => [d.id, d]));
-        // Solo piloti che hanno gareggiato nel 2026
-        const drivers2026Ids = [...new Set(results.filter(r => r.year === 2026).map(r => r.driverId))];
-        // Fallback: se non ci sono dati 2026, usa piloti con ≥20 gare totali
+        const drivers2026Ids = [...new Set(
+          results.filter(r => r.year === 2026 && r._circuitType === 'RACE') 
+          .map(r => r.driverId)
+        )];
+
         const driverPool = drivers2026Ids.length > 0
           ? drivers2026Ids
-          : Object.entries(results.reduce((acc, r) => { acc[r.driverId] = (acc[r.driverId] ?? 0) + 1; return acc; }, {}))
-              .filter(([, c]) => c >= 20).map(([id]) => id);
+          : Object.entries(
+              results
+                .filter(r => r._circuitType === 'RACE') 
+                .reduce((acc, r) => { 
+                  acc[r.driverId] = (acc[r.driverId] ?? 0) + 1; 
+                  return acc; 
+                }, {})
+            )
+            .filter(([, c]) => c >= 20)
+            .map(([id]) => id);
         const activeDrivers = driverPool
           .map(id => ({ id, number: driverMap[id]?.permanentNumber ?? null }))
           .sort((a, b) => a.id.localeCompare(b.id));
 
         // Gare 2026 già completate
-        const results2026        = results.filter(r => r.year === 2026);
-        const completedRounds    = new Set(results2026.map(r => r.round));
+        const results2026 = results.filter(r => r.year === 2026 && r._circuitType === 'RACE');  
+        const completedRounds = new Set(results2026.map(r => r.round));
         const nextRace           = CALENDAR_2026.find(r => !completedRounds.has(r.round)) ?? CALENDAR_2026[0];
 
         setTargetRace(nextRace);
