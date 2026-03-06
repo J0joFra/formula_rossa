@@ -139,16 +139,17 @@ function yearWeight(year, currentYear) {
 }
 
 // ─── ENGINE STATISTICO ────────────────────────────────────────────────────────
-// results contiene solo gare principali (RACE). Niente sprint, niente qualifiche.
 function buildDriverStats(results, driverId, circuitId = null) {
   const currentYear = Math.max(...results.map(r => r.year));
   const MIN_YEAR    = currentYear - 7;
 
+  // Risolvi alias: cerca sia l'id diretto che varianti comuni
   const matchCircuit = (r) => {
     if (!circuitId) return true;
     const rid = r._circuitId;
     if (!rid) return false;
     const canonical = CIRCUIT_ALIAS[circuitId] ?? circuitId;
+    // Match esatto, o match con trattini→underscore e viceversa
     return rid === canonical ||
            rid === circuitId ||
            rid.replace(/-/g, '_') === circuitId.replace(/-/g, '_') ||
@@ -169,9 +170,9 @@ function buildDriverStats(results, driverId, circuitId = null) {
 
   filtered.forEach(r => {
     const w = yearWeight(r.year, currentYear);
-    wPosSum += r.positionNumber * w;
-    wSum    += w;
-    wPtsSum += ptsFor(r.positionNumber) * w;
+    wPosSum  += r.positionNumber * w;
+    wSum     += w;
+    wPtsSum  += ptsFor(r.positionNumber) * w;
     if (r.positionNumber === 1) wins++;
     if (r.positionNumber <= 3) podiums++;
     if (r.positionNumber <= 5) top5++;
@@ -182,7 +183,6 @@ function buildDriverStats(results, driverId, circuitId = null) {
   const n      = filtered.length;
   const variance = filtered.reduce((s, r) => s + Math.pow(r.positionNumber - avgPos, 2), 0) / n;
 
-  // Ultimi 5 risultati (solo gare), ordinati per anno/round decrescente
   const allRecent = results
     .filter(r => r.driverId === driverId && r.positionNumber != null)
     .sort((a, b) => b.year - a.year || b.round - a.round)
@@ -274,12 +274,10 @@ export default function PredictorSection() {
         const racesMap    = Object.fromEntries(rawRaces.map(r => [r.id, r]));
         const circuitsMap = Object.fromEntries(rawCircuits.map(c => [c.id, c]));
 
-        // Solo gare principali — sprint race e qualifiche escluse dalla predizione
         const results = rawResults.map(r => ({
           ...r,
           _circuitId:   racesMap[r.raceId]?.circuitId ?? null,
           _circuitType: circuitsMap[racesMap[r.raceId]?.circuitId]?.type ?? 'RACE',
-          _entryType:   'RACE',
         }));
 
         // Tutti i piloti con almeno 20 gare
@@ -357,6 +355,9 @@ export default function PredictorSection() {
           <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
           Home
         </Link>
+
+        {/* HEADER */}
+        
         {loadError && (
           <div className="bg-red-900/20 border border-red-500/30 rounded-3xl p-6 flex gap-4 mb-8">
             <AlertCircle className="w-6 h-6 text-red-400 shrink-0 mt-0.5" />
@@ -725,7 +726,7 @@ export default function PredictorSection() {
                 </div>
               </div>
 
-              {/* ULTIMI 5 RISULTATI (solo gare principali) */}
+              {/* ULTIMI 5 RISULTATI */}
               <div className="grid grid-cols-2 gap-4">
                 {(['primary', 'secondary']).map((key) => {
                   const drv   = key === 'primary' ? primaryDriver : secondaryDriver;
@@ -748,6 +749,7 @@ export default function PredictorSection() {
                               r.positionNumber <= 10 ? 'bg-green-500/10 text-green-500' :
                               'bg-white-800 text-white-500'
                             }`}>{r.positionNumber}</div>
+                            {/* Bandierina circuito */}
                             {CIRCUIT_COUNTRY[r._circuitId] ? (
                               <div className="w-7 h-5 rounded overflow-hidden shrink-0 border border-white/10">
                                 <img src={`https://flagcdn.com/w40/${CIRCUIT_COUNTRY[r._circuitId]}.png`}
@@ -770,10 +772,9 @@ export default function PredictorSection() {
               {/* NOTA */}
               <div className="bg-white-900/20 border border-white/5 rounded-2xl p-4">
                 <p className="text-[9px] text-white-700 leading-relaxed uppercase tracking-wider font-bold">
-                  ⚙️ Media ponderata ultimi 7 anni (anno corrente = 3×, -1 = 2×, -2 = 1.5×, oltre = 0.5×).
-                  Solo gare principali — sprint race e qualifiche escluse.
+                  ⚙️ Media ponderata ultimi 7 anni (anno corrente = 3×, -1 anno = 2×, -2 = 1.5×, oltre = 0.5×).
                   Blend storico circuito (60%) + forma recente ultimi 5 risultati (40%).
-                  Intervallo confidenza ±0.7σ. Dati: F1DB (f1db.com).
+                  Intervallo confidenza ±0.7σ. Si aggiorna automaticamente aggiungendo risultati ai JSON in <code className="text-white-500">public/data/</code>. Dati: F1DB (f1db.com).
                 </p>
               </div>
             </div>
