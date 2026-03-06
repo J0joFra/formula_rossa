@@ -93,7 +93,7 @@ const CIRCUIT_COUNTRY = {
 
 // ─── CALENDARIO 2026 ──────────────────────────────────────────────────────────
 const CALENDAR_2026 = [
-  { round: 1,  circuitId: 'albert-park',      name: 'Australian GP',      date: '2026-03-15' },
+  { round: 1,  circuitId: 'albert-park',      name: 'Australian GP',      date: '2026-03-06' },
   { round: 2,  circuitId: 'shanghai',          name: 'Chinese GP',         date: '2026-03-22' },
   { round: 3,  circuitId: 'suzuka',            name: 'Japanese GP',        date: '2026-04-05' },
   { round: 4,  circuitId: 'bahrain',           name: 'Bahrain GP',         date: '2026-04-19' },
