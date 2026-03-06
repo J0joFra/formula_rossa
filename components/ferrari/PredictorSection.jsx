@@ -5,8 +5,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
-import Navigation from '../components/ferrari/Navigation';
 import {
   TrendingUp, Trophy, Target, Loader2,
   ChevronLeft, ChevronRight, BarChart3,
@@ -153,15 +151,13 @@ function buildDriverStats(results, driverId, circuitId = null) {
     return rid === canonical ||
            rid === circuitId ||
            rid.replace(/-/g, '_') === circuitId.replace(/-/g, '_') ||
-           rid.replace(/_/g, '-') === circuitId.replace(/-/g, '-');
+           rid.replace(/_/g, '-') === circuitId.replace(/_/g, '-');
   };
 
-  // FILTRO PRINCIPALE: solo RACE
   const filtered = results.filter(r =>
     r.driverId === driverId &&
     r.year >= MIN_YEAR &&
     r.positionNumber != null &&
-    (r._entryType === 'RACE' || !r._entryType) && 
     matchCircuit(r)
   );
 
@@ -185,15 +181,10 @@ function buildDriverStats(results, driverId, circuitId = null) {
   const n      = filtered.length;
   const variance = filtered.reduce((s, r) => s + Math.pow(r.positionNumber - avgPos, 2), 0) / n;
 
-  // ULTIMI 5 RISULTATI: solo RACE
   const allRecent = results
-    .filter(r => 
-      r.driverId === driverId && 
-      r.positionNumber != null &&
-      (r._entryType === 'RACE' || !r._entryType)  
-    )
+    .filter(r => r.driverId === driverId && r.positionNumber != null)
     .sort((a, b) => b.year - a.year || b.round - a.round)
-    .slice(0, 7);
+    .slice(0, 5);
 
   const recentAvgPos = allRecent.length
     ? allRecent.reduce((s, r) => s + r.positionNumber, 0) / allRecent.length
@@ -283,34 +274,25 @@ export default function PredictorSection() {
 
         const results = rawResults.map(r => ({
           ...r,
-          _circuitId:   racesMap[r.raceId]?.circuitId ?? null,
-          _circuitType: circuitsMap[racesMap[r.raceId]?.circuitId]?.type ?? 'RACE',
+          _circuitId: racesMap[r.raceId]?.circuitId ?? null,
         }));
 
-        const drivers2026Ids = [...new Set(
-          results.filter(r => r.year === 2026 && r._circuitType === 'RACE') 
-          .map(r => r.driverId)
-        )];
-
+        // Tutti i piloti con almeno 20 gare
+        const driverMap = Object.fromEntries(rawDrivers.map(d => [d.id, d]));
+        // Solo piloti che hanno gareggiato nel 2026
+        const drivers2026Ids = [...new Set(results.filter(r => r.year === 2026).map(r => r.driverId))];
+        // Fallback: se non ci sono dati 2026, usa piloti con ≥20 gare totali
         const driverPool = drivers2026Ids.length > 0
           ? drivers2026Ids
-          : Object.entries(
-              results
-                .filter(r => r._circuitType === 'RACE') 
-                .reduce((acc, r) => { 
-                  acc[r.driverId] = (acc[r.driverId] ?? 0) + 1; 
-                  return acc; 
-                }, {})
-            )
-            .filter(([, c]) => c >= 20)
-            .map(([id]) => id);
+          : Object.entries(results.reduce((acc, r) => { acc[r.driverId] = (acc[r.driverId] ?? 0) + 1; return acc; }, {}))
+              .filter(([, c]) => c >= 20).map(([id]) => id);
         const activeDrivers = driverPool
           .map(id => ({ id, number: driverMap[id]?.permanentNumber ?? null }))
           .sort((a, b) => a.id.localeCompare(b.id));
 
         // Gare 2026 già completate
-        const results2026 = results.filter(r => r.year === 2026 && r._circuitType === 'RACE');  
-        const completedRounds = new Set(results2026.map(r => r.round));
+        const results2026        = results.filter(r => r.year === 2026);
+        const completedRounds    = new Set(results2026.map(r => r.round));
         const nextRace           = CALENDAR_2026.find(r => !completedRounds.has(r.round)) ?? CALENDAR_2026[0];
 
         setTargetRace(nextRace);
@@ -362,14 +344,7 @@ export default function PredictorSection() {
 
   return (
     <section className="py-20 px-4 bg-[#080808] text-white">
-      <Navigation activeSection="predictions" />
       <div className="max-w-7xl mx-auto">
-
-        {/* BACK LINK */}
-        <Link href="/" className="inline-flex items-center gap-2 text-zinc-500 font-black uppercase text-[10px] tracking-widest mb-8 hover:text-red-600 transition-colors group">
-          <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-          Home
-        </Link>
 
         {/* HEADER */}
         
@@ -756,39 +731,28 @@ export default function PredictorSection() {
                         </p>
                       </div>
                       <div className="space-y-1.5">
-                        {data.global?.recent
-                          ?.filter(r => r._entryType === 'RACE' || !r._entryType)  
-                          ?.map((r, i) => {
-                            const entryType = r._entryType ?? 'RACE';
-                            const badge =
-                              entryType === 'QUALI'        ? { label: 'Q',  cls: 'bg-blue-500/20 text-blue-400'   } :
-                              entryType === 'SPRINT_RACE'  ? { label: 'SR', cls: 'bg-purple-500/20 text-purple-400'} :
-                              entryType === 'SPRINT_QUALI' ? { label: 'SQ', cls: 'bg-indigo-500/20 text-indigo-400'} :
-                                                            { label: 'R',  cls: 'bg-zinc-700/40 text-zinc-400'   };
-                              return (
-                                <div key={i} className="flex items-center gap-2.5 py-1.5 border-b border-white/5 last:border-0">
-                                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
-                                    r.positionNumber === 1 ? 'bg-yellow-500/20 text-yellow-400' :
-                                    r.positionNumber <= 3  ? 'bg-orange-500/20 text-orange-400' :
-                                    r.positionNumber <= 10 ? 'bg-green-500/10 text-green-500' :
-                                    'bg-white-800 text-white-500'
-                                  }`}>{r.positionNumber}</div>
-                                  {/* Bandierina circuito */}
-                                  {CIRCUIT_COUNTRY[r._circuitId] ? (
-                                    <div className="w-7 h-5 rounded overflow-hidden shrink-0 border border-white/10">
-                                      <img src={`https://flagcdn.com/w40/${CIRCUIT_COUNTRY[r._circuitId]}.png`}
-                                        className="w-full h-full object-cover" alt="" />
-                                    </div>
-                                  ) : null}
-                                  <div className="flex-1 min-w-0">
-                                    <p className="font-black text-[11px] truncate">{r._circuitId ?? '—'}</p>
-                                    <p className="text-white-700 text-[9px]">{r.year} R{r.round}</p>
-                                  </div>
-                                  <p className="font-black text-[11px] text-yellow-400 shrink-0">{ptsFor(r.positionNumber)}p</p>
-                                </div>
-                              );
-                          }
-                        ) ?? <p className="text-white-700 text-xs">Nessun dato</p>}
+                        {data.global?.recent?.map((r, i) => (
+                          <div key={i} className="flex items-center gap-2.5 py-1.5 border-b border-white/5 last:border-0">
+                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
+                              r.positionNumber === 1 ? 'bg-yellow-500/20 text-yellow-400' :
+                              r.positionNumber <= 3  ? 'bg-orange-500/20 text-orange-400' :
+                              r.positionNumber <= 10 ? 'bg-green-500/10 text-green-500' :
+                              'bg-white-800 text-white-500'
+                            }`}>{r.positionNumber}</div>
+                            {/* Bandierina circuito */}
+                            {CIRCUIT_COUNTRY[r._circuitId] ? (
+                              <div className="w-7 h-5 rounded overflow-hidden shrink-0 border border-white/10">
+                                <img src={`https://flagcdn.com/w40/${CIRCUIT_COUNTRY[r._circuitId]}.png`}
+                                  className="w-full h-full object-cover" alt="" />
+                              </div>
+                            ) : null}
+                            <div className="flex-1 min-w-0">
+                              <p className="font-black text-[11px] truncate">{r._circuitId ?? '—'}</p>
+                              <p className="text-white-700 text-[9px]">{r.year} R{r.round}</p>
+                            </div>
+                            <p className="font-black text-[11px] text-yellow-400 shrink-0">{ptsFor(r.positionNumber)}p</p>
+                          </div>
+                        )) ?? <p className="text-white-700 text-xs">Nessun dato</p>}
                       </div>
                     </div>
                   );
@@ -798,10 +762,9 @@ export default function PredictorSection() {
               {/* NOTA */}
               <div className="bg-white-900/20 border border-white/5 rounded-2xl p-4">
                 <p className="text-[9px] text-white-700 leading-relaxed uppercase tracking-wider font-bold">
-                  ⚙️ Media ponderata ultimi 7 anni (anno corrente = 3×, -1 = 2×, -2 = 1.5×, oltre = 0.5×).
-                  Analisi basata ESCLUSIVAMENTE su gare principali (RACE). Sprint e qualifiche escluse.
+                  ⚙️ Media ponderata ultimi 7 anni (anno corrente = 3×, -1 anno = 2×, -2 = 1.5×, oltre = 0.5×).
                   Blend storico circuito (60%) + forma recente ultimi 5 risultati (40%).
-                  Intervallo confidenza ±0.7σ. Dati: F1DB (f1db.com).
+                  Intervallo confidenza ±0.7σ. Si aggiorna automaticamente aggiungendo risultati ai JSON in <code className="text-white-500">public/data/</code>. Dati: F1DB (f1db.com).
                 </p>
               </div>
             </div>
