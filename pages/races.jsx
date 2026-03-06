@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
@@ -367,96 +367,116 @@ export default function RaceDetailsPage() {
             {activeTab === 'sprint' && (() => {
               const sqRows = sprintRaceResults.filter(r => r._type === 'SPRINT_QUALI');
               const srRows = sprintRaceResults.filter(r => r._type === 'SPRINT_RACE');
+
+              const SprintAccordion = ({ title, color, rows, renderRow }) => {
+                const [open, setOpen] = useState(false);
+                return (
+                  <div className="border-b border-zinc-800 last:border-0">
+                    <button
+                      onClick={() => setOpen(o => !o)}
+                      className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/5 transition-colors group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`w-2 h-2 rounded-full`} style={{ backgroundColor: color }} />
+                        <span className="font-black uppercase text-xs tracking-widest" style={{ color }}>{title}</span>
+                        <span className="text-zinc-600 text-[10px] font-bold">{rows.length} entries</span>
+                      </div>
+                      <svg
+                        className={`w-4 h-4 text-zinc-500 transition-transform duration-300 ${open ? 'rotate-180' : ''}`}
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {open && (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm border-collapse">
+                          <thead>
+                            <tr className="bg-zinc-950 text-zinc-500 text-[10px] font-black uppercase tracking-widest border-b border-zinc-800">
+                              {renderRow(null, true)}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {rows.map((s, i) => (
+                              <tr key={i} className={`${getPositionBackground(s.positionText)} border-b border-zinc-800/30`}>
+                                {renderRow(s, false)}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                );
+              };
+
               return (
                 <div>
                   {sqRows.length > 0 && (
-                    <>
-                      <div className="p-3 bg-indigo-950/40 border-b border-zinc-800">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Sprint Qualifying</p>
-                      </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm border-collapse">
-                          <thead>
-                            <tr className="bg-zinc-950 text-zinc-500 text-[10px] font-black uppercase tracking-widest border-b border-zinc-800">
-                              <th className="p-4 w-12 text-center">Pos</th>
-                              <th className="p-4">Driver</th>
-                              <th className="p-4">Team</th>
-                              <th className="p-4 text-right">SQ1</th>
-                              <th className="p-4 text-right">SQ2</th>
-                              <th className="p-4 text-right">SQ3 / Best</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {sqRows.map((s, i) => {
-                              const isFerrariItem = isFerrari(s.constructorId);
-                              const driver = drivers[s.driverId];
-                              const best = s.q3 || s.q2 || s.q1 || s.time || '—';
-                              return (
-                                <tr key={i} className={`${getPositionBackground(s.positionText)} border-b border-zinc-800/30`}>
-                                  <td className={`p-4 text-center font-black italic ${getPositionTextColor(s.positionText)}`}>{s.positionText}</td>
-                                  <td className="p-4">
-                                    <div className={`font-bold uppercase tracking-tight ${isFerrariItem ? 'text-[#ff2800]' : 'text-white'}`}>
-                                      <span className="opacity-40 font-medium mr-1 hidden sm:inline">{driver?.firstName}</span>
-                                      <span>{driver?.lastName}</span>
-                                    </div>
-                                  </td>
-                                  <td className={`p-4 text-xs font-bold uppercase ${isFerrariItem ? 'text-[#ff2800]' : 'text-zinc-400'}`}>
-                                    {constructors[s.constructorId]?.name}
-                                  </td>
-                                  <td className="p-4 text-right font-mono text-xs text-zinc-400">{s.q1 || '—'}</td>
-                                  <td className="p-4 text-right font-mono text-xs text-zinc-400">{s.q2 || '—'}</td>
-                                  <td className="p-4 text-right font-mono text-xs text-white font-black">{best}</td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </>
+                    <SprintAccordion
+                      title="Sprint Qualifying"
+                      color="#818cf8"
+                      rows={sqRows}
+                      renderRow={(s, isHeader) => isHeader ? (
+                        <>
+                          <th className="p-4 w-12 text-center">Pos</th>
+                          <th className="p-4">Driver</th>
+                          <th className="p-4">Team</th>
+                          <th className="p-4 text-right">SQ1</th>
+                          <th className="p-4 text-right">SQ2</th>
+                          <th className="p-4 text-right">SQ3 / Best</th>
+                        </>
+                      ) : (
+                        <>
+                          <td className={`p-4 text-center font-black italic ${getPositionTextColor(s.positionText)}`}>{s.positionText}</td>
+                          <td className="p-4">
+                            <div className={`font-bold uppercase tracking-tight ${isFerrari(s.constructorId) ? 'text-[#ff2800]' : 'text-white'}`}>
+                              <span className="opacity-40 font-medium mr-1 hidden sm:inline">{drivers[s.driverId]?.firstName}</span>
+                              <span>{drivers[s.driverId]?.lastName}</span>
+                            </div>
+                          </td>
+                          <td className={`p-4 text-xs font-bold uppercase ${isFerrari(s.constructorId) ? 'text-[#ff2800]' : 'text-zinc-400'}`}>
+                            {constructors[s.constructorId]?.name}
+                          </td>
+                          <td className="p-4 text-right font-mono text-xs text-zinc-400">{s.q1 || '—'}</td>
+                          <td className="p-4 text-right font-mono text-xs text-zinc-400">{s.q2 || '—'}</td>
+                          <td className="p-4 text-right font-mono text-xs text-white font-black">{s.q3 || s.q2 || s.q1 || s.time || '—'}</td>
+                        </>
+                      )}
+                    />
                   )}
                   {srRows.length > 0 && (
-                    <>
-                      <div className="p-3 bg-purple-950/40 border-b border-zinc-800 mt-2">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-purple-400">Sprint Race</p>
-                      </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm border-collapse">
-                          <thead>
-                            <tr className="bg-zinc-950 text-zinc-500 text-[10px] font-black uppercase tracking-widest border-b border-zinc-800">
-                              <th className="p-4 w-12 text-center">Pos</th>
-                              <th className="p-4">Driver</th>
-                              <th className="p-4">Team</th>
-                              <th className="p-4 text-right">Time / Gap</th>
-                              <th className="p-4 text-right">Pts</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {srRows.map((s, i) => {
-                              const isFerrariItem = isFerrari(s.constructorId);
-                              const driver = drivers[s.driverId];
-                              return (
-                                <tr key={i} className={`${getPositionBackground(s.positionText)} border-b border-zinc-800/30`}>
-                                  <td className={`p-4 text-center font-black italic ${getPositionTextColor(s.positionText)}`}>{s.positionText}</td>
-                                  <td className="p-4">
-                                    <div className={`font-bold uppercase tracking-tight ${isFerrariItem ? 'text-[#ff2800]' : 'text-white'}`}>
-                                      <span className="opacity-40 font-medium mr-1 hidden sm:inline">{driver?.firstName}</span>
-                                      <span>{driver?.lastName}</span>
-                                    </div>
-                                  </td>
-                                  <td className={`p-4 text-xs font-bold uppercase ${isFerrariItem ? 'text-[#ff2800]' : 'text-zinc-400'}`}>
-                                    {constructors[s.constructorId]?.name}
-                                  </td>
-                                  <td className="p-4 text-right font-mono text-xs text-zinc-300">
-                                    {s.positionText === "1" ? (s.time || "Winner") : (s.gap || s.reasonRetired || "—")}
-                                  </td>
-                                  <td className="p-4 text-right font-black text-yellow-400">{s.points ?? '—'}</td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </>
+                    <SprintAccordion
+                      title="Sprint Race"
+                      color="#c084fc"
+                      rows={srRows}
+                      renderRow={(s, isHeader) => isHeader ? (
+                        <>
+                          <th className="p-4 w-12 text-center">Pos</th>
+                          <th className="p-4">Driver</th>
+                          <th className="p-4">Team</th>
+                          <th className="p-4 text-right">Time / Gap</th>
+                          <th className="p-4 text-right">Pts</th>
+                        </>
+                      ) : (
+                        <>
+                          <td className={`p-4 text-center font-black italic ${getPositionTextColor(s.positionText)}`}>{s.positionText}</td>
+                          <td className="p-4">
+                            <div className={`font-bold uppercase tracking-tight ${isFerrari(s.constructorId) ? 'text-[#ff2800]' : 'text-white'}`}>
+                              <span className="opacity-40 font-medium mr-1 hidden sm:inline">{drivers[s.driverId]?.firstName}</span>
+                              <span>{drivers[s.driverId]?.lastName}</span>
+                            </div>
+                          </td>
+                          <td className={`p-4 text-xs font-bold uppercase ${isFerrari(s.constructorId) ? 'text-[#ff2800]' : 'text-zinc-400'}`}>
+                            {constructors[s.constructorId]?.name}
+                          </td>
+                          <td className="p-4 text-right font-mono text-xs text-zinc-300">
+                            {s.positionText === "1" ? (s.time || "Winner") : (s.gap || s.reasonRetired || "—")}
+                          </td>
+                          <td className="p-4 text-right font-black text-yellow-400">{s.points ?? '—'}</td>
+                        </>
+                      )}
+                    />
                   )}
                 </div>
               );

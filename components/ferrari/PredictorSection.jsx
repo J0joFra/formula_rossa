@@ -5,6 +5,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
+import Navigation from '../components/ferrari/Navigation';
 import {
   TrendingUp, Trophy, Target, Loader2,
   ChevronLeft, ChevronRight, BarChart3,
@@ -137,17 +139,21 @@ function yearWeight(year, currentYear) {
 }
 
 // ─── ENGINE STATISTICO ────────────────────────────────────────────────────────
+//
+// results contiene solo RACE (1.0×) e SPRINT_RACE (0.6×).
+// Il peso finale di ogni record = yearWeight × _posMultiplier.
+// Wins/podiums/top5 si contano solo sulle RACE (non sprint).
+//
 function buildDriverStats(results, driverId, circuitId = null) {
-  const currentYear = Math.max(...results.map(r => r.year));
+  const raceOnly = results.filter(r => r._entryType === 'RACE' || !r._entryType);
+  const currentYear = Math.max(...raceOnly.map(r => r.year));
   const MIN_YEAR    = currentYear - 7;
 
-  // Risolvi alias: cerca sia l'id diretto che varianti comuni
   const matchCircuit = (r) => {
     if (!circuitId) return true;
     const rid = r._circuitId;
     if (!rid) return false;
     const canonical = CIRCUIT_ALIAS[circuitId] ?? circuitId;
-    // Match esatto, o match con trattini→underscore e viceversa
     return rid === canonical ||
            rid === circuitId ||
            rid.replace(/-/g, '_') === circuitId.replace(/-/g, '_') ||
@@ -164,38 +170,49 @@ function buildDriverStats(results, driverId, circuitId = null) {
   if (!filtered.length) return null;
 
   let wPosSum = 0, wSum = 0, wPtsSum = 0;
-  let wins = 0, podiums = 0, top5 = 0;
+  let wins = 0, podiums = 0, top5 = 0, nRaces = 0;
 
   filtered.forEach(r => {
-    const w = yearWeight(r.year, currentYear);
+    const pm = r._posMultiplier ?? 1.0;
+    const w  = yearWeight(r.year, currentYear) * pm;
     wPosSum  += r.positionNumber * w;
     wSum     += w;
     wPtsSum  += ptsFor(r.positionNumber) * w;
-    if (r.positionNumber === 1) wins++;
-    if (r.positionNumber <= 3) podiums++;
-    if (r.positionNumber <= 5) top5++;
+    // wins/podiums/top5 solo su gare vere (non sprint)
+    if (r._entryType === 'RACE' || !r._entryType) {
+      nRaces++;
+      if (r.positionNumber === 1) wins++;
+      if (r.positionNumber <= 3) podiums++;
+      if (r.positionNumber <= 5) top5++;
+    }
   });
 
   const avgPos = wPosSum / wSum;
-  const avgPts = wPtsSum / wSum;
+  const avgPts = wPtsSum / (wSum || 1);
   const n      = filtered.length;
   const variance = filtered.reduce((s, r) => s + Math.pow(r.positionNumber - avgPos, 2), 0) / n;
 
+  // Ultimi 7 risultati (gare + sprint race), ordinati per anno/round decrescente
   const allRecent = results
     .filter(r => r.driverId === driverId && r.positionNumber != null)
-    .sort((a, b) => b.year - a.year || b.round - a.round)
-    .slice(0, 5);
+    .sort((a, b) =>
+      b.year - a.year ||
+      b.round - a.round ||
+      (b._posMultiplier ?? 1) - (a._posMultiplier ?? 1)
+    )
+    .slice(0, 7);
 
   const recentAvgPos = allRecent.length
     ? allRecent.reduce((s, r) => s + r.positionNumber, 0) / allRecent.length
     : avgPos;
 
+  const nR = nRaces || 1;
   return {
     n, avgPos, avgPts, stdDev: Math.sqrt(variance),
     wins, podiums, top5,
-    winRate:    (wins    / n) * 100,
-    podiumRate: (podiums / n) * 100,
-    top5Rate:   (top5   / n) * 100,
+    winRate:    (wins    / nR) * 100,
+    podiumRate: (podiums / nR) * 100,
+    top5Rate:   (top5   / nR) * 100,
     recentAvgPos,
     recent: allRecent,
     formTrend: recentAvgPos < avgPos - 0.5 ? 'up' :
@@ -258,11 +275,20 @@ export default function PredictorSection() {
     async function load() {
       setLoadingDB(true);
       try {
-        const [rawResults, rawRaces, rawCircuits, rawDrivers] = await Promise.all([
+        const [
+          rawResults, rawRaces, rawCircuits, rawDrivers,
+          rawQual, rawQual1, rawQual2,
+          rawSprintRace, rawSprintQual,
+        ] = await Promise.all([
           loadJSON('/data/f1db-races-race-results.json'),
           loadJSON('/data/f1db-races.json'),
           loadJSON('/data/f1db-circuits.json'),
           loadJSON('/data/f1db-drivers.json'),
+          loadJSON('/data/f1db-races-qualifying-results.json'),
+          loadJSON('/data/f1db-races-qualifying-1-results.json'),
+          loadJSON('/data/f1db-races-qualifying-2-results.json'),
+          loadJSON('/data/f1db-races-sprint-race-results.json'),
+          loadJSON('/data/f1db-races-sprint-qualifying-results.json'),
         ]);
 
         if (!rawResults || !rawRaces || !rawCircuits || !rawDrivers) {
@@ -272,11 +298,32 @@ export default function PredictorSection() {
         const racesMap    = Object.fromEntries(rawRaces.map(r => [r.id, r]));
         const circuitsMap = Object.fromEntries(rawCircuits.map(c => [c.id, c]));
 
-        const results = rawResults.map(r => ({
-          ...r,
-          _circuitId:   racesMap[r.raceId]?.circuitId ?? null,
-          _circuitType: circuitsMap[racesMap[r.raceId]?.circuitId]?.type ?? 'RACE',
-        }));
+        // ── Helper per arricchire ogni entry con metadati circuito ──────────────
+        const enrich = (arr, type, posMultiplier) =>
+          (arr ?? []).map(r => ({
+            ...r,
+            _circuitId:      racesMap[r.raceId]?.circuitId ?? null,
+            _circuitType:    circuitsMap[racesMap[r.raceId]?.circuitId]?.type ?? 'RACE',
+            _entryType:      type,
+            _posMultiplier:  posMultiplier,
+          }));
+
+        // Gare (peso pieno 1.0) e Sprint Race (peso 0.6) — usate per la predizione
+        const raceEntries        = enrich(rawResults,    'RACE',         1.0);
+        const sprintRaceEntries  = enrich(rawSprintRace, 'SPRINT_RACE',  0.6);
+
+        // Qualifying caricate solo per la visualizzazione in races.jsx,
+        // NON incluse nell'array unificato usato dal motore statistico.
+        const qualiEntries       = enrich(rawQual,       'QUALI',        0.4);
+        const quali1Entries      = enrich(rawQual1,      'QUALI',        0.4);
+        const quali2Entries      = enrich(rawQual2,      'QUALI',        0.4);
+        const sprintQualiEntries = enrich(rawSprintQual, 'SPRINT_QUALI', 0.25);
+
+        // ── Array usato dal motore predittivo: solo gare reali ──────────────────
+        const results = [
+          ...raceEntries,
+          ...sprintRaceEntries,
+        ];
 
         // Tutti i piloti con almeno 20 gare
         const driverMap = Object.fromEntries(rawDrivers.map(d => [d.id, d]));
@@ -345,10 +392,14 @@ export default function PredictorSection() {
 
   return (
     <section className="py-20 px-4 bg-[#080808] text-white">
+      <Navigation activeSection="predictions" />
       <div className="max-w-7xl mx-auto">
 
-        {/* HEADER */}
-        
+        {/* BACK LINK */}
+        <Link href="/" className="inline-flex items-center gap-2 text-zinc-500 font-black uppercase text-[10px] tracking-widest mb-8 hover:text-red-600 transition-colors group">
+          <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+          Home
+        </Link>
         {loadError && (
           <div className="bg-red-900/20 border border-red-500/30 rounded-3xl p-6 flex gap-4 mb-8">
             <AlertCircle className="w-6 h-6 text-red-400 shrink-0 mt-0.5" />
@@ -717,7 +768,7 @@ export default function PredictorSection() {
                 </div>
               </div>
 
-              {/* ULTIMI 5 RISULTATI */}
+              {/* ULTIMI 7 RISULTATI (gare + sprint race) */}
               <div className="grid grid-cols-2 gap-4">
                 {(['primary', 'secondary']).map((key) => {
                   const drv   = key === 'primary' ? primaryDriver : secondaryDriver;
@@ -732,28 +783,39 @@ export default function PredictorSection() {
                         </p>
                       </div>
                       <div className="space-y-1.5">
-                        {data.global?.recent?.map((r, i) => (
-                          <div key={i} className="flex items-center gap-2.5 py-1.5 border-b border-white/5 last:border-0">
-                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
-                              r.positionNumber === 1 ? 'bg-yellow-500/20 text-yellow-400' :
-                              r.positionNumber <= 3  ? 'bg-orange-500/20 text-orange-400' :
-                              r.positionNumber <= 10 ? 'bg-green-500/10 text-green-500' :
-                              'bg-white-800 text-white-500'
-                            }`}>{r.positionNumber}</div>
-                            {/* Bandierina circuito */}
-                            {CIRCUIT_COUNTRY[r._circuitId] ? (
-                              <div className="w-7 h-5 rounded overflow-hidden shrink-0 border border-white/10">
-                                <img src={`https://flagcdn.com/w40/${CIRCUIT_COUNTRY[r._circuitId]}.png`}
-                                  className="w-full h-full object-cover" alt="" />
+                        {data.global?.recent?.map((r, i) => {
+                          const isSprint = r._entryType === 'SPRINT_RACE';
+                          return (
+                            <div key={i} className="flex items-center gap-2.5 py-1.5 border-b border-white/5 last:border-0">
+                              <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
+                                r.positionNumber === 1 ? 'bg-yellow-500/20 text-yellow-400' :
+                                r.positionNumber <= 3  ? 'bg-orange-500/20 text-orange-400' :
+                                r.positionNumber <= 10 ? 'bg-green-500/10 text-green-500' :
+                                'bg-white-800 text-white-500'
+                              }`}>{r.positionNumber}</div>
+                              {/* Badge tipo sessione */}
+                              {isSprint && (
+                                <span className="text-[8px] font-black px-1.5 py-0.5 rounded shrink-0 bg-purple-500/20 text-purple-400">
+                                  SR
+                                </span>
+                              )}
+                              {/* Bandierina circuito */}
+                              {CIRCUIT_COUNTRY[r._circuitId] ? (
+                                <div className="w-7 h-5 rounded overflow-hidden shrink-0 border border-white/10">
+                                  <img src={`https://flagcdn.com/w40/${CIRCUIT_COUNTRY[r._circuitId]}.png`}
+                                    className="w-full h-full object-cover" alt="" />
+                                </div>
+                              ) : null}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-black text-[11px] truncate">{r._circuitId ?? '—'}</p>
+                                <p className="text-white-700 text-[9px]">{r.year} R{r.round}</p>
                               </div>
-                            ) : null}
-                            <div className="flex-1 min-w-0">
-                              <p className="font-black text-[11px] truncate">{r._circuitId ?? '—'}</p>
-                              <p className="text-white-700 text-[9px]">{r.year} R{r.round}</p>
+                              <p className="font-black text-[11px] text-yellow-400 shrink-0">
+                                {ptsFor(r.positionNumber)}p
+                              </p>
                             </div>
-                            <p className="font-black text-[11px] text-yellow-400 shrink-0">{ptsFor(r.positionNumber)}p</p>
-                          </div>
-                        )) ?? <p className="text-white-700 text-xs">Nessun dato</p>}
+                          );
+                        }) ?? <p className="text-white-700 text-xs">Nessun dato</p>}
                       </div>
                     </div>
                   );
@@ -763,9 +825,11 @@ export default function PredictorSection() {
               {/* NOTA */}
               <div className="bg-white-900/20 border border-white/5 rounded-2xl p-4">
                 <p className="text-[9px] text-white-700 leading-relaxed uppercase tracking-wider font-bold">
-                  ⚙️ Media ponderata ultimi 7 anni (anno corrente = 3×, -1 anno = 2×, -2 = 1.5×, oltre = 0.5×).
-                  Blend storico circuito (60%) + forma recente ultimi 5 risultati (40%).
-                  Intervallo confidenza ±0.7σ. Si aggiorna automaticamente aggiungendo risultati ai JSON in <code className="text-white-500">public/data/</code>. Dati: F1DB (f1db.com).
+                  ⚙️ Media ponderata ultimi 7 anni (anno corrente = 3×, -1 = 2×, -2 = 1.5×, oltre = 0.5×).
+                  Sessioni considerate: Gara = 1.0×, Sprint Race = 0.6×. Qualifiche escluse dalla predizione.
+                  Blend storico circuito (60%) + forma recente ultimi 7 risultati (40%).
+                  Wins/podiums calcolati solo su gare principali. Badge <span className="text-purple-400">SR</span> = Sprint Race.
+                  Intervallo confidenza ±0.7σ. Dati: F1DB (f1db.com).
                 </p>
               </div>
             </div>
