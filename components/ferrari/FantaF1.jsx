@@ -150,11 +150,13 @@ export default function FantaF1() {
     loadLeaderboard();
   }, []);
 
-  const handleSave = async () => {
-    if (!session?.user?.email) { 
-      setError('Effettua il login per salvare'); 
-      return; 
-    }
+    const handleSave = async () => {
+        console.log('Salvataggio con:', {
+            email: session?.user?.email,
+            raceId: race?.raceId,
+            docId: `${session?.user?.email}_${race?.raceId}`
+        }
+    );
     
     if (!race) {
       setError('Gara non disponibile');
