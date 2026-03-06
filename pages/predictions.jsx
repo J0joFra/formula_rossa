@@ -285,7 +285,7 @@ export default function PredictorSection() {
           'lando-norris', 'oscar-piastri',
           'fernando-alonso', 'lance-stroll',
           'pierre-gasly', 'franco-colapinto',
-          'carlos-sainz', 'alexander-albon',
+          'carlos-sainz-jr', 'alexander-albon',
           'nico-hulkenberg', 'gabriel-bortoleto',
           'esteban-ocon', 'oliver-bearman',
           'liam-lawson', 'arvid-lindblad',
@@ -294,7 +294,6 @@ export default function PredictorSection() {
 
         const driverMap = Object.fromEntries(rawDrivers.map(d => [d.id, d]));
 
-        // Usa la griglia 2026 come base, fallback su piloti con dati storici
         const activeDrivers = DRIVERS_2026
           .map(id => ({ id, number: driverMap[id]?.permanentNumber ?? null }))
           .sort((a, b) => a.id.localeCompare(b.id));
@@ -427,7 +426,7 @@ export default function PredictorSection() {
                         <input autoFocus value={driverSearch} onChange={e => setDriverSearch(e.target.value)}
                           placeholder="Cerca pilota (es. max-verstappen)..."
                           className="w-full rounded-xl px-3 py-2 text-sm outline-none font-bold border border-zinc-300 text-zinc-900 placeholder-zinc-400"
-                          style={{ backgroundColor: '#f4f4f5' }} />
+                          style={{ backgroundColor: '#f1f4b6' }} />
                       </div>
                       <div className="max-h-48 overflow-y-auto">
                         {filteredDrivers.slice(0, 40).map(d => (
