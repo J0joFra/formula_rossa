@@ -1,3 +1,4 @@
+"use client";
 /**
  * PredictorSection.jsx — Race Predictor 2026
  * Dati da JSON locali F1DB. Auto-aggiornante.
@@ -5,6 +6,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
+import Navigation from '../components/ferrari/Navigation';
+import Footer from '../components/ferrari/Footer';
 import {
   TrendingUp, Trophy, Target, Loader2,
   ChevronLeft, ChevronRight, BarChart3,
@@ -184,7 +188,7 @@ function buildDriverStats(results, driverId, circuitId = null) {
   const allRecent = results
     .filter(r => r.driverId === driverId && r.positionNumber != null)
     .sort((a, b) => b.year - a.year || b.round - a.round)
-    .slice(0, 10);
+    .slice(0, 5);
 
   const recentAvgPos = allRecent.length
     ? allRecent.reduce((s, r) => s + r.positionNumber, 0) / allRecent.length
@@ -344,9 +348,13 @@ export default function PredictorSection() {
 
   return (
     <section className="py-20 px-4 bg-[#080808] text-white">
+      <Navigation activeSection="predictions" />
       <div className="max-w-7xl mx-auto">
 
-        {/* HEADER */}
+        <Link href="/" className="inline-flex items-center gap-2 text-zinc-500 font-black uppercase text-[10px] tracking-widest mb-8 hover:text-red-600 transition-colors group">
+          <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+          Home
+        </Link>
         
         {loadError && (
           <div className="bg-red-900/20 border border-red-500/30 rounded-3xl p-6 flex gap-4 mb-8">
@@ -763,7 +771,7 @@ export default function PredictorSection() {
               <div className="bg-white-900/20 border border-white/5 rounded-2xl p-4">
                 <p className="text-[9px] text-white-700 leading-relaxed uppercase tracking-wider font-bold">
                   ⚙️ Media ponderata ultimi 7 anni (anno corrente = 3×, -1 anno = 2×, -2 = 1.5×, oltre = 0.5×).
-                  Blend storico circuito (60%) + forma recente ultimi 10 risultati (40%).
+                  Blend storico circuito (60%) + forma recente ultimi 5 risultati (40%).
                   Intervallo confidenza ±0.7σ. Si aggiorna automaticamente aggiungendo risultati ai JSON in <code className="text-white-500">public/data/</code>. Dati: F1DB (f1db.com).
                 </p>
               </div>
