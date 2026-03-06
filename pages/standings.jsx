@@ -194,7 +194,7 @@ export default function StandingsPage() {
                     <img 
                       src={`https://flagcdn.com/w320/${countryCode}.png`} 
                       className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500" 
-                      alt="" 
+                      alt="Bandiera nazione" 
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-[8px] text-zinc-600 uppercase font-black">No Flag</div>

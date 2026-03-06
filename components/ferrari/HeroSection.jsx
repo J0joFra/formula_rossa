@@ -321,7 +321,7 @@ export default function HeroSection() {
                 <div key={`left-${index}`} className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden group">
                   <Image
                     src={img}
-                    alt=""
+                    alt="Immagine del pilota Ferrari in azione durante un Gran Premio"
                     width={192}
                     height={256}
                     className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
@@ -351,7 +351,7 @@ export default function HeroSection() {
                 <div key={`right-${index}`} className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden group">
                   <Image
                     src={img}
-                    alt=""
+                    alt="Immagine del pilota Ferrari in azione durante un Gran Premio"
                     width={192}
                     height={256}
                     className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"

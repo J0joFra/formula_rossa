@@ -1177,7 +1177,7 @@ const fetchAll = async () => {
               header={
                 meeting ? (
                   <div className="flex items-center gap-2">
-                    {flagCode && <img src={`https://flagcdn.com/w20/${flagCode}.png`} alt="" className="w-5 h-3 object-cover rounded-sm flex-shrink-0" />}
+                    {flagCode && <img src={`https://flagcdn.com/w20/${flagCode}.png`} alt="Bandiera nazione" className="w-5 h-3 object-cover rounded-sm flex-shrink-0" />}
                     <div>
                       <div className="text-sm font-bold leading-tight">{meeting.meeting_name}</div>
                       <div className="text-xs text-zinc-500">{meeting.location} · {meeting.country_name}</div>
@@ -1190,7 +1190,7 @@ const fetchAll = async () => {
                 return (
                   <button key={m.meeting_key} onClick={() => handleMeetingChange(m)}
                     className={`w-full p-3 text-left hover:bg-zinc-800 transition-colors flex items-center gap-3 ${meeting?.meeting_key===m.meeting_key?'bg-red-600/15 border-l-2 border-red-600 pl-4':''}`}>
-                    {fc && <img src={`https://flagcdn.com/w20/${fc}.png`} alt="" className="w-5 h-3 object-cover rounded-sm flex-shrink-0" />}
+                    {fc && <img src={`https://flagcdn.com/w20/${fc}.png`} alt="Bandiera nazione" className="w-5 h-3 object-cover rounded-sm flex-shrink-0" />}
                     <div>
                       <div className="text-sm font-bold text-white">{m.meeting_name}</div>
                       <div className="text-xs text-zinc-500">{m.location}</div>
@@ -1218,7 +1218,7 @@ const fetchAll = async () => {
               header={
                 driverInfo ? (
                   <div className="flex items-center gap-3">
-                    {driverInfo.headshot_url && <img src={driverInfo.headshot_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />}
+                    {driverInfo.headshot_url && <img src={driverInfo.headshot_url} alt="Foto del pilota" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />}
                     <div>
                       <div className="font-black font-mono text-sm flex items-center gap-2">
                         <span style={{ color }}>{driverInfo.name_acronym}</span>
@@ -1233,7 +1233,7 @@ const fetchAll = async () => {
                 <button key={d.driver_number}
                   onClick={() => { setDriverCode(d.name_acronym); setOpenDriver(false); }}
                   className={`w-full p-3 text-left hover:bg-zinc-800 transition-colors flex items-center gap-3 ${driverCode===d.name_acronym?'bg-red-600/15 border-l-2 border-red-600 pl-4':''}`}>
-                  {d.headshot_url && <img src={d.headshot_url} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />}
+                  {d.headshot_url && <img src={d.headshot_url} alt="Foto del pilota" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />}
                   <div>
                     <div className="font-mono font-bold text-sm text-white">{d.name_acronym} <span className="text-zinc-600 font-normal">#{d.driver_number}</span></div>
                     <div className="text-xs text-zinc-500">{d.full_name} · {d.team_name}</div>

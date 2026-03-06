@@ -234,7 +234,7 @@ function RaceFlag({ circuitId, className = '' }) {
   return (
     <img
       src={`https://flagcdn.com/w320/${cc}.png`}
-      alt=""
+      alt="Bandiera nazione del circuito"
       className={`object-cover ${className}`}
       onError={e => { e.target.style.display = 'none'; }}
     />
@@ -498,7 +498,7 @@ export default function PredictorSection() {
                         {/* Bandiera di sfondo */}
                         <div className="absolute inset-0">
                           {cc && (
-                            <img src={`https://flagcdn.com/w160/${cc}.png`} alt=""
+                            <img src={`https://flagcdn.com/w160/${cc}.png`} alt="Bandiera nazione del circuito"
                               className={`w-full h-full object-cover transition-all duration-500 ${
                                 isSelected ? 'opacity-30' : 'opacity-15 group-hover:opacity-25'
                               }`}
@@ -561,7 +561,7 @@ export default function PredictorSection() {
                   {/* Bandiera nazione grande */}
                   {CIRCUIT_COUNTRY[targetRace.circuitId] && (
                     <img src={`https://flagcdn.com/w80/${CIRCUIT_COUNTRY[targetRace.circuitId]}.png`}
-                      className="h-12 rounded-lg shadow-xl border border-white/10 shrink-0" alt="" />
+                      className="h-12 rounded-lg shadow-xl border border-white/10 shrink-0" alt="Bandiera nazione del circuito" />
                   )}
                 </div>
               </motion.div>
@@ -743,7 +743,7 @@ export default function PredictorSection() {
                             {CIRCUIT_COUNTRY[r._circuitId] ? (
                               <div className="w-7 h-5 rounded overflow-hidden shrink-0 border border-white/10">
                                 <img src={`https://flagcdn.com/w40/${CIRCUIT_COUNTRY[r._circuitId]}.png`}
-                                  className="w-full h-full object-cover" alt="" />
+                                  className="w-full h-full object-cover" alt="Bandiera nazione del circuito" />
                               </div>
                             ) : null}
                             <div className="flex-1 min-w-0">
