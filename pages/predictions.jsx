@@ -1,4 +1,3 @@
-"use client";
 /**
  * PredictorSection.jsx — Race Predictor 2026
  * Dati da JSON locali F1DB. Auto-aggiornante.
@@ -6,9 +5,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
-import Navigation from '../components/ferrari/Navigation';
-import Footer from '../components/ferrari/Footer';
 import {
   TrendingUp, Trophy, Target, Loader2,
   ChevronLeft, ChevronRight, BarChart3,
@@ -281,16 +277,25 @@ export default function PredictorSection() {
           _circuitId: racesMap[r.raceId]?.circuitId ?? null,
         }));
 
-        // Tutti i piloti con almeno 20 gare
+        // Griglia F1 2026
+        const DRIVERS_2026 = [
+          'charles-leclerc', 'lewis-hamilton',
+          'max-verstappen', 'isack-hadjar',
+          'george-russell', 'kimi-antonelli',
+          'lando-norris', 'oscar-piastri',
+          'fernando-alonso', 'lance-stroll',
+          'pierre-gasly', 'franco-colapinto',
+          'carlos-sainz', 'alexander-albon',
+          'nico-hulkenberg', 'gabriel-bortoleto',
+          'esteban-ocon', 'oliver-bearman',
+          'liam-lawson', 'arvid-lindblad',
+          'sergio-perez', 'valtteri-bottas',
+        ];
+
         const driverMap = Object.fromEntries(rawDrivers.map(d => [d.id, d]));
-        // Solo piloti che hanno gareggiato nel 2026
-        const drivers2026Ids = [...new Set(results.filter(r => r.year === 2026).map(r => r.driverId))];
-        // Fallback: se non ci sono dati 2026, usa piloti con ≥20 gare totali
-        const driverPool = drivers2026Ids.length > 0
-          ? drivers2026Ids
-          : Object.entries(results.reduce((acc, r) => { acc[r.driverId] = (acc[r.driverId] ?? 0) + 1; return acc; }, {}))
-              .filter(([, c]) => c >= 20).map(([id]) => id);
-        const activeDrivers = driverPool
+
+        // Usa la griglia 2026 come base, fallback su piloti con dati storici
+        const activeDrivers = DRIVERS_2026
           .map(id => ({ id, number: driverMap[id]?.permanentNumber ?? null }))
           .sort((a, b) => a.id.localeCompare(b.id));
 
@@ -348,13 +353,9 @@ export default function PredictorSection() {
 
   return (
     <section className="py-20 px-4 bg-[#080808] text-white">
-      <Navigation activeSection="predictions" />
       <div className="max-w-7xl mx-auto">
 
-        <Link href="/" className="inline-flex items-center gap-2 text-zinc-500 font-black uppercase text-[10px] tracking-widest mb-8 hover:text-red-600 transition-colors group">
-          <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-          Home
-        </Link>
+        {/* HEADER */}
         
         {loadError && (
           <div className="bg-red-900/20 border border-red-500/30 rounded-3xl p-6 flex gap-4 mb-8">
@@ -420,11 +421,13 @@ export default function PredictorSection() {
                 <AnimatePresence>
                   {showDriverPicker && (
                     <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-                      className="mt-2 bg-white-900 border border-white-800 rounded-2xl overflow-hidden">
-                      <div className="p-3 border-b border-white-800">
+                      className="mt-2 rounded-2xl overflow-hidden shadow-2xl border border-zinc-200"
+                      style={{ backgroundColor: '#ffffff' }}>
+                      <div className="p-3 border-b border-zinc-200">
                         <input autoFocus value={driverSearch} onChange={e => setDriverSearch(e.target.value)}
-                          placeholder="Cerca per id (es. max-verstappen)..."
-                          className="w-full bg-white-800 rounded-xl px-3 py-2 text-sm outline-none text-white placeholder-white-600 font-bold" />
+                          placeholder="Cerca pilota (es. max-verstappen)..."
+                          className="w-full rounded-xl px-3 py-2 text-sm outline-none font-bold border border-zinc-300 text-zinc-900 placeholder-zinc-400"
+                          style={{ backgroundColor: '#f4f4f5' }} />
                       </div>
                       <div className="max-h-48 overflow-y-auto">
                         {filteredDrivers.slice(0, 40).map(d => (
@@ -434,15 +437,15 @@ export default function PredictorSection() {
                               else setSecondaryDriver(d);
                               setShowDriverPicker(false);
                             }}
-                            className="w-full px-4 py-2.5 hover:bg-white-800 transition-all flex items-center gap-3 text-left">
-                            <span className="text-[10px] font-black text-white-500 w-8 shrink-0">
+                            className="w-full px-4 py-2.5 transition-all flex items-center gap-3 text-left hover:bg-zinc-100">
+                            <span className="text-[10px] font-black text-zinc-400 w-8 shrink-0">
                               {d.id.split('-').pop().slice(0, 3).toUpperCase()}
                             </span>
-                            <span className="text-sm font-bold truncate">{d.id}</span>
+                            <span className="text-sm font-bold truncate text-zinc-800">{d.id}</span>
                           </button>
                         ))}
                         {filteredDrivers.length === 0 && (
-                          <p className="text-center text-white-600 text-xs py-4">Nessun pilota trovato</p>
+                          <p className="text-center text-zinc-400 text-xs py-4">Nessun pilota trovato</p>
                         )}
                       </div>
                     </motion.div>
