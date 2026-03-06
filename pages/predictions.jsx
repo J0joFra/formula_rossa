@@ -357,6 +357,10 @@ export default function PredictorSection() {
     <section className="py-20 px-4 bg-[#080808] text-white">
       <Navigation activeSection="predictions" />
       <div className="max-w-7xl mx-auto">
+        <Link href="/" className="inline-flex items-center gap-2 text-white-500 font-black uppercase text-[10px] tracking-widest mb-8 hover:text-red-600 transition-colors group">
+          <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+          Home
+        </Link>
 
         {/* HEADER */}
         
@@ -785,7 +789,7 @@ export default function PredictorSection() {
           </div>
         )}
       </div>
-      <Navigation activeSection="footer" />
+      <Footer />
     </section>
   );
 }
