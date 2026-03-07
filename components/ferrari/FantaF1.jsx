@@ -22,10 +22,11 @@ import {
 
 const CIRCUIT_COUNTRY = {
   'albert-park':'au', 'shanghai':'cn', 'suzuka':'jp', 'bahrain':'bh', 'jeddah':'sa',
-  'miami':'us', 'imola':'it', 'monte-carlo':'mc', 'barcelona':'es', 'villeneuve':'ca',
-  'red-bull-ring':'at', 'silverstone':'gb', 'hungaroring':'hu', 'spa-francorchamps':'be',
-  'zandvoort':'nl', 'monza':'it', 'baku':'az', 'marina-bay':'sg', 'austin':'us',
-  'rodriguez':'mx', 'interlagos':'br', 'las-vegas':'us', 'lusail':'qa', 'yas-marina':'ae',
+  'miami':'us', 'villeneuve':'ca', 'monte-carlo':'mc', 'barcelona':'es',
+  'red-bull-ring':'at', 'silverstone':'gb', 'spa-francorchamps':'be',
+  'hungaroring':'hu', 'zandvoort':'nl', 'monza':'it', 'ifema-madrid':'es',
+  'baku':'az', 'marina-bay':'sg', 'austin':'us', 'rodriguez':'mx',
+  'interlagos':'br', 'las-vegas':'us', 'lusail':'qa', 'yas-marina':'ae',
 };
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
