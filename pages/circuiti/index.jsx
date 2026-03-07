@@ -225,22 +225,42 @@ function StatMini({ label, value }) {
 
 export async function getStaticProps() {
   try {
-    const filePath = path.join(process.cwd(), 'public', 'data', 'f1db-circuits.json');
-    const raw = fs.readFileSync(filePath, 'utf-8');
-    const data = JSON.parse(raw);
+    const dataDir = path.join(process.cwd(), 'public', 'data');
 
-    const circuits = (Array.isArray(data) ? data : data.circuits || []).map(c => ({
-      id:               c.id,
-      name:             c.name || c.fullName || '',
-      cityName:         c.cityName || c.city || null,
-      countryId:        c.countryId || c.country || null,
-      lapLengthKm:      c.lapLengthKm ?? c.circuitLength ?? null,
-      numberOfCorners:  c.numberOfCorners ?? c.corners ?? null,
-      numberOfDrszones: c.numberOfDrszones ?? c.drsZones ?? null,
-      direction:        c.direction || null,
-      seasonDebut:      c.seasonDebut || null,
-      region:           getRegion(c.countryId || c.country || ''),
-    }));
+    const raw = fs.readFileSync(path.join(dataDir, 'f1db-circuits.json'), 'utf-8');
+    const data = JSON.parse(raw);
+    const circuitsRaw = Array.isArray(data) ? data : data.circuits || [];
+
+    // Load layouts — pick the "effective" layout per circuit for current specs
+    let layoutsMap = {};
+    try {
+      const layoutsRaw = fs.readFileSync(path.join(dataDir, 'f1db-circuits-layouts.json'), 'utf-8');
+      const layouts = JSON.parse(layoutsRaw);
+      // Prefer effective:true, fallback to last entry per circuit
+      layouts.forEach(l => {
+        if (!layoutsMap[l.circuitId] || l.effective) {
+          layoutsMap[l.circuitId] = l;
+        }
+      });
+    } catch (e) {
+      console.warn('Layouts file not found:', e.message);
+    }
+
+    const circuits = circuitsRaw.map(c => {
+      const layout = layoutsMap[c.id] || {};
+      return {
+        id:               c.id,
+        name:             c.name || c.fullName || '',
+        cityName:         c.cityName || c.city || null,
+        countryId:        c.countryId || c.country || null,
+        lapLengthKm:      layout.length ?? null,
+        numberOfCorners:  layout.turns ?? null,
+        numberOfDrszones: c.numberOfDrszones ?? null,
+        direction:        c.direction || null,
+        seasonDebut:      c.seasonDebut || null,
+        region:           getRegion(c.countryId || c.country || ''),
+      };
+    });
 
     return { props: { circuits } };
   } catch (e) {

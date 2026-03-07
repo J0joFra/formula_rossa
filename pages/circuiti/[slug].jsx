@@ -168,6 +168,35 @@ export default function CircuitDetail({ circuit, races, lapRecord }) {
                 </div>
               </div>
 
+              {/* Layout variants — if multiple exist */}
+              {circuit.layouts?.length > 1 && (
+                <div className="rounded-2xl border border-white/8 p-6"
+                     style={{background:'rgba(255,255,255,0.02)'}}>
+                  <h2 className="text-xs text-white/30 font-mono tracking-[0.25em] uppercase mb-4">
+                    Varianti del tracciato ({circuit.layouts.length})
+                  </h2>
+                  <div className="space-y-2">
+                    {circuit.layouts.map(l => (
+                      <div key={l.id} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-mono text-white/50">{l.id}</span>
+                          {l.effective && (
+                            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full text-green-400"
+                                  style={{background:'rgba(34,197,94,0.1)',border:'1px solid rgba(34,197,94,0.2)'}}>
+                              Attuale
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex gap-6 text-xs font-mono">
+                          <span className="text-white/60">{l.length ? `${l.length} km` : '—'}</span>
+                          <span className="text-white/35">{l.turns ? `${l.turns} curve` : '—'}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* What makes this circuit special — static editorial notes */}
               <CircuitNotes circuitId={circuit.id} />
             </div>
@@ -310,19 +339,33 @@ export async function getStaticProps({ params }) {
     const c = circuits.find(x => x.id === params.slug);
     if (!c) return { notFound: true };
 
+    // Load layouts — effective layout for current specs, all layouts for history
+    let effectiveLayout = {};
+    let allLayouts = [];
+    try {
+      const layoutsRaw = fs.readFileSync(path.join(dataDir, 'f1db-circuits-layouts.json'), 'utf-8');
+      const layouts = JSON.parse(layoutsRaw);
+      allLayouts = layouts.filter(l => l.circuitId === params.slug);
+      // Prefer effective:true, fallback to last entry
+      effectiveLayout = allLayouts.find(l => l.effective) || allLayouts[allLayouts.length - 1] || {};
+    } catch (e) {
+      console.warn('Layouts load error:', e.message);
+    }
+
     const circuit = {
       id:               c.id,
       name:             c.name || c.fullName || '',
       fullName:         c.fullName || null,
       cityName:         c.cityName || c.city || null,
       countryId:        c.countryId || c.country || null,
-      lapLengthKm:      c.lapLengthKm ?? c.circuitLength ?? null,
-      numberOfCorners:  c.numberOfCorners ?? c.corners ?? null,
-      numberOfDrszones: c.numberOfDrszones ?? c.drsZones ?? null,
+      lapLengthKm:      effectiveLayout.length ?? null,
+      numberOfCorners:  effectiveLayout.turns ?? null,
+      numberOfDrszones: c.numberOfDrszones ?? null,
       direction:        c.direction || null,
       seasonDebut:      c.seasonDebut || null,
       altitude:         c.altitude || null,
       timezone:         c.timezone || null,
+      layouts:          allLayouts.map(l => ({ id: l.id, length: l.length, turns: l.turns, effective: l.effective })),
     };
 
     // Load race history for this circuit
