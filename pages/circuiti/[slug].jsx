@@ -1,8 +1,8 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { useState } from 'react';
-import Navigation from '../components/ferrari/Navigation';
-import Footer from '../components/ferrari/Footer';
+import Navigation from '../../components/ferrari/Navigation';
+import Footer from '../../components/ferrari/Footer';
 import path from 'path';
 import fs from 'fs';
 
