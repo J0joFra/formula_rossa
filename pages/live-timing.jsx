@@ -603,16 +603,6 @@ function GridToRaceChart({ raceResults, year, grandPrix }) {
 
       <div className="overflow-x-auto rounded-xl" style={{background:'rgba(0,0,0,0.35)',border:'1px solid rgba(255,255,255,0.05)'}}>
         <svg width="100%" viewBox={`0 0 ${SVG_W} ${SVG_H}`} style={{minWidth:500,display:'block'}}>
-          <defs>
-            {filtered.map(d => (
-              <linearGradient key={`g-${d.id}`} id={`g-${d.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%"   stopColor={d.color} stopOpacity="1" />
-                <stop offset="40%"  stopColor={d.color} stopOpacity="0.65" />
-                <stop offset="60%"  stopColor={d.color} stopOpacity="0.65" />
-                <stop offset="100%" stopColor={d.color} stopOpacity="1" />
-              </linearGradient>
-            ))}
-          </defs>
           <rect x={0}     y={0} width={LX+30}           height={SVG_H} fill="rgba(255,255,255,0.012)" />
           <rect x={RX-30} y={0} width={SVG_W-(RX-30)}   height={SVG_H} fill="rgba(255,255,255,0.012)" />
           <text x={LX/2+15}        y={28} textAnchor="middle" fill="#3f3f46" fontSize={10} fontFamily="monospace" letterSpacing="6">GRIGLIA PARTENZA</text>
@@ -637,7 +627,7 @@ function GridToRaceChart({ raceResults, year, grandPrix }) {
                   <path d={path} fill="none" stroke="transparent" strokeWidth={22} style={{cursor:'pointer'}}
                     onMouseEnter={()=>setHighlight(d.id)} onMouseLeave={()=>setHighlight(null)}/>
                   {isHL&&<path d={path} fill="none" stroke={d.color} strokeWidth={16} opacity={0.15} strokeLinecap="round"/>}
-                  <path d={path} fill="none" stroke={`url(#g-${d.id})`} strokeWidth={sw} opacity={opacity} strokeLinecap="round"/>
+                  <path d={path} fill="none" stroke={d.color} strokeWidth={sw} opacity={opacity} strokeLinecap="round"/>
                   {isHL&&<><circle cx={LX} cy={y1} r={9} fill={d.color} opacity={0.18}/><circle cx={RX} cy={y2} r={9} fill={d.color} opacity={0.18}/></>}
                   <circle cx={LX} cy={y1} r={isHL?8:6} fill={d.color} opacity={opacity}/>
                   <circle cx={RX} cy={y2} r={isHL?8:6} fill={d.color} opacity={opacity}/>
@@ -728,9 +718,14 @@ function QualiProgressionChart({ qualiResults }) {
   );
 
   const ROW_H=30, SVG_W=960, PAD=54;
-  const q1s=[...drivers].filter(d=>d.q1pos!=null).sort((a,b)=>a.q1pos-b.q1pos);
-  const q2s=[...drivers].filter(d=>d.q2pos!=null).sort((a,b)=>a.q2pos-b.q2pos);
-  const q3s=[...drivers].filter(d=>d.q3pos!=null).sort((a,b)=>a.q3pos-b.q3pos);
+  // Sort each round by lap time (fastest at top = P1), fallback to position
+  const q1s=[...drivers].filter(d=>d.q1t!=null||d.q1pos!=null).sort((a,b)=>(a.q1t??Infinity)-(b.q1t??Infinity)||(a.q1pos??99)-(b.q1pos??99));
+  const q2s=[...drivers].filter(d=>d.q2t!=null||d.q2pos!=null).sort((a,b)=>(a.q2t??Infinity)-(b.q2t??Infinity)||(a.q2pos??99)-(b.q2pos??99));
+  const q3s=[...drivers].filter(d=>d.q3t!=null||d.q3pos!=null).sort((a,b)=>(a.q3t??Infinity)-(b.q3t??Infinity)||(a.q3pos??99)-(b.q3pos??99));
+  // Re-assign visual rank (1 = fastest)
+  q1s.forEach((d,i)=>{ d.q1rank=i+1; });
+  q2s.forEach((d,i)=>{ d.q2rank=i+1; });
+  q3s.forEach((d,i)=>{ d.q3rank=i+1; });
   const N=Math.max(q1s.length,q2s.length,q3s.length,15);
   const SVG_H=N*ROW_H+PAD+24;
   const COLS=[200,480,760];
@@ -738,7 +733,8 @@ function QualiProgressionChart({ qualiResults }) {
   const makeY=(sorted)=>{ const m={}; sorted.forEach((d,i)=>{m[d.id]=PAD+i*ROW_H;}); return m; };
   const y1=makeY(q1s), y2=makeY(q2s), y3=makeY(q3s);
   const getY=(d,ri)=>ri===0?y1[d.id]:ri===1?y2[d.id]:y3[d.id];
-  const hasR=(d,ri)=>ri===0?d.q1pos!=null:ri===1?d.q2pos!=null:d.q3pos!=null;
+  const hasR=(d,ri)=>ri===0?(d.q1t!=null||d.q1pos!=null):ri===1?(d.q2t!=null||d.q2pos!=null):(d.q3t!=null||d.q3pos!=null);
+  const getRank=(d,ri)=>ri===0?d.q1rank:ri===1?d.q2rank:d.q3rank;
   const fmtT=(ms)=>ms==null?'—':`${Math.floor(ms/60000)}:${((ms%60000)/1000).toFixed(3).padStart(6,'0')}`;
 
   return (
@@ -758,14 +754,6 @@ function QualiProgressionChart({ qualiResults }) {
 
       <div className="overflow-x-auto rounded-xl" style={{background:'rgba(0,0,0,0.35)',border:'1px solid rgba(255,255,255,0.05)'}}>
         <svg width="100%" viewBox={`0 0 ${SVG_W} ${SVG_H}`} style={{minWidth:500,display:'block'}}>
-          <defs>
-            {drivers.map(d=>(
-              <linearGradient key={`qg-${d.id}`} id={`qg-${d.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor={d.color} stopOpacity="1"/>
-                <stop offset="100%" stopColor={d.color} stopOpacity="0.8"/>
-              </linearGradient>
-            ))}
-          </defs>
           {/* Column headers */}
           {COLS.map((cx,ci)=>(
             <g key={`ch-${ci}`}>
@@ -781,7 +769,7 @@ function QualiProgressionChart({ qualiResults }) {
           {/* Column bg */}
           <rect x={0}          y={0} width={COLS[0]+50}            height={SVG_H} fill="rgba(255,255,255,0.012)"/>
           <rect x={SVG_W-200}  y={0} width={200}                   height={SVG_H} fill="rgba(255,255,255,0.012)"/>
-          {/* Curves */}
+          {/* Curves — direct color stroke, no gradient (gradients break on horizontal lines) */}
           {[false,true].map(hlPass=>
             drivers.map(d=>{
               const isHL=highlight===d.id;
@@ -806,7 +794,7 @@ function QualiProgressionChart({ qualiResults }) {
                       <path d={path} fill="none" stroke="transparent" strokeWidth={20} style={{cursor:'pointer'}}
                         onMouseEnter={()=>setHighlight(d.id)} onMouseLeave={()=>setHighlight(null)}/>
                       {isHL&&<path d={path} fill="none" stroke={d.color} strokeWidth={14} opacity={0.18} strokeLinecap="round"/>}
-                      <path d={path} fill="none" stroke={`url(#qg-${d.id})`} strokeWidth={sw} opacity={opacity} strokeLinecap="round"/>
+                      <path d={path} fill="none" stroke={d.color} strokeWidth={sw} opacity={opacity} strokeLinecap="round"/>
                     </g>
                   ))}
                   {[0,1,2].map(ri=>{
@@ -829,13 +817,13 @@ function QualiProgressionChart({ qualiResults }) {
               );
             })
           )}
-          {/* Left labels */}
+          {/* Left labels — Q1, sorted by time */}
           {q1s.map(d=>{
             const y_=y1[d.id],isHL=highlight===d.id,dim=highlight&&!isHL;
             return (
               <g key={`ql-${d.id}`} onMouseEnter={()=>setHighlight(d.id)} onMouseLeave={()=>setHighlight(null)} style={{cursor:'pointer'}}>
                 {isHL&&<rect x={6} y={y_-14} width={COLS[0]-16} height={28} rx={5} fill={d.color} fillOpacity={0.12}/>}
-                <text x={32} y={y_+5} textAnchor="middle" fontSize={dim?9:isHL?11:10} fontWeight={700} fontFamily="monospace" fill={dim?'#2a2a2a':isHL?d.color:'#4b4b4b'}>P{d.q1pos}</text>
+                <text x={32} y={y_+5} textAnchor="middle" fontSize={dim?9:isHL?11:10} fontWeight={700} fontFamily="monospace" fill={dim?'#2a2a2a':isHL?d.color:'#4b4b4b'}>P{d.q1rank}</text>
                 <text x={COLS[0]-12} y={y_+5} textAnchor="end" fontSize={dim?11:isHL?15:13} fontWeight={isHL?900:700} fontFamily="monospace" fill={dim?'#252525':isHL?'#ffffff':'#e0e0e0'}>{d.code}</text>
               </g>
             );
@@ -843,7 +831,7 @@ function QualiProgressionChart({ qualiResults }) {
           {/* Right labels */}
           {(q3s.length>0?q3s:q2s).map(d=>{
             const ymap=q3s.length>0?y3:y2;
-            const y_=ymap[d.id],pos=q3s.length>0?d.q3pos:d.q2pos;
+            const y_=ymap[d.id],pos=q3s.length>0?d.q3rank:d.q2rank;
             const isHL=highlight===d.id,dim=highlight&&!isHL;
             return (
               <g key={`qr-${d.id}`} onMouseEnter={()=>setHighlight(d.id)} onMouseLeave={()=>setHighlight(null)} style={{cursor:'pointer'}}>

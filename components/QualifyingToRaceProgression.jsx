@@ -150,16 +150,6 @@ function GridToRaceChart({ raceResults, year, grandPrix }) {
       {/* Slope chart */}
       <div className="overflow-x-auto rounded-xl" style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.05)' }}>
         <svg width="100%" viewBox={`0 0 ${SVG_W} ${SVG_H}`} style={{ minWidth: 500, display: 'block' }}>
-          <defs>
-            {filtered.map(d => (
-              <linearGradient key={`g-${d.id}`} id={`gr-${d.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%"   stopColor={d.color} stopOpacity="1" />
-                <stop offset="40%"  stopColor={d.color} stopOpacity="0.7" />
-                <stop offset="60%"  stopColor={d.color} stopOpacity="0.7" />
-                <stop offset="100%" stopColor={d.color} stopOpacity="1" />
-              </linearGradient>
-            ))}
-          </defs>
 
           {/* Column header backgrounds */}
           <rect x={0}      y={0} width={LX + 30}         height={SVG_H} fill="rgba(255,255,255,0.012)" />
@@ -179,7 +169,7 @@ function GridToRaceChart({ raceResults, year, grandPrix }) {
               width={RX - LX - 2} height={ROW_H} fill="rgba(255,255,255,0.014)" />
           ))}
 
-          {/* Curves */}
+          {/* Curves — direct color stroke, no gradient (gradients fail on horizontal paths) */}
           {[false, true].map(hlPass =>
             filtered.map(d => {
               const y1 = gridY[d.id], y2 = raceY[d.id];
@@ -187,13 +177,11 @@ function GridToRaceChart({ raceResults, year, grandPrix }) {
               const isHL  = highlight === d.id;
               if (hlPass !== isHL) return null;
               const dimmed = highlight && !isHL;
-
               const opacity = dimmed ? 0.08 : 1;
               const sw      = isHL ? 9 : 7;
               const cx1 = LX + (RX - LX) * 0.35;
               const cx2 = LX + (RX - LX) * 0.65;
               const path = `M ${LX} ${y1} C ${cx1} ${y1}, ${cx2} ${y2}, ${RX} ${y2}`;
-
               return (
                 <g key={d.id}>
                   <path d={path} fill="none" stroke="transparent" strokeWidth={22}
@@ -201,7 +189,7 @@ function GridToRaceChart({ raceResults, year, grandPrix }) {
                     onMouseEnter={() => setHighlight(d.id)}
                     onMouseLeave={() => setHighlight(null)} />
                   {isHL && <path d={path} fill="none" stroke={d.color} strokeWidth={16} opacity={0.15} strokeLinecap="round" />}
-                  <path d={path} fill="none" stroke={`url(#gr-${d.id})`} strokeWidth={sw} opacity={opacity} strokeLinecap="round" />
+                  <path d={path} fill="none" stroke={d.color} strokeWidth={sw} opacity={opacity} strokeLinecap="round" />
                   {isHL && <>
                     <circle cx={LX} cy={y1} r={9} fill={d.color} opacity={0.18} />
                     <circle cx={RX} cy={y2} r={9} fill={d.color} opacity={0.18} />
