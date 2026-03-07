@@ -161,7 +161,6 @@ export default function FantaF1() {
   const [loading, setLoading] = useState(true);
 
   const [fullGrid, setFullGrid] = useState([]);
-  const [lastTail, setLastTail] = useState([]); // Ultimi 12 ordinati (pos 11-22)
   const [fastestLap, setFastestLap] = useState('');
   const [polePosition, setPolePosition] = useState('');
   const [dnfDrivers, setDnfDrivers] = useState([]);  // max 3 DNF previsti
@@ -176,7 +175,6 @@ export default function FantaF1() {
 
   useEffect(() => {
     setFullGrid(DRIVERS_2026.map(d => d.id));
-    setLastTail(DRIVERS_2026.slice(-12).map(d => d.id)); // Ultimi 12 come default
   }, []);
 
   useEffect(() => {
@@ -185,12 +183,6 @@ export default function FantaF1() {
     if (r) setLocked(isRaceLocked(r));
     setLoading(false);
   }, []);
-
-  // Se un pilota viene spostato nelle prime 10 della griglia, rimuovilo dagli ultimi 12
-  useEffect(() => {
-    const top10 = new Set(fullGrid.slice(0, 10));
-    setLastTail(prev => prev.filter(id => !top10.has(id)));
-  }, [fullGrid]);
 
   useEffect(() => {
     if (!race) return;
@@ -209,8 +201,6 @@ export default function FantaF1() {
         if (pred) {
           setExistingPred(pred);
           if (pred.fullGrid) setFullGrid(pred.fullGrid.map(p => p.driverId));
-          if (pred.lastTail) setLastTail(pred.lastTail.map(p => p.driverId));
-          else if (pred.lastFive) setLastTail(pred.lastFive.map(p => p.driverId)); // compat
           setFastestLap(pred.bonuses?.fastestLap || '');
           setPolePosition(pred.bonuses?.polePosition || '');
           setDnfDrivers(pred.bonuses?.dnfDrivers || []);
@@ -256,7 +246,7 @@ export default function FantaF1() {
     try {
       await savePrediction(session, race.raceId, {
         fullGrid:  fullGrid.map((id, i) => ({ pos: i + 1, driverId: id })),
-        lastTail:  lastTail.map((id, i) => ({ pos: 11 + i, driverId: id })),
+        lastTail:  fullGrid.slice(10).map((id, i) => ({ pos: 11 + i, driverId: id })),
         bonuses: { fastestLap, polePosition, safetyCar, dnfDrivers, winningConstructor },
       });
       setSaved(true);
@@ -270,7 +260,6 @@ export default function FantaF1() {
 
   const resetToDefault = () => {
     setFullGrid(DRIVERS_2026.map(d => d.id));
-    setLastTail(DRIVERS_2026.slice(-12).map(d => d.id)); // Ultimi 12 come default
     setFastestLap('');
     setSafetyCar(null);
     setSaved(false);
@@ -289,7 +278,7 @@ export default function FantaF1() {
   }
 
   const cc = CIRCUIT_COUNTRY[race.circuitId];
-  const lockDate = new Date(race.lockDate + 'T15:00:00');
+  const lockDate = new Date(race.lockDate + 'T23:59:00');
 
   // Step tabs config
   const STEPS = [
@@ -635,16 +624,17 @@ export default function FantaF1() {
                     transition={{ duration: 0.2 }}
                   >
                     <div className="rounded-3xl border border-purple-500/15 bg-zinc-900/20 overflow-hidden">
+                      {/* Header sticky */}
                       <div className="px-5 pt-5 pb-4 border-b border-white/5 sticky top-0 z-10 bg-zinc-950/95 backdrop-blur-sm">
                         <SectionLabel color="text-purple-500">Zona Coda · Posizioni 11–22</SectionLabel>
                         <p className="text-xs text-zinc-500 mt-1">
-                          Trascina i 12 piloti in coda nell'ordine che prevedi.
-                          Le prime 5 posizioni valgono di più — l'ordine conta!
+                          Riordina i piloti in coda. I <span className="text-purple-400 font-bold">primi 7</span> valgono posizione esatta,
+                          gli <span className="text-violet-700 font-bold">ultimi 5</span> zona corretta.
                         </p>
-                        <div className="flex gap-4 mt-2">
+                        <div className="flex gap-4 mt-2.5">
                           {[
-                            { color: '#a855f7', label: '11-15 · Pos esatta +10pt' },
-                            { color: '#7c3aed', label: '16-22 · Zona corretta +4pt' },
+                            { color: '#a855f7', label: `11–17 · Pos esatta +${POINTS.lastTailExact}pt` },
+                            { color: '#4c1d95', label: `18–22 · Zona +${POINTS.lastTailZone}pt` },
                           ].map(z => (
                             <div key={z.label} className="flex items-center gap-1.5">
                               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: z.color }} />
@@ -654,35 +644,43 @@ export default function FantaF1() {
                         </div>
                       </div>
 
-                      <div className="p-3 max-h-[500px] overflow-y-auto">
-                        <Reorder.Group axis="y" values={lastTail} onReorder={setLastTail} className="space-y-1.5">
-                          {lastTail.map((driverId, i) => {
+                      {/* Drag list — only the bottom 12 of fullGrid, syncs back into fullGrid */}
+                      <div className="p-3 max-h-[560px] overflow-y-auto">
+                        <Reorder.Group
+                          axis="y"
+                          values={fullGrid.slice(10)}
+                          onReorder={(newTail) => setFullGrid([...fullGrid.slice(0, 10), ...newTail])}
+                          className="space-y-1.5"
+                        >
+                          {fullGrid.slice(10).map((driverId, i) => {
                             const d = driverById(driverId);
                             const absPos = 11 + i;
-                            const isHighlight = absPos <= 15;
+                            // pos 11-17 = "highlight" zone (exact pts), pos 18-22 = "bottom 5" zone
+                            const isTop7  = absPos <= 17;   // pos esatta
+                            const isBot5  = absPos >= 18;   // zona (gli ultimi 5 evidenziati)
                             return (
                               <React.Fragment key={driverId}>
-                                {i === 5 && (
-                                  <p className="text-[10px] font-black uppercase tracking-widest px-2 pt-3 pb-1 text-violet-700/70">
-                                    ↓ Zona rossa · 16–22
+                                {i === 7 && (
+                                  <p className="text-[10px] font-black uppercase tracking-widest px-2 pt-3 pb-1 text-violet-900/80">
+                                    ↓ Ultimi 5 · 18–22
                                   </p>
                                 )}
                                 <Reorder.Item value={driverId} className="list-none">
                                   <div
                                     className="group flex items-center gap-4 px-4 py-3.5 rounded-2xl border transition-all duration-150 cursor-grab active:cursor-grabbing select-none"
                                     style={{
-                                      background: isHighlight
-                                        ? `linear-gradient(90deg, ${d.color}10 0%, rgba(20,20,24,0.8) 70%)`
-                                        : 'rgba(18,12,28,0.6)',
-                                      borderColor: isHighlight
-                                        ? `${d.color}25`
-                                        : 'rgba(139,92,246,0.12)',
+                                      background: isBot5
+                                        ? 'rgba(76,29,149,0.18)'
+                                        : `linear-gradient(90deg, ${d.color}10 0%, rgba(20,20,24,0.8) 70%)`,
+                                      borderColor: isBot5
+                                        ? 'rgba(109,40,217,0.30)'
+                                        : `${d.color}25`,
                                     }}
                                   >
                                     <GripVertical className="w-4 h-4 text-zinc-700 group-hover:text-zinc-500 transition-colors shrink-0" />
                                     <span
                                       className="text-sm font-black w-7 text-center shrink-0 tabular-nums"
-                                      style={{ color: isHighlight ? '#a855f7' : '#7c3aed' }}
+                                      style={{ color: isBot5 ? '#6d28d9' : '#a855f7' }}
                                     >
                                       {absPos}°
                                     </span>
@@ -983,7 +981,7 @@ export default function FantaF1() {
                         <div>
                           <SectionLabel color="text-purple-500">🔻 Zona Coda · Posizioni 11–22</SectionLabel>
                           <div className="grid grid-cols-2 gap-1">
-                            {lastTail.map((id, i) => (
+                            {fullGrid.slice(10).map((id, i) => (
                               <DriverChip key={id} driverId={id} pos={11 + i} small />
                             ))}
                           </div>
