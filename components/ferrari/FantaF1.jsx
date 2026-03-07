@@ -183,6 +183,12 @@ export default function FantaF1() {
     setLoading(false);
   }, []);
 
+  // Se un pilota viene spostato nelle prime 15 della griglia, rimuovilo dagli ultimi 5
+  useEffect(() => {
+    const top15 = new Set(fullGrid.slice(0, 15));
+    setLastFive(prev => prev.filter(id => !top15.has(id)));
+  }, [fullGrid]);
+
   useEffect(() => {
     if (!race) return;
     const id = setInterval(() => setLocked(isRaceLocked(race)), 60000);
@@ -654,7 +660,11 @@ export default function FantaF1() {
                             Clicca per aggiungere · {lastFive.length}/5
                           </p>
                           <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto">
-                            {DRIVERS_2026.filter(d => !lastFive.includes(d.id)).map(d => (
+                            {/* Solo piloti NON già nelle prime 15 della griglia e non già selezionati */}
+                            {(() => {
+                              const top15 = new Set(fullGrid.slice(0, 15));
+                              return DRIVERS_2026.filter(d => !lastFive.includes(d.id) && !top15.has(d.id));
+                            })().map(d => (
                               <button
                                 key={d.id}
                                 onClick={() => { if (lastFive.length < 5) setLastFive(prev => [...prev, d.id]); }}
