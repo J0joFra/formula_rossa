@@ -1433,10 +1433,103 @@ const fetchAll = async () => {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-2 text-[10px] text-red-600 font-mono tracking-[0.2em] mb-2">
-              <Radio className="w-3 h-3" /> OPENF1 API · TELEMETRY EXPLORER · 2023–2025
+              <Radio className="w-3 h-3" /> OPENF1 API · TELEMETRY EXPLORER · 2023–2026
             </div>
             <h1 className="text-4xl font-black tracking-tighter">TELEMETRY <span className="text-red-600">EXPLORER</span></h1>
-            <p className="text-white/35 text-sm mt-1 font-mono">Speed · RPM · Gear · Inputs · GPS Map · Sectors</p>
+          </div>
+
+          {/* ── HERO GUIDE — visible before any selection ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
+
+            {/* Left: intro text */}
+            <div className="lg:col-span-3 relative overflow-hidden rounded-2xl border border-white/8 p-8"
+                 style={{background:'linear-gradient(135deg,#0e0e0e 0%,#111 100%)'}}>
+              <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full pointer-events-none"
+                   style={{background:'radial-gradient(circle,rgba(220,0,0,0.14) 0%,transparent 70%)'}}/>
+              <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
+                   style={{backgroundImage:'radial-gradient(circle at 1px 1px,#fff 1px,transparent 0)',backgroundSize:'32px 32px'}}/>
+              <div className="absolute top-0 left-0 right-0 h-px overflow-hidden">
+                <div className="h-px w-1/2 bg-gradient-to-r from-transparent via-red-500/50 to-transparent"
+                     style={{animation:'scan 5s linear infinite'}}/>
+              </div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"/>
+                  <span className="text-[10px] text-red-500 font-mono tracking-[0.3em] uppercase">OpenF1 API · Live Data</span>
+                </div>
+                <h2 className="text-3xl font-black tracking-tighter leading-none uppercase mb-1">
+                  Come leggere<br/>la <span className="text-red-600">Telemetria</span>
+                </h2>
+                <p className="text-white/40 font-mono text-[11px] tracking-widest uppercase mb-6">Formula 1 · 2023–2026</p>
+
+                <div className="space-y-4 text-sm text-white/70 leading-relaxed">
+                  <p>
+                    La <strong className="text-white">telemetria</strong> è il flusso continuo di dati che ogni monoposto F1 trasmette ai box a ~50Hz durante la sessione. Ogni punto registra velocità, RPM, marcia inserita, posizione del pedale del gas e del freno.
+                  </p>
+                  <p>
+                    Il grafico <strong className="text-white">Speed</strong> mostra l'andamento della velocità lungo il giro: i picchi corrispondono ai rettilinei, le valli alle frenate. Confronta curve simili per capire dove un pilota frena più tardi o accelera prima.
+                  </p>
+                  <p>
+                    I <strong className="text-white">Settori</strong> dividono il circuito in tre tratti cronometrati. Il miglior tempo teorico è la somma dei migliori S1+S2+S3 di tutti i piloti — nessuno li ottiene insieme nello stesso giro.
+                  </p>
+                  <p>
+                    Il grafico <strong className="text-white">Grid → Race</strong> mostra quante posizioni ha guadagnato o perso ogni pilota dalla griglia all'arrivo. <strong className="text-white">Q1 → Q2 → Q3</strong> traccia l'evoluzione delle qualifiche per vedere chi si è migliorato nel corso delle sessioni.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: how-to steps + data glossary */}
+            <div className="lg:col-span-2 flex flex-col gap-4">
+
+              {/* Steps */}
+              <div className="rounded-2xl border border-white/8 p-6"
+                   style={{background:'rgba(255,255,255,0.02)'}}>
+                <div className="text-[10px] text-white/30 font-mono tracking-[0.25em] uppercase mb-4">Come usarlo</div>
+                <div className="space-y-3">
+                  {[
+                    {n:'01', title:'Anno + Gran Premio', desc:'Seleziona la stagione e la gara che vuoi analizzare'},
+                    {n:'02', title:'Sessione + Pilota',  desc:'Gara o Sprint, poi il pilota da esaminare'},
+                    {n:'03', title:'Fetch Telemetry',    desc:'Carica i dati — velocità, RPM, settori e posizioni'},
+                    {n:'04', title:'Esplora i grafici',  desc:'Cambia tab, lap, e passa da Grid→Race a Q1→Q3'},
+                  ].map(({n,title,desc})=>(
+                    <div key={n} className="flex gap-3">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-[10px] font-black font-mono text-red-500"
+                           style={{background:'rgba(220,0,0,0.1)',border:'1px solid rgba(220,0,0,0.2)'}}>
+                        {n}
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white leading-tight">{title}</div>
+                        <div className="text-[11px] text-white/40 mt-0.5">{desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Mini glossary */}
+              <div className="rounded-2xl border border-white/8 p-6 flex-1"
+                   style={{background:'rgba(255,255,255,0.02)'}}>
+                <div className="text-[10px] text-white/30 font-mono tracking-[0.25em] uppercase mb-4">Glossario dati</div>
+                <div className="space-y-2">
+                  {[
+                    {key:'Speed',   val:'Velocità istantanea in km/h',           color:'#f59e0b'},
+                    {key:'RPM',     val:'Giri motore — massimo ~18.000 rpm',      color:'#ef4444'},
+                    {key:'Gear',    val:'Marcia inserita (0 = folle)',             color:'#6366f1'},
+                    {key:'Throttle', val:'Apertura gas in % (0–100)',              color:'#22c55e'},
+                    {key:'Brake',   val:'Intensità frenata in % (0–100)',          color:'#ef4444'},
+                    {key:'DRS',     val:'Drag Reduction System attivo',            color:'#06b6d4'},
+                    {key:'S1/S2/S3',val:'Tempo per settore in secondi',            color:'#a855f7'},
+                  ].map(({key,val,color})=>(
+                    <div key={key} className="flex items-baseline gap-2">
+                      <span className="text-[11px] font-black font-mono w-16 flex-shrink-0" style={{color}}>{key}</span>
+                      <span className="text-[11px] text-white/45">{val}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
           </div>
 
           {/* 2×2 selectors */}
@@ -1689,70 +1782,12 @@ const fetchAll = async () => {
           )}
 
 
-          {!isFetching && !error && !telemetry.length && !driverLaps.length && (
-            <div className="relative overflow-hidden rounded-2xl border border-white/8 mt-4"
-                 style={{background:'linear-gradient(135deg,#0a0a0a 0%,#111 50%,#0d0d0d 100%)'}}>
-              <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full pointer-events-none"
-                   style={{background:'radial-gradient(circle,rgba(220,0,0,0.18) 0%,transparent 65%)'}}/>
-              <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full pointer-events-none"
-                   style={{background:'radial-gradient(circle,rgba(99,102,241,0.1) 0%,transparent 65%)'}}/>
-              <div className="absolute inset-0 pointer-events-none opacity-[0.035]"
-                   style={{backgroundImage:'radial-gradient(circle at 1px 1px,#fff 1px,transparent 0)',backgroundSize:'36px 36px'}}/>
-              <div className="absolute top-0 left-0 right-0 h-px overflow-hidden">
-                <div className="h-px w-1/3 bg-gradient-to-r from-transparent via-red-500/60 to-transparent"
-                     style={{animation:'scan 5s linear infinite'}}/>
-              </div>
-              <div className="relative z-10 px-8 py-16 md:px-16 md:py-20">
-                <div className="max-w-3xl">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6"
-                       style={{background:'rgba(220,0,0,0.1)',border:'1px solid rgba(220,0,0,0.25)'}}>
-                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"/>
-                    <span className="text-[10px] text-red-400 font-mono tracking-[0.3em] uppercase">OpenF1 Live Data</span>
-                  </div>
-                  <h2 className="text-5xl md:text-7xl font-black tracking-tighter leading-none uppercase mb-4">
-                    Telemetry<br/><span className="text-red-600">Explorer</span>
-                  </h2>
-                  <p className="text-white/40 font-mono text-sm tracking-[0.15em] uppercase mb-10">
-                    Speed · RPM · Gear · Inputs · Sectors · Grid Analysis
-                  </p>
-                  <div className="flex flex-wrap gap-2 mb-12">
-                    {[
-                      {icon:'⚡', label:'Real-time telemetry'},
-                      {icon:'📊', label:'Sector comparison'},
-                      {icon:'🏁', label:'Grid → Race'},
-                      {icon:'⏱', label:'Q1 → Q2 → Q3'},
-                      {icon:'🌡', label:'Weather data'},
-                      {icon:'🗺', label:'GPS circuit map'},
-                    ].map(({icon,label})=>(
-                      <div key={label} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-mono text-white/50"
-                           style={{background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.08)'}}>
-                        <span>{icon}</span>{label}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    {[
-                      {n:'01', label: year ? String(year) : 'Year',       done: !!year},
-                      {n:'02', label: meeting ? meeting.meeting_name.split(' ').slice(-2).join(' ') : 'Grand Prix', done: !!meeting},
-                      {n:'03', label: driverCode || 'Driver', done: !!driverCode},
-                      {n:'04', label: 'Fetch', done: false},
-                    ].map(({n,label,done},i,arr)=>(
-                      <React.Fragment key={n}>
-                        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-mono"
-                             style={{
-                               background: done ? 'rgba(220,0,0,0.12)' : 'rgba(255,255,255,0.04)',
-                               border: done ? '1px solid rgba(220,0,0,0.3)' : '1px solid rgba(255,255,255,0.08)',
-                             }}>
-                          <span className={`text-[9px] font-black ${done ? 'text-red-500' : 'text-white/20'}`}>{n}</span>
-                          <span className={done ? 'text-white' : 'text-white/35'}>{label}</span>
-                          {done && <span className="text-red-500 text-[10px]">✓</span>}
-                        </div>
-                        {i < arr.length-1 && <span className="text-white/15 text-xs font-mono">→</span>}
-                      </React.Fragment>
-                    ))}
-                  </div>
-                </div>
-              </div>
+
+          {!isFetching && !error && !telemetry.length && !driverLaps.length && canFetch && (
+            <div className="mt-2 flex items-center justify-center gap-3 py-10 rounded-2xl border border-white/6"
+                 style={{background:'rgba(255,255,255,0.015)'}}>
+              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"/>
+              <span className="text-white/40 font-mono text-sm tracking-widest uppercase">Pronto — clicca Fetch Telemetry per caricare i dati</span>
             </div>
           )}
 
