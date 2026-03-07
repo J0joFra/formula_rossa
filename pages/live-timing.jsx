@@ -93,9 +93,9 @@ function Dropdown({ label, isOpen, onToggle, disabled, header, children, dropdow
       <button onClick={onToggle} disabled={disabled}
         className={`w-full bg-zinc-900 border rounded-xl p-4 text-left transition-all
           ${disabled ? 'border-zinc-800 opacity-40 cursor-not-allowed' : 'border-zinc-800 hover:border-red-800/60 cursor-pointer'}`}>
-        {label && <div className="text-[10px] text-zinc-600 font-mono mb-1 tracking-[0.15em] uppercase">{label}</div>}
+        {label && <div className="text-[10px] text-white/35 font-mono mb-1 tracking-[0.15em] uppercase">{label}</div>}
         <div className="pr-6">{header}</div>
-        {!disabled && <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />}
+        {!disabled && <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 transition-transform ${isOpen ? 'rotate-180' : ''}`} />}
       </button>
       {isOpen && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-xl z-50 max-h-72 overflow-y-auto shadow-2xl shadow-black/60">
@@ -110,10 +110,10 @@ function StatCard({ label, value, icon, sub, accent }) {
   return (
     <div className={`bg-zinc-900 border rounded-xl p-4 ${accent ? 'border-red-900/40' : 'border-zinc-800'}`}>
       <div className="flex items-center gap-2 mb-2">{icon}
-        <span className="text-[10px] text-zinc-600 font-mono tracking-[0.15em] uppercase">{label}</span>
+        <span className="text-[10px] text-white/35 font-mono tracking-[0.15em] uppercase">{label}</span>
       </div>
       <div className="text-2xl font-black text-white font-mono leading-none">{value}</div>
-      {sub && <div className="text-xs text-zinc-600 mt-1 font-mono">{sub}</div>}
+      {sub && <div className="text-xs text-white/35 mt-1 font-mono">{sub}</div>}
     </div>
   );
 }
@@ -133,17 +133,17 @@ function LapSelector({ laps, selectedLap, onSelect, fastestLapNumber, color, lab
   return (
     <div className="flex items-center gap-1">
       <button onClick={() => { const p = laps[idx - 1]; if (p) onSelect(p.lap_number); }} disabled={idx <= 0}
-        className="p-1.5 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white disabled:opacity-30 transition-colors">
+        className="p-1.5 rounded-lg bg-zinc-800 text-white/70 hover:text-white disabled:opacity-30 transition-colors">
         <ChevronLeft className="w-3 h-3" />
       </button>
       <div className="relative" ref={ref}>
         <button onClick={() => setOpen(v => !v)}
           className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs font-mono hover:border-zinc-600 transition-colors">
-          <span className="text-zinc-500">{label}</span>
+          <span className="text-white/50">{label}</span>
           <span className="font-bold" style={{ color }}>L{current?.lap_number ?? '?'}</span>
           {current?.lap_number === fastestLapNumber && <span className="text-purple-400 text-[9px]">★</span>}
-          <span className="text-zinc-500">{formatTime(current?.lap_duration)}</span>
-          <ChevronDown className={`w-3 h-3 text-zinc-600 transition-transform ${open ? 'rotate-180' : ''}`} />
+          <span className="text-white/50">{formatTime(current?.lap_duration)}</span>
+          <ChevronDown className={`w-3 h-3 text-white/35 transition-transform ${open ? 'rotate-180' : ''}`} />
         </button>
         {open && (
           <div className="absolute top-full left-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-xl z-50 w-48 max-h-56 overflow-y-auto shadow-2xl">
@@ -151,17 +151,17 @@ function LapSelector({ laps, selectedLap, onSelect, fastestLapNumber, color, lab
               <button key={l.lap_number} onClick={() => { onSelect(l.lap_number); setOpen(false); }}
                 className={`w-full px-3 py-2 text-left flex items-center justify-between text-xs font-mono hover:bg-zinc-800 transition-colors
                   ${l.lap_number === current?.lap_number ? 'bg-zinc-800/60' : ''}`}>
-                <span className={l.lap_number === fastestLapNumber ? 'text-purple-400 font-bold' : 'text-zinc-300'}>
+                <span className={l.lap_number === fastestLapNumber ? 'text-purple-400 font-bold' : 'text-white/80'}>
                   Lap {l.lap_number}{l.lap_number === fastestLapNumber ? ' ★' : ''}
                 </span>
-                <span className="text-zinc-500">{formatTime(l.lap_duration)}</span>
+                <span className="text-white/50">{formatTime(l.lap_duration)}</span>
               </button>
             ))}
           </div>
         )}
       </div>
       <button onClick={() => { const n = laps[idx + 1]; if (n) onSelect(n.lap_number); }} disabled={idx >= laps.length - 1}
-        className="p-1.5 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white disabled:opacity-30 transition-colors">
+        className="p-1.5 rounded-lg bg-zinc-800 text-white/70 hover:text-white disabled:opacity-30 transition-colors">
         <ChevronRight className="w-3 h-3" />
       </button>
     </div>
@@ -187,7 +187,7 @@ function TelemetryChart({ data, code, color, tab }) {
           ['Brake %',    'brake',    '#ef4444', 60],
         ].map(([name, key, c, h]) => (
           <div key={name}>
-            <div className="text-[9px] text-zinc-600 font-mono mb-0.5 uppercase tracking-widest">{name}</div>
+            <div className="text-[9px] text-white/35 font-mono mb-0.5 uppercase tracking-widest">{name}</div>
             <ResponsiveContainer width="100%" height={h}>
               <AreaChart data={chartData} margin={{ top: 2, right: 4, left: 0, bottom: 0 }}>
                 <XAxis dataKey="distance" stroke="#3f3f46" tick={{ fontSize: 9 }} tickFormatter={kmFmt} />
@@ -228,7 +228,7 @@ function TelemetryChart({ data, code, color, tab }) {
             if (!active || !payload?.length) return null;
             return (
               <div className="bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-xs font-mono">
-                <div className="text-zinc-600 mb-1">{kmFmt(label)}</div>
+                <div className="text-white/35 mb-1">{kmFmt(label)}</div>
                 {payload.map(p => p.value != null && (
                   <div key={p.name} style={{ color: p.stroke }}>{p.name}: {p.value}{unit}</div>
                 ))}
@@ -271,7 +271,7 @@ function SectorTable({ sectorsData, highlightCode }) {
   if (!sectorsData?.length) return (
     <div className="relative overflow-hidden rounded-2xl border border-white/8 p-10 flex items-center justify-center h-40"
          style={{ background: 'linear-gradient(135deg,#0c0c0c,#111)' }}>
-      <span className="text-zinc-600 font-mono text-sm tracking-widest uppercase">Loading sector data…</span>
+      <span className="text-white/35 font-mono text-sm tracking-widest uppercase">Loading sector data…</span>
     </div>
   );
 
@@ -304,7 +304,7 @@ function SectorTable({ sectorsData, highlightCode }) {
           </div>
 
           <div className="flex items-center gap-2" ref={filterRef}>
-            <span className="text-[10px] text-zinc-600 font-mono tracking-widest uppercase">Lap</span>
+            <span className="text-[10px] text-white/35 font-mono tracking-widest uppercase">Lap</span>
             <div className="relative">
               <button onClick={() => setOpenFilter(v => !v)}
                 className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-mono border transition-all"
@@ -312,18 +312,18 @@ function SectorTable({ sectorsData, highlightCode }) {
                 <span className={lapFilter == null ? 'text-purple-400 font-bold' : 'text-white'}>
                   {lapFilter == null ? '★ Best' : `Lap ${lapFilter}`}
                 </span>
-                <ChevronDown className={`w-3 h-3 text-zinc-500 transition-transform ${openFilter ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-3 h-3 text-white/50 transition-transform ${openFilter ? 'rotate-180' : ''}`} />
               </button>
               {openFilter && (
                 <div className="absolute top-full right-0 mt-1 rounded-xl z-50 w-40 max-h-52 overflow-y-auto shadow-2xl"
                      style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)' }}>
                   <button onClick={() => { setLapFilter(null); setOpenFilter(false); }}
-                    className={`w-full px-3 py-2 text-left text-xs font-mono hover:bg-white/5 transition-colors ${lapFilter == null ? 'text-purple-400 font-bold' : 'text-zinc-400'}`}>
+                    className={`w-full px-3 py-2 text-left text-xs font-mono hover:bg-white/5 transition-colors ${lapFilter == null ? 'text-purple-400 font-bold' : 'text-white/70'}`}>
                     ★ Best lap each
                   </button>
                   {allLapNumbers.map(n => (
                     <button key={n} onClick={() => { setLapFilter(n); setOpenFilter(false); }}
-                      className={`w-full px-3 py-2 text-left text-xs font-mono hover:bg-white/5 transition-colors ${lapFilter === n ? 'bg-white/8 text-white' : 'text-zinc-400'}`}>
+                      className={`w-full px-3 py-2 text-left text-xs font-mono hover:bg-white/5 transition-colors ${lapFilter === n ? 'bg-white/8 text-white' : 'text-white/70'}`}>
                       Lap {n}
                     </button>
                   ))}
@@ -346,7 +346,7 @@ function SectorTable({ sectorsData, highlightCode }) {
                    style={{ background: `${color}12`, border: `1px solid ${color}30` }}>
                 <div className="text-[9px] font-mono tracking-widest uppercase mb-0.5" style={{ color: `${color}99` }}>{label}</div>
                 <div className="text-base font-black font-mono" style={{ color }}>{best !== Infinity ? `${best.toFixed(3)}s` : '—'}</div>
-                {bestDriver && <div className="text-[9px] text-zinc-600 font-mono mt-0.5">{bestDriver.code}</div>}
+                {bestDriver && <div className="text-[9px] text-white/35 font-mono mt-0.5">{bestDriver.code}</div>}
               </div>
             );
           })}
@@ -370,7 +370,7 @@ function SectorTable({ sectorsData, highlightCode }) {
                   { h: 'ΔS2',    align: 'right' },
                   { h: 'ΔS3',    align: 'right' },
                 ].map(({ h, align }) => (
-                  <th key={h} className={`py-2.5 px-2 whitespace-nowrap text-[10px] tracking-[0.15em] font-normal text-zinc-600 uppercase ${align === 'left' ? 'text-left' : 'text-right'}`}>
+                  <th key={h} className={`py-2.5 px-2 whitespace-nowrap text-[10px] tracking-[0.15em] font-normal text-white/35 uppercase ${align === 'left' ? 'text-left' : 'text-right'}`}>
                     {h}
                   </th>
                 ))}
@@ -400,7 +400,7 @@ function SectorTable({ sectorsData, highlightCode }) {
 
                     {/* Pos */}
                     <td className="py-2 px-2">
-                      <span className="text-zinc-600 font-mono text-[10px]">{i + 1}</span>
+                      <span className="text-white/35 font-mono text-[10px]">{i + 1}</span>
                     </td>
 
                     {/* Driver */}
@@ -416,7 +416,7 @@ function SectorTable({ sectorsData, highlightCode }) {
 
                     {/* Lap */}
                     <td className="py-2 px-2 text-right">
-                      <span className={`text-[11px] ${d.isBest ? 'text-purple-400 font-bold' : 'text-zinc-500'}`}>
+                      <span className={`text-[11px] ${d.isBest ? 'text-purple-400 font-bold' : 'text-white/50'}`}>
                         {d.isBest ? '★' : ''}{d.lap_number}
                       </span>
                     </td>
@@ -438,7 +438,7 @@ function SectorTable({ sectorsData, highlightCode }) {
                     {/* S1, S2, S3 */}
                     {[['s1', bS1, '#a855f7'], ['s2', bS2, '#6366f1'], ['s3', bS3, '#8b5cf6']].map(([k, best, sc]) => (
                       <td key={k} className="py-2 px-2 text-right">
-                        <span className={`text-[11px] font-bold ${d[k] === best ? '' : 'text-zinc-300'}`}
+                        <span className={`text-[11px] font-bold ${d[k] === best ? '' : 'text-white/80'}`}
                           style={d[k] === best ? { color: sc } : {}}>
                           {d[k]?.toFixed(3) ?? '—'}
                         </span>
@@ -448,7 +448,7 @@ function SectorTable({ sectorsData, highlightCode }) {
                     {/* ΔS1, ΔS2, ΔS3 */}
                     {[dS1, dS2, dS3].map((delta, di) => (
                       <td key={di} className="py-2 px-2 text-right">
-                        <span className={`text-[10px] font-mono ${delta === 0 ? 'text-zinc-600' : delta < 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        <span className={`text-[10px] font-mono ${delta === 0 ? 'text-white/35' : delta < 0 ? 'text-green-400' : 'text-red-400'}`}>
                           {delta === 0 ? 'REF' : formatDelta(delta)}
                         </span>
                       </td>
@@ -475,7 +475,7 @@ function RacePositionsChart({ positionsData, highlightCodes }) {
   });
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-      <div className="text-[10px] text-zinc-600 font-mono tracking-[0.15em] uppercase mb-4">Race Positions</div>
+      <div className="text-[10px] text-white/35 font-mono tracking-[0.15em] uppercase mb-4">Race Positions</div>
       <ResponsiveContainer width="100%" height={280}>
         <LineChart data={byLap}>
           <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
@@ -555,7 +555,7 @@ function GridToRaceChart({ raceResults, year, grandPrix }) {
   }, [drivers]);
 
   if (!drivers.length) return (
-    <div className="flex items-center justify-center h-32 text-zinc-600 font-mono text-sm tracking-widest uppercase">
+    <div className="flex items-center justify-center h-32 text-white/35 font-mono text-sm tracking-widest uppercase">
       No race results available
     </div>
   );
@@ -571,7 +571,7 @@ function GridToRaceChart({ raceResults, year, grandPrix }) {
     {key:'all',    label:`ALL · ${drivers.length}`,    ac:'bg-white/10 text-white border-white/25'},
     {key:'gained', label:`▲ GAINED · ${stats.gained}`, ac:'bg-green-500/15 text-green-400 border-green-500/40'},
     {key:'lost',   label:`▼ LOST · ${stats.lost}`,     ac:'bg-red-500/15 text-red-400 border-red-500/40'},
-    {key:'same',   label:`● SAME · ${stats.same}`,     ac:'bg-zinc-700/60 text-zinc-300 border-zinc-600/40'},
+    {key:'same',   label:`● SAME · ${stats.same}`,     ac:'bg-zinc-700/60 text-white/80 border-zinc-600/40'},
   ];
 
   return (
@@ -580,7 +580,7 @@ function GridToRaceChart({ raceResults, year, grandPrix }) {
         {FILTERS.map(({key,label,ac}) => (
           <button key={key} onClick={() => setFilter(key)}
             className={`px-3.5 py-2 rounded-xl text-[11px] font-mono tracking-widest border transition-all duration-200 ${
-              filter === key ? ac : 'bg-white/5 text-zinc-600 border-white/8 hover:text-zinc-300 hover:bg-white/8'
+              filter === key ? ac : 'bg-white/5 text-white/35 border-white/8 hover:text-white/80 hover:bg-white/8'
             }`}>{label}</button>
         ))}
       </div>
@@ -595,7 +595,7 @@ function GridToRaceChart({ raceResults, year, grandPrix }) {
             color:'#ef4444', bg:'rgba(255,255,255,0.03)', border:'rgba(255,255,255,0.08)'},
         ].map(({label,value,color,bg,border}) => (
           <div key={label} className="rounded-xl px-4 py-3" style={{background:bg,border:`1px solid ${border}`}}>
-            <div className="text-[9px] text-zinc-600 font-mono tracking-[0.25em] uppercase mb-1">{label}</div>
+            <div className="text-[9px] text-white/35 font-mono tracking-[0.25em] uppercase mb-1">{label}</div>
             <div className="text-2xl font-black font-mono leading-none" style={{color}}>{value}</div>
           </div>
         ))}
@@ -681,23 +681,30 @@ function GridToRaceChart({ raceResults, year, grandPrix }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-6 pt-5 border-t border-white/5">
-        <span className="text-[9px] text-zinc-700 font-mono tracking-[0.3em] uppercase">Legend</span>
-        <span className="flex items-center gap-2 text-[11px] text-zinc-500 font-mono">
+        <span className="text-[9px] text-white/25 font-mono tracking-[0.3em] uppercase">Legend</span>
+        <span className="flex items-center gap-2 text-[11px] text-white/50 font-mono">
           <span className="inline-block w-8 h-0.5 rounded" style={{background:'linear-gradient(90deg,#888,#888)'}}/> Team color (tutti i piloti)
         </span>
-        <span className="ml-auto text-[10px] text-zinc-800 font-mono tracking-widest">HOVER TO HIGHLIGHT</span>
+        <span className="ml-auto text-[10px] text-white/15 font-mono tracking-widest">HOVER TO HIGHLIGHT</span>
       </div>
     </div>
   );
 }
 
 // ── Q1→Q2→Q3 inner chart ──
-function QualiProgressionChart({ qualiResults }) {
+function QualiProgressionChart({ qualiResults, year }) {
   const [highlight, setHighlight] = React.useState(null);
+
+  // 2026: 22 drivers, Q1 eliminates 6 (→16 advance), Q2 eliminates 6 (→10 advance)
+  // Pre-2026: 20 drivers, Q1 eliminates 5 (→15 advance), Q2 eliminates 5 (→10 advance)
+  const is2026Plus = parseInt(year) >= 2026;
+  const Q1_ADVANCE = is2026Plus ? 16 : 15;  // drivers advancing from Q1
+  const Q2_ADVANCE = 10;                     // always 10 for Q3
 
   const drivers = React.useMemo(() => {
     if (!qualiResults?.length) return [];
-    return qualiResults.map(r => {
+    // First pass: determine who advances based on actual data
+    const all = qualiResults.map(r => {
       const parts = (r.driverId || '').split('-');
       const code  = parts[parts.length - 1].toUpperCase().substring(0, 3);
       return {
@@ -706,13 +713,27 @@ function QualiProgressionChart({ qualiResults }) {
         q1pos: r.q1pos ?? null, q1t: r.q1Millis ?? null,
         q2pos: r.q2pos ?? null, q2t: r.q2Millis ?? null,
         q3pos: r.q3pos ?? null, q3t: r.q3Millis ?? null,
-        eliminatedAfter: r.q3pos != null ? null : r.q2pos != null ? 'Q2' : 'Q1',
       };
     });
-  }, [qualiResults]);
+    // If q2/q3 data not present from DB, infer from Q1 times who advanced
+    const hasQ2Data = all.some(d => d.q2t != null || d.q2pos != null);
+    const hasQ3Data = all.some(d => d.q3t != null || d.q3pos != null);
+    if (!hasQ2Data) {
+      const q1sorted = [...all].filter(d=>d.q1t!=null).sort((a,b)=>a.q1t-b.q1t);
+      q1sorted.slice(0, Q1_ADVANCE).forEach((d,i)=>{ d.q2pos=i+1; d.q2t=d.q1t; });
+    }
+    if (!hasQ3Data) {
+      const q2sorted = [...all].filter(d=>d.q2t!=null).sort((a,b)=>a.q2t-b.q2t);
+      q2sorted.slice(0, Q2_ADVANCE).forEach((d,i)=>{ d.q3pos=i+1; d.q3t=d.q2t; });
+    }
+    return all.map(d => ({
+      ...d,
+      eliminatedAfter: d.q3pos != null ? null : d.q2pos != null ? 'Q2' : 'Q1',
+    }));
+  }, [qualiResults, Q1_ADVANCE, Q2_ADVANCE]);
 
   if (!drivers.length) return (
-    <div className="flex items-center justify-center h-32 text-zinc-600 font-mono text-sm tracking-widest uppercase">
+    <div className="flex items-center justify-center h-32 text-white/35 font-mono text-sm tracking-widest uppercase">
       No qualifying data available
     </div>
   );
@@ -737,16 +758,27 @@ function QualiProgressionChart({ qualiResults }) {
   const getRank=(d,ri)=>ri===0?d.q1rank:ri===1?d.q2rank:d.q3rank;
   const fmtT=(ms)=>ms==null?'—':`${Math.floor(ms/60000)}:${((ms%60000)/1000).toFixed(3).padStart(6,'0')}`;
 
+  const q1elim = q1s.length - q2s.length;
+  const q2elim = q2s.length - q3s.length;
+
   return (
     <div className="space-y-6">
+      {/* 2026 format notice */}
+      {is2026Plus && (
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-mono text-indigo-300"
+             style={{background:'rgba(99,102,241,0.08)',border:'1px solid rgba(99,102,241,0.2)'}}>
+          <span className="text-indigo-400">ℹ</span>
+          <span className="text-white/50">2026 Format: 22 drivers · Q1 eliminates 6 → Q2 eliminates 6 → 10 in Q3</span>
+        </div>
+      )}
       <div className="grid grid-cols-3 gap-3">
         {[
-          {label:'Q1 RUNNERS',value:q1s.length,color:COL_COLORS[0],bg:'rgba(99,102,241,0.08)',border:'rgba(99,102,241,0.2)'},
-          {label:'Q2 RUNNERS',value:q2s.length,color:COL_COLORS[1],bg:'rgba(245,158,11,0.08)',border:'rgba(245,158,11,0.2)'},
-          {label:'Q3 RUNNERS',value:q3s.length,color:COL_COLORS[2],bg:'rgba(239,68,68,0.08)', border:'rgba(239,68,68,0.2)'},
+          {label:`Q1  –${q1elim} elim.`, value:q1s.length,  color:COL_COLORS[0], bg:'rgba(99,102,241,0.08)', border:'rgba(99,102,241,0.2)'},
+          {label:`Q2  –${q2elim} elim.`, value:q2s.length,  color:COL_COLORS[1], bg:'rgba(245,158,11,0.08)', border:'rgba(245,158,11,0.2)'},
+          {label:'Q3  Pole shoot-out',   value:q3s.length,  color:COL_COLORS[2], bg:'rgba(239,68,68,0.08)',  border:'rgba(239,68,68,0.2)'},
         ].map(({label,value,color,bg,border})=>(
           <div key={label} className="rounded-xl px-4 py-3" style={{background:bg,border:`1px solid ${border}`}}>
-            <div className="text-[9px] font-mono tracking-[0.25em] uppercase mb-1" style={{color:`${color}99`}}>{label}</div>
+            <div className="text-[9px] font-mono tracking-[0.2em] uppercase mb-1" style={{color:`${color}99`}}>{label}</div>
             <div className="text-3xl font-black font-mono leading-none" style={{color}}>{value}</div>
           </div>
         ))}
@@ -865,16 +897,16 @@ function QualiProgressionChart({ qualiResults }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-6 pt-4 border-t border-white/5">
-        <span className="text-[9px] text-zinc-700 font-mono tracking-[0.3em] uppercase">Legend</span>
+        <span className="text-[9px] text-white/25 font-mono tracking-[0.3em] uppercase">Legend</span>
         {[{color:COL_COLORS[0],label:'Q1'},{color:COL_COLORS[1],label:'Q2'},{color:COL_COLORS[2],label:'Q3'}].map(({color,label})=>(
-          <span key={label} className="flex items-center gap-2 text-[11px] text-zinc-500 font-mono">
+          <span key={label} className="flex items-center gap-2 text-[11px] text-white/50 font-mono">
             <span className="inline-block w-3 h-3 rounded-full" style={{background:color,opacity:0.6}}/>{label}
           </span>
         ))}
-        <span className="flex items-center gap-2 text-[11px] text-zinc-500 font-mono">
+        <span className="flex items-center gap-2 text-[11px] text-white/50 font-mono">
           <span style={{color:'#555',fontSize:11}}>✕</span> Eliminato
         </span>
-        <span className="ml-auto text-[10px] text-zinc-800 font-mono tracking-widest">HOVER TO HIGHLIGHT</span>
+        <span className="ml-auto text-[10px] text-white/15 font-mono tracking-widest">HOVER TO HIGHLIGHT</span>
       </div>
     </div>
   );
@@ -913,7 +945,7 @@ function QualifyingToRaceProgression({ raceResults, qualiResults, year, grandPri
                 ? <>Grid <span className="text-red-600">→</span> Race</>
                 : <>Q1 <span style={{color:'#6366f1'}}>→</span> Q2 <span style={{color:'#f59e0b'}}>→</span> Q3</>}
             </h2>
-            <p className="text-zinc-500 font-mono text-xs mt-2 tracking-[0.2em] uppercase">
+            <p className="text-white/50 font-mono text-xs mt-2 tracking-[0.2em] uppercase">
               {year} · {grandPrix} · {mode==='race'?'Position Gains & Losses':'Qualifying Progression'}
             </p>
           </div>
@@ -922,15 +954,15 @@ function QualifyingToRaceProgression({ raceResults, qualiResults, year, grandPri
           <div className="flex gap-2">
             <button onClick={()=>setMode('race')}
               className={`px-4 py-2.5 rounded-xl text-[11px] font-mono tracking-widest border transition-all duration-200 ${
-                mode==='race'?'bg-red-500/15 text-red-400 border-red-500/40':'bg-white/5 text-zinc-600 border-white/8 hover:text-zinc-300 hover:bg-white/8'
+                mode==='race'?'bg-red-500/15 text-red-400 border-red-500/40':'bg-white/5 text-white/35 border-white/8 hover:text-white/80 hover:bg-white/8'
               }`}>
               🏁 GRID → RACE
             </button>
             <button onClick={()=>setMode('quali')} disabled={!hasQuali}
               className={`px-4 py-2.5 rounded-xl text-[11px] font-mono tracking-widest border transition-all duration-200 ${
                 mode==='quali'?'bg-indigo-500/15 text-indigo-400 border-indigo-500/40'
-                :hasQuali?'bg-white/5 text-zinc-600 border-white/8 hover:text-zinc-300 hover:bg-white/8'
-                :'opacity-30 bg-white/3 text-zinc-800 border-white/5 cursor-not-allowed'
+                :hasQuali?'bg-white/5 text-white/35 border-white/8 hover:text-white/80 hover:bg-white/8'
+                :'opacity-30 bg-white/3 text-white/15 border-white/5 cursor-not-allowed'
               }`}>
               ⏱ Q1 → Q2 → Q3
             </button>
@@ -1404,7 +1436,7 @@ const fetchAll = async () => {
               <Radio className="w-3 h-3" /> OPENF1 API · TELEMETRY EXPLORER · 2023–2025
             </div>
             <h1 className="text-4xl font-black tracking-tighter">TELEMETRY <span className="text-red-600">EXPLORER</span></h1>
-            <p className="text-zinc-600 text-sm mt-1 font-mono">Speed · RPM · Gear · Inputs · GPS Map · Sectors</p>
+            <p className="text-white/35 text-sm mt-1 font-mono">Speed · RPM · Gear · Inputs · GPS Map · Sectors</p>
           </div>
 
           {/* 2×2 selectors */}
@@ -1414,7 +1446,7 @@ const fetchAll = async () => {
               header={<div className="text-2xl font-black font-mono">{year||'—'}</div>}>
               {AVAILABLE_YEARS.map(y => (
                 <button key={y} onClick={() => handleYearChange(y)}
-                  className={`w-full p-3 text-left font-mono text-sm hover:bg-zinc-800 transition-colors ${year===y?'bg-red-600/15 border-l-2 border-red-600 pl-4 text-red-400':'text-zinc-300'}`}>
+                  className={`w-full p-3 text-left font-mono text-sm hover:bg-zinc-800 transition-colors ${year===y?'bg-red-600/15 border-l-2 border-red-600 pl-4 text-red-400':'text-white/80'}`}>
                   {y}
                 </button>
               ))}
@@ -1429,10 +1461,10 @@ const fetchAll = async () => {
                     {flagCode && <img src={`https://flagcdn.com/w20/${flagCode}.png`} alt="Bandiera nazione" className="w-5 h-3 object-cover rounded-sm flex-shrink-0" />}
                     <div>
                       <div className="text-sm font-bold leading-tight">{meeting.meeting_name}</div>
-                      <div className="text-xs text-zinc-500">{meeting.location} · {meeting.country_name}</div>
+                      <div className="text-xs text-white/50">{meeting.location} · {meeting.country_name}</div>
                     </div>
                   </div>
-                ) : <div className="text-sm text-zinc-500">{year?(meetings.length?'Select Grand Prix':'Loading...'):'Select year first'}</div>
+                ) : <div className="text-sm text-white/50">{year?(meetings.length?'Select Grand Prix':'Loading...'):'Select year first'}</div>
               }>
               {meetings.map(m => {
                 const fc = getFlagCode(m.location||m.meeting_name||'');
@@ -1442,7 +1474,7 @@ const fetchAll = async () => {
                     {fc && <img src={`https://flagcdn.com/w20/${fc}.png`} alt="Bandiera nazione" className="w-5 h-3 object-cover rounded-sm flex-shrink-0" />}
                     <div>
                       <div className="text-sm font-bold text-white">{m.meeting_name}</div>
-                      <div className="text-xs text-zinc-500">{m.location}</div>
+                      <div className="text-xs text-white/50">{m.location}</div>
                     </div>
                   </button>
                 );
@@ -1451,12 +1483,12 @@ const fetchAll = async () => {
 
             {/* Session */}
             <Dropdown label="Session" isOpen={openSession} onToggle={() => setOpenSession(v=>!v)} dropdownRef={r3}
-              header={<div className="flex items-center gap-3"><span className="text-2xl font-black font-mono">{sessionType}</span><span className="text-zinc-500 text-sm">{SESSION_TYPES.find(s=>s.id===sessionType)?.name}</span></div>}>
+              header={<div className="flex items-center gap-3"><span className="text-2xl font-black font-mono">{sessionType}</span><span className="text-white/50 text-sm">{SESSION_TYPES.find(s=>s.id===sessionType)?.name}</span></div>}>
               {SESSION_TYPES.map(s => (
                 <button key={s.id} onClick={() => handleSessionChange(s.id)}
                   className={`w-full p-3 text-left hover:bg-zinc-800 transition-colors ${sessionType===s.id?'bg-red-600/15 border-l-2 border-red-600 pl-4':''}`}>
                   <span className="font-mono font-bold text-white mr-3">{s.id}</span>
-                  <span className="text-zinc-500 text-sm">{s.name}</span>
+                  <span className="text-white/50 text-sm">{s.name}</span>
                 </button>
               ))}
             </Dropdown>
@@ -1471,12 +1503,12 @@ const fetchAll = async () => {
                     <div>
                       <div className="font-black font-mono text-sm flex items-center gap-2">
                         <span style={{ color }}>{driverInfo.name_acronym}</span>
-                        <span className="text-zinc-600 font-normal">#{driverInfo.driver_number}</span>
+                        <span className="text-white/35 font-normal">#{driverInfo.driver_number}</span>
                       </div>
-                      <div className="text-xs text-zinc-500">{driverInfo.full_name} · {driverInfo.team_name}</div>
+                      <div className="text-xs text-white/50">{driverInfo.full_name} · {driverInfo.team_name}</div>
                     </div>
                   </div>
-                ) : <div className="text-sm text-zinc-500">{meeting?(drivers.length?'Select Driver':'Loading...'):'Select GP first'}</div>
+                ) : <div className="text-sm text-white/50">{meeting?(drivers.length?'Select Driver':'Loading...'):'Select GP first'}</div>
               }>
               {drivers.map(d => (
                 <button key={d.driver_number}
@@ -1484,8 +1516,8 @@ const fetchAll = async () => {
                   className={`w-full p-3 text-left hover:bg-zinc-800 transition-colors flex items-center gap-3 ${driverCode===d.name_acronym?'bg-red-600/15 border-l-2 border-red-600 pl-4':''}`}>
                   {d.headshot_url && <img src={d.headshot_url} alt="Foto del pilota" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />}
                   <div>
-                    <div className="font-mono font-bold text-sm text-white">{d.name_acronym} <span className="text-zinc-600 font-normal">#{d.driver_number}</span></div>
-                    <div className="text-xs text-zinc-500">{d.full_name} · {d.team_name}</div>
+                    <div className="font-mono font-bold text-sm text-white">{d.name_acronym} <span className="text-white/35 font-normal">#{d.driver_number}</span></div>
+                    <div className="text-xs text-white/50">{d.full_name} · {d.team_name}</div>
                   </div>
                 </button>
               ))}
@@ -1495,15 +1527,15 @@ const fetchAll = async () => {
           {/* Fetch row */}
           <div className="flex flex-wrap items-center gap-3 mb-6">
             <div className="flex-1" />
-            {lastQuery && <div className="hidden lg:block text-xs text-zinc-700 font-mono">{lastQuery.year} · {lastQuery.gp} · {lastQuery.driver} · {lastQuery.session}</div>}
+            {lastQuery && <div className="hidden lg:block text-xs text-white/25 font-mono">{lastQuery.year} · {lastQuery.gp} · {lastQuery.driver} · {lastQuery.session}</div>}
             <button onClick={fetchAll} disabled={!canFetch}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-mono font-bold text-sm transition-all ${canFetch?'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-950/50':'bg-zinc-800 text-zinc-600 cursor-not-allowed'}`}>
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-mono font-bold text-sm transition-all ${canFetch?'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-950/50':'bg-zinc-800 text-white/35 cursor-not-allowed'}`}>
               {isFetching ? <><RefreshCw className="w-4 h-4 animate-spin" />LOADING…</> : <><Search className="w-4 h-4" />FETCH TELEMETRY</>}
             </button>
           </div>
 
           {!canFetch && !loading && (
-            <div className="mb-6 text-xs text-zinc-700 font-mono text-center py-2">
+            <div className="mb-6 text-xs text-white/25 font-mono text-center py-2">
               {!year&&'Select a year'}{year&&!meeting&&' → Select a Grand Prix'}{year&&meeting&&!driverCode&&' → Select a driver'}{year&&meeting&&driverCode&&!sessionInfo&&' → Loading session…'}
             </div>
           )}
@@ -1561,21 +1593,21 @@ const fetchAll = async () => {
                 {fastestLap && (
                   <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
                     <div className="text-xs font-mono">
-                      <span className="text-zinc-600 uppercase mr-2">Time</span>
+                      <span className="text-white/35 uppercase mr-2">Time</span>
                       <span className="text-white font-black">{formatTime(fastestLap.lap_duration)}</span>
                     </div>
                     {[1,2,3].map(s => fastestLap[`sector_${s}`] ? (
                       <div key={s} className="text-xs font-mono">
-                        <span className="text-zinc-600 mr-1">S{s}</span>
-                        <span className="text-zinc-300">{fastestLap[`sector_${s}`].toFixed(3)}s</span>
+                        <span className="text-white/35 mr-1">S{s}</span>
+                        <span className="text-white/80">{fastestLap[`sector_${s}`].toFixed(3)}s</span>
                       </div>
                     ) : null)}
                   </div>
                 )}
                 {weather && (
                   <div className="flex gap-4 ml-auto">
-                    {weather.air_temp   != null && <div className="text-xs font-mono"><span className="text-zinc-600">Air </span><span className="text-zinc-300">{weather.air_temp}°C</span></div>}
-                    {weather.track_temp != null && <div className="text-xs font-mono"><span className="text-zinc-600">Track </span><span className="text-zinc-300">{weather.track_temp}°C</span></div>}
+                    {weather.air_temp   != null && <div className="text-xs font-mono"><span className="text-white/35">Air </span><span className="text-white/80">{weather.air_temp}°C</span></div>}
+                    {weather.track_temp != null && <div className="text-xs font-mono"><span className="text-white/35">Track </span><span className="text-white/80">{weather.track_temp}°C</span></div>}
                   </div>
                 )}
               </div>
@@ -1590,14 +1622,14 @@ const fetchAll = async () => {
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
                 <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <div className="text-[10px] text-zinc-600 font-mono flex items-center gap-2">
+                    <div className="text-[10px] text-white/35 font-mono flex items-center gap-2">
                       <span style={{ color }}>● {driverCode}</span>
                     </div>
                   </div>
                   <div className="flex gap-1">
                     {['speed','rpm','gear','inputs'].map(t => (
                       <button key={t} onClick={() => setActiveTab(t)}
-                        className={`px-3 py-1 text-xs rounded-lg font-mono transition-all ${activeTab===t?'bg-red-600 text-white':'text-zinc-500 hover:text-white hover:bg-zinc-800'}`}>
+                        className={`px-3 py-1 text-xs rounded-lg font-mono transition-all ${activeTab===t?'bg-red-600 text-white':'text-white/50 hover:text-white hover:bg-zinc-800'}`}>
                         {t.toUpperCase()}
                       </button>
                     ))}
@@ -1650,21 +1682,81 @@ const fetchAll = async () => {
 
               {sessionType === 'R' && !raceResults && !loadingResults && (
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center">
-                  <p className="text-zinc-500 font-mono text-sm">No race results available for this session</p>
+                  <p className="text-white/50 font-mono text-sm">No race results available for this session</p>
                 </div>
               )}
             </div>
           )}
 
+
           {!isFetching && !error && !telemetry.length && !driverLaps.length && (
-            <div className="text-center py-28 border border-zinc-900 rounded-xl">
-              <Radio className="w-10 h-10 mx-auto mb-4 text-zinc-800" />
-              <div className="text-xl font-black font-mono text-zinc-700 mb-2">NO DATA LOADED</div>
-              <div className="text-sm font-mono text-zinc-800">Year → Grand Prix → Session → Driver → FETCH</div>
+            <div className="relative overflow-hidden rounded-2xl border border-white/8 mt-4"
+                 style={{background:'linear-gradient(135deg,#0a0a0a 0%,#111 50%,#0d0d0d 100%)'}}>
+              <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full pointer-events-none"
+                   style={{background:'radial-gradient(circle,rgba(220,0,0,0.18) 0%,transparent 65%)'}}/>
+              <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full pointer-events-none"
+                   style={{background:'radial-gradient(circle,rgba(99,102,241,0.1) 0%,transparent 65%)'}}/>
+              <div className="absolute inset-0 pointer-events-none opacity-[0.035]"
+                   style={{backgroundImage:'radial-gradient(circle at 1px 1px,#fff 1px,transparent 0)',backgroundSize:'36px 36px'}}/>
+              <div className="absolute top-0 left-0 right-0 h-px overflow-hidden">
+                <div className="h-px w-1/3 bg-gradient-to-r from-transparent via-red-500/60 to-transparent"
+                     style={{animation:'scan 5s linear infinite'}}/>
+              </div>
+              <div className="relative z-10 px-8 py-16 md:px-16 md:py-20">
+                <div className="max-w-3xl">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6"
+                       style={{background:'rgba(220,0,0,0.1)',border:'1px solid rgba(220,0,0,0.25)'}}>
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"/>
+                    <span className="text-[10px] text-red-400 font-mono tracking-[0.3em] uppercase">OpenF1 Live Data</span>
+                  </div>
+                  <h2 className="text-5xl md:text-7xl font-black tracking-tighter leading-none uppercase mb-4">
+                    Telemetry<br/><span className="text-red-600">Explorer</span>
+                  </h2>
+                  <p className="text-white/40 font-mono text-sm tracking-[0.15em] uppercase mb-10">
+                    Speed · RPM · Gear · Inputs · Sectors · Grid Analysis
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-12">
+                    {[
+                      {icon:'⚡', label:'Real-time telemetry'},
+                      {icon:'📊', label:'Sector comparison'},
+                      {icon:'🏁', label:'Grid → Race'},
+                      {icon:'⏱', label:'Q1 → Q2 → Q3'},
+                      {icon:'🌡', label:'Weather data'},
+                      {icon:'🗺', label:'GPS circuit map'},
+                    ].map(({icon,label})=>(
+                      <div key={label} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-mono text-white/50"
+                           style={{background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.08)'}}>
+                        <span>{icon}</span>{label}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    {[
+                      {n:'01', label: year ? String(year) : 'Year',       done: !!year},
+                      {n:'02', label: meeting ? meeting.meeting_name.split(' ').slice(-2).join(' ') : 'Grand Prix', done: !!meeting},
+                      {n:'03', label: driverCode || 'Driver', done: !!driverCode},
+                      {n:'04', label: 'Fetch', done: false},
+                    ].map(({n,label,done},i,arr)=>(
+                      <React.Fragment key={n}>
+                        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-mono"
+                             style={{
+                               background: done ? 'rgba(220,0,0,0.12)' : 'rgba(255,255,255,0.04)',
+                               border: done ? '1px solid rgba(220,0,0,0.3)' : '1px solid rgba(255,255,255,0.08)',
+                             }}>
+                          <span className={`text-[9px] font-black ${done ? 'text-red-500' : 'text-white/20'}`}>{n}</span>
+                          <span className={done ? 'text-white' : 'text-white/35'}>{label}</span>
+                          {done && <span className="text-red-500 text-[10px]">✓</span>}
+                        </div>
+                        {i < arr.length-1 && <span className="text-white/15 text-xs font-mono">→</span>}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
-          <div className="mt-8 flex items-center justify-between border-t border-zinc-900 pt-4 text-xs text-zinc-800 font-mono">
+          <div className="mt-8 flex items-center justify-between border-t border-zinc-900 pt-4 text-xs text-white/15 font-mono">
             <span>OpenF1 API · openf1.org · 2023–2025</span>
             <span>{meeting?.meeting_name||'—'} · {driverCode||'—'} · {sessionType} · {year||'—'}</span>
             <span>{telemetry.length ? `${telemetry.length} pts` : 'No data'}</span>
