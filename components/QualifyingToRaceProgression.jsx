@@ -95,7 +95,7 @@ function GridToRaceChart({ raceResults, year, grandPrix }) {
   }, [drivers]);
 
   if (!drivers.length) return (
-    <div className="flex items-center justify-center h-40 text-zinc-600 font-mono text-sm tracking-widest uppercase">
+    <div className="flex items-center justify-center h-40 text-white-600 font-mono text-sm tracking-widest uppercase">
       No race results available
     </div>
   );
@@ -113,7 +113,7 @@ function GridToRaceChart({ raceResults, year, grandPrix }) {
     { key: 'all',    label: `ALL · ${drivers.length}`,    ac: 'bg-white/10 text-white border-white/25' },
     { key: 'gained', label: `▲ GAINED · ${stats.gained}`, ac: 'bg-green-500/15 text-green-400 border-green-500/40' },
     { key: 'lost',   label: `▼ LOST · ${stats.lost}`,     ac: 'bg-red-500/15 text-red-400 border-red-500/40' },
-    { key: 'same',   label: `● SAME · ${stats.same}`,     ac: 'bg-zinc-700/60 text-zinc-300 border-zinc-600/40' },
+    { key: 'same',   label: `● SAME · ${stats.same}`,     ac: 'bg-white-700/60 text-white-300 border-white-600/40' },
   ];
 
   return (
@@ -123,7 +123,7 @@ function GridToRaceChart({ raceResults, year, grandPrix }) {
         {FILTERS.map(({ key, label, ac }) => (
           <button key={key} onClick={() => setFilter(key)}
             className={`px-3.5 py-2 rounded-xl text-[11px] font-mono tracking-widest border transition-all duration-200 ${
-              filter === key ? ac : 'bg-white/5 text-zinc-600 border-white/8 hover:text-zinc-300 hover:bg-white/8'
+              filter === key ? ac : 'bg-white/5 text-white-600 border-white/8 hover:text-white-300 hover:bg-white/8'
             }`}>
             {label}
           </button>
@@ -141,7 +141,7 @@ function GridToRaceChart({ raceResults, year, grandPrix }) {
             color: '#ef4444', bg: 'rgba(255,255,255,0.03)', border: 'rgba(255,255,255,0.08)' },
         ].map(({ label, value, color, bg, border }) => (
           <div key={label} className="rounded-xl px-4 py-3" style={{ background: bg, border: `1px solid ${border}` }}>
-            <div className="text-[9px] text-zinc-600 font-mono tracking-[0.25em] uppercase mb-1">{label}</div>
+            <div className="text-[9px] text-white-600 font-mono tracking-[0.25em] uppercase mb-1">{label}</div>
             <div className="text-2xl font-black font-mono leading-none" style={{ color }}>{value}</div>
           </div>
         ))}
@@ -278,11 +278,11 @@ function GridToRaceChart({ raceResults, year, grandPrix }) {
 
       {/* Legend */}
       <div className="flex flex-wrap items-center gap-6 pt-4 border-t border-white/5">
-        <span className="text-[9px] text-zinc-700 font-mono tracking-[0.3em] uppercase">Legend</span>
-        <span className="flex items-center gap-2 text-[11px] text-zinc-500 font-mono">
+        <span className="text-[9px] text-white-700 font-mono tracking-[0.3em] uppercase">Legend</span>
+        <span className="flex items-center gap-2 text-[11px] text-white-500 font-mono">
           <span className="inline-block w-8 h-0.5 rounded" style={{ background: 'linear-gradient(90deg,#888,#888)' }} /> Team color (all lines)
         </span>
-        <span className="ml-auto text-[10px] text-zinc-800 font-mono tracking-widest">HOVER TO HIGHLIGHT</span>
+        <span className="ml-auto text-[10px] text-white-800 font-mono tracking-widest">HOVER TO HIGHLIGHT</span>
       </div>
     </div>
   );
@@ -314,7 +314,7 @@ function QualiProgressionChart({ qualiResults, year, grandPrix }) {
   }, [qualiResults]);
 
   if (!drivers.length) return (
-    <div className="flex items-center justify-center h-40 text-zinc-600 font-mono text-sm tracking-widest uppercase">
+    <div className="flex items-center justify-center h-40 text-white-600 font-mono text-sm tracking-widest uppercase">
       No qualifying data available
     </div>
   );
@@ -569,22 +569,22 @@ function QualiProgressionChart({ qualiResults, year, grandPrix }) {
 
       {/* Legend */}
       <div className="flex flex-wrap items-center gap-6 pt-4 border-t border-white/5">
-        <span className="text-[9px] text-zinc-700 font-mono tracking-[0.3em] uppercase">Legend</span>
+        <span className="text-[9px] text-white-700 font-mono tracking-[0.3em] uppercase">Legend</span>
         {[
           { color: COL_COLORS[0], label: 'Q1' },
           { color: COL_COLORS[1], label: 'Q2' },
           { color: COL_COLORS[2], label: 'Q3' },
         ].map(({ color, label }) => (
-          <span key={label} className="flex items-center gap-2 text-[11px] text-zinc-500 font-mono">
+          <span key={label} className="flex items-center gap-2 text-[11px] text-white-500 font-mono">
             <span className="inline-block w-3 h-3 rounded-full" style={{ background: color, opacity: 0.6 }} />
             {label}
           </span>
         ))}
-        <span className="flex items-center gap-2 text-[11px] text-zinc-500 font-mono">
+        <span className="flex items-center gap-2 text-[11px] text-white-500 font-mono">
           <span className="inline-block w-3 h-3 text-center text-[9px]" style={{ color: '#666' }}>✕</span>
           Eliminated
         </span>
-        <span className="ml-auto text-[10px] text-zinc-800 font-mono tracking-widest">HOVER TO HIGHLIGHT</span>
+        <span className="ml-auto text-[10px] text-white-800 font-mono tracking-widest">HOVER TO HIGHLIGHT</span>
       </div>
     </div>
   );
@@ -637,7 +637,7 @@ export default function QualifyingToRaceProgression({ raceResults, qualiResults,
                 : <>Q1 <span className="text-indigo-500">→</span> Q2 <span className="text-amber-500">→</span> Q3</>
               }
             </h2>
-            <p className="text-zinc-500 font-mono text-xs mt-2 tracking-[0.2em] uppercase">
+            <p className="text-white-500 font-mono text-xs mt-2 tracking-[0.2em] uppercase">
               {year} · {grandPrix} · {mode === 'race' ? 'Position Gains & Losses' : 'Qualifying Progression'}
             </p>
           </div>
@@ -649,7 +649,7 @@ export default function QualifyingToRaceProgression({ raceResults, qualiResults,
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-mono tracking-widest border transition-all duration-200 ${
                 mode === 'race'
                   ? 'bg-red-500/15 text-red-400 border-red-500/40'
-                  : 'bg-white/5 text-zinc-600 border-white/8 hover:text-zinc-300 hover:bg-white/8'
+                  : 'bg-white/5 text-white-600 border-white/8 hover:text-white-300 hover:bg-white/8'
               }`}>
               <Flag className="w-3.5 h-3.5" />
               GRID → RACE
@@ -661,8 +661,8 @@ export default function QualifyingToRaceProgression({ raceResults, qualiResults,
                 mode === 'quali'
                   ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/40'
                   : hasQuali
-                    ? 'bg-white/5 text-zinc-600 border-white/8 hover:text-zinc-300 hover:bg-white/8'
-                    : 'bg-white/3 text-zinc-800 border-white/5 cursor-not-allowed opacity-40'
+                    ? 'bg-white/5 text-white-600 border-white/8 hover:text-white-300 hover:bg-white/8'
+                    : 'bg-white/3 text-white-800 border-white/5 cursor-not-allowed opacity-40'
               }`}>
               <Timer className="w-3.5 h-3.5" />
               Q1 → Q2 → Q3
