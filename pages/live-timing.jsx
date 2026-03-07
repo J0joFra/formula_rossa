@@ -269,8 +269,9 @@ function SectorTable({ sectorsData, highlightCode }) {
   }, [sectorsData, lapFilter]);
 
   if (!sectorsData?.length) return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 flex items-center justify-center h-40">
-      <span className="text-zinc-600 font-mono text-sm">Loading sector data…</span>
+    <div className="relative overflow-hidden rounded-2xl border border-white/8 p-10 flex items-center justify-center h-40"
+         style={{ background: 'linear-gradient(135deg,#0c0c0c,#111)' }}>
+      <span className="text-zinc-600 font-mono text-sm tracking-widest uppercase">Loading sector data…</span>
     </div>
   );
 
@@ -280,84 +281,184 @@ function SectorTable({ sectorsData, highlightCode }) {
   const bS3 = Math.min(...tableData.map(d => d.s3 ?? Infinity));
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-        <div className="text-[10px] text-zinc-600 font-mono tracking-[0.15em] uppercase">
-          Sector Times · All Drivers
-        </div>
-        <div className="flex items-center gap-2" ref={filterRef}>
-          <span className="text-[10px] text-zinc-600 font-mono">LAP:</span>
-          <div className="relative">
-            <button onClick={() => setOpenFilter(v => !v)}
-              className="flex items-center gap-2 bg-zinc-800 border border-zinc-700 rounded-lg px-2.5 py-1 text-xs font-mono hover:border-zinc-500 transition-colors">
-              <span className={lapFilter == null ? 'text-purple-400 font-bold' : 'text-white'}>
-                {lapFilter == null ? '★ Best' : `Lap ${lapFilter}`}
-              </span>
-              <ChevronDown className={`w-3 h-3 text-zinc-500 transition-transform ${openFilter ? 'rotate-180' : ''}`} />
-            </button>
-            {openFilter && (
-              <div className="absolute top-full right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-xl z-50 w-40 max-h-52 overflow-y-auto shadow-2xl">
-                <button onClick={() => { setLapFilter(null); setOpenFilter(false); }}
-                  className={`w-full px-3 py-2 text-left text-xs font-mono hover:bg-zinc-800 ${lapFilter == null ? 'text-purple-400 font-bold' : 'text-zinc-400'}`}>
-                  ★ Best lap each
-                </button>
-                {allLapNumbers.map(n => (
-                  <button key={n} onClick={() => { setLapFilter(n); setOpenFilter(false); }}
-                    className={`w-full px-3 py-2 text-left text-xs font-mono hover:bg-zinc-800 ${lapFilter === n ? 'bg-zinc-800/60 text-white' : 'text-zinc-400'}`}>
-                    Lap {n}
+    <div className="relative overflow-hidden rounded-2xl border border-white/8"
+         style={{ background: 'linear-gradient(135deg,#0c0c0c 0%,#111 50%,#0a0a0a 100%)' }}>
+
+      {/* Ambient glow */}
+      <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full pointer-events-none"
+           style={{ background: 'radial-gradient(circle,rgba(99,102,241,0.12) 0%,transparent 70%)' }} />
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
+           style={{ backgroundImage: 'radial-gradient(circle at 1px 1px,#fff 1px,transparent 0)', backgroundSize: '32px 32px' }} />
+
+      <div className="relative z-10 p-5 md:p-7">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+              <span className="text-[10px] text-indigo-500 font-mono tracking-[0.3em] uppercase">Sector Analysis</span>
+            </div>
+            <h3 className="text-2xl font-black tracking-tight uppercase">
+              Sector <span className="text-indigo-500">Times</span>
+            </h3>
+          </div>
+
+          <div className="flex items-center gap-2" ref={filterRef}>
+            <span className="text-[10px] text-zinc-600 font-mono tracking-widest uppercase">Lap</span>
+            <div className="relative">
+              <button onClick={() => setOpenFilter(v => !v)}
+                className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-mono border transition-all"
+                style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                <span className={lapFilter == null ? 'text-purple-400 font-bold' : 'text-white'}>
+                  {lapFilter == null ? '★ Best' : `Lap ${lapFilter}`}
+                </span>
+                <ChevronDown className={`w-3 h-3 text-zinc-500 transition-transform ${openFilter ? 'rotate-180' : ''}`} />
+              </button>
+              {openFilter && (
+                <div className="absolute top-full right-0 mt-1 rounded-xl z-50 w-40 max-h-52 overflow-y-auto shadow-2xl"
+                     style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <button onClick={() => { setLapFilter(null); setOpenFilter(false); }}
+                    className={`w-full px-3 py-2 text-left text-xs font-mono hover:bg-white/5 transition-colors ${lapFilter == null ? 'text-purple-400 font-bold' : 'text-zinc-400'}`}>
+                    ★ Best lap each
                   </button>
-                ))}
-              </div>
-            )}
+                  {allLapNumbers.map(n => (
+                    <button key={n} onClick={() => { setLapFilter(n); setOpenFilter(false); }}
+                      className={`w-full px-3 py-2 text-left text-xs font-mono hover:bg-white/5 transition-colors ${lapFilter === n ? 'bg-white/8 text-white' : 'text-zinc-400'}`}>
+                      Lap {n}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs font-mono">
-          <thead>
-            <tr className="border-b border-zinc-800 text-zinc-600 font-normal">
-              {['P','Driver','Lap','Time','Gap','S1','S2','S3','ΔS1','ΔS2','ΔS3'].map(h => (
-                <th key={h} className={`py-1.5 pr-2 whitespace-nowrap ${['P','Driver'].includes(h) ? 'text-left' : 'text-right'}`}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {tableData.map((d, i) => {
-              const gap = d.lap_duration - leader.lap_duration;
-              const dS1 = (d.s1 ?? 0) - (leader?.s1 ?? 0);
-              const dS2 = (d.s2 ?? 0) - (leader?.s2 ?? 0);
-              const dS3 = (d.s3 ?? 0) - (leader?.s3 ?? 0);
-              const isHL = d.code === highlightCode;
-              return (
-                <tr key={d.code} className={`border-b border-zinc-900 hover:bg-zinc-800/30 transition-colors ${isHL ? 'bg-zinc-800/50' : ''}`}>
-                  <td className="py-1.5 pr-2 text-zinc-500">{i + 1}</td>
-                  <td className="py-1.5 pr-2">
-                    <span className={isHL ? 'text-white font-bold' : 'font-bold'} style={{ color: isHL ? undefined : d.color }}>{d.code}</span>
-                    {isHL && <span className="text-zinc-600 ml-1 text-[9px]">◀</span>}
-                  </td>
-                  <td className="py-1.5 pr-2 text-right">
-                    <span className={d.isBest ? 'text-purple-400' : 'text-zinc-500'}>{d.isBest ? '★' : ''}{d.lap_number}</span>
-                  </td>
-                  <td className="py-1.5 pr-2 text-right text-white font-bold">{formatTime(d.lap_duration)}</td>
-                  <td className="py-1.5 pr-2 text-right">
-                    <span className={gap === 0 ? 'text-yellow-400' : 'text-red-400'}>{gap === 0 ? 'LDR' : `+${gap.toFixed(3)}`}</span>
-                  </td>
-                  {[['s1', bS1], ['s2', bS2], ['s3', bS3]].map(([k, best]) => (
-                    <td key={k} className={`py-1.5 pr-2 text-right font-bold ${d[k] === best ? 'text-purple-400' : 'text-zinc-300'}`}>
-                      {d[k]?.toFixed(3) ?? '—'}
+        {/* Best sector indicators */}
+        <div className="grid grid-cols-3 gap-2 mb-5">
+          {[
+            { label: 'Sector 1', best: bS1, key: 's1', color: '#a855f7' },
+            { label: 'Sector 2', best: bS2, key: 's2', color: '#6366f1' },
+            { label: 'Sector 3', best: bS3, key: 's3', color: '#8b5cf6' },
+          ].map(({ label, best, key, color }) => {
+            const bestDriver = tableData.find(d => d[key] === best);
+            return (
+              <div key={key} className="rounded-xl px-3 py-2.5"
+                   style={{ background: `${color}12`, border: `1px solid ${color}30` }}>
+                <div className="text-[9px] font-mono tracking-widest uppercase mb-0.5" style={{ color: `${color}99` }}>{label}</div>
+                <div className="text-base font-black font-mono" style={{ color }}>{best !== Infinity ? `${best.toFixed(3)}s` : '—'}</div>
+                {bestDriver && <div className="text-[9px] text-zinc-600 font-mono mt-0.5">{bestDriver.code}</div>}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto rounded-xl" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <table className="w-full text-xs font-mono">
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                {[
+                  { h: 'P',      align: 'left'  },
+                  { h: 'Driver', align: 'left'  },
+                  { h: 'Lap',    align: 'right' },
+                  { h: 'Time',   align: 'right' },
+                  { h: 'Gap',    align: 'right' },
+                  { h: 'S1',     align: 'right' },
+                  { h: 'S2',     align: 'right' },
+                  { h: 'S3',     align: 'right' },
+                  { h: 'ΔS1',    align: 'right' },
+                  { h: 'ΔS2',    align: 'right' },
+                  { h: 'ΔS3',    align: 'right' },
+                ].map(({ h, align }) => (
+                  <th key={h} className={`py-2.5 px-2 whitespace-nowrap text-[10px] tracking-[0.15em] font-normal text-zinc-600 uppercase ${align === 'left' ? 'text-left' : 'text-right'}`}>
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {tableData.map((d, i) => {
+                const gap   = d.lap_duration - leader.lap_duration;
+                const dS1   = (d.s1 ?? 0) - (leader?.s1 ?? 0);
+                const dS2   = (d.s2 ?? 0) - (leader?.s2 ?? 0);
+                const dS3   = (d.s3 ?? 0) - (leader?.s3 ?? 0);
+                const isHL  = d.code === highlightCode;
+                const isLdr = i === 0;
+                return (
+                  <tr key={d.code}
+                    className="transition-colors"
+                    style={{
+                      borderBottom: '1px solid rgba(255,255,255,0.04)',
+                      background: isHL
+                        ? `${d.color}12`
+                        : isLdr
+                          ? 'rgba(255,255,255,0.03)'
+                          : 'transparent',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = isHL ? `${d.color}20` : 'rgba(255,255,255,0.04)'}
+                    onMouseLeave={e => e.currentTarget.style.background = isHL ? `${d.color}12` : isLdr ? 'rgba(255,255,255,0.03)' : 'transparent'}>
+
+                    {/* Pos */}
+                    <td className="py-2 px-2">
+                      <span className="text-zinc-600 font-mono text-[10px]">{i + 1}</span>
                     </td>
-                  ))}
-                  {[dS1, dS2, dS3].map((delta, di) => (
-                    <td key={di} className={`py-1.5 pr-2 text-right ${delta === 0 ? 'text-zinc-500' : delta < 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {delta === 0 ? 'REF' : formatDelta(delta)}
+
+                    {/* Driver */}
+                    <td className="py-2 px-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-0.5 h-4 rounded-full" style={{ background: d.color }} />
+                        <span className="font-black text-[13px]" style={{ color: isHL ? '#fff' : d.color }}>
+                          {d.code}
+                        </span>
+                        {isHL && <span className="text-[9px] px-1 py-0.5 rounded" style={{ background: `${d.color}30`, color: d.color }}>YOU</span>}
+                      </div>
                     </td>
-                  ))}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+
+                    {/* Lap */}
+                    <td className="py-2 px-2 text-right">
+                      <span className={`text-[11px] ${d.isBest ? 'text-purple-400 font-bold' : 'text-zinc-500'}`}>
+                        {d.isBest ? '★' : ''}{d.lap_number}
+                      </span>
+                    </td>
+
+                    {/* Time */}
+                    <td className="py-2 px-2 text-right">
+                      <span className={`font-black text-[12px] ${isLdr ? 'text-yellow-400' : 'text-white'}`}>
+                        {formatTime(d.lap_duration)}
+                      </span>
+                    </td>
+
+                    {/* Gap */}
+                    <td className="py-2 px-2 text-right">
+                      <span className={`text-[11px] font-mono ${gap === 0 ? 'text-yellow-400 font-bold' : 'text-red-400'}`}>
+                        {gap === 0 ? 'LDR' : `+${gap.toFixed(3)}`}
+                      </span>
+                    </td>
+
+                    {/* S1, S2, S3 */}
+                    {[['s1', bS1, '#a855f7'], ['s2', bS2, '#6366f1'], ['s3', bS3, '#8b5cf6']].map(([k, best, sc]) => (
+                      <td key={k} className="py-2 px-2 text-right">
+                        <span className={`text-[11px] font-bold ${d[k] === best ? '' : 'text-zinc-300'}`}
+                          style={d[k] === best ? { color: sc } : {}}>
+                          {d[k]?.toFixed(3) ?? '—'}
+                        </span>
+                      </td>
+                    ))}
+
+                    {/* ΔS1, ΔS2, ΔS3 */}
+                    {[dS1, dS2, dS3].map((delta, di) => (
+                      <td key={di} className="py-2 px-2 text-right">
+                        <span className={`text-[10px] font-mono ${delta === 0 ? 'text-zinc-600' : delta < 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          {delta === 0 ? 'REF' : formatDelta(delta)}
+                        </span>
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -775,7 +876,79 @@ export default function LiveTimingPage() {
   const cachedRawLaps   = React.useRef(null);   // { sk, num, data }
 
   const [raceResults, setRaceResults] = useState(null);
+  const [qualiResults, setQualiResults] = useState(null);
   const [loadingResults, setLoadingResults] = useState(false);
+
+  const loadQualiResults = async (year, meetingObj) => {
+    if (typeof window === 'undefined' || !meetingObj) return;
+    try {
+      const [q1Res, q2Res, qRes, racesRes] = await Promise.all([
+        fetch('/data/f1db-races-qualifying-1-results.json').catch(() => null),
+        fetch('/data/f1db-races-qualifying-2-results.json').catch(() => null),
+        fetch('/data/f1db-races-qualifying-results.json').catch(() => null),
+        fetch('/data/f1db-races.json').catch(() => null),
+      ]);
+      if (!racesRes?.ok) return;
+      const allRaces   = await racesRes.json();
+      const q1All      = q1Res?.ok ? await q1Res.json() : [];
+      const q2All      = q2Res?.ok ? await q2Res.json() : [];
+      const qAll       = qRes?.ok  ? await qRes.json()  : [];
+
+      const loc         = (meetingObj.location || '').toLowerCase();
+      const country     = (meetingObj.country_name || '').toLowerCase();
+      const meetingName = (meetingObj.meeting_name || '').toLowerCase().replace(' grand prix','').replace(' gp','').trim();
+
+      const racesForYear = allRaces.filter(r => r.year === parseInt(year));
+      const matchedRace  = racesForYear.find(r => {
+        const fields = [r.name, r.officialName, r.grandPrixId, r.circuitId].map(f => (f||'').toLowerCase());
+        return fields.some(f => f && (f.includes(loc)||loc.includes(f)||f.includes(country)||country.includes(f)||f.includes(meetingName)||meetingName.includes(f)));
+      });
+      if (!matchedRace) return;
+
+      const rId = matchedRace.id;
+      const q1  = q1All.filter(r => r.raceId === rId);
+      const q2  = q2All.filter(r => r.raceId === rId);
+      const q   = qAll.filter(r => r.raceId === rId);
+
+      // Merge into per-driver objects
+      const driverMap = {};
+      const addRound = (arr, posKey, timeKey) => arr.forEach(r => {
+        if (!driverMap[r.driverId]) driverMap[r.driverId] = { driverId: r.driverId, constructorId: r.constructorId };
+        driverMap[r.driverId][posKey]  = r.positionNumber;
+        driverMap[r.driverId][timeKey] = r.timeMillis;
+      });
+
+      if (q1.length && q2.length) {
+        // Has separate Q1/Q2 files
+        addRound(q1, 'q1pos', 'q1Millis');
+        addRound(q2, 'q2pos', 'q2Millis');
+        // Q3 would be in a separate file; for now mark Q3 as q2pos<=10
+        Object.values(driverMap).forEach(d => {
+          if (d.q2pos != null && d.q2pos <= 10) { d.q3pos = d.q2pos; d.q3Millis = d.q2Millis; }
+        });
+      } else if (q.length) {
+        // Modern Q1/Q2/Q3 combined
+        q.forEach(r => {
+          if (!driverMap[r.driverId]) driverMap[r.driverId] = { driverId: r.driverId, constructorId: r.constructorId };
+          const d = driverMap[r.driverId];
+          if (r.q1Millis) { d.q1pos = r.positionNumber; d.q1Millis = r.q1Millis; }
+          if (r.q2Millis) { d.q2pos = r.positionNumber; d.q2Millis = r.q2Millis; }
+          if (r.q3Millis) { d.q3pos = r.positionNumber; d.q3Millis = r.q3Millis; }
+        });
+        // Assign Q1 positions to those that only have q1Millis
+        const byQ1 = Object.values(driverMap).filter(d => d.q1Millis).sort((a,b)=>a.q1Millis-b.q1Millis);
+        byQ1.forEach((d, i) => { if (!d.q1pos) d.q1pos = i + 1; });
+        const byQ2 = Object.values(driverMap).filter(d => d.q2Millis).sort((a,b)=>a.q2Millis-b.q2Millis);
+        byQ2.forEach((d, i) => { if (!d.q2pos) d.q2pos = i + 1; });
+        const byQ3 = Object.values(driverMap).filter(d => d.q3Millis).sort((a,b)=>a.q3Millis-b.q3Millis);
+        byQ3.forEach((d, i) => { if (!d.q3pos) d.q3pos = i + 1; });
+      }
+
+      const result = Object.values(driverMap);
+      if (result.length) setQualiResults(result);
+    } catch(e) { console.error('Quali load error:', e); }
+  };
+
   const loadRaceResults = async (year, meetingObj) => {
     if (typeof window === 'undefined' || !meetingObj) return;
 
@@ -958,16 +1131,16 @@ export default function LiveTimingPage() {
 
   const handleMeetingChange = async (m) => {
     setMeeting(m); setOpenMeeting(false); setDrivers([]); setSessionInfo(null);
-    setRaceResults(null);
-    if (sessionType === 'R') loadRaceResults(year, m);
+    setRaceResults(null); setQualiResults(null);
+    if (sessionType === 'R') { loadRaceResults(year, m); loadQualiResults(year, m); }
     try { await loadDriversForSession(m, SESSION_TYPES.find(s => s.id === sessionType)?.name || 'Qualifying'); }
     catch { setDrivers([]); }
   };
 
   const handleSessionChange = async (sid) => {
     setSessionType(sid); setOpenSession(false); setDrivers([]); setSessionInfo(null);
-    setRaceResults(null);
-    if (sid === 'R' && meeting) loadRaceResults(year, meeting);
+    setRaceResults(null); setQualiResults(null);
+    if (sid === 'R' && meeting) { loadRaceResults(year, meeting); loadQualiResults(year, meeting); }
     if (!meeting) return;
     try { await loadDriversForSession(meeting, SESSION_TYPES.find(s => s.id === sid)?.name || sid); }
     catch { setDrivers([]); }
@@ -1376,6 +1549,7 @@ const fetchAll = async () => {
                 ) : raceResults && raceResults.length > 0 && (
                   <QualifyingToRaceProgression
                     raceResults={raceResults}
+                    qualiResults={qualiResults}
                     year={year}
                     grandPrix={meeting?.meeting_name}
                     driverStandings={null}
