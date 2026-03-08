@@ -13,7 +13,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import {
   Trophy, Zap, Shield, AlertCircle, CheckCircle2,
-  ChevronDown, Plus, X, Loader2, Flag, Star,
+  ChevronDown, Plus, X, Loader2, Flag,
   Users, Coins, RotateCcw,
 } from 'lucide-react';
 import { FANTA_CALENDAR, DRIVERS_2026 } from '../../lib/fantaF1';
@@ -82,8 +82,7 @@ export default function AdminScoreGP() {
   const [raceId,    setRaceId]    = useState('');
   const [gpStatus,  setGpStatus]  = useState('provisional');
   const [fullGrid,  setFullGrid]  = useState(Array(10).fill(''));   // pos 1–10
-  const [lastTail,  setLastTail]  = useState(Array(6).fill(''));    // pos 11–16
-  const [pole,      setPole]      = useState('');
+  const [lastTail,  setLastTail]  = useState(Array(12).fill(''));   // pos 11–22
   const [fl,        setFl]        = useState('');
   const [sc,        setSc]        = useState(null);    // true | false | null
   const [dnfs,      setDnfs]      = useState(['', '', '']);
@@ -119,7 +118,7 @@ export default function AdminScoreGP() {
     else setDoublePod('');
   }, [fullGrid[0], fullGrid[1], fullGrid[2]]);
 
-  const usedDrivers = [...fullGrid, ...lastTail, pole, fl, ...dnfs].filter(Boolean);
+  const usedDrivers = [...fullGrid, ...lastTail, fl, ...dnfs].filter(Boolean);
 
   // ── Submit ──
   async function handleSubmit() {
@@ -128,7 +127,6 @@ export default function AdminScoreGP() {
 
     if (!raceId)           return setError('Seleziona la gara');
     if (fullGrid.some(d => !d)) return setError('Completa tutti i 10 piloti nella griglia principale');
-    if (!pole)             return setError('Inserisci la pole position');
     if (!fl)               return setError('Inserisci il giro veloce');
     if (sc === null)       return setError('Specifica se c\'era Safety Car / VSC');
 
@@ -138,7 +136,6 @@ export default function AdminScoreGP() {
       fullGrid: fullGrid.map((driverId, i) => ({ pos: i + 1, driverId })),
       lastTail: lastTail.filter(Boolean).map((driverId, i) => ({ pos: 11 + i, driverId })),
       bonuses: {
-        polePosition:       pole,
         fastestLap:         fl,
         safetyCar:          sc,
         dnfDrivers:         dnfs.filter(Boolean),
@@ -308,12 +305,12 @@ export default function AdminScoreGP() {
 
             {/* Zona coda 11–16 */}
             <Card>
-              <SLabel>Zona coda · Posizioni 11 – 16 (classificati)</SLabel>
-              <p className="text-[11px] text-zinc-600 mb-3">Inserisci solo chi ha tagliato il traguardo fuori dai punti, in ordine.</p>
+              <SLabel>Zona coda · Posizioni 11 – 22</SLabel>
+              <p className="text-[11px] text-zinc-600 mb-3">Tutti i 12 piloti rimanenti in ordine. Per i DNF/DNS inseriscili comunque nella posizione in cui sono stati classificati.</p>
               <div className="space-y-2">
                 {lastTail.map((val, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <span className="text-sm font-black w-6 text-center shrink-0 text-zinc-600 tabular-nums">
+                    <span className="text-sm font-black w-6 text-center shrink-0 tabular-nums" style={{color: i >= 7 ? '#a855f7' : '#52525b'}}>
                       {11 + i}°
                     </span>
                     <DriverSelect
@@ -331,14 +328,6 @@ export default function AdminScoreGP() {
             <Card>
               <SLabel color="text-yellow-500">Bonus gara</SLabel>
               <div className="space-y-4">
-
-                {/* Pole */}
-                <div>
-                  <p className="text-[11px] text-zinc-500 font-bold mb-2 flex items-center gap-1.5">
-                    <Star className="w-3 h-3 text-yellow-400" /> Pole Position
-                  </p>
-                  <DriverSelect value={pole} onChange={setPole} placeholder="Chi ha fatto la pole?" />
-                </div>
 
                 {/* Giro veloce */}
                 <div>
