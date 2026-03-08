@@ -45,12 +45,20 @@ function normalizePrediction(raw) {
 }
 
 export default async function handler(req, res) {
+  // Assicura sempre risposta JSON anche in caso di crash inatteso
+  res.setHeader('Content-Type', 'application/json');
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   // ── Auth: controlla sessione NextAuth ──
-  const session = await getServerSession(req, res, authOptions);
+  let session;
+  try {
+    session = await getServerSession(req, res, authOptions);
+  } catch (e) {
+    return res.status(500).json({ error: 'Errore autenticazione: ' + e.message });
+  }
   if (!session?.user?.email || !ADMIN_EMAILS.includes(session.user.email)) {
     return res.status(403).json({ error: 'Non autorizzato' });
   }
