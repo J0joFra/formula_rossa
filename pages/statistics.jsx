@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
+import { fetchWithCache } from '../lib/cache';
 import Link from 'next/link';
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -664,16 +665,12 @@ export default function StatisticsPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [resultsRes, driversRes, historicalRes, racesRes] = await Promise.all([
-          fetch('/data/f1db-races-race-results.json'),
-          fetch('/data/f1db-drivers.json'),
-          fetch('/data/ferrari_historical.json'),
-          fetch('/data/f1db-races.json'),
-        ]);
-        const results     = await resultsRes.json();
-        const driversData = await driversRes.json();
-        const historical  = await historicalRes.json();
-        const racesData   = await racesRes.json();
+        const [results, driversData, historical, racesData] = await Promise.all([
+        fetchWithCache('/data/f1db-races-race-results.json'),
+        fetchWithCache('/data/f1db-drivers.json'),
+        fetchWithCache('/data/ferrari_historical.json'),
+        fetchWithCache('/data/f1db-races.json'),
+      ]);
 
         const driverMap = {};
         driversData.forEach(d => { driverMap[d.id] = d; });
