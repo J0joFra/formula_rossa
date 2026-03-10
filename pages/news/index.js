@@ -4,8 +4,8 @@ import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import Link from "next/link";
 import Head from "next/head";
 import { useState, useEffect } from "react";
-import Navigation from '../components/ferrari/Navigation';
-import Footer from '../components/ferrari/Footer';
+import Navigation from '@/components/ferrari/Navigation';
+import Footer from '@/components/ferrari/Footer';
 
 export async function getServerSideProps() {
   try {
