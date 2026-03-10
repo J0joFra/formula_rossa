@@ -1196,8 +1196,8 @@ export default function LiveTimingPage() {
   const [openSession, setOpenSession] = useState(false);
   const [openDriver, setOpenDriver]   = useState(false);
 
-  const r1=useRef(null),r2=useRef(null),r3=useRef(null),r4=useRef(null);
-  useOutsideClose([r1,r2,r3,r4],[setOpenYear,setOpenMeeting,setOpenSession,setOpenDriver]);
+  const dropdownRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
+  useOutsideClose(dropdownRefs, [setOpenYear, setOpenMeeting, setOpenSession, setOpenDriver]);
 
   // Auto-populate on mount
   useEffect(() => {
@@ -1535,7 +1535,7 @@ const fetchAll = async () => {
           {/* 2×2 selectors */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
             {/* Year */}
-            <Dropdown label="Year" isOpen={openYear} onToggle={() => setOpenYear(v=>!v)} dropdownRef={r1}
+            <Dropdown label="Year" isOpen={openYear} onToggle={() => setOpenYear(v=>!v)} dropdownRef={dropdownRefs[0]}
               header={<div className="text-2xl font-black font-mono">{year||'—'}</div>}>
               {AVAILABLE_YEARS.map(y => (
                 <button key={y} onClick={() => handleYearChange(y)}
@@ -1547,7 +1547,7 @@ const fetchAll = async () => {
 
             {/* Grand Prix */}
             <Dropdown label="Grand Prix" isOpen={openMeeting&&!!year} onToggle={() => year&&setOpenMeeting(v=>!v)}
-              disabled={!year||!meetings.length} dropdownRef={r2}
+              disabled={!year||!meetings.length} dropdownRef={dropdownRefs[1]}
               header={
                 meeting ? (
                   <div className="flex items-center gap-2">
@@ -1575,7 +1575,7 @@ const fetchAll = async () => {
             </Dropdown>
 
             {/* Session */}
-            <Dropdown label="Session" isOpen={openSession} onToggle={() => setOpenSession(v=>!v)} dropdownRef={r3}
+            <Dropdown label="Session" isOpen={openSession} onToggle={() => setOpenSession(v=>!v)} dropdownRef={dropdownRefs[2]}
               header={<div className="flex items-center gap-3"><span className="text-2xl font-black font-mono">{sessionType}</span><span className="text-white/50 text-sm">{SESSION_TYPES.find(s=>s.id===sessionType)?.name}</span></div>}>
               {SESSION_TYPES.map(s => (
                 <button key={s.id} onClick={() => handleSessionChange(s.id)}
@@ -1588,7 +1588,7 @@ const fetchAll = async () => {
 
             {/* Driver */}
             <Dropdown label="Driver" isOpen={openDriver&&!!meeting} onToggle={() => meeting&&drivers.length&&setOpenDriver(v=>!v)}
-              disabled={!meeting||!drivers.length} dropdownRef={r4}
+              disabled={!meeting||!drivers.length} dropdownRef={dropdownRefs[3]}
               header={
                 driverInfo ? (
                   <div className="flex items-center gap-3">

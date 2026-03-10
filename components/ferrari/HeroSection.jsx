@@ -31,14 +31,17 @@ export default function HeroSection() {
   ];
 
   useEffect(() => {
+    let isMounted = true;
+
     async function calculateFerrariStats() {
       try {
         const response = await fetch('/data/f1db-races-race-results.json');
         if (!response.ok) throw new Error('Network response was not ok');
+        if (!isMounted) return;
         const data = await response.json();
+        if (!isMounted) return;
 
         const ferrariResults = data.filter(r => r.constructorId === 'ferrari');
-
         const stats = ferrariResults.reduce((acc, curr) => {
           if (curr.positionNumber === 1) acc.wins++;
           if (curr.positionNumber >= 1 && curr.positionNumber <= 3) acc.podiums++;
@@ -49,24 +52,29 @@ export default function HeroSection() {
           return acc;
         }, { wins: 0, podiums: 0, poles: 0, fastestLaps: 0, totalPoints: 0, grandSlams: 0 });
 
-        setDynamicStats(prev => ({
-          ...prev,
-          wins: stats.wins,
-          podiums: stats.podiums,
-          poles: stats.poles,
-          fastestLaps: stats.fastestLaps,
-          totalPoints: Math.floor(stats.totalPoints),
-          grandSlams: stats.grandSlams
-        }));
-        setStatsError(false);
+        if (isMounted) {
+          setDynamicStats(prev => ({
+            ...prev,
+            wins: stats.wins,
+            podiums: stats.podiums,
+            poles: stats.poles,
+            fastestLaps: stats.fastestLaps,
+            totalPoints: Math.floor(stats.totalPoints),
+            grandSlams: stats.grandSlams
+          }));
+          setStatsError(false);
+        }
       } catch (error) {
         console.error("Errore nel calcolo statistiche Ferrari:", error);
-        setStatsError(true);
+        if (isMounted) setStatsError(true);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
+
     calculateFerrariStats();
+
+    return () => { isMounted = false; };
   }, []);
 
   const statsConfig = [

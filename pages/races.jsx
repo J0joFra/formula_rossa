@@ -210,8 +210,12 @@ export default function RaceDetailsPage() {
   
   let mapUrl = '';
   if (circuitInfo?.latitude && circuitInfo?.longitude) {
-    const bbox = calculateBoundingBox(parseFloat(circuitInfo.latitude), parseFloat(circuitInfo.longitude));
-    mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox.minLon}%2C${bbox.minLat}%2C${bbox.maxLon}%2C${bbox.maxLat}&layer=mapnik&marker=${circuitInfo.latitude}%2C${circuitInfo.longitude}`;
+    const lat = parseFloat(String(circuitInfo.latitude).replace(',', '.'));
+    const lon = parseFloat(String(circuitInfo.longitude).replace(',', '.'));
+    if (!isNaN(lat) && !isNaN(lon)) {
+      const bbox = calculateBoundingBox(lat, lon);
+      mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox.minLon}%2C${bbox.minLat}%2C${bbox.maxLon}%2C${bbox.maxLat}&layer=mapnik&marker=${lat}%2C${lon}`;
+    }
   }
 
   const isFerrari = (constructorId) => constructors[constructorId]?.name?.toLowerCase().includes('ferrari') || false;

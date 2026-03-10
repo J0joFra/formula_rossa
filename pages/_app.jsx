@@ -325,8 +325,8 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
             color: var(--ferrari-red);
           }
 
-          /* Lascia spazio al bottom nav */
-          main, #__next > *:last-child {
+          /* Lascia spazio al bottom nav — solo main, non tutti gli ultimi figli */
+          main {
             padding-bottom: calc(72px + env(safe-area-inset-bottom));
           }
         }
