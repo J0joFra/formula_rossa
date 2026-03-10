@@ -26,3 +26,17 @@
 2026-03-10 10:45:34,402 [INFO] Articolo generato: F1 Today - Notizie e aggiornamenti
 2026-03-10 10:45:35,384 [INFO] Pubblicato su Firestore: news/f1-today-notizie-e-aggiornamenti
 2026-03-10 10:45:35,386 [INFO] Ciclo completato con successo!
+2026-03-10 11:19:56,980 [INFO] ==================================================
+2026-03-10 11:19:56,980 [INFO] F1 Aggregator Bot — formula-rossa.it
+2026-03-10 11:19:56,981 [INFO] 10/03/2026 11:19:56
+2026-03-10 11:19:56,981 [INFO] ==================================================
+2026-03-10 11:19:57,181 [INFO] FormulaPassion: 3 articoli trovati
+2026-03-10 11:19:57,303 [INFO] Motorsport.com: 3 articoli trovati
+2026-03-10 11:19:57,623 [INFO] Autosprint: 0 articoli trovati
+2026-03-10 11:19:57,951 [INFO] P300: 3 articoli trovati
+2026-03-10 11:20:00,144 [INFO] FormulaUno.com: 3 articoli trovati
+2026-03-10 11:20:00,145 [INFO] Notizie nuove da elaborare: 5
+2026-03-10 11:20:00,438 [INFO] Generazione articolo con Groq (Llama 3)...
+2026-03-10 11:20:02,322 [INFO] Articolo generato: F1 Today - Notizie F1 del giorno
+2026-03-10 11:20:02,699 [INFO] Pubblicato su Firestore: news/f1-today-notizie-f1-del-giorno
+2026-03-10 11:20:02,700 [INFO] Ciclo completato con successo!
