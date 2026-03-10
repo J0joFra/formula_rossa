@@ -1,11 +1,6 @@
 """
 F1 News Aggregator Bot — formula-rossa.it
 ==========================================
-Stack: Firebase Firestore + Next.js
-Legge RSS feed F1 italiane, genera digest con Claude AI,
-scrive direttamente su Firestore. Il tuo sito Next.js
-legge la collection "news" e mostra gli articoli.
-
 Installazione:
   pip install feedparser anthropic firebase-admin python-dotenv schedule
 
@@ -37,8 +32,10 @@ RSS_FEEDS = [
     {"name": "FormulaPassion",  "url": "https://www.formulapassion.it/feed/"},
     {"name": "Motorsport.com",  "url": "https://it.motorsport.com/rss/f1/news/"},
     {"name": "Autosprint",      "url": "https://autosprint.corrieredellosport.it/feed/"},
-    {"name": "P300",            "url": "https://www.p300.it/feed/"},
+    {"name": "Formula1.it",     "url": "https://www.formula1.it/feed/"},
     {"name": "FormulaUno.com",  "url": "https://www.formulauno.com/feed/"},
+    {"name": "F1GrandPrix",     "url": "https://f1grandprix.motorionline.com/feed/"},
+    {"name": "F1Race",          "url": "https://f1race.it/feed/"},
 ]
 
 MAX_ITEMS_PER_FEED  = 3   # notizie da leggere per feed
