@@ -125,8 +125,7 @@ const CALENDAR_2026 = [
 // ─── UTILS ────────────────────────────────────────────────────────────────────
 async function loadJSON(path) {
   try {
-    const res = await fetch(path);
-    return res.ok ? await res.json() : null;
+    return await fetchWithCache(path);
   } catch { return null; }
 }
 
