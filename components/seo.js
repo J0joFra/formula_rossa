@@ -78,7 +78,7 @@ export default function SEO({
   jsonLd = null,         // schema aggiuntivo specifico della pagina
   facebookAppId = null,  // opzionale: ID app Facebook per og:app_id
 }) {
-  const canonical = `${BASE_URL}${path}`;
+  const canonical = `${BASE_URL}${path.startsWith('/') ? path : '/' + path}`;
   const fullTitle = title
     ? `${title} | ${SITE_NAME}`
     : `${SITE_NAME} | Statistiche e Analisi Dati Ferrari F1`;
