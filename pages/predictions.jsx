@@ -8,16 +8,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
+import { ptsFor, yearWeight } from '../lib/formatters';
+import { DRIVERS_2026, CALENDAR_2026 } from '../config/f1-2026';
 import {
   TrendingUp, Trophy, Target, Loader2,
   ChevronLeft, ChevronRight, BarChart3,
   Flag, Zap, AlertCircle, MapPin, Activity,
   ChevronDown, Users
 } from 'lucide-react';
-
-// ─── PUNTI F1 ─────────────────────────────────────────────────────────────────
-const PTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
-const ptsFor = (p) => (p >= 1 && p <= 10) ? PTS[p - 1] : 0;
 
 // ─── ALIAS circuitId 2026 → id reale nei JSON storici F1DB ─────────────────
 const CIRCUIT_ALIAS = {
@@ -94,48 +92,11 @@ const CIRCUIT_COUNTRY = {
   'silverstone_circuit':'gb','spa_francorchamps':'be','circuit_de_monaco':'mc','fuji_speedway':'jp',
 };
 
-// ─── CALENDARIO 2026 ──────────────────────────────────────────────────────────
-const CALENDAR_2026 = [
-  { round: 1,  circuitId: 'albert-park',      name: 'Australian GP',      date: '2026-03-06' },
-  { round: 2,  circuitId: 'shanghai',          name: 'Chinese GP',         date: '2026-03-22' },
-  { round: 3,  circuitId: 'suzuka',            name: 'Japanese GP',        date: '2026-04-05' },
-  { round: 4,  circuitId: 'bahrain',           name: 'Bahrain GP',         date: '2026-04-19' },
-  { round: 5,  circuitId: 'jeddah',            name: 'Saudi Arabia GP',    date: '2026-04-26' },
-  { round: 6,  circuitId: 'miami',             name: 'Miami GP',           date: '2026-05-10' },
-  { round: 7,  circuitId: 'imola',             name: 'Emilia Romagna GP',  date: '2026-05-24' },
-  { round: 8,  circuitId: 'monte-carlo',       name: 'Monaco GP',          date: '2026-05-31' },
-  { round: 9,  circuitId: 'barcelona',         name: 'Spanish GP',         date: '2026-06-14' },
-  { round: 10, circuitId: 'villeneuve',        name: 'Canadian GP',        date: '2026-06-21' },
-  { round: 11, circuitId: 'red-bull-ring',     name: 'Austrian GP',        date: '2026-07-05' },
-  { round: 12, circuitId: 'silverstone',       name: 'British GP',         date: '2026-07-19' },
-  { round: 13, circuitId: 'hungaroring',       name: 'Hungarian GP',       date: '2026-08-02' },
-  { round: 14, circuitId: 'spa-francorchamps', name: 'Belgian GP',         date: '2026-08-30' },
-  { round: 15, circuitId: 'zandvoort',         name: 'Dutch GP',           date: '2026-09-06' },
-  { round: 16, circuitId: 'monza',             name: 'Italian GP',         date: '2026-09-13' },
-  { round: 17, circuitId: 'baku',              name: 'Azerbaijan GP',      date: '2026-09-27' },
-  { round: 18, circuitId: 'marina-bay',        name: 'Singapore GP',       date: '2026-10-04' },
-  { round: 19, circuitId: 'austin',            name: 'US GP',              date: '2026-10-18' },
-  { round: 20, circuitId: 'rodriguez',         name: 'Mexico City GP',     date: '2026-10-25' },
-  { round: 21, circuitId: 'interlagos',        name: 'Brazilian GP',       date: '2026-11-08' },
-  { round: 22, circuitId: 'las-vegas',         name: 'Las Vegas GP',       date: '2026-11-21' },
-  { round: 23, circuitId: 'lusail',            name: 'Qatar GP',           date: '2026-11-29' },
-  { round: 24, circuitId: 'yas-marina',        name: 'Abu Dhabi GP',       date: '2026-12-06' },
-];
-
 // ─── UTILS ────────────────────────────────────────────────────────────────────
 async function loadJSON(path) {
   try {
     return await fetchWithCache(path);
   } catch { return null; }
-}
-
-function yearWeight(year, currentYear) {
-  const d = currentYear - year;
-  if (d === 0) return 3.0;
-  if (d === 1) return 2.0;
-  if (d === 2) return 1.5;
-  if (d <= 5)  return 1.0;
-  return 0.5;
 }
 
 // ─── ENGINE STATISTICO ────────────────────────────────────────────────────────
