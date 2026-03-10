@@ -22,7 +22,7 @@ import Head from 'next/head';
 
 const BASE_URL    = 'https://formula-rossa.it';
 const SITE_NAME   = 'Formula Rossa';
-const DEFAULT_OG  = `${BASE_URL}/og-image.jpg`;
+const DEFAULT_OG = `${BASE_URL}/data/images/formula-rossa-logo.png`;
 const DEFAULT_DESC = 'Formula Rossa è la piattaforma definitiva per i tifosi della Scuderia Ferrari. Esplora statistiche F1, dati storici e grafici interattivi della Rossa.';
 
 // ── Local Business Schema (sempre incluso, migliora il ranking locale) ──
