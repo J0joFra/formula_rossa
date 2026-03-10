@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useSession, signIn, signOut } from "next-auth/react";
 import { Home as HomeIcon, BarChart3, Gamepad2, LogOut, Trophy, Zap, Info, Newspaper } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,6 +40,9 @@ export default function Navigation() {
             <NavLink href="/live-timing" icon={Zap}        label="Live Timing" active={pathname === '/live-timing'} />
             <NavLink href="/news"        icon={Newspaper}  label="News"        active={pathname?.startsWith('/news')} />
             <NavLink href="/about"       icon={Info}       label="Chi Siamo"   active={pathname === '/about'} />
+            <div className="px-4 py-2">
+              <ThemeToggle />
+            </div>
 
             <div className="ml-6 pl-6 border-l border-white/10 flex items-center">
               {session ? (
@@ -106,7 +110,10 @@ export default function Navigation() {
               <MobileLink href="/live-timing" label="Live Timing" active={pathname === '/live-timing'}        onClick={() => setIsMenuOpen(false)} />
               <MobileLink href="/news"        label="News"        active={pathname?.startsWith('/news')}      onClick={() => setIsMenuOpen(false)} />
               <MobileLink href="/about"       label="Chi Siamo"   active={pathname === '/about'}              onClick={() => setIsMenuOpen(false)} />
-
+              <div className="px-4 py-2">
+                <ThemeToggle />
+              </div>
+  
               <div className="pt-6 border-t border-white/5">
                 {session ? (
                   <div className="flex items-center justify-between bg-white/5 p-4 rounded-2xl">

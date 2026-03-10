@@ -1,10 +1,12 @@
 import { SessionProvider } from "next-auth/react";
 import Head from 'next/head';
+import { ThemeProvider } from 'next-themes';
 import Script from 'next/script'; 
 import '../styles/globals.css';
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   return (
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
     <SessionProvider session={session}>
       <Head>
         {/* Charset & Viewport */}
@@ -471,6 +473,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
 
       <Component {...pageProps} />
     </SessionProvider>
+    </ThemeProvider>
   );
 }
 
