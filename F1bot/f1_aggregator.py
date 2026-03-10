@@ -15,7 +15,7 @@ Uso:
 import sys
 import os
 
-# Fix encoding Windows PRIMA di tutto il resto
+# Fix encoding Windows
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
@@ -46,27 +46,22 @@ RSS_FEEDS = [
     {"name": "FormulaUno.com",  "url": "https://www.formulauno.com/feed/"},
 ]
 
-MAX_ITEMS_PER_FEED  = 3
-ITEMS_PER_DIGEST    = 5
-RUN_EVERY_HOURS     = 4
+MAX_ITEMS_PER_FEED   = 3
+ITEMS_PER_DIGEST     = 5
+RUN_EVERY_HOURS      = 4
 FIRESTORE_COLLECTION = "news"
 FIREBASE_CREDENTIALS = os.getenv("FIREBASE_CREDENTIALS", "firebase-credentials.json")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_API_KEY         = os.getenv("GROQ_API_KEY")
 
 # ─── LOGGING ───────────────────────────────────────────────────────────────────
 logger = logging.getLogger("f1bot")
 logger.setLevel(logging.INFO)
-
-# Handler file (UTF-8)
 fh = logging.FileHandler("f1_bot.log", encoding="utf-8")
 fh.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
 logger.addHandler(fh)
-
-# Handler terminale (UTF-8, senza emoji se non supportate)
 sh = logging.StreamHandler(sys.stdout)
 sh.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
 logger.addHandler(sh)
-
 log = logger
 
 # ─── FIREBASE ──────────────────────────────────────────────────────────────────
@@ -101,15 +96,14 @@ def fetch_feed(feed: dict) -> list:
     try:
         parsed = feedparser.parse(feed["url"])
         for entry in parsed.entries[:MAX_ITEMS_PER_FEED]:
-            summary = re.sub(r"<[^>]+>", "", entry.get("summary", "")).strip()[:500]
-            # Rimuovi caratteri di controllo dal testo
+            summary = re.sub(r"<[^>]+>", "", entry.get("summary", "")).strip()[:600]
             summary = re.sub(r"[\x00-\x1f\x7f]", " ", summary)
-            title = re.sub(r"[\x00-\x1f\x7f]", " ", entry.get("title", ""))
+            title   = re.sub(r"[\x00-\x1f\x7f]", " ", entry.get("title", ""))
             articles.append({
-                "source":   feed["name"],
-                "title":    title,
-                "url":      entry.get("link", ""),
-                "summary":  summary,
+                "source":  feed["name"],
+                "title":   title,
+                "url":     entry.get("link", ""),
+                "summary": summary,
             })
         log.info(f"{feed['name']}: {len(articles)} articoli trovati")
     except Exception as e:
@@ -129,10 +123,7 @@ def fetch_all_news(seen: set) -> list:
 # ─── GENERAZIONE CON GROQ ──────────────────────────────────────────────────────
 
 def clean_json_string(text: str) -> str:
-    """Rimuove caratteri problematici dalla risposta prima del parsing JSON."""
-    # Rimuovi backtick markdown
     text = re.sub(r"^```json|^```|```$", "", text, flags=re.MULTILINE).strip()
-    # Rimuovi caratteri di controllo TRANNE newline e tab (validi in JSON)
     text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
     return text
 
@@ -142,37 +133,57 @@ def generate_digest(articles: list) -> dict:
 
     client = groq.Groq(api_key=GROQ_API_KEY)
 
+    # Blocco notizie per il prompt
     news_block = ""
     for i, art in enumerate(articles, 1):
-        news_block += f"\nNOTIZIA {i}:\nTitolo: {art['title']}\nFonte: {art['source']}\nURL: {art['url']}\nRiassunto: {art['summary']}\n---"
+        news_block += f"\nNOTIZIA {i}:\nTitolo: {art['title']}\nURL: {art['url']}\nRiassunto: {art['summary']}\n---"
+
+    # Footer fonti (link discreti in fondo all'articolo)
+    sources_html = " &nbsp;|&nbsp; ".join(
+        f'<a href="{art["url"]}" target="_blank" rel="noopener">{art["source"]}</a>'
+        for art in articles
+    )
+    footer_html = f'<hr/><p style="font-size:12px;color:#999;">Fonti: {sources_html}</p>'
 
     today = datetime.now().strftime("%d %B %Y")
 
-    prompt = f"""Sei il redattore di formula-rossa.it, piattaforma italiana Ferrari F1.
+    prompt = f"""Sei un giornalista sportivo esperto di Formula 1 che scrive per formula-rossa.it, sito italiano dedicato alla Ferrari.
 
-Oggi e' {today}. Notizie F1 raccolte:
+Oggi e' {today}. Hai raccolto queste informazioni:
 {news_block}
 
-Scrivi un articolo digest in italiano che:
-1. Titolo: "F1 Today - [tema principale] | {today}"
-2. Intro di 2 righe sulla giornata F1
-3. Per ogni notizia: 2-3 frasi originali + link fonte (es: secondo <a href='URL'>FormulaPassion</a>)
-4. Conclusione di 2 righe dal punto di vista Ferrari
-5. Usa HTML semplice: h2, p, a href
+COMPITO: Scrivi un articolo giornalistico completo, originale e approfondito in italiano.
 
-IMPORTANTE: Rispondi SOLO con JSON valido senza caratteri speciali nei valori stringa. Formato:
-{{"title": "titolo", "slug": "titolo-kebab-case", "html_content": "html qui", "excerpt": "riassunto breve", "tags": ["f1", "ferrari", "news"], "cover_image": ""}}"""
+REGOLE FONDAMENTALI:
+- NON citare mai le fonti nel testo (zero "secondo X", zero "come riporta Y", zero nomi di siti)
+- Scrivi tutto come se fossi tu ad aver seguito le notizie direttamente
+- Usa "oggi", "nelle ultime ore", "in questa giornata" per contestualizzare
+- Ogni sezione deve avere almeno 5-7 righe di testo ricco e originale
+- Aggiungi contesto tecnico, storico o sportivo per arricchire ogni argomento
+- Tono: professionale, appassionato, tecnico ma leggibile
+- Lunghezza minima: 700 parole
+
+STRUTTURA HTML da usare:
+<h1> per il titolo principale
+<p> per l'introduzione (4-5 righe)
+<h2> per ogni sottotitolo di sezione
+<p> per i paragrafi (minimo 2 paragrafi per sezione)
+<strong> per concetti chiave
+Niente <a> nel corpo dell'articolo
+
+Rispondi SOLO con questo JSON valido (niente backtick, niente newline nei valori):
+{{"title": "titolo accattivante della giornata", "slug": "titolo-kebab-case-data-{datetime.now().strftime('%d-%m-%Y')}", "html_content": "HTML completo qui", "excerpt": "2 righe di riassunto per anteprima", "tags": ["F1", "Ferrari", "news"], "footer_html": "{footer_html}"}}"""
 
     log.info("Generazione articolo con Groq (Llama 3)...")
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
-        max_tokens=2000,
-        temperature=0.5,
+        max_tokens=4000,
+        temperature=0.7,
         messages=[
             {
                 "role": "system",
-                "content": "Sei un redattore sportivo italiano esperto di Formula 1. Rispondi SEMPRE e SOLO con JSON valido, senza testo aggiuntivo, senza backtick, senza newline nei valori stringa."
+                "content": "Sei un giornalista sportivo italiano esperto di Formula 1 e Ferrari. Scrivi articoli lunghi, originali e approfonditi. Rispondi SEMPRE e SOLO con JSON valido, senza testo aggiuntivo, senza backtick, senza newline nei valori stringa."
             },
             {"role": "user", "content": prompt}
         ]
@@ -183,6 +194,8 @@ IMPORTANTE: Rispondi SOLO con JSON valido senza caratteri speciali nei valori st
 
     try:
         result = json.loads(raw)
+        # Aggiungi il footer fonti in fondo al contenuto HTML
+        result["html_content"] = result.get("html_content", "") + result.get("footer_html", footer_html)
     except json.JSONDecodeError as e:
         log.error(f"Errore parsing JSON: {e}")
         log.error(f"Risposta raw (primi 300 char): {raw[:300]}")
