@@ -105,15 +105,17 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
           text-size-adjust: 100%;
         }
 
+        /* DOPO */
         body {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
             Oxygen, Ubuntu, Cantarell, sans-serif;
-          background-color: #000000;
-          color: #ffffff;
+          background-color: var(--bg-primary, #000000);
+          color: var(--text-primary, #ffffff);
           overflow-x: hidden;
           line-height: 1.6;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
+          transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         /* ===== SCROLLBAR FERRARI (desktop) ===== */
