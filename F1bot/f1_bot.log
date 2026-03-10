@@ -1,0 +1,19 @@
+2026-03-10 12:38:38,883 [INFO] ==================================================
+2026-03-10 12:38:38,883 [INFO] F1 Aggregator Bot — formula-rossa.it
+2026-03-10 12:38:38,883 [INFO] 10/03/2026 12:38:38
+2026-03-10 12:38:38,883 [INFO] ==================================================
+2026-03-10 12:38:39,033 [INFO] FormulaPassion: 3 articoli trovati
+2026-03-10 12:38:39,148 [INFO] Motorsport.com: 3 articoli trovati
+2026-03-10 12:38:39,606 [INFO] Autosprint: 0 articoli trovati
+2026-03-10 12:38:40,229 [INFO] P300: 3 articoli trovati
+2026-03-10 12:38:41,964 [INFO] FormulaUno.com: 3 articoli trovati
+2026-03-10 12:38:42,084 [INFO] Autosport F1: 3 articoli trovati
+2026-03-10 12:38:42,420 [INFO] Pitpass: 0 articoli trovati
+2026-03-10 12:38:42,851 [INFO] Formel1.de: 0 articoli trovati
+2026-03-10 12:38:43,051 [INFO] SportsMole F1: 3 articoli trovati
+2026-03-10 12:38:44,776 [INFO] F1 Destinations: 3 articoli trovati
+2026-03-10 12:38:44,777 [INFO] Notizie nuove da elaborare: 5
+2026-03-10 12:38:45,237 [INFO] Generazione articolo con Groq (Llama 3)...
+2026-03-10 12:38:50,525 [INFO] Articolo generato: La Formula 1 si scalda: McLaren in crisi, Renault punta sull'elettrico e la Mercedes si conferma leader
+2026-03-10 12:38:51,223 [INFO] Pubblicato su Firestore: news/f1-mercedes-leader-mclaren-crisi-renault-elettrico-10-03-2026
+2026-03-10 12:38:51,225 [INFO] Ciclo completato con successo!

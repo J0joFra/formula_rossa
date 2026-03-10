@@ -4,6 +4,8 @@ import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import Link from "next/link";
 import Head from "next/head";
 import { useState, useEffect } from "react";
+import Navigation from '../components/ferrari/Navigation';
+import Footer from '../components/ferrari/Footer';
 
 export async function getServerSideProps() {
   try {
@@ -282,6 +284,8 @@ export default function NewsPage({ articles }) {
         <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Serif+4:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
       </Head>
 
+      <Navigation />  {/* ← aggiunto */}
+
       <main style={{
         maxWidth: "1100px",
         margin: "0 auto",
@@ -289,7 +293,6 @@ export default function NewsPage({ articles }) {
         opacity: mounted ? 1 : 0,
         transition: "opacity 0.4s ease",
       }}>
-
         {/* Header */}
         <div style={{ marginBottom: "40px", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "24px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
@@ -315,11 +318,7 @@ export default function NewsPage({ articles }) {
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "40px" }}>
-
-            {/* Hero card */}
             {hero && <HeroCard article={hero} />}
-
-            {/* Divisore */}
             {rest.length > 0 && (
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.07)" }} />
@@ -327,8 +326,6 @@ export default function NewsPage({ articles }) {
                 <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.07)" }} />
               </div>
             )}
-
-            {/* Griglia articoli */}
             {rest.length > 0 && (
               <div style={{
                 display: "grid",
@@ -338,10 +335,11 @@ export default function NewsPage({ articles }) {
                 {rest.map(art => <NewsCard key={art.id} article={art} />)}
               </div>
             )}
-
           </div>
         )}
       </main>
+
+      <Footer />  {/* ← aggiunto */}
     </>
   );
 }
