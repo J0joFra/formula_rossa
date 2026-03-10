@@ -3,6 +3,9 @@ import Link from 'next/link';
 import { fetchWithCache } from '../lib/cache';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
+import LoadingSpinner from '../components/ferrari/LoadingSpinner';
+import ErrorMessage from '../components/ferrari/ErrorMessage';
+import EmptyState from '../components/ferrari/EmptyState';
 
 const nationalityToCountryCode = {
   'Monegasque': 'mc', 'British': 'gb', 'Italian': 'it', 'French': 'fr',
@@ -122,7 +125,11 @@ export default function StandingsPage() {
   const visibleDrivers = showFullDrivers ? driverStandings : driverStandings.slice(0, 5);
   const visibleConstructors = showFullConstructors ? constructorStandings : constructorStandings.slice(0, 5);
 
-  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center"><div className="animate-spin rounded-full h-20 w-20 border-4 border-t-red-600"></div></div>;
+  if (loading) return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <LoadingSpinner size="lg" message="Caricamento standings..." />
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-black text-white">
