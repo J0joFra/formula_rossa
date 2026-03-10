@@ -74,6 +74,20 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
           --ferrari-yellow: #FFD700;
           --ferrari-dark: #0A0A0A;
 
+          /* Tema scuro default */
+          --bg-primary: #000000;
+          --bg-secondary: #0A0A0A;
+          --text-primary: #ffffff;
+          --text-secondary: #a1a1aa;
+
+          /* Tema chiaro */
+          .light {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+          }
+
           /* Spacing scale */
           --space-xs: 0.25rem;
           --space-sm: 0.5rem;
