@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signIn, signOut } from "next-auth/react";
-import { Home as HomeIcon, BarChart3, Gamepad2, LogOut, Trophy, Zap, Info } from 'lucide-react';
+import { Home as HomeIcon, BarChart3, Gamepad2, LogOut, Trophy, Zap, Info, Newspaper } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navigation() {
@@ -32,12 +32,13 @@ export default function Navigation() {
 
           {/* Menu Desktop */}
           <div className="hidden md:flex items-center space-x-1">
-            <NavLink href="/"            icon={HomeIcon} label="Home"        active={pathname === '/'} />
-            <NavLink href="/standings"   icon={Trophy}   label="Standings"   active={pathname === '/standings'} />
-            <NavLink href="/statistics"  icon={BarChart3} label="Stats"      active={pathname === '/statistics'} />
-            <NavLink href="/fanzone"     icon={Gamepad2} label="Fan Zone"    active={pathname === '/fanzone'} />
-            <NavLink href="/live-timing" icon={Zap}      label="Live Timing" active={pathname === '/live-timing'} />
-            <NavLink href="/about"       icon={Info}     label="Chi Siamo"   active={pathname === '/about'} />
+            <NavLink href="/"            icon={HomeIcon}   label="Home"        active={pathname === '/'} />
+            <NavLink href="/standings"   icon={Trophy}     label="Standings"   active={pathname === '/standings'} />
+            <NavLink href="/statistics"  icon={BarChart3}  label="Stats"       active={pathname === '/statistics'} />
+            <NavLink href="/fanzone"     icon={Gamepad2}   label="Fan Zone"    active={pathname === '/fanzone'} />
+            <NavLink href="/live-timing" icon={Zap}        label="Live Timing" active={pathname === '/live-timing'} />
+            <NavLink href="/news"        icon={Newspaper}  label="News"        active={pathname?.startsWith('/news')} />
+            <NavLink href="/about"       icon={Info}       label="Chi Siamo"   active={pathname === '/about'} />
 
             <div className="ml-6 pl-6 border-l border-white/10 flex items-center">
               {session ? (
@@ -98,11 +99,13 @@ export default function Navigation() {
             className="md:hidden bg-zinc-950 border-t border-white/5"
           >
             <div className="px-4 py-6 space-y-2">
-              <MobileLink href="/"            label="Home"        active={pathname === '/'}            onClick={() => setIsMenuOpen(false)} />
-              <MobileLink href="/standings"   label="Standings"   active={pathname === '/standings'}   onClick={() => setIsMenuOpen(false)} />
-              <MobileLink href="/statistics"  label="Statistics"  active={pathname === '/statistics'}  onClick={() => setIsMenuOpen(false)} />
-              <MobileLink href="/fanzone"     label="Fan Zone"    active={pathname === '/fanzone'}     onClick={() => setIsMenuOpen(false)} />
-              <MobileLink href="/about"       label="Chi Siamo"   active={pathname === '/about'}       onClick={() => setIsMenuOpen(false)} />
+              <MobileLink href="/"            label="Home"        active={pathname === '/'}                   onClick={() => setIsMenuOpen(false)} />
+              <MobileLink href="/standings"   label="Standings"   active={pathname === '/standings'}          onClick={() => setIsMenuOpen(false)} />
+              <MobileLink href="/statistics"  label="Statistics"  active={pathname === '/statistics'}         onClick={() => setIsMenuOpen(false)} />
+              <MobileLink href="/fanzone"     label="Fan Zone"    active={pathname === '/fanzone'}            onClick={() => setIsMenuOpen(false)} />
+              <MobileLink href="/live-timing" label="Live Timing" active={pathname === '/live-timing'}        onClick={() => setIsMenuOpen(false)} />
+              <MobileLink href="/news"        label="News"        active={pathname?.startsWith('/news')}      onClick={() => setIsMenuOpen(false)} />
+              <MobileLink href="/about"       label="Chi Siamo"   active={pathname === '/about'}              onClick={() => setIsMenuOpen(false)} />
 
               <div className="pt-6 border-t border-white/5">
                 {session ? (
