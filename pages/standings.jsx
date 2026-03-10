@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { fetchWithCache } from '../lib/cache';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 
@@ -76,8 +77,7 @@ export default function StandingsPage() {
 
   async function loadJSON(path) {
     try {
-      const response = await fetch(path);
-      return response.ok ? await response.json() : null;
+      return await fetchWithCache(path);
     } catch { return null; }
   }
 
