@@ -1,0 +1,28 @@
+2026-03-10 10:43:18,930 [INFO] ==================================================
+2026-03-10 10:43:18,931 [INFO] F1 Aggregator Bot — formula-rossa.it
+2026-03-10 10:43:18,931 [INFO] 10/03/2026 10:43:18
+2026-03-10 10:43:18,931 [INFO] ==================================================
+2026-03-10 10:43:19,060 [INFO] FormulaPassion: 3 articoli trovati
+2026-03-10 10:43:19,155 [INFO] Motorsport.com: 3 articoli trovati
+2026-03-10 10:43:19,554 [INFO] Autosprint: 0 articoli trovati
+2026-03-10 10:43:19,906 [INFO] P300: 3 articoli trovati
+2026-03-10 10:43:21,560 [INFO] FormulaUno.com: 3 articoli trovati
+2026-03-10 10:43:21,561 [INFO] Notizie nuove da elaborare: 5
+2026-03-10 10:43:21,869 [INFO] Generazione articolo con Groq (Llama 3)...
+2026-03-10 10:43:24,098 [INFO] Articolo generato: F1 Today - Notizie F1 del 10 marzo 2026
+2026-03-10 10:43:24,893 [ERROR] Errore Firestore: 404 The database (default) does not exist for project articoli-13b64 Please visit https://console.cloud.google.com/datastore/setup?project=articoli-13b64 to add a Cloud Datastore or Cloud Firestore database. 
+2026-03-10 10:43:24,894 [ERROR] Pubblicazione fallita.
+2026-03-10 10:45:28,883 [INFO] ==================================================
+2026-03-10 10:45:28,884 [INFO] F1 Aggregator Bot — formula-rossa.it
+2026-03-10 10:45:28,884 [INFO] 10/03/2026 10:45:28
+2026-03-10 10:45:28,884 [INFO] ==================================================
+2026-03-10 10:45:29,020 [INFO] FormulaPassion: 3 articoli trovati
+2026-03-10 10:45:29,129 [INFO] Motorsport.com: 3 articoli trovati
+2026-03-10 10:45:29,576 [INFO] Autosprint: 0 articoli trovati
+2026-03-10 10:45:30,229 [INFO] P300: 3 articoli trovati
+2026-03-10 10:45:32,030 [INFO] FormulaUno.com: 3 articoli trovati
+2026-03-10 10:45:32,030 [INFO] Notizie nuove da elaborare: 5
+2026-03-10 10:45:32,305 [INFO] Generazione articolo con Groq (Llama 3)...
+2026-03-10 10:45:34,402 [INFO] Articolo generato: F1 Today - Notizie e aggiornamenti
+2026-03-10 10:45:35,384 [INFO] Pubblicato su Firestore: news/f1-today-notizie-e-aggiornamenti
+2026-03-10 10:45:35,386 [INFO] Ciclo completato con successo!
