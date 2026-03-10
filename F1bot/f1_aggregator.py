@@ -39,12 +39,19 @@ load_dotenv()
 # ─── CONFIGURAZIONE ────────────────────────────────────────────────────────────
 
 RSS_FEEDS = [
-    {"name": "FormulaPassion",  "url": "https://www.formulapassion.it/feed/"},
-    {"name": "Motorsport.com",  "url": "https://it.motorsport.com/rss/f1/news/"},
-    {"name": "Autosprint",      "url": "https://autosprint.corrieredellosport.it/feed/"},
-    {"name": "P300",            "url": "https://www.p300.it/feed/"},
-    {"name": "FormulaUno.com",  "url": "https://www.formulauno.com/feed/"},
+    {"name": "FormulaPassion", "url": "https://www.formulapassion.it/feed/"},
+    {"name": "Motorsport.com", "url": "https://it.motorsport.com/rss/f1/news/"},
+    {"name": "Autosprint", "url": "https://autosprint.corrieredellosport.it/feed/"},
+    {"name": "P300", "url": "https://www.p300.it/feed/"},
+    {"name": "FormulaUno.com", "url": "https://www.formulauno.com/feed/"},
+    
+    {"name": "Autosport F1", "url": "https://www.autosport.com/rss/f1/news/"},
+    {"name": "Pitpass", "url": "https://www.pitpass.com/rss-feed"},
+    {"name": "Formel1.de", "url": "https://www.formel1.de/f1_tools/rss/news"},
+    {"name": "SportsMole F1", "url": "https://www.sportsmole.co.uk/formula-1/rss.xml"},
+    {"name": "F1 Destinations", "url": "https://f1destinations.com/feed/"},
 ]
+
 
 MAX_ITEMS_PER_FEED   = 3
 ITEMS_PER_DIGEST     = 5
