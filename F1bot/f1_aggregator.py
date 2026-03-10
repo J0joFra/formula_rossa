@@ -132,6 +132,32 @@ def fetch_all_news(seen: set) -> list:
 def clean_json_string(text: str) -> str:
     text = re.sub(r"^```json|^```|```$", "", text, flags=re.MULTILINE).strip()
     text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
+    
+    def fix_newlines_in_strings(json_text):
+        result = []
+        in_string = False
+        i = 0
+        while i < len(json_text):
+            ch = json_text[i]
+            if ch == '\\' and in_string:
+                result.append(ch)
+                i += 1
+                if i < len(json_text):
+                    result.append(json_text[i])
+                i += 1
+                continue
+            if ch == '"':
+                in_string = not in_string
+            if in_string and ch == '\n':
+                result.append('\\n')
+            elif in_string and ch == '\r':
+                result.append('\\r')
+            else:
+                result.append(ch)
+            i += 1
+        return ''.join(result)
+    
+    text = fix_newlines_in_strings(text)
     return text
 
 def generate_digest(articles: list) -> dict:
