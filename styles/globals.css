@@ -129,6 +129,41 @@
   --shadow-yellow: 0 0 30px rgba(245, 158, 11, 0.15);
 }
 
+/* ===== LIGHT MODE OVERRIDE — copre tutte le pagine ===== */
+:root[class~="light"] {
+
+  /* Sfondi */
+  .bg-black         { background-color: #f8fafc !important; }
+  .bg-zinc-950      { background-color: #f1f5f9 !important; }
+  .bg-zinc-900      { background-color: #ffffff !important; }
+  .bg-zinc-900\/40  { background-color: rgba(0,0,0,0.04) !important; }
+  .bg-zinc-800      { background-color: #e2e8f0 !important; }
+  .bg-zinc-800\/50  { background-color: rgba(0,0,0,0.06) !important; }
+
+  /* Testi */
+  .text-white       { color: #0f172a !important; }
+  .text-zinc-400    { color: #475569 !important; }
+  .text-zinc-500    { color: #64748b !important; }
+  .text-zinc-600    { color: #94a3b8 !important; }
+
+  /* Bordi */
+  .border-zinc-800  { border-color: #e2e8f0 !important; }
+  .border-zinc-700  { border-color: #cbd5e1 !important; }
+  .border-white\/5  { border-color: rgba(0,0,0,0.05) !important; }
+  .border-white\/8  { border-color: rgba(0,0,0,0.08) !important; }
+  .border-white\/10 { border-color: rgba(0,0,0,0.1) !important; }
+
+  /* Hover */
+  .hover\:bg-white\/5:hover  { background-color: rgba(0,0,0,0.04) !important; }
+  .hover\:bg-zinc-800:hover  { background-color: #e2e8f0 !important; }
+
+  /* Navbar */
+  nav { background-color: rgba(248,250,252,0.95) !important; border-color: rgba(0,0,0,0.08) !important; }
+
+  /* Body */
+  body { background-color: #f8fafc !important; color: #0f172a !important; }
+}
+
 /* ===== RESET & BASE ===== */
 *,
 *::before,
