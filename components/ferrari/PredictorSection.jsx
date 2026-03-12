@@ -132,17 +132,17 @@ const CALENDAR_2026 = [
 
 function yearWeight(year, currentYear) {
   const d = currentYear - year;
-  if (d === 0) return 3.0;
-  if (d === 1) return 2.0;
-  if (d === 2) return 1.5;
-  if (d <= 5)  return 1.0;
-  return 0.5;
+  if (d === 0) return 3.0;  // 2026
+  if (d === 1) return 2.0;  // 2025
+  if (d === 2) return 1.5;  // 2024
+  if (d === 3) return 1.0;  // 2023
+  return 0;                 // escluso
 }
 
 // ─── ENGINE STATISTICO ────────────────────────────────────────────────────────
 function buildDriverStats(results, driverId, circuitId = null, realYear = null) {
   const currentYear = realYear ?? new Date().getFullYear();
-  const MIN_YEAR    = currentYear - 7;
+  const MIN_YEAR    = currentYear - 3;
 
   // Risolvi alias: cerca sia l'id diretto che varianti comuni
   const matchCircuit = (r) => {
@@ -263,7 +263,7 @@ export default function PredictorSection() {
       setLoadingDB(true);
       try {
         const currentYear = new Date().getFullYear();
-        const MIN_YEAR = currentYear - 7;
+        const MIN_YEAR = currentYear - 3;
 
         const [
           { data: rawResults, error: e1 },
