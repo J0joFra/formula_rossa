@@ -169,23 +169,23 @@ export default function StandingsPage() {
   const visibleConstructors = showFullConstructors ? constructorStandings : constructorStandings.slice(0, 5);
 
   if (loading) return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
+    <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
       <LoadingSpinner size="lg" message="Caricamento standings..." />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
       <Navigation activeSection="stats" />
       <main className="max-w-7xl mx-auto px-4 pt-32 pb-20">
         <div className="flex justify-between items-end mb-12 border-b border-red-600/30 pb-6">
           <h2 className="text-5xl font-black italic uppercase tracking-tighter">
-            Standings <span className="text-red-600">{selectedSeason}</span>
+            Standings <span className="text-[var(--ferrari-red)]">{selectedSeason}</span>
           </h2>
           <select
             value={selectedSeason}
             onChange={(e) => setSelectedSeason(Number(e.target.value))}
-            className="bg-zinc-900 border-l-4 border-red-600 px-4 py-2 font-bold outline-none text-white cursor-pointer"
+            className="bg-[var(--bg-tertiary)] border-l-4 border-red-600 px-4 py-2 font-bold outline-none text-[var(--text-primary)] cursor-pointer"
           >
             {availableSeasons.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
@@ -193,20 +193,20 @@ export default function StandingsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
           {/* Driver Table */}
-          <div className="bg-zinc-900/40 border border-zinc-800">
-            <h3 className="p-4 font-black uppercase text-sm border-b border-zinc-800 text-red-600">Drivers</h3>
+          <div className="bg-[var(--bg-tertiary)]/40 border border-[var(--border-light)]">
+            <h3 className="p-4 font-black uppercase text-sm border-b border-[var(--border-light)] text-[var(--ferrari-red)]">Drivers</h3>
             <table className="w-full text-left text-sm">
               <tbody>
                 {visibleDrivers.map((s) => {
                   const driver = drivers[s.driver_id];
                   return (
-                    <tr key={s.driver_id} className="border-b border-zinc-800/30 hover:bg-white/5 transition-colors">
-                      <td className="p-4 w-12 font-black italic text-zinc-500">{s.position_number}</td>
-                      <td className="p-4 font-bold text-white">{driver?.last_name?.toUpperCase()}</td>
-                      <td className="p-4 text-zinc-500 text-[10px] uppercase font-bold">
+                    <tr key={s.driver_id} className="border-b border-[var(--border-light)]/30 hover:bg-[var(--bg-card)] transition-colors">
+                      <td className="p-4 w-12 font-black italic text-[var(--text-tertiary)]">{s.position_number}</td>
+                      <td className="p-4 font-bold text-[var(--text-primary)]">{driver?.last_name?.toUpperCase()}</td>
+                      <td className="p-4 text-[var(--text-tertiary)] text-[10px] uppercase font-bold">
                         {constructors[s.constructor_id]?.name || s.constructor_id}
                       </td>
-                      <td className="p-4 text-right font-black text-white">{s.points}</td>
+                      <td className="p-4 text-right font-black text-[var(--text-primary)]">{s.points}</td>
                     </tr>
                   );
                 })}
@@ -214,29 +214,29 @@ export default function StandingsPage() {
             </table>
             <button
               onClick={() => setShowFullDrivers(!showFullDrivers)}
-              className="w-full p-3 text-[10px] font-black uppercase text-zinc-500 hover:text-white transition-colors"
+              className="w-full p-3 text-[10px] font-black uppercase text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
             >
               {showFullDrivers ? '↑ Close' : '↓ View All'}
             </button>
           </div>
 
           {/* Constructor Table */}
-          <div className="bg-zinc-900/40 border border-zinc-800">
-            <h3 className="p-4 font-black uppercase text-sm border-b border-zinc-800 text-red-600">Constructors</h3>
+          <div className="bg-[var(--bg-tertiary)]/40 border border-[var(--border-light)]">
+            <h3 className="p-4 font-black uppercase text-sm border-b border-[var(--border-light)] text-[var(--ferrari-red)]">Constructors</h3>
             <table className="w-full text-left text-sm">
               <tbody>
                 {visibleConstructors.map((s) => (
-                  <tr key={s.constructor_id} className="border-b border-zinc-800/30 hover:bg-white/5 transition-colors">
-                    <td className="p-4 w-12 font-black italic text-zinc-500">{s.position_number}</td>
-                    <td className="p-4 font-bold text-white">{constructors[s.constructor_id]?.name?.toUpperCase()}</td>
-                    <td className="p-4 text-right font-black text-white">{s.points}</td>
+                  <tr key={s.constructor_id} className="border-b border-[var(--border-light)]/30 hover:bg-[var(--bg-card)] transition-colors">
+                    <td className="p-4 w-12 font-black italic text-[var(--text-tertiary)]">{s.position_number}</td>
+                    <td className="p-4 font-bold text-[var(--text-primary)]">{constructors[s.constructor_id]?.name?.toUpperCase()}</td>
+                    <td className="p-4 text-right font-black text-[var(--text-primary)]">{s.points}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             <button
               onClick={() => setShowFullConstructors(!showFullConstructors)}
-              className="w-full p-3 text-[10px] font-black uppercase text-zinc-500 hover:text-white transition-colors"
+              className="w-full p-3 text-[10px] font-black uppercase text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
             >
               {showFullConstructors ? '↑ Close' : '↓ View All'}
             </button>
@@ -244,7 +244,7 @@ export default function StandingsPage() {
         </div>
 
         {/* Calendar Section */}
-        <h3 className="mb-8 font-black uppercase tracking-widest text-sm text-red-600">Race Calendar</h3>
+        <h3 className="mb-8 font-black uppercase tracking-widest text-sm text-[var(--ferrari-red)]">Race Calendar</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
           {calendar.map((race) => {
             const countryCode = circuitToCountry[race.circuit_id];
@@ -252,12 +252,12 @@ export default function StandingsPage() {
               <Link
                 key={race.id}
                 href={`/races?id=${race.id}`}
-                className="relative group bg-zinc-900 border border-zinc-800 rounded-sm overflow-hidden hover:border-red-600 transition-all"
+                className="relative group bg-[var(--bg-tertiary)] border border-[var(--border-light)] rounded-sm overflow-hidden hover:border-red-600 transition-all"
               >
-                <div className="absolute top-2 left-2 z-20 w-6 h-6 bg-red-600 rounded-full flex items-center justify-center border border-black/20 shadow-md">
-                  <span className="text-white text-[10px] font-black">{race.round}</span>
+                <div className="absolute top-2 left-2 z-20 w-6 h-6 bg-[var(--ferrari-red)] rounded-full flex items-center justify-center border border-black/20 shadow-md">
+                  <span className="text-[var(--text-primary)] text-[10px] font-black">{race.round}</span>
                 </div>
-                <div className="relative h-28 w-full overflow-hidden bg-zinc-800">
+                <div className="relative h-28 w-full overflow-hidden bg-[var(--bg-tertiary)]">
                   {countryCode ? (
                     <img
                       src={`https://flagcdn.com/w320/${countryCode}.png`}
@@ -265,15 +265,15 @@ export default function StandingsPage() {
                       alt="Bandiera nazione"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[8px] text-zinc-600 uppercase font-black">No Flag</div>
+                    <div className="w-full h-full flex items-center justify-center text-[8px] text-[var(--text-muted)] uppercase font-black">No Flag</div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 to-transparent"></div>
                 </div>
-                <div className="p-3 bg-zinc-900">
-                  <div className="font-black text-[10px] uppercase truncate text-white mb-1 tracking-tighter">
+                <div className="p-3 bg-[var(--bg-tertiary)]">
+                  <div className="font-black text-[10px] uppercase truncate text-[var(--text-primary)] mb-1 tracking-tighter">
                     {race.official_name?.replace('Grand Prix', 'GP')}
                   </div>
-                  <div className="text-[9px] font-bold text-zinc-500 group-hover:text-red-500 transition-colors">
+                  <div className="text-[9px] font-bold text-[var(--text-tertiary)] group-hover:text-red-500 transition-colors">
                     {race.date}
                   </div>
                 </div>
