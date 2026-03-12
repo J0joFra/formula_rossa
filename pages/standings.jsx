@@ -81,12 +81,13 @@ export default function StandingsPage() {
   const [availableSeasons, setAvailableSeasons] = useState([]);
   const [showFullDrivers, setShowFullDrivers] = useState(false);
   const [showFullConstructors, setShowFullConstructors] = useState(false);
+  const [showSprintRaces, setShowSprintRaces] = useState(false); // Nuovo stato per filtrare le sprint race
 
   async function loadStandings() {
     try {
       setLoading(true);
 
-      // ── 1. Stagioni disponibili — usa races per avere una riga per anno ────────
+      // ── 1. Stagioni disponibili ──────────────────────────────────
       const { data: seasonsData, error: seasonsErr } = await supabase
         .from('races')
         .select('year')
@@ -96,7 +97,7 @@ export default function StandingsPage() {
       const seasons = [...new Set(seasonsData?.map(s => s.year))];
       setAvailableSeasons(seasons);
 
-      // ── 2. Piloti e costruttori (mappe id → oggetto) ─────────────────────────
+      // ── 2. Piloti e costruttori ─────────────────────────────────
       const [{ data: drData }, { data: coData }] = await Promise.all([
         supabase.from('drivers').select('id, first_name, last_name, nationality_country_id'),
         supabase.from('constructors').select('id, name'),
@@ -108,7 +109,7 @@ export default function StandingsPage() {
       setDrivers(drMap);
       setConstructors(coMap);
 
-      // ── 3. Driver standings dell'ultimo round della stagione selezionata ──────
+      // ── 3. Driver standings ────────────────────────────────────
       const { data: drStData, error: drStErr } = await supabase
         .from('driver_standings')
         .select('*')
@@ -127,7 +128,7 @@ export default function StandingsPage() {
         );
       }
 
-      // ── 4. Constructor standings dell'ultimo round ───────────────────────────
+      // ── 4. Constructor standings ───────────────────────────────
       const { data: coStData, error: coStErr } = await supabase
         .from('constructor_standings')
         .select('*')
@@ -146,10 +147,10 @@ export default function StandingsPage() {
         );
       }
 
-      // ── 5. Calendario della stagione selezionata ─────────────────────────────
+      // ── 5. Calendario con info sulle sprint race ───────────────
       const { data: racesData, error: racesErr } = await supabase
         .from('races')
-        .select('id, round, date, circuit_id, official_name')
+        .select('id, round, date, circuit_id, official_name, sprint_race_date, qualifying_date')
         .eq('year', selectedSeason)
         .order('round', { ascending: true });
       if (racesErr) console.error('❌ races:', racesErr.message);
@@ -167,6 +168,11 @@ export default function StandingsPage() {
 
   const visibleDrivers = showFullDrivers ? driverStandings : driverStandings.slice(0, 5);
   const visibleConstructors = showFullConstructors ? constructorStandings : constructorStandings.slice(0, 5);
+  
+  // Filtra le gare che hanno una sprint race
+  const sprintRaces = calendar.filter(race => race.sprint_race_date);
+  // Filtra le gare in base al toggle
+  const displayedCalendar = showSprintRaces ? sprintRaces : calendar;
 
   if (loading) return (
     <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
@@ -243,44 +249,79 @@ export default function StandingsPage() {
           </div>
         </div>
 
-        {/* Calendar Section */}
-        <h3 className="mb-8 font-black uppercase tracking-widest text-sm text-[var(--ferrari-red)]">Race Calendar</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-          {calendar.map((race) => {
-            const countryCode = circuitToCountry[race.circuit_id];
-            return (
-              <Link
-                key={race.id}
-                href={`/races?id=${race.id}`}
-                className="relative group bg-[var(--bg-tertiary)] border border-[var(--border-light)] rounded-sm overflow-hidden hover:border-red-600 transition-all"
-              >
-                <div className="absolute top-2 left-2 z-20 w-6 h-6 bg-[var(--ferrari-red)] rounded-full flex items-center justify-center border border-black/20 shadow-md">
-                  <span className="text-[var(--text-primary)] text-[10px] font-black">{race.round}</span>
-                </div>
-                <div className="relative h-28 w-full overflow-hidden bg-[var(--bg-tertiary)]">
-                  {countryCode ? (
-                    <img
-                      src={`https://flagcdn.com/w320/${countryCode}.png`}
-                      className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
-                      alt="Bandiera nazione"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[8px] text-[var(--text-muted)] uppercase font-black">No Flag</div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 to-transparent"></div>
-                </div>
-                <div className="p-3 bg-[var(--bg-tertiary)]">
-                  <div className="font-black text-[10px] uppercase truncate text-[var(--text-primary)] mb-1 tracking-tighter">
-                    {race.official_name?.replace('Grand Prix', 'GP')}
-                  </div>
-                  <div className="text-[9px] font-bold text-[var(--text-tertiary)] group-hover:text-red-500 transition-colors">
-                    {race.date}
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+        {/* Calendar Section with Sprint Race Toggle */}
+        <div className="flex justify-between items-center mb-8">
+          <h3 className="font-black uppercase tracking-widest text-sm text-[var(--ferrari-red)]">
+            {showSprintRaces ? 'Sprint Race Calendar' : 'Race Calendar'}
+          </h3>
+          <button
+            onClick={() => setShowSprintRaces(!showSprintRaces)}
+            className={`px-4 py-2 text-xs font-black uppercase transition-all border ${
+              showSprintRaces 
+                ? 'bg-[var(--ferrari-red)] text-white border-red-600' 
+                : 'bg-[var(--bg-tertiary)] text-[var(--text-tertiary)] border-[var(--border-light)] hover:border-red-600'
+            }`}
+          >
+            {showSprintRaces ? 'Show All Races' : 'Show Only Sprint Races'}
+          </button>
         </div>
+
+        {displayedCalendar.length === 0 ? (
+          <div className="text-center py-12 text-[var(--text-tertiary)] font-bold">
+            {showSprintRaces ? 'No sprint races in this season' : 'No races available'}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {displayedCalendar.map((race) => {
+              const countryCode = circuitToCountry[race.circuit_id];
+              const hasSprint = race.sprint_race_date;
+              
+              return (
+                <Link
+                  key={race.id}
+                  href={`/races?id=${race.id}`}
+                  className={`relative group bg-[var(--bg-tertiary)] border border-[var(--border-light)] rounded-sm overflow-hidden hover:border-red-600 transition-all ${
+                    hasSprint ? 'border-l-4 border-l-[var(--ferrari-red)]' : ''
+                  }`}
+                >
+                  {hasSprint && (
+                    <div className="absolute -top-1 -right-1 z-30 bg-[var(--ferrari-red)] text-white text-[8px] font-black px-1 py-0.5 uppercase rotate-12 shadow-lg">
+                      Sprint
+                    </div>
+                  )}
+                  <div className="absolute top-2 left-2 z-20 w-6 h-6 bg-[var(--ferrari-red)] rounded-full flex items-center justify-center border border-black/20 shadow-md">
+                    <span className="text-[var(--text-primary)] text-[10px] font-black">{race.round}</span>
+                  </div>
+                  <div className="relative h-28 w-full overflow-hidden bg-[var(--bg-tertiary)]">
+                    {countryCode ? (
+                      <img
+                        src={`https://flagcdn.com/w320/${countryCode}.png`}
+                        className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
+                        alt="Bandiera nazione"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[8px] text-[var(--text-muted)] uppercase font-black">No Flag</div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 to-transparent"></div>
+                  </div>
+                  <div className="p-3 bg-[var(--bg-tertiary)]">
+                    <div className="font-black text-[10px] uppercase truncate text-[var(--text-primary)] mb-1 tracking-tighter">
+                      {race.official_name?.replace('Grand Prix', 'GP')}
+                    </div>
+                    <div className="text-[9px] font-bold text-[var(--text-tertiary)] group-hover:text-red-500 transition-colors">
+                      {race.date}
+                    </div>
+                    {hasSprint && (
+                      <div className="text-[8px] font-black text-[var(--ferrari-red)] uppercase mt-1">
+                        Sprint: {race.sprint_race_date}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </main>
       <Footer />
     </div>
