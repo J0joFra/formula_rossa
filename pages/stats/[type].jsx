@@ -15,13 +15,22 @@ const supabase = typeof window !== 'undefined'
     )
   : null;
 
-/* ─── Config stat types ─────────────────────────────────────────────────────── */
+/* ─── Config stat types con relative query ─────────────────────────────────── */
 const CONFIG = {
   'wins': {
     title: 'Vittorie GP',
     subtitle: 'Race Wins',
     description: 'Ogni volta che un pilota ha tagliato il traguardo in prima posizione con una Ferrari.',
-    filter: (r) => r.position_number === 1,
+    query: async () => {
+      const { data, error } = await supabase
+        .from('race_results')
+        .select('driver_id, year, points')
+        .eq('constructor_id', 'ferrari')
+        .eq('position_number', 1);
+      
+      if (error) throw error;
+      return data;
+    },
     color: '#DC0000',
     colorMuted: 'rgba(220,0,0,0.15)',
     icon: Trophy,
@@ -30,7 +39,16 @@ const CONFIG = {
     title: 'Podi Totali',
     subtitle: 'Podium Finishes',
     description: 'Piazzamenti tra i primi tre classificati: simbolo di costanza al vertice.',
-    filter: (r) => r.position_number >= 1 && r.position_number <= 3,
+    query: async () => {
+      const { data, error } = await supabase
+        .from('race_results')
+        .select('driver_id, year, points')
+        .eq('constructor_id', 'ferrari')
+        .lte('position_number', 3);
+      
+      if (error) throw error;
+      return data;
+    },
     color: '#EAB308',
     colorMuted: 'rgba(234,179,8,0.15)',
     icon: Star,
@@ -39,7 +57,16 @@ const CONFIG = {
     title: 'Pole Positions',
     subtitle: 'Starting Grid P1',
     description: 'Il miglior tempo assoluto in qualifica: la perfezione espressa in un singolo giro.',
-    filter: (r) => r.grid_position_number === 1,
+    query: async () => {
+      const { data, error } = await supabase
+        .from('race_results')
+        .select('driver_id, year, points')
+        .eq('constructor_id', 'ferrari')
+        .eq('grid_position_number', 1);
+      
+      if (error) throw error;
+      return data;
+    },
     color: '#DC0000',
     colorMuted: 'rgba(220,0,0,0.15)',
     icon: Timer,
@@ -48,7 +75,16 @@ const CONFIG = {
     title: 'Giri Veloci',
     subtitle: 'Fastest Laps',
     description: 'Il giro più rapido in gara: velocità pura della vettura e talento assoluto.',
-    filter: (r) => r.fastest_lap === true,
+    query: async () => {
+      const { data, error } = await supabase
+        .from('race_results')
+        .select('driver_id, year, points')
+        .eq('constructor_id', 'ferrari')
+        .eq('fastest_lap', true);
+      
+      if (error) throw error;
+      return data;
+    },
     color: '#EAB308',
     colorMuted: 'rgba(234,179,8,0.15)',
     icon: Zap,
@@ -57,7 +93,24 @@ const CONFIG = {
     title: 'Punti Storici',
     subtitle: 'All-Time Points',
     description: 'La somma totale dei punti conquistati, calcolata su tutti i sistemi di punteggio F1 dal 1950.',
-    filter: (r) => r.points > 0,
+    query: async () => {
+      // Usiamo una query aggregata direttamente in SQL per maggiore efficienza
+      const { data, error } = await supabase
+        .rpc('get_ferrari_points_by_driver');
+      
+      if (error) {
+        // Fallback: se la RPC non esiste, facciamo una query normale
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('race_results')
+          .select('driver_id, year, points')
+          .eq('constructor_id', 'ferrari')
+          .gt('points', 0);
+        
+        if (fallbackError) throw fallbackError;
+        return fallbackData;
+      }
+      return data;
+    },
     isSum: true,
     color: '#DC0000',
     colorMuted: 'rgba(220,0,0,0.15)',
@@ -67,12 +120,39 @@ const CONFIG = {
     title: 'Grand Slams',
     subtitle: 'Perfect Weekends',
     description: "L'impresa suprema: Pole, Vittoria, Giro Veloce e in testa dal primo all'ultimo giro.",
-    filter: (r) => r.grand_slam === true,
+    query: async () => {
+      const { data, error } = await supabase
+        .from('race_results')
+        .select('driver_id, year, points')
+        .eq('constructor_id', 'ferrari')
+        .eq('grand_slam', true);
+      
+      if (error) throw error;
+      return data;
+    },
     color: '#EAB308',
     colorMuted: 'rgba(234,179,8,0.15)',
     icon: Award,
   },
 };
+
+/* ─── Funzione per creare la stored procedure dei punti ───────────────────── */
+// Esegui questo SQL in Supabase una volta:
+/*
+CREATE OR REPLACE FUNCTION get_ferrari_points_by_driver()
+RETURNS TABLE (driver_id text, total_points numeric) 
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT rr.driver_id, SUM(rr.points) as total_points
+  FROM race_results rr
+  WHERE rr.constructor_id = 'ferrari'
+  GROUP BY rr.driver_id
+  ORDER BY total_points DESC;
+END;
+$$;
+*/
 
 /* ─── Medal colors for top 3 ───────────────────────────────────────────────── */
 const MEDAL = [
@@ -81,7 +161,7 @@ const MEDAL = [
   { ring: '#CD7F32', glow: 'rgba(205,127,50,0.3)',  label: '3RD' },
 ];
 
-/* ─── Driver row ────────────────────────────────────────────────────────────── */
+/* ─── Driver row (invariato) ───────────────────────────────────────────────── */
 function DriverRow({ driver, index, max, cfg, isSum }) {
   const pct = max > 0 ? (driver.count / max) * 100 : 0;
   const medal = MEDAL[index] ?? null;
@@ -212,11 +292,11 @@ export default function StatDetail() {
 
   const cfg = type ? CONFIG[type] : null;
 
+  // Carica i piloti una volta sola
   useEffect(() => {
-    if (!type || !cfg || !supabase) return;
+    if (!supabase) return;
 
     async function loadDrivers() {
-      // Carica i piloti una volta sola
       const { data: drData } = await supabase
         .from('drivers')
         .select('id, first_name, last_name');
@@ -232,55 +312,63 @@ export default function StatDetail() {
     }
 
     loadDrivers();
-  }, [type]);
+  }, []);
 
+  // Carica la statistica specifica
   useEffect(() => {
     if (!type || !cfg || !supabase || Object.keys(drivers).length === 0) return;
 
     async function processStats() {
       setLoading(true);
       try {
-        // Query Supabase per i risultati delle gare con Ferrari
-        const { data: results, error } = await supabase
-          .from('race_results')
-          .select('*')
-          .eq('constructor_id', 'ferrari');
-
-        if (error) {
-          console.error('Errore nel caricamento dei risultati:', error);
-          return;
-        }
-
-        // Filtra in base al tipo di statistica
-        const filtered = results.filter(cfg.filter);
-
-        // Aggrega per pilota
-        const agg = filtered.reduce((acc, curr) => {
-          const driverInfo = drivers[curr.driver_id] || { 
-            fullName: curr.driver_id, 
-            id: curr.driver_id 
-          };
-          
-          if (!acc[driverInfo.fullName]) {
-            acc[driverInfo.fullName] = { 
-              name: driverInfo.fullName, 
-              id: driverInfo.id, 
-              count: 0, 
-              years: [] 
+        // Esegue la query specifica per questa statistica
+        const results = await cfg.query();
+        
+        if (cfg.isSum && results[0]?.driver_id) {
+          // Per i punti, i risultati sono già aggregati dalla RPC
+          const agg = {};
+          results.forEach(item => {
+            const driverInfo = drivers[item.driver_id] || { 
+              fullName: item.driver_id, 
+              id: item.driver_id 
             };
-          }
-          
-          acc[driverInfo.fullName].count += cfg.isSum ? curr.points : 1;
-          
-          if (!acc[driverInfo.fullName].years.includes(curr.year)) {
-            acc[driverInfo.fullName].years.push(curr.year);
-          }
-          
-          return acc;
-        }, {});
+            
+            agg[driverInfo.fullName] = {
+              name: driverInfo.fullName,
+              id: driverInfo.id,
+              count: item.total_points || 0,
+              years: [] // Non abbiamo gli anni nella query aggregata
+            };
+          });
+          setData(Object.values(agg).sort((a, b) => b.count - a.count));
+        } else {
+          // Per le altre statistiche, aggregazione lato client
+          const agg = results.reduce((acc, curr) => {
+            const driverInfo = drivers[curr.driver_id] || { 
+              fullName: curr.driver_id, 
+              id: curr.driver_id 
+            };
+            
+            if (!acc[driverInfo.fullName]) {
+              acc[driverInfo.fullName] = { 
+                name: driverInfo.fullName, 
+                id: driverInfo.id, 
+                count: 0, 
+                years: [] 
+              };
+            }
+            
+            acc[driverInfo.fullName].count += cfg.isSum ? curr.points : 1;
+            
+            if (!acc[driverInfo.fullName].years.includes(curr.year)) {
+              acc[driverInfo.fullName].years.push(curr.year);
+            }
+            
+            return acc;
+          }, {});
 
-        // Ordina per conteggio decrescente
-        setData(Object.values(agg).sort((a, b) => b.count - a.count));
+          setData(Object.values(agg).sort((a, b) => b.count - a.count));
+        }
       } catch (err) {
         console.error('Errore:', err);
       }
