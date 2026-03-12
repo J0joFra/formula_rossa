@@ -87,7 +87,7 @@ export default function StandingsPage() {
       setLoading(true);
 
       // ── 1. Stagioni disponibili ──────────────────────────────────────────────
-      const { data: seasonsData } = await supabase
+      const { data: seasonsData } = await getSupabase()
         .from('driver_standings')
         .select('year')
         .order('year', { ascending: false });
@@ -107,7 +107,7 @@ export default function StandingsPage() {
       setConstructors(coMap);
 
       // ── 3. Driver standings dell'ultimo round della stagione selezionata ──────
-      const { data: drStData } = await supabase
+      const { data: drStData } = await getSupabase()
         .from('driver_standings')
         .select('*')
         .eq('year', selectedSeason)
@@ -124,7 +124,7 @@ export default function StandingsPage() {
       }
 
       // ── 4. Constructor standings dell'ultimo round ───────────────────────────
-      const { data: coStData } = await supabase
+      const { data: coStData } = await getSupabase()
         .from('constructor_standings')
         .select('*')
         .eq('year', selectedSeason)
@@ -141,7 +141,7 @@ export default function StandingsPage() {
       }
 
       // ── 5. Calendario della stagione selezionata ─────────────────────────────
-      const { data: racesData } = await supabase
+      const { data: racesData } = await getSupabase()
         .from('races')
         .select('id, round, date, circuit_id, official_name')
         .eq('year', selectedSeason)

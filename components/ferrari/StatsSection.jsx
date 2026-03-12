@@ -1,4 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
+
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  );
+}
 import { motion } from 'framer-motion';
 import { 
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
@@ -17,43 +25,48 @@ export default function StatsSection() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [resultsRes, driversRes] = await Promise.all([
-          fetch('/data/f1db-races-race-results.json'),
-          fetch('/data/f1db-drivers.json')
-        ]);
-        const results = await resultsRes.json();
-        const drivers = await driversRes.json();
-
-        const driverMap = {};
-        drivers.forEach(d => { driverMap[d.id] = d.lastName; });
-
-        const ferrariWins = results.filter(r => r.constructorId === 'ferrari' && r.positionNumber === 1);
-        const winsCount = ferrariWins.reduce((acc, curr) => {
-          const name = driverMap[curr.driverId] || curr.driverId;
-          acc[name] = (acc[name] || 0) + 1;
-          return acc;
-        }, {});
-
-        const winsData = Object.entries(winsCount)
-          .map(([name, wins]) => ({ name, wins }))
-          .sort((a, b) => b.wins - a.wins)
-          .slice(0, 8);
-
-        setPilotWins(winsData);
-
+        const sb = getSupabase();
         const currentYear = new Date().getFullYear();
-        const pointsByYear = results
-          .filter(r => r.constructorId === 'ferrari' && r.year > currentYear - 12)
-          .reduce((acc, curr) => {
-            acc[curr.year] = (acc[curr.year] || 0) + (curr.points || 0);
-            return acc;
-          }, {});
 
-        const historyData = Object.entries(pointsByYear)
-          .map(([year, points]) => ({ year: year.toString(), points: Math.floor(points) }))
-          .sort((a, b) => a.year - b.year);
+        // Top 8 piloti Ferrari per vittorie (aggregazione lato DB)
+        const { data: winsData } = await sb
+          .from('race_results')
+          .select('driver_id, drivers(last_name)')
+          .eq('constructor_id', 'ferrari')
+          .eq('position_number', 1);
 
-        setPointsHistory(historyData);
+        if (winsData) {
+          const winsCount = {};
+          winsData.forEach(r => {
+            const name = r.drivers?.last_name || r.driver_id;
+            winsCount[name] = (winsCount[name] || 0) + 1;
+          });
+          setPilotWins(
+            Object.entries(winsCount)
+              .map(([name, wins]) => ({ name, wins }))
+              .sort((a, b) => b.wins - a.wins)
+              .slice(0, 8)
+          );
+        }
+
+        // Punti Ferrari per anno (ultimi 12 anni)
+        const { data: pointsData } = await sb
+          .from('race_results')
+          .select('year, points')
+          .eq('constructor_id', 'ferrari')
+          .gte('year', currentYear - 12);
+
+        if (pointsData) {
+          const pointsByYear = {};
+          pointsData.forEach(r => {
+            pointsByYear[r.year] = (pointsByYear[r.year] || 0) + (r.points || 0);
+          });
+          setPointsHistory(
+            Object.entries(pointsByYear)
+              .map(([year, points]) => ({ year: year.toString(), points: Math.floor(points) }))
+              .sort((a, b) => a.year - b.year)
+          );
+        }
       } catch (err) {
         console.error("Errore caricamento dati:", err);
       } finally {
