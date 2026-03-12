@@ -1,4 +1,3 @@
-import { supabase } from '../../lib/supabase';
 import React, { useState, useEffect } from 'react';
 
 import { motion } from 'framer-motion';
@@ -10,6 +9,15 @@ import {
   Trophy, Gauge, Cpu, Zap, Activity, ChevronRight, 
   Settings, Weight, Shield, BarChart3, LineChart as LineChartIcon
 } from 'lucide-react';
+
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = typeof window !== 'undefined'
+  ? createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    )
+  : null;
 
 export default function StatsSection() {
   const [pilotWins, setPilotWins] = useState([]);
