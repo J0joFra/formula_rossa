@@ -1,21 +1,10 @@
+import { supabase } from '../lib/supabase';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { createClient } from '@supabase/supabase-js';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import Link from 'next/link';
 
-// ─── Supabase singleton — una sola istanza per evitare "Multiple GoTrueClient" ─
-let _supabase = null;
-function getSupabase() {
-  if (!_supabase) {
-    _supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-    );
-  }
-  return _supabase;
-}
 
 const circuitToCountry = {
   'monza': 'it', 'autodromo-nazionale-di-monza': 'it', 'milan': 'it', 'imola': 'it', 'enzo-e-dino-ferrari': 'it',
@@ -101,57 +90,57 @@ export default function RaceDetailsPage() {
     if (!id) return;
     async function loadData() {
       try {
-        const sb = getSupabase();
+        
         const raceId = parseInt(id);
 
         // Gara + circuito
-        const { data: race } = await sb.from('races').select('*').eq('id', raceId).single();
+        const { data: race } = await supabase.from('races').select('*').eq('id', raceId).single();
         if (!race) { setLoading(false); return; }
         setRaceInfo(race);
 
-        const { data: circuit } = await sb.from('circuits').select('*').eq('id', race.circuit_id).single();
+        const { data: circuit } = await supabase.from('circuits').select('*').eq('id', race.circuit_id).single();
         setCircuitInfo(circuit);
 
         // Piloti e costruttori (mappe)
         const [{ data: drData }, { data: coData }] = await Promise.all([
-          sb.from('drivers').select('id, first_name, last_name'),
-          sb.from('constructors').select('id, name'),
+          supabase.from('drivers').select('id, first_name, last_name'),
+          supabase.from('constructors').select('id, name'),
         ]);
         const dMap = {}; drData?.forEach(d => dMap[d.id] = d);
         const cMap = {}; coData?.forEach(c => cMap[c.id] = c);
         setDrivers(dMap); setConstructors(cMap);
 
         // Race results
-        const { data: results } = await sb
+        const { data: results } = await supabase
           .from('race_results').select('*')
           .eq('race_id', raceId)
           .order('position_display_order');
         setRaceResults(results || []);
 
         // Constructor standings per questa gara
-        const { data: coSt } = await sb
+        const { data: coSt } = await supabase
           .from('constructor_standings').select('*')
           .eq('race_id', raceId)
           .order('position_display_order');
         setConstructorStandings(coSt || []);
 
         // Qualifying — prova qualifying_results prima, poi fallback a qual1/qual2
-        const { data: qualMain } = await sb
+        const { data: qualMain } = await supabase
           .from('qualifying_results').select('*')
           .eq('race_id', raceId).order('position_display_order');
 
         if (qualMain && qualMain.length > 0) {
           setQualifyingResults(qualMain);
         } else {
-          const { data: qual2 } = await sb.from('qualifying_2_results').select('*').eq('race_id', raceId).order('position_display_order');
-          const { data: qual1 } = await sb.from('qualifying_1_results').select('*').eq('race_id', raceId).order('position_display_order');
+          const { data: qual2 } = await supabase.from('qualifying_2_results').select('*').eq('race_id', raceId).order('position_display_order');
+          const { data: qual1 } = await supabase.from('qualifying_1_results').select('*').eq('race_id', raceId).order('position_display_order');
           setQualifyingResults((qual2?.length ? qual2 : qual1) || []);
         }
 
         // Sprint
         const [{ data: sqData }, { data: srData }] = await Promise.all([
-          sb.from('sprint_qualifying_results').select('*').eq('race_id', raceId).order('position_display_order'),
-          sb.from('sprint_race_results').select('*').eq('race_id', raceId).order('position_display_order'),
+          supabase.from('sprint_qualifying_results').select('*').eq('race_id', raceId).order('position_display_order'),
+          supabase.from('sprint_race_results').select('*').eq('race_id', raceId).order('position_display_order'),
         ]);
         setSprintRaceResults([
           ...(sqData || []).map(r => ({ ...r, _type: 'SPRINT_QUALI' })),

@@ -1,21 +1,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import LoadingSpinner from '../components/ferrari/LoadingSpinner';
-
-// ─── Supabase singleton — una sola istanza per evitare "Multiple GoTrueClient" ─
-let _supabase = null;
-function getSupabase() {
-  if (!_supabase) {
-    _supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-    );
-  }
-  return _supabase;
-}
 
 const nationalityToCountryCode = {
   'Monegasque': 'mc', 'British': 'gb', 'Italian': 'it', 'French': 'fr',
@@ -91,17 +79,19 @@ export default function StandingsPage() {
       setLoading(true);
 
       // ── 1. Stagioni disponibili ──────────────────────────────────────────────
-      const { data: seasonsData } = await getSupabase()
+      const { data: seasonsData, error: seasonsErr } = await supabase
         .from('driver_standings')
         .select('year')
         .order('year', { ascending: false });
+      if (seasonsErr) console.error('❌ driver_standings:', seasonsErr.message);
+      else console.log('✅ stagioni trovate:', seasonsData?.length, seasonsData?.slice(0,3));
       const seasons = [...new Set(seasonsData?.map(s => s.year))];
       setAvailableSeasons(seasons);
 
       // ── 2. Piloti e costruttori (mappe id → oggetto) ─────────────────────────
       const [{ data: drData }, { data: coData }] = await Promise.all([
-        getSupabase().from('drivers').select('id, first_name, last_name, nationality_country_id'),
-        getSupabase().from('constructors').select('id, name'),
+        supabase.from('drivers').select('id, first_name, last_name, nationality_country_id'),
+        supabase.from('constructors').select('id, name'),
       ]);
       const drMap = {};
       drData?.forEach(d => { drMap[d.id] = d; });
@@ -111,13 +101,15 @@ export default function StandingsPage() {
       setConstructors(coMap);
 
       // ── 3. Driver standings dell'ultimo round della stagione selezionata ──────
-      const { data: drStData } = await getSupabase()
+      const { data: drStData, error: drStErr } = await supabase
         .from('driver_standings')
         .select('*')
         .eq('year', selectedSeason)
         .order('round', { ascending: false })
         .order('position_number', { ascending: true });
 
+      if (drStErr) console.error('❌ driver_standings year:', drStErr.message);
+      else console.log('✅ driver standings:', drStData?.length, 'righe per anno', selectedSeason);
       if (drStData && drStData.length > 0) {
         const maxRound = drStData[0].round;
         setDriverStandings(
@@ -128,13 +120,15 @@ export default function StandingsPage() {
       }
 
       // ── 4. Constructor standings dell'ultimo round ───────────────────────────
-      const { data: coStData } = await getSupabase()
+      const { data: coStData, error: coStErr } = await supabase
         .from('constructor_standings')
         .select('*')
         .eq('year', selectedSeason)
         .order('round', { ascending: false })
         .order('position_number', { ascending: true });
 
+      if (coStErr) console.error('❌ constructor_standings:', coStErr.message);
+      else console.log('✅ constructor standings:', coStData?.length);
       if (coStData && coStData.length > 0) {
         const maxRound = coStData[0].round;
         setConstructorStandings(
@@ -145,11 +139,13 @@ export default function StandingsPage() {
       }
 
       // ── 5. Calendario della stagione selezionata ─────────────────────────────
-      const { data: racesData } = await getSupabase()
+      const { data: racesData, error: racesErr } = await supabase
         .from('races')
         .select('id, round, date, circuit_id, official_name')
         .eq('year', selectedSeason)
         .order('round', { ascending: true });
+      if (racesErr) console.error('❌ races:', racesErr.message);
+      else console.log('✅ calendario:', racesData?.length, 'gare');
       setCalendar(racesData || []);
 
     } catch (e) {
