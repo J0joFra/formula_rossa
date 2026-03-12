@@ -96,8 +96,8 @@ export default function StandingsPage() {
 
       // ── 2. Piloti e costruttori (mappe id → oggetto) ─────────────────────────
       const [{ data: drData }, { data: coData }] = await Promise.all([
-        supabase.from('drivers').select('id, first_name, last_name, nationality_country_id'),
-        supabase.from('constructors').select('id, name'),
+        getSupabase().from('drivers').select('id, first_name, last_name, nationality_country_id'),
+        getSupabase().from('constructors').select('id, name'),
       ]);
       const drMap = {};
       drData?.forEach(d => { drMap[d.id] = d; });
