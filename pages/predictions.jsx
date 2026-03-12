@@ -52,6 +52,19 @@ const CALENDAR_2026 = [
   { round: 24, circuitId: 'yas-marina',        name: 'Abu Dhabi GP',       date: '2026-12-06' },
 ];
 
+
+const PTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
+const ptsFor = (p) => (p >= 1 && p <= 10) ? PTS[p - 1] : 0;
+
+function yearWeight(year, currentYear) {
+  const d = currentYear - year;
+  if (d === 0) return 3.0;
+  if (d === 1) return 2.0;
+  if (d === 2) return 1.5;
+  if (d <= 5)  return 1.0;
+  return 0.5;
+}
+
 // ─── ALIAS circuitId 2026 → id reale nei JSON storici F1DB ─────────────────
 const CIRCUIT_ALIAS = {
   'albert-park':      'albert-park',
