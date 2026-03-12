@@ -12,6 +12,15 @@ import {
   ChevronDown, Users
 } from 'lucide-react';
 
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = typeof window !== 'undefined'
+  ? createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    )
+  : null;
+
 // ─── PUNTI F1 ─────────────────────────────────────────────────────────────────
 const PTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
 const ptsFor = (p) => (p >= 1 && p <= 10) ? PTS[p - 1] : 0;
@@ -120,12 +129,6 @@ const CALENDAR_2026 = [
 ];
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
-async function loadJSON(path) {
-  try {
-    const res = await fetch(path);
-    return res.ok ? await res.json() : null;
-  } catch { return null; }
-}
 
 function yearWeight(year, currentYear) {
   const d = currentYear - year;
@@ -253,53 +256,83 @@ export default function PredictorSection() {
   const [driverSearch, setDriverSearch]         = useState('');
   const [targetRace, setTargetRace]     = useState(CALENDAR_2026[0]);
 
-  // Carica JSON una volta sola
+  // Carica dati da Supabase una volta sola
   useEffect(() => {
     async function load() {
+      if (!supabase) return;
       setLoadingDB(true);
       try {
-        const [rawResults, rawRaces, rawCircuits, rawDrivers] = await Promise.all([
-          loadJSON('/data/f1db-races-race-results.json'),
-          loadJSON('/data/f1db-races.json'),
-          loadJSON('/data/f1db-circuits.json'),
-          loadJSON('/data/f1db-drivers.json'),
+        const currentYear = new Date().getFullYear();
+        const MIN_YEAR = currentYear - 7;
+
+        const [
+          { data: rawResults, error: e1 },
+          { data: rawCircuits, error: e2 },
+          { data: rawDrivers,  error: e3 },
+          { data: rawRaces,    error: e4 },
+        ] = await Promise.all([
+          supabase
+            .from('race_results')
+            .select('race_id, year, round, driver_id, constructor_id, position_number, position_text, points')
+            .gte('year', MIN_YEAR)
+            .limit(50000),
+          supabase
+            .from('circuits')
+            .select('id, name, full_name, type, length, turns, country_id')
+            .limit(200),
+          supabase
+            .from('drivers')
+            .select('id, permanent_number')
+            .limit(1000),
+          supabase
+            .from('races')
+            .select('id, year, round, circuit_id')
+            .gte('year', MIN_YEAR)
+            .limit(5000),
         ]);
 
-        if (!rawResults || !rawRaces || !rawCircuits || !rawDrivers) {
-          throw new Error('Uno o più file JSON non trovati in public/data/');
-        }
+        if (e1) throw new Error('race_results: ' + e1.message);
+        if (e2) throw new Error('circuits: ' + e2.message);
+        if (e3) throw new Error('drivers: ' + e3.message);
+        if (e4) throw new Error('races: ' + e4.message);
 
-        const racesMap    = Object.fromEntries(rawRaces.map(r => [r.id, r]));
-        const circuitsMap = Object.fromEntries(rawCircuits.map(c => [c.id, c]));
+        const racesMap    = Object.fromEntries((rawRaces    ?? []).map(r => [r.id, r]));
+        const circuitsMap = Object.fromEntries((rawCircuits ?? []).map(c => [c.id, c]));
+        const driverMap   = Object.fromEntries((rawDrivers  ?? []).map(d => [d.id, d]));
 
-        const results = rawResults.map(r => ({
-          ...r,
-          _circuitId: racesMap[r.raceId]?.circuitId ?? null,
+        // Normalizza snake_case → camelCase per compatibilità con le funzioni statistiche
+        const results = (rawResults ?? []).map(r => ({
+          raceId:         r.race_id,
+          year:           r.year,
+          round:          r.round,
+          driverId:       r.driver_id,
+          constructorId:  r.constructor_id,
+          positionNumber: r.position_number,
+          positionText:   r.position_text,
+          points:         r.points,
+          _circuitId:     racesMap[r.race_id]?.circuit_id ?? null,
         }));
 
-        // Tutti i piloti con almeno 20 gare
-        const driverMap = Object.fromEntries(rawDrivers.map(d => [d.id, d]));
-        // Solo piloti che hanno gareggiato nel 2026
-        const drivers2026Ids = [...new Set(results.filter(r => r.year === 2026).map(r => r.driverId))];
-        // Fallback: se non ci sono dati 2026, usa piloti con ≥20 gare totali
+        const drivers2026Ids = [...new Set(results.filter(r => r.year === currentYear).map(r => r.driverId))];
         const driverPool = drivers2026Ids.length > 0
           ? drivers2026Ids
           : Object.entries(results.reduce((acc, r) => { acc[r.driverId] = (acc[r.driverId] ?? 0) + 1; return acc; }, {}))
               .filter(([, c]) => c >= 20).map(([id]) => id);
+
         const activeDrivers = driverPool
-          .map(id => ({ id, number: driverMap[id]?.permanentNumber ?? null }))
+          .map(id => ({ id, number: driverMap[id]?.permanent_number ?? null }))
           .sort((a, b) => a.id.localeCompare(b.id));
 
-        // Gare 2026 già completate
-        const results2026        = results.filter(r => r.year === 2026);
-        const completedRounds    = new Set(results2026.map(r => r.round));
-        const nextRace           = CALENDAR_2026.find(r => !completedRounds.has(r.round)) ?? CALENDAR_2026[0];
+        const results2026     = results.filter(r => r.year === currentYear);
+        const completedRounds = new Set(results2026.map(r => r.round));
+        const nextRace        = CALENDAR_2026.find(r => !completedRounds.has(r.round)) ?? CALENDAR_2026[0];
 
         setTargetRace(nextRace);
         setPrimaryDriver(activeDrivers.find(d => d.id === 'charles-leclerc') ?? activeDrivers[0]);
         setSecondaryDriver(activeDrivers.find(d => d.id === 'lewis-hamilton') ?? activeDrivers[1]);
         setDbData({ results, results2026, activeDrivers, circuitsMap, completedRounds });
       } catch (e) {
+        console.error('❌ PredictorSection:', e.message);
         setLoadError(e.message);
       } finally {
         setLoadingDB(false);
