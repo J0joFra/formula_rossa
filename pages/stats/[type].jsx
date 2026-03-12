@@ -94,21 +94,14 @@ const CONFIG = {
     subtitle: 'All-Time Points',
     description: 'La somma totale dei punti conquistati, calcolata su tutti i sistemi di punteggio F1 dal 1950.',
     query: async () => {
-      // Usiamo una query aggregata direttamente in SQL per maggiore efficienza
+      // Query che restituisce driver_id, year e points per calcolare la somma
       const { data, error } = await supabase
-        .rpc('get_ferrari_points_by_driver');
+        .from('race_results')
+        .select('driver_id, year, points')
+        .eq('constructor_id', 'ferrari')
+        .gt('points', 0);
       
-      if (error) {
-        // Fallback: se la RPC non esiste, facciamo una query normale
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('race_results')
-          .select('driver_id, year, points')
-          .eq('constructor_id', 'ferrari')
-          .gt('points', 0);
-        
-        if (fallbackError) throw fallbackError;
-        return fallbackData;
-      }
+      if (error) throw error;
       return data;
     },
     isSum: true,
@@ -136,23 +129,53 @@ const CONFIG = {
   },
 };
 
-/* ─── Funzione per creare la stored procedure dei punti ───────────────────── */
-// Esegui questo SQL in Supabase una volta:
-/*
-CREATE OR REPLACE FUNCTION get_ferrari_points_by_driver()
-RETURNS TABLE (driver_id text, total_points numeric) 
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  RETURN QUERY
-  SELECT rr.driver_id, SUM(rr.points) as total_points
-  FROM race_results rr
-  WHERE rr.constructor_id = 'ferrari'
-  GROUP BY rr.driver_id
-  ORDER BY total_points DESC;
-END;
-$$;
-*/
+/* ─── Versione alternativa con aggregazione lato client ─────────────────── */
+// Se preferisci un'aggregazione più completa che include anche gli anni
+const CONFIG_WITH_YEARS = {
+  // ... tutte le altre config uguali
+  'points': {
+    title: 'Punti Storici',
+    subtitle: 'All-Time Points',
+    description: 'La somma totale dei punti conquistati, calcolata su tutti i sistemi di punteggio F1 dal 1950.',
+    query: async () => {
+      const { data, error } = await supabase
+        .from('race_results')
+        .select('driver_id, year, points')
+        .eq('constructor_id', 'ferrari')
+        .gt('points', 0)
+        .order('year', { ascending: false });
+      
+      if (error) throw error;
+      
+      // Raggruppa per pilota sommando i punti e raccogliendo gli anni
+      const aggregated = data.reduce((acc, curr) => {
+        if (!acc[curr.driver_id]) {
+          acc[curr.driver_id] = {
+            driver_id: curr.driver_id,
+            total_points: 0,
+            years: new Set()
+          };
+        }
+        acc[curr.driver_id].total_points += curr.points;
+        acc[curr.driver_id].years.add(curr.year);
+        return acc;
+      }, {});
+      
+      // Converti in array e ordina per punti totali
+      return Object.values(aggregated)
+        .map(item => ({
+          driver_id: item.driver_id,
+          total_points: item.total_points,
+          years: Array.from(item.years).sort((a, b) => b - a)
+        }))
+        .sort((a, b) => b.total_points - a.total_points);
+    },
+    isSum: true,
+    color: '#DC0000',
+    colorMuted: 'rgba(220,0,0,0.15)',
+    icon: Gauge,
+  }
+};
 
 /* ─── Medal colors for top 3 ───────────────────────────────────────────────── */
 const MEDAL = [
@@ -161,7 +184,7 @@ const MEDAL = [
   { ring: '#CD7F32', glow: 'rgba(205,127,50,0.3)',  label: '3RD' },
 ];
 
-/* ─── Driver row (invariato) ───────────────────────────────────────────────── */
+/* ─── Driver row ────────────────────────────────────────────────────────────── */
 function DriverRow({ driver, index, max, cfg, isSum }) {
   const pct = max > 0 ? (driver.count / max) * 100 : 0;
   const medal = MEDAL[index] ?? null;
@@ -234,8 +257,8 @@ function DriverRow({ driver, index, max, cfg, isSum }) {
           </span>
           {/* Year range */}
           <span className="text-[10px] text-zinc-600 font-mono shrink-0">
-            {Math.min(...driver.years)}
-            {driver.years.length > 1 ? ` – ${Math.max(...driver.years)}` : ''}
+            {driver.years && driver.years.length > 0 ? Math.min(...driver.years) : ''}
+            {driver.years && driver.years.length > 1 ? ` – ${Math.max(...driver.years)}` : ''}
           </span>
         </div>
 
@@ -251,22 +274,24 @@ function DriverRow({ driver, index, max, cfg, isSum }) {
         </div>
 
         {/* Year pills — visible on md+ */}
-        <div className="hidden md:flex flex-wrap gap-1 mt-2">
-          {driver.years.sort((a, b) => b - a).slice(0, 12).map((year) => (
-            <span
-              key={year}
-              className="text-[9px] px-1.5 py-0.5 rounded font-black"
-              style={{ background: cfg.colorMuted, color: cfg.color }}
-            >
-              {year}
-            </span>
-          ))}
-          {driver.years.length > 12 && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded font-black text-zinc-500">
-              +{driver.years.length - 12}
-            </span>
-          )}
-        </div>
+        {driver.years && driver.years.length > 0 && (
+          <div className="hidden md:flex flex-wrap gap-1 mt-2">
+            {driver.years.sort((a, b) => b - a).slice(0, 12).map((year) => (
+              <span
+                key={year}
+                className="text-[9px] px-1.5 py-0.5 rounded font-black"
+                style={{ background: cfg.colorMuted, color: cfg.color }}
+              >
+                {year}
+              </span>
+            ))}
+            {driver.years.length > 12 && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded font-black text-zinc-500">
+                +{driver.years.length - 12}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Value */}
@@ -324,8 +349,9 @@ export default function StatDetail() {
         // Esegue la query specifica per questa statistica
         const results = await cfg.query();
         
-        if (cfg.isSum && results[0]?.driver_id) {
-          // Per i punti, i risultati sono già aggregati dalla RPC
+        // Per i punti, results potrebbe essere già aggregato dalla query
+        if (cfg.isSum && results[0]?.total_points) {
+          // Caso in cui la query ha già aggregato
           const agg = {};
           results.forEach(item => {
             const driverInfo = drivers[item.driver_id] || { 
@@ -336,13 +362,13 @@ export default function StatDetail() {
             agg[driverInfo.fullName] = {
               name: driverInfo.fullName,
               id: driverInfo.id,
-              count: item.total_points || 0,
-              years: [] // Non abbiamo gli anni nella query aggregata
+              count: item.total_points,
+              years: item.years || []
             };
           });
           setData(Object.values(agg).sort((a, b) => b.count - a.count));
         } else {
-          // Per le altre statistiche, aggregazione lato client
+          // Aggregazione standard
           const agg = results.reduce((acc, curr) => {
             const driverInfo = drivers[curr.driver_id] || { 
               fullName: curr.driver_id, 
@@ -360,7 +386,7 @@ export default function StatDetail() {
             
             acc[driverInfo.fullName].count += cfg.isSum ? curr.points : 1;
             
-            if (!acc[driverInfo.fullName].years.includes(curr.year)) {
+            if (curr.year && !acc[driverInfo.fullName].years.includes(curr.year)) {
               acc[driverInfo.fullName].years.push(curr.year);
             }
             
