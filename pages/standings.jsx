@@ -5,11 +5,13 @@ import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import LoadingSpinner from '../components/ferrari/LoadingSpinner';
 
-// ─── Supabase client ───────────────────
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-);
+// ─── Supabase client (creato lazy per evitare errori SSR durante il build) ────
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  );
+}
 
 const nationalityToCountryCode = {
   'Monegasque': 'mc', 'British': 'gb', 'Italian': 'it', 'French': 'fr',
