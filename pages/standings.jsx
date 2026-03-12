@@ -86,13 +86,13 @@ export default function StandingsPage() {
     try {
       setLoading(true);
 
-      // ── 1. Stagioni disponibili ──────────────────────────────────────────────
+      // ── 1. Stagioni disponibili — usa races per avere una riga per anno ────────
       const { data: seasonsData, error: seasonsErr } = await supabase
-        .from('driver_standings')
+        .from('races')
         .select('year')
-        .order('year', { ascending: false });
-      if (seasonsErr) console.error('❌ driver_standings:', seasonsErr.message);
-      else console.log('✅ stagioni trovate:', seasonsData?.length, seasonsData?.slice(0,3));
+        .order('year', { ascending: false })
+        .limit(1000);
+      if (seasonsErr) console.error('❌ stagioni:', seasonsErr.message);
       const seasons = [...new Set(seasonsData?.map(s => s.year))];
       setAvailableSeasons(seasons);
 
