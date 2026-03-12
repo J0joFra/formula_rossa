@@ -6,13 +6,22 @@ import { motion } from 'framer-motion';
 import { User, Trophy, Timer, Zap, Star, Award, Gauge, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = typeof window !== 'undefined'
+  ? createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    )
+  : null;
+
 /* ─── Config stat types ─────────────────────────────────────────────────────── */
 const CONFIG = {
   'wins': {
     title: 'Vittorie GP',
     subtitle: 'Race Wins',
     description: 'Ogni volta che un pilota ha tagliato il traguardo in prima posizione con una Ferrari.',
-    filter: (r) => r.positionNumber === 1,
+    filter: (r) => r.position_number === 1,
     color: '#DC0000',
     colorMuted: 'rgba(220,0,0,0.15)',
     icon: Trophy,
@@ -21,7 +30,7 @@ const CONFIG = {
     title: 'Podi Totali',
     subtitle: 'Podium Finishes',
     description: 'Piazzamenti tra i primi tre classificati: simbolo di costanza al vertice.',
-    filter: (r) => r.positionNumber >= 1 && r.positionNumber <= 3,
+    filter: (r) => r.position_number >= 1 && r.position_number <= 3,
     color: '#EAB308',
     colorMuted: 'rgba(234,179,8,0.15)',
     icon: Star,
@@ -30,7 +39,7 @@ const CONFIG = {
     title: 'Pole Positions',
     subtitle: 'Starting Grid P1',
     description: 'Il miglior tempo assoluto in qualifica: la perfezione espressa in un singolo giro.',
-    filter: (r) => r.gridPositionNumber === 1,
+    filter: (r) => r.grid_position_number === 1,
     color: '#DC0000',
     colorMuted: 'rgba(220,0,0,0.15)',
     icon: Timer,
@@ -39,7 +48,7 @@ const CONFIG = {
     title: 'Giri Veloci',
     subtitle: 'Fastest Laps',
     description: 'Il giro più rapido in gara: velocità pura della vettura e talento assoluto.',
-    filter: (r) => r.fastestLap === true,
+    filter: (r) => r.fastest_lap === true,
     color: '#EAB308',
     colorMuted: 'rgba(234,179,8,0.15)',
     icon: Zap,
@@ -58,7 +67,7 @@ const CONFIG = {
     title: 'Grand Slams',
     subtitle: 'Perfect Weekends',
     description: "L'impresa suprema: Pole, Vittoria, Giro Veloce e in testa dal primo all'ultimo giro.",
-    filter: (r) => r.grandSlam === true,
+    filter: (r) => r.grand_slam === true,
     color: '#EAB308',
     colorMuted: 'rgba(234,179,8,0.15)',
     icon: Award,
@@ -199,43 +208,78 @@ export default function StatDetail() {
   const { type } = router.query;
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [drivers, setDrivers] = useState({});
 
   const cfg = type ? CONFIG[type] : null;
 
   useEffect(() => {
-    if (!type || !cfg) return;
+    if (!type || !cfg || !supabase) return;
+
+    async function loadDrivers() {
+      // Carica i piloti una volta sola
+      const { data: drData } = await supabase
+        .from('drivers')
+        .select('id, first_name, last_name');
+      
+      const drMap = {};
+      drData?.forEach(d => {
+        drMap[d.id] = {
+          fullName: `${d.first_name} ${d.last_name}`,
+          id: d.id
+        };
+      });
+      setDrivers(drMap);
+    }
+
+    loadDrivers();
+  }, [type]);
+
+  useEffect(() => {
+    if (!type || !cfg || !supabase || Object.keys(drivers).length === 0) return;
 
     async function processStats() {
       setLoading(true);
       try {
-        const [resResults, resDrivers] = await Promise.all([
-          fetch('/data/f1db-races-race-results.json'),
-          fetch('/data/f1db-drivers.json'),
-        ]);
-        const results = await resResults.json();
-        const drivers = await resDrivers.json();
+        // Query Supabase per i risultati delle gare con Ferrari
+        const { data: results, error } = await supabase
+          .from('race_results')
+          .select('*')
+          .eq('constructor_id', 'ferrari');
 
-        const driverMap = {};
-        drivers.forEach((d) => {
-          driverMap[d.id] = { fullName: `${d.firstName} ${d.lastName}`, id: d.id };
-        });
+        if (error) {
+          console.error('Errore nel caricamento dei risultati:', error);
+          return;
+        }
 
-        const filtered = results.filter(
-          (r) => r.constructorId === 'ferrari' && cfg.filter(r)
-        );
+        // Filtra in base al tipo di statistica
+        const filtered = results.filter(cfg.filter);
 
+        // Aggrega per pilota
         const agg = filtered.reduce((acc, curr) => {
-          const info = driverMap[curr.driverId] || { fullName: curr.driverId, id: curr.driverId };
-          if (!acc[info.fullName]) {
-            acc[info.fullName] = { name: info.fullName, id: info.id, count: 0, years: [] };
+          const driverInfo = drivers[curr.driver_id] || { 
+            fullName: curr.driver_id, 
+            id: curr.driver_id 
+          };
+          
+          if (!acc[driverInfo.fullName]) {
+            acc[driverInfo.fullName] = { 
+              name: driverInfo.fullName, 
+              id: driverInfo.id, 
+              count: 0, 
+              years: [] 
+            };
           }
-          acc[info.fullName].count += cfg.isSum ? curr.points : 1;
-          if (!acc[info.fullName].years.includes(curr.year)) {
-            acc[info.fullName].years.push(curr.year);
+          
+          acc[driverInfo.fullName].count += cfg.isSum ? curr.points : 1;
+          
+          if (!acc[driverInfo.fullName].years.includes(curr.year)) {
+            acc[driverInfo.fullName].years.push(curr.year);
           }
+          
           return acc;
         }, {});
 
+        // Ordina per conteggio decrescente
         setData(Object.values(agg).sort((a, b) => b.count - a.count));
       } catch (err) {
         console.error('Errore:', err);
@@ -244,10 +288,10 @@ export default function StatDetail() {
     }
 
     processStats();
-  }, [type]);
+  }, [type, drivers]);
 
   /* ── Loading ── */
-  if (loading || !cfg) {
+  if (loading || !cfg || Object.keys(drivers).length === 0) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4">
         <div className="flex gap-1.5" aria-label="Caricamento">
