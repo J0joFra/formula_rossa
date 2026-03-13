@@ -197,7 +197,7 @@ export default function StatDetail() {
       try {
         const { data: rows, error } = await supabase
           .from('driver_ferrari_stats')
-          .select(`driver_id, first_year, last_year, ${cfg.field}, drivers(first_name, last_name)`)
+          .select(`driver_id, first_year, last_year, ${cfg.field}, driver(first_name, last_name)`)
           .order(cfg.field, { ascending: false })
           .gt(cfg.field, 0);
 
@@ -205,7 +205,7 @@ export default function StatDetail() {
 
         const formatted = rows.map(row => ({
           id: row.driver_id,
-          name: `${row.drivers.first_name} ${row.drivers.last_name}`,
+          name: `${row.driver.first_name} ${row.driver.last_name}`,
           count: row[cfg.field],
           first_year: row.first_year,
           last_year: row.last_year,

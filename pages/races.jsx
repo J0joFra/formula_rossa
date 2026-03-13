@@ -102,17 +102,17 @@ export default function RaceDetailsPage() {
         const raceId = parseInt(id);
 
         // Gara + circuito
-        const { data: race } = await supabase.from('races').select('*').eq('id', raceId).single();
+        const { data: race } = await supabase.from('race').select('*').eq('id', raceId).single();
         if (!race) { setLoading(false); return; }
         setRaceInfo(race);
 
-        const { data: circuit } = await supabase.from('circuits').select('*').eq('id', race.circuit_id).single();
+        const { data: circuit } = await supabase.from('circuit').select('*').eq('id', race.circuit_id).single();
         setCircuitInfo(circuit);
 
         // Piloti e costruttori (mappe)
         const [{ data: drData }, { data: coData }] = await Promise.all([
-          supabase.from('drivers').select('id, first_name, last_name'),
-          supabase.from('constructors').select('id, name'),
+          supabase.from('driver').select('id, first_name, last_name'),
+          supabase.from('constructor').select('id, name'),
         ]);
         const dMap = {}; drData?.forEach(d => dMap[d.id] = d);
         const cMap = {}; coData?.forEach(c => cMap[c.id] = c);
@@ -120,35 +120,37 @@ export default function RaceDetailsPage() {
 
         // Race results
         const { data: results } = await supabase
-          .from('race_results').select('*')
+          .from('race_data').select('*')
+          .eq('type', 'RACE_RESULT')
           .eq('race_id', raceId)
           .order('position_display_order');
         setRaceResults(results || []);
 
         // Constructor standings per questa gara
         const { data: coSt } = await supabase
-          .from('constructor_standings').select('*')
+          .from('race_constructor_standing').select('*')
           .eq('race_id', raceId)
           .order('position_display_order');
         setConstructorStandings(coSt || []);
 
         // Qualifying — prova qualifying_results prima, poi fallback a qual1/qual2
         const { data: qualMain } = await supabase
-          .from('qualifying_results').select('*')
+          .from('race_data').select('*')
+          .eq('type', 'QUALIFYING_RESULT')
           .eq('race_id', raceId).order('position_display_order');
 
         if (qualMain && qualMain.length > 0) {
           setQualifyingResults(qualMain);
         } else {
-          const { data: qual2 } = await supabase.from('qualifying_2_results').select('*').eq('race_id', raceId).order('position_display_order');
-          const { data: qual1 } = await supabase.from('qualifying_1_results').select('*').eq('race_id', raceId).order('position_display_order');
+          const { data: qual2 } = await supabase.from('race_data').select('*').eq('race_id', raceId).eq('type', 'QUALIFYING_2_RESULT').order('position_display_order');
+          const { data: qual1 } = await supabase.from('race_data').select('*').eq('race_id', raceId).eq('type', 'QUALIFYING_1_RESULT').order('position_display_order');
           setQualifyingResults((qual2?.length ? qual2 : qual1) || []);
         }
 
         // Sprint
         const [{ data: sqData }, { data: srData }] = await Promise.all([
-          supabase.from('sprint_qualifying_results').select('*').eq('race_id', raceId).order('position_display_order'),
-          supabase.from('sprint_race_results').select('*').eq('race_id', raceId).order('position_display_order'),
+          supabase.from('race_data').select('*').eq('race_id', raceId).eq('type', 'SPRINT_QUALIFYING_RESULT').order('position_display_order'),
+          supabase.from('race_data').select('*').eq('race_id', raceId).eq('type', 'SPRINT_RACE_RESULT').order('position_display_order'),
         ]);
         setSprintRaceResults([
           ...(sqData || []).map(r => ({ ...r, _type: 'SPRINT_QUALI' })),
@@ -366,7 +368,7 @@ export default function RaceDetailsPage() {
                         <td className="p-4"><div className={`font-bold uppercase ${isFerrari(s.constructor_id) ? 'text-[#ff2800]' : 'text-white'}`}><span className="opacity-40 mr-1 hidden sm:inline">{drivers[s.driver_id]?.first_name}</span><span>{drivers[s.driver_id]?.last_name}</span></div></td>
                         <td className={`p-4 text-xs font-bold uppercase ${isFerrari(s.constructor_id) ? 'text-[#ff2800]' : 'text-zinc-400'}`}>{constructors[s.constructor_id]?.name}</td>
                         <td className="p-4 text-right font-mono text-xs text-zinc-300">{s.position_text === "1" ? (s.time || "Winner") : (s.gap || s.reason_retired || "—")}</td>
-                        <td className="p-4 text-right font-black text-yellow-400">{s.points ?? '—'}</td></>
+                        <td className="p-4 text-right font-black text-yellow-400">{s.race_points ?? '—'}</td></>
                       )}
                     />
                   )}
@@ -385,7 +387,7 @@ export default function RaceDetailsPage() {
                   <tr key={i} className={`${getPositionBackground(s.position_text)} hover:bg-white/5 transition-all duration-300 border-b border-zinc-800/20`}>
                     <td className={`p-4 w-12 text-center font-black italic ${getPositionTextColor(s.position_text)}`}>{s.position_text}</td>
                     <td className={`p-4 font-bold uppercase text-xs tracking-tight ${isFerrari(s.constructor_id) ? 'text-[#ff2800]' : 'text-white'}`}>{constructors[s.constructor_id]?.name}</td>
-                    <td className="p-4 text-right font-black text-white px-6">{s.points}</td>
+                    <td className="p-4 text-right font-black text-white px-6">{s.race_points}</td>
                   </tr>
                 ))}
               </tbody>

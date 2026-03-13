@@ -162,7 +162,7 @@ function buildDriverStats(results, driverId, circuitId = null, realYear = null) 
 
   const filtered = results.filter(r =>
     r.driverId === driverId &&
-    r.year >= MIN_YEAR &&
+    (r.year ?? r.race?.year) >= MIN_YEAR &&
     r.positionNumber != null &&
     matchCircuit(r)
   );
@@ -275,22 +275,21 @@ export default function PredictorSection() {
           { data: rawRaces,    error: e4 },
         ] = await Promise.all([
           supabase
-            .from('race_results')
-            .select('race_id, year, round, driver_id, constructor_id, position_number, position_text, points')
-            .gte('year', MIN_YEAR)
-            .order('year', { ascending: false })
-            .order('round', { ascending: false })
+            .from('race_data')
+            .select('race_id, driver_id, constructor_id, position_number, position_text, race_points, race(year, round)')
+            .eq('type', 'RACE_RESULT')
+            .order('race_id', { ascending: false })
             .limit(50000),
           supabase
-            .from('circuits')
+            .from('circuit')
             .select('id, name, full_name, type, length, turns, country_id')
             .limit(200),
           supabase
-            .from('drivers')
+            .from('driver')
             .select('id, permanent_number')
             .limit(1000),
           supabase
-            .from('races')
+            .from('race')
             .select('id, year, round, circuit_id')
             .gte('year', MIN_YEAR)
             .order('year', { ascending: false })
@@ -300,7 +299,7 @@ export default function PredictorSection() {
 
         const years = [...new Set((rawRaces ?? []).map(r => r.year))].sort((a,b) => b-a);
         console.log('📊 Supabase:', {
-          race_results: rawResults?.length, e1: e1?.message,
+          race_data: rawResults?.length, e1: e1?.message,
           circuits: rawCircuits?.length,    e2: e2?.message,
           drivers: rawDrivers?.length,      e3: e3?.message,
           races: rawRaces?.length,          e4: e4?.message,
@@ -308,11 +307,11 @@ export default function PredictorSection() {
           anno_max: years[0],
         });
 
-        if (e1) throw new Error('race_results: ' + e1.message);
+        if (e1) throw new Error('race_data: ' + e1.message);
         if (e2) throw new Error('circuits: ' + e2.message);
         if (e3) throw new Error('drivers: ' + e3.message);
         if (e4) throw new Error('races: ' + e4.message);
-        if (!rawResults?.length) throw new Error('Nessun dato in race_results. Su Supabase → Table Editor → race_results → RLS: aggiungi policy SELECT per anon.');
+        if (!rawResults?.length) throw new Error('Nessun dato in race_data. Su Supabase → Table Editor → race_data → RLS: aggiungi policy SELECT per anon.');
 
         const racesMap    = Object.fromEntries((rawRaces    ?? []).map(r => [r.id, r]));
         const circuitsMap = Object.fromEntries((rawCircuits ?? []).map(c => [c.id, c]));
@@ -320,13 +319,13 @@ export default function PredictorSection() {
 
         const results = (rawResults ?? []).map(r => ({
           raceId:         r.race_id,
-          year:           r.year,
-          round:          r.round,
+          year:           r.race?.year ?? null,
+          round:          r.race?.round ?? null,
           driverId:       r.driver_id,
           constructorId:  r.constructor_id,
           positionNumber: r.position_number,
           positionText:   r.position_text,
-          points:         r.points,
+          points:         r.race_points,
           _circuitId:     racesMap[r.race_id]?.circuit_id ?? null,
         }));
 

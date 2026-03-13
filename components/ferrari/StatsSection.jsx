@@ -29,18 +29,17 @@ export default function StatsSection() {
       try {
         
         const currentYear = new Date().getFullYear();
-
-        // Top 8 piloti Ferrari per vittorie (aggregazione lato DB)
         const { data: winsData } = await supabase
-          .from('race_results')
-          .select('driver_id, drivers(last_name)')
+          .from('race_data')
+          .select('driver_id, driver(last_name)')
           .eq('constructor_id', 'ferrari')
+          .eq('type', 'RACE_RESULT')
           .eq('position_number', 1);
 
         if (winsData) {
           const winsCount = {};
           winsData.forEach(r => {
-            const name = r.drivers?.last_name || r.driver_id;
+            const name = r.driver?.last_name || r.driver_id;
             winsCount[name] = (winsCount[name] || 0) + 1;
           });
           setPilotWins(
@@ -51,17 +50,19 @@ export default function StatsSection() {
           );
         }
 
-        // Punti Ferrari per anno (ultimi 12 anni)
         const { data: pointsData } = await supabase
-          .from('race_results')
-          .select('year, points')
+          .from('race_data')
+          .select('race_points, race(year)')
           .eq('constructor_id', 'ferrari')
-          .gte('year', currentYear - 12);
+          .eq('type', 'RACE_RESULT')
+          .gte('race.year', currentYear - 12);
 
         if (pointsData) {
           const pointsByYear = {};
           pointsData.forEach(r => {
-            pointsByYear[r.year] = (pointsByYear[r.year] || 0) + (r.points || 0);
+            const year = r.race?.year;
+            if (!year) return;
+            pointsByYear[year] = (pointsByYear[year] || 0) + (r.race_points || 0);
           });
           setPointsHistory(
             Object.entries(pointsByYear)
