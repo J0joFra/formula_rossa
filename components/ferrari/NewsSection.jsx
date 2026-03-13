@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import { ExternalLink, RefreshCw, Newspaper } from 'lucide-react';
 
 const CATEGORY_STYLES = {
-  SCUDERIA:  { bg: 'bg-red-600/15',    border: 'border-red-500/30',    text: 'text-red-400'    },
-  PILOTI:    { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-400' },
+  SCUDERIA:  { bg: 'bg-[var(--ferrari-red)]/15',    border: 'border-red-500/30',    text: 'text-[var(--ferrari-red)]'    },
+  PILOTI:    { bg: 'bg-[var(--ferrari-yellow)]/10', border: 'border-yellow-500/30', text: 'text-[var(--ferrari-yellow)]' },
   'F1 NEWS': { bg: 'bg-zinc-700/40',   border: 'border-zinc-500/30',   text: 'text-zinc-300'   },
 };
 
@@ -73,7 +73,7 @@ export default function NewsSection() {
       <div className="h-px w-full bg-gradient-to-r from-transparent via-red-600/30 to-transparent" aria-hidden="true" />
 
       <section
-        className="py-24 px-4 bg-gradient-to-b from-[#111] via-[#1a1a1a] to-[#111] border-y border-white/5"
+        className="py-24 px-4 bg-gradient-to-b from-[#111] via-[#1a1a1a] to-[#111] border-y border-[var(--border-light)]"
         aria-label="Flash News Formula 1"
       >
         <div className="max-w-6xl mx-auto">
@@ -85,18 +85,18 @@ export default function NewsSection() {
             className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6"
           >
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-600/10 text-red-500 text-[10px] font-black uppercase tracking-widest mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--ferrari-red)]/10 text-red-500 text-[10px] font-black uppercase tracking-widest mb-4">
                 <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
                 Live Updates
               </div>
-              <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter text-white">
-                Flash <span className="text-red-600">News</span>
+              <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter text-[var(--text-primary)]">
+                Flash <span className="text-[var(--ferrari-red)]">News</span>
               </h2>
-              <p className="mt-2 text-zinc-500 text-sm max-w-md">
+              <p className="mt-2 text-[var(--text-tertiary)] text-sm max-w-md">
                 Le ultime notizie dalla Formula 1 e dalla Scuderia Ferrari, aggiornate in tempo reale.
               </p>
             </div>
-            <p className="text-zinc-500 text-sm max-w-xs border-l border-zinc-800 pl-4 italic hidden md:block">
+            <p className="text-[var(--text-tertiary)] text-sm max-w-xs border-l border-[var(--border-light)] pl-4 italic hidden md:block">
               Ultime 3 notizie in tempo reale dal paddock di Motorsport.com
             </p>
           </motion.div>
@@ -104,7 +104,7 @@ export default function NewsSection() {
           {isLoading && news.length === 0 ? (
             <div className="grid md:grid-cols-3 gap-6" aria-label="Caricamento notizie">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-64 bg-zinc-900/50 animate-pulse rounded-2xl border border-white/5" aria-hidden="true" />
+                <div key={i} className="h-64 bg-[var(--bg-tertiary)]/50 animate-pulse rounded-2xl border border-[var(--border-light)]" aria-hidden="true" />
               ))}
             </div>
           ) : (
@@ -119,10 +119,10 @@ export default function NewsSection() {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.1 }}
-                      className="group bg-zinc-900/60 backdrop-blur-md rounded-2xl border border-white/8 hover:border-red-600/40 transition-all flex flex-col overflow-hidden shadow-xl"
+                      className="group bg-[var(--bg-tertiary)]/60 backdrop-blur-md rounded-2xl border border-white/8 hover:border-[var(--ferrari-red)]/40 transition-all flex flex-col overflow-hidden shadow-xl"
                     >
                       {/* Thumbnail */}
-                      <div className="relative w-full h-40 overflow-hidden bg-zinc-800 shrink-0">
+                      <div className="relative w-full h-40 overflow-hidden bg-[var(--bg-tertiary)] shrink-0">
                         {item.thumbnail ? (
                           <img
                             src={item.thumbnail}
@@ -135,7 +135,7 @@ export default function NewsSection() {
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900">
-                            <Newspaper className="w-10 h-10 text-zinc-600" aria-hidden="true" />
+                            <Newspaper className="w-10 h-10 text-[var(--text-muted)]" aria-hidden="true" />
                           </div>
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent" aria-hidden="true" />
@@ -147,15 +147,15 @@ export default function NewsSection() {
 
                       {/* Contenuto */}
                       <div className="flex flex-col flex-grow p-5">
-                        <h3 className="text-sm font-bold text-white leading-snug group-hover:text-red-400 transition-colors mb-2 line-clamp-2">
+                        <h3 className="text-sm font-bold text-[var(--text-primary)] leading-snug group-hover:text-[var(--ferrari-red)] transition-colors mb-2 line-clamp-2">
                           {item.title}
                         </h3>
-                        <p className="text-zinc-500 text-xs leading-relaxed line-clamp-3 flex-grow">
+                        <p className="text-[var(--text-tertiary)] text-xs leading-relaxed line-clamp-3 flex-grow">
                           {item.description}
                         </p>
 
-                        <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/5">
-                          <time className="text-zinc-600 text-[10px] font-bold uppercase" dateTime={item.date}>
+                        <div className="flex justify-between items-center mt-4 pt-4 border-t border-[var(--border-light)]">
+                          <time className="text-[var(--text-muted)] text-[10px] font-bold uppercase" dateTime={item.date}>
                             {item.date}
                           </time>
                           <a
@@ -163,7 +163,7 @@ export default function NewsSection() {
                             target="_blank"
                             rel="noopener noreferrer"
                             aria-label={`Leggi articolo completo: ${item.title}`}
-                            className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500 hover:text-red-400 transition-colors"
+                            className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] hover:text-[var(--ferrari-red)] transition-colors"
                           >
                             Leggi
                             <ExternalLink className="w-3 h-3" aria-hidden="true" />
@@ -175,7 +175,7 @@ export default function NewsSection() {
                 })}
               </div>
 
-              <p className="text-center text-zinc-600 text-xs max-w-2xl mx-auto">
+              <p className="text-center text-[var(--text-muted)] text-xs max-w-2xl mx-auto">
                 Aggiornamenti F1 in tempo reale: segui le ultime notizie sulla Scuderia Ferrari,
                 i risultati dei Gran Premi, le dichiarazioni di Charles Leclerc e Lewis Hamilton
                 e tutti gli sviluppi tecnici dalla stagione di Formula 1.

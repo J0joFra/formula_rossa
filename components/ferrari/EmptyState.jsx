@@ -7,20 +7,20 @@ export default function EmptyState({
   action = null, // { label: 'Riprova', onClick: fn }
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4 border border-white/5 rounded-2xl bg-zinc-900/20">
-      <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 mb-4">
-        <Icon className="w-8 h-8 text-zinc-600" />
+    <div className="flex flex-col items-center justify-center py-12 px-4 border border-[var(--border-light)] rounded-2xl bg-[var(--bg-tertiary)]/20">
+      <div className="p-4 rounded-2xl bg-[var(--bg-tertiary)] border border-[var(--border-light)] mb-4">
+        <Icon className="w-8 h-8 text-[var(--text-muted)]" />
       </div>
-      <h3 className="text-sm font-black uppercase tracking-widest text-white mb-2">
+      <h3 className="text-sm font-black uppercase tracking-widest text-[var(--text-primary)] mb-2">
         {title}
       </h3>
-      <p className="text-xs text-zinc-500 text-center max-w-xs leading-relaxed">
+      <p className="text-xs text-[var(--text-tertiary)] text-center max-w-xs leading-relaxed">
         {description}
       </p>
       {action && (
         <button
           onClick={action.onClick}
-          className="mt-4 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-red-500 border border-red-600/30 rounded-lg hover:bg-red-600/10 transition-colors"
+          className="mt-4 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-red-500 border border-[var(--ferrari-red)]/30 rounded-lg hover:bg-[var(--ferrari-red)]/10 transition-colors"
         >
           {action.label}
         </button>

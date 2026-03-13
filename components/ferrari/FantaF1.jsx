@@ -81,7 +81,7 @@ function DriverRow({ driverId, index }) {
       }}
     >
       {/* Grip */}
-      <GripVertical className="w-4 h-4 text-zinc-700 group-hover:text-zinc-500 transition-colors shrink-0" />
+      <GripVertical className="w-4 h-4 text-zinc-700 group-hover:text-[var(--text-tertiary)] transition-colors shrink-0" />
 
       {/* Numero posizione */}
       <span
@@ -98,7 +98,7 @@ function DriverRow({ driverId, index }) {
       />
 
       {/* Nome */}
-      <span className="font-black text-base flex-1 text-white tracking-tight">{d.name}</span>
+      <span className="font-black text-base flex-1 text-[var(--text-primary)] tracking-tight">{d.name}</span>
 
       {/* Team badge */}
       <span
@@ -128,20 +128,20 @@ function DriverChip({ driverId, pos, onRemove, small = false }) {
       }}
     >
       {pos !== undefined && (
-        <span className="text-[10px] font-black text-zinc-500 w-5 text-center">{pos}°</span>
+        <span className="text-[10px] font-black text-[var(--text-tertiary)] w-5 text-center">{pos}°</span>
       )}
       <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
-      <span className={`font-black text-white ${small ? 'text-[10px]' : 'text-xs'}`}>{d.name}</span>
+      <span className={`font-black text-[var(--text-primary)] ${small ? 'text-[10px]' : 'text-xs'}`}>{d.name}</span>
       <span className={`${small ? 'text-[9px]' : 'text-[10px]'}`} style={{ color: `${d.color}99` }}>{d.team}</span>
       {onRemove && (
-        <button onClick={onRemove} className="ml-auto text-zinc-600 hover:text-red-400 transition-colors text-xs leading-none">✕</button>
+        <button onClick={onRemove} className="ml-auto text-[var(--text-muted)] hover:text-[var(--ferrari-red)] transition-colors text-xs leading-none">✕</button>
       )}
     </div>
   );
 }
 
 // ─── SECTION LABEL ────────────────────────────────────────────────────────────
-function SectionLabel({ children, color = 'text-zinc-500' }) {
+function SectionLabel({ children, color = 'text-[var(--text-tertiary)]' }) {
   return (
     <p className={`text-xs font-black uppercase tracking-[0.12em] mb-2 ${color}`}>
       {children}
@@ -270,8 +270,8 @@ export default function FantaF1() {
     return (
       <section className="mb-24 flex items-center justify-center py-16">
         <div className="relative w-10 h-10">
-          <div className="absolute inset-0 rounded-full border-2 border-red-600/20" />
-          <div className="absolute inset-0 rounded-full border-t-2 border-red-600 animate-spin" />
+          <div className="absolute inset-0 rounded-full border-2 border-[var(--ferrari-red)]/20" />
+          <div className="absolute inset-0 rounded-full border-t-2 border-[var(--ferrari-red)] animate-spin" />
         </div>
       </section>
     );
@@ -294,16 +294,16 @@ export default function FantaF1() {
 
       {/* ── HEADER ── */}
       <div className="flex items-center gap-4 mb-10">
-        <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-yellow-500/10 border border-yellow-500/20">
-          <Trophy className="w-5 h-5 text-yellow-500" />
+        <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-[var(--ferrari-yellow)]/10 border border-[var(--ferrari-yellow)]/20">
+          <Trophy className="w-5 h-5 text-[var(--ferrari-yellow)]" />
         </div>
         <div>
           <h3 className="text-xl font-black uppercase italic tracking-tight leading-none">FantaF1</h3>
-          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Predici la gara · Stagione 2026</p>
+          <p className="text-[10px] text-[var(--text-tertiary)] font-bold uppercase tracking-widest mt-0.5">Predici la gara · Stagione 2026</p>
         </div>
         <div className="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent ml-2" />
         {locked && (
-          <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-red-400 bg-red-500/10 px-3 py-1.5 rounded-full border border-red-500/20">
+          <span className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-[var(--ferrari-red)] bg-red-500/10 px-3 py-1.5 rounded-full border border-red-500/20">
             <Lock className="w-3 h-3" /> Chiuse
           </span>
         )}
@@ -317,7 +317,7 @@ export default function FantaF1() {
         <div className="space-y-5">
 
           {/* Card Gara */}
-          <div className="relative overflow-hidden rounded-3xl border border-white/10">
+          <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)]">
             {/* Flag bg */}
             {cc && (
               <>
@@ -333,14 +333,14 @@ export default function FantaF1() {
               </>
             )}
             {/* Red accent line top */}
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 via-red-500 to-transparent" />
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[var(--ferrari-red)] via-red-500 to-transparent" />
 
             <div className="relative z-10 p-6">
               {/* Round badge */}
               <div className="inline-flex items-center gap-2 mb-4">
                 <span className="text-[9px] font-black uppercase tracking-[0.2em] text-red-500">Round {race.round}</span>
                 <span className="w-1 h-1 rounded-full bg-zinc-700" />
-                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600">2026</span>
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">2026</span>
               </div>
 
               {/* Flag emoji + name */}
@@ -358,8 +358,8 @@ export default function FantaF1() {
               {/* Countdown / lock */}
               <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold
                 ${locked
-                  ? 'bg-red-500/10 border border-red-500/20 text-red-400'
-                  : 'bg-zinc-800/60 border border-white/5 text-zinc-400'}`}>
+                  ? 'bg-red-500/10 border border-red-500/20 text-[var(--ferrari-red)]'
+                  : 'bg-[var(--bg-tertiary)]/60 border border-[var(--border-light)] text-[var(--text-secondary)]'}`}>
                 <Clock className="w-3.5 h-3.5 shrink-0" />
                 <span>
                   {locked
@@ -374,7 +374,7 @@ export default function FantaF1() {
           </div>
 
           {/* Sistema Punti */}
-          <div className="rounded-3xl border border-white/5 bg-zinc-900/30 overflow-hidden">
+          <div className="rounded-3xl border border-[var(--border-light)] bg-[var(--bg-tertiary)]/30 overflow-hidden">
             <div className="px-5 pt-5 pb-3">
               <SectionLabel>Sistema Punti</SectionLabel>
             </div>
@@ -393,7 +393,7 @@ export default function FantaF1() {
                 { label: 'Doppietta team podio',     pts: POINTS.teamDoublePodium,   color: '#a3e635' },
               ].map((r, i) => (
                 <div key={i} className="flex justify-between items-center py-2.5 border-b border-white/[0.04] last:border-0">
-                  <span className="text-xs text-zinc-400">{r.label}</span>
+                  <span className="text-xs text-[var(--text-secondary)]">{r.label}</span>
                   <span
                     className="text-xs font-black px-2.5 py-0.5 rounded-lg"
                     style={{ color: r.color, background: `${r.color}15` }}
@@ -406,14 +406,14 @@ export default function FantaF1() {
           </div>
 
           {/* Leaderboard */}
-          <div className="rounded-3xl border border-white/5 bg-zinc-900/30 overflow-hidden">
+          <div className="rounded-3xl border border-[var(--border-light)] bg-[var(--bg-tertiary)]/30 overflow-hidden">
             <div className="px-5 pt-5 pb-3 flex items-center justify-between">
               <SectionLabel>🏆 Classifica Stagione</SectionLabel>
             </div>
             <div className="px-5 pb-5">
               {lbLoading ? (
                 <div className="flex items-center justify-center py-6">
-                  <div className="w-5 h-5 rounded-full border-t-2 border-red-600 animate-spin" />
+                  <div className="w-5 h-5 rounded-full border-t-2 border-[var(--ferrari-red)] animate-spin" />
                 </div>
               ) : leaderboard.length === 0 ? (
                 <p className="text-zinc-700 text-xs text-center py-6">Nessuna predizione ancora</p>
@@ -426,26 +426,26 @@ export default function FantaF1() {
                       <div
                         key={p.userId || i}
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl transition-all
-                          ${isMe ? 'bg-yellow-500/10 border border-yellow-500/20' : 'hover:bg-white/[0.02]'}`}
+                          ${isMe ? 'bg-[var(--ferrari-yellow)]/10 border border-[var(--ferrari-yellow)]/20' : 'hover:bg-[var(--bg-card)]/20'}`}
                       >
-                        <span className="text-[11px] font-black w-5 text-center shrink-0 text-zinc-500">
+                        <span className="text-[11px] font-black w-5 text-center shrink-0 text-[var(--text-tertiary)]">
                           {i < 3 ? medals[i] : `#${i + 1}`}
                         </span>
                         {p.avatar
                           ? <img src={p.avatar} alt="" className="w-7 h-7 rounded-full ring-1 ring-white/10 shrink-0" />
                           : (
-                            <div className="w-7 h-7 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-[10px] font-black text-zinc-500 shrink-0">
+                            <div className="w-7 h-7 rounded-full bg-[var(--bg-tertiary)] border border-[var(--border-strong)] flex items-center justify-center text-[10px] font-black text-[var(--text-tertiary)] shrink-0">
                               {p.name?.[0]?.toUpperCase() || '?'}
                             </div>
                           )
                         }
-                        <span className={`flex-1 text-sm font-bold truncate ${isMe ? 'text-yellow-400' : 'text-white'}`}>
+                        <span className={`flex-1 text-sm font-bold truncate ${isMe ? 'text-[var(--ferrari-yellow)]' : 'text-[var(--text-primary)]'}`}>
                           {p.name || 'Anonimo'}
                           {isMe && <span className="ml-1.5 text-[9px] text-yellow-600 font-black uppercase">tu</span>}
                         </span>
-                        <span className={`text-sm font-black tabular-nums ${isMe ? 'text-yellow-400' : 'text-zinc-300'}`}>
+                        <span className={`text-sm font-black tabular-nums ${isMe ? 'text-[var(--ferrari-yellow)]' : 'text-zinc-300'}`}>
                           {p.totalPoints || 0}
-                          <span className="text-[10px] text-zinc-600 font-bold ml-0.5">pt</span>
+                          <span className="text-[10px] text-[var(--text-muted)] font-bold ml-0.5">pt</span>
                         </span>
                       </div>
                     );
@@ -473,14 +473,14 @@ export default function FantaF1() {
                 <SectionLabel color="text-yellow-600">✓ Risultato — {race.name}</SectionLabel>
                 <div className="flex items-center gap-8 mt-3">
                   <div>
-                    <p className="text-6xl font-black text-yellow-400 tabular-nums leading-none">{score.total}</p>
-                    <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mt-1">punti totali</p>
+                    <p className="text-6xl font-black text-[var(--ferrari-yellow)] tabular-nums leading-none">{score.total}</p>
+                    <p className="text-[10px] text-[var(--text-tertiary)] uppercase font-black tracking-widest mt-1">punti totali</p>
                   </div>
                   <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-1">
                     {Object.entries(score.breakdown || {}).map(([key, val]) => val > 0 && (
-                      <div key={key} className="flex justify-between items-center py-1 border-b border-white/5">
-                        <span className="text-[10px] text-zinc-500 capitalize">{key.replace(/([A-Z])/g, ' $1').toLowerCase()}</span>
-                        <span className="text-[11px] font-black text-green-400">+{val}</span>
+                      <div key={key} className="flex justify-between items-center py-1 border-b border-[var(--border-light)]">
+                        <span className="text-[10px] text-[var(--text-tertiary)] capitalize">{key.replace(/([A-Z])/g, ' $1').toLowerCase()}</span>
+                        <span className="text-[11px] font-black text-[var(--success)]">+{val}</span>
                       </div>
                     ))}
                   </div>
@@ -491,12 +491,12 @@ export default function FantaF1() {
 
           {/* Login required */}
           {!session && (
-            <div className="rounded-3xl border border-white/8 bg-zinc-900/30 p-8 text-center mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-zinc-800/60 border border-white/10 flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-5 h-5 text-zinc-600" />
+            <div className="rounded-3xl border border-white/8 bg-[var(--bg-tertiary)]/30 p-8 text-center mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-[var(--bg-tertiary)]/60 border border-[var(--border-strong)] flex items-center justify-center mx-auto mb-4">
+                <Shield className="w-5 h-5 text-[var(--text-muted)]" />
               </div>
               <p className="font-black text-sm mb-1">Login richiesto</p>
-              <p className="text-zinc-600 text-xs">Accedi per salvare le tue predizioni e scalare la classifica.</p>
+              <p className="text-[var(--text-muted)] text-xs">Accedi per salvare le tue predizioni e scalare la classifica.</p>
             </div>
           )}
 
@@ -516,10 +516,10 @@ export default function FantaF1() {
                         onClick={() => setStep(id)}
                         className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border
                           ${isActive
-                            ? 'bg-red-600 text-white border-red-600 shadow-lg shadow-red-600/20'
+                            ? 'bg-[var(--ferrari-red)] text-[var(--text-primary)] border-[var(--ferrari-red)] shadow-lg shadow-[var(--ferrari-red)]/20'
                             : isDone
                             ? 'bg-green-500/10 text-green-500 border-green-500/20'
-                            : 'bg-transparent text-zinc-600 border-white/8 hover:border-white/20 hover:text-zinc-400'}`}
+                            : 'bg-transparent text-[var(--text-muted)] border-white/8 hover:border-white/20 hover:text-[var(--text-secondary)]'}`}
                       >
                         {isDone ? <CheckCircle2 className="w-3 h-3" /> : <Icon className="w-3 h-3" />}
                         <span className="hidden sm:inline">{label}</span>
@@ -528,9 +528,9 @@ export default function FantaF1() {
                   })}
                 </div>
                 {/* Progress bar */}
-                <div className="h-0.5 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="h-0.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-red-600 to-red-400 rounded-full"
+                    className="h-full bg-gradient-to-r from-[var(--ferrari-red)] to-red-400 rounded-full"
                     animate={{ width: `${((stepIndex + 1) / STEPS.length) * 100}%` }}
                     transition={{ duration: 0.4, ease: 'easeOut' }}
                   />
@@ -549,10 +549,10 @@ export default function FantaF1() {
                     exit={{ opacity: 0, x: -16 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <div className="rounded-3xl border border-white/5 bg-zinc-900/20 overflow-hidden">
+                    <div className="rounded-3xl border border-[var(--border-light)] bg-[var(--bg-tertiary)]/20 overflow-hidden">
                       {/* Header sticky */}
-                      <div className="px-5 pt-5 pb-4 sticky top-0 z-10 bg-zinc-950/95 backdrop-blur-sm border-b border-white/5">
-                        <p className="text-sm font-black text-white uppercase tracking-wide mb-2">
+                      <div className="px-5 pt-5 pb-4 sticky top-0 z-10 bg-[var(--bg-secondary)]/95 backdrop-blur-sm border-b border-[var(--border-light)]">
+                        <p className="text-sm font-black text-[var(--text-primary)] uppercase tracking-wide mb-2">
                           Trascina i piloti · Posizione 1 → 20
                         </p>
                         <div className="flex gap-4">
@@ -563,7 +563,7 @@ export default function FantaF1() {
                           ].map(z => (
                             <div key={z.label} className="flex items-center gap-1.5">
                               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: z.color }} />
-                              <span className="text-[10px] text-zinc-500 font-bold">{z.label}</span>
+                              <span className="text-[10px] text-[var(--text-tertiary)] font-bold">{z.label}</span>
                             </div>
                           ))}
                         </div>
@@ -577,7 +577,7 @@ export default function FantaF1() {
                             const zoneLabel =
                               i === 0  ? { text: '🏆 Podio',         color: 'text-yellow-600/70' } :
                               i === 3  ? { text: '🔵 Top 10',         color: 'text-blue-500/70'   } :
-                              i === 10 ? { text: 'Posizioni 11–22 · Zona Coda', color: 'text-zinc-600' } :
+                              i === 10 ? { text: 'Posizioni 11–22 · Zona Coda', color: 'text-[var(--text-muted)]' } :
                               null;
 
                             return (
@@ -596,16 +596,16 @@ export default function FantaF1() {
                         </Reorder.Group>
                       </div>
 
-                      <div className="px-5 py-4 border-t border-white/5 flex justify-between items-center bg-zinc-950/50">
+                      <div className="px-5 py-4 border-t border-[var(--border-light)] flex justify-between items-center bg-[var(--bg-secondary)]/50">
                         <button
                           onClick={() => setFullGrid(DRIVERS_2026.map(d => d.id))}
-                          className="flex items-center gap-1.5 text-zinc-600 hover:text-white transition-colors text-xs font-black uppercase"
+                          className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors text-xs font-black uppercase"
                         >
                           <RotateCcw className="w-3.5 h-3.5" /> Reset
                         </button>
                         <button
                           onClick={() => setStep('lasttail')}
-                          className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-500 transition-all shadow-lg shadow-red-600/20 hover:scale-[1.02]"
+                          className="flex items-center gap-2 px-6 py-3 bg-[var(--ferrari-red)] text-[var(--text-primary)] rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-500 transition-all shadow-lg shadow-[var(--ferrari-red)]/20 hover:scale-[1.02]"
                         >
                           Coda 11-22 →
                         </button>
@@ -623,11 +623,11 @@ export default function FantaF1() {
                     exit={{ opacity: 0, x: -16 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <div className="rounded-3xl border border-purple-500/15 bg-zinc-900/20 overflow-hidden">
+                    <div className="rounded-3xl border border-purple-500/15 bg-[var(--bg-tertiary)]/20 overflow-hidden">
                       {/* Header sticky */}
-                      <div className="px-5 pt-5 pb-4 border-b border-white/5 sticky top-0 z-10 bg-zinc-950/95 backdrop-blur-sm">
+                      <div className="px-5 pt-5 pb-4 border-b border-[var(--border-light)] sticky top-0 z-10 bg-[var(--bg-secondary)]/95 backdrop-blur-sm">
                         <SectionLabel color="text-purple-500">Zona Coda · Posizioni 11–22</SectionLabel>
-                        <p className="text-xs text-zinc-500 mt-1">
+                        <p className="text-xs text-[var(--text-tertiary)] mt-1">
                           Riordina i piloti in coda. I <span className="text-purple-400 font-bold">primi 7</span> valgono posizione esatta,
                           gli <span className="text-violet-700 font-bold">ultimi 5</span> zona corretta.
                         </p>
@@ -638,7 +638,7 @@ export default function FantaF1() {
                           ].map(z => (
                             <div key={z.label} className="flex items-center gap-1.5">
                               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: z.color }} />
-                              <span className="text-[10px] text-zinc-500 font-bold">{z.label}</span>
+                              <span className="text-[10px] text-[var(--text-tertiary)] font-bold">{z.label}</span>
                             </div>
                           ))}
                         </div>
@@ -677,7 +677,7 @@ export default function FantaF1() {
                                         : `${d.color}25`,
                                     }}
                                   >
-                                    <GripVertical className="w-4 h-4 text-zinc-700 group-hover:text-zinc-500 transition-colors shrink-0" />
+                                    <GripVertical className="w-4 h-4 text-zinc-700 group-hover:text-[var(--text-tertiary)] transition-colors shrink-0" />
                                     <span
                                       className="text-sm font-black w-7 text-center shrink-0 tabular-nums"
                                       style={{ color: isBot5 ? '#6d28d9' : '#a855f7' }}
@@ -685,7 +685,7 @@ export default function FantaF1() {
                                       {absPos}°
                                     </span>
                                     <div className="w-3 h-3 rounded-full shrink-0 ring-1 ring-white/10" style={{ backgroundColor: d.color }} />
-                                    <span className="font-black text-base flex-1 text-white tracking-tight">{d.name}</span>
+                                    <span className="font-black text-base flex-1 text-[var(--text-primary)] tracking-tight">{d.name}</span>
                                     <span
                                       className="text-[11px] font-bold px-2.5 py-1 rounded-xl hidden sm:inline"
                                       style={{ color: d.color, background: `${d.color}18`, border: `1px solid ${d.color}30` }}
@@ -700,13 +700,13 @@ export default function FantaF1() {
                         </Reorder.Group>
                       </div>
 
-                      <div className="px-5 py-4 border-t border-white/5 flex justify-between items-center bg-zinc-950/50">
-                        <button onClick={() => setStep('grid')} className="text-zinc-600 hover:text-white transition-colors text-xs font-black uppercase">
+                      <div className="px-5 py-4 border-t border-[var(--border-light)] flex justify-between items-center bg-[var(--bg-secondary)]/50">
+                        <button onClick={() => setStep('grid')} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors text-xs font-black uppercase">
                           ← Griglia
                         </button>
                         <button
                           onClick={() => setStep('bonus')}
-                          className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-500 transition-all shadow-lg shadow-red-600/20 hover:scale-[1.02]"
+                          className="flex items-center gap-2 px-6 py-3 bg-[var(--ferrari-red)] text-[var(--text-primary)] rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-500 transition-all shadow-lg shadow-[var(--ferrari-red)]/20 hover:scale-[1.02]"
                         >
                           Bonus →
                         </button>
@@ -724,8 +724,8 @@ export default function FantaF1() {
                     exit={{ opacity: 0, x: -16 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <div className="rounded-3xl border border-white/5 bg-zinc-900/20 overflow-hidden">
-                      <div className="px-5 pt-5 pb-4 border-b border-white/5">
+                    <div className="rounded-3xl border border-[var(--border-light)] bg-[var(--bg-tertiary)]/20 overflow-hidden">
+                      <div className="px-5 pt-5 pb-4 border-b border-[var(--border-light)]">
                         <SectionLabel>Bonus — punti extra</SectionLabel>
                       </div>
 
@@ -734,11 +734,11 @@ export default function FantaF1() {
                         {/* Pole position */}
                         <div>
                           <div className="flex items-center gap-2 mb-3">
-                            <div className="flex items-center justify-center w-7 h-7 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
-                              <Star className="w-3.5 h-3.5 text-yellow-400" />
+                            <div className="flex items-center justify-center w-7 h-7 rounded-xl bg-[var(--ferrari-yellow)]/10 border border-[var(--ferrari-yellow)]/20">
+                              <Star className="w-3.5 h-3.5 text-[var(--ferrari-yellow)]" />
                             </div>
-                            <p className="text-sm font-black text-white">Chi conquista la Pole?</p>
-                            <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded-lg bg-yellow-500/15 text-yellow-400 border border-yellow-500/20">
+                            <p className="text-sm font-black text-[var(--text-primary)]">Chi conquista la Pole?</p>
+                            <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded-lg bg-[var(--ferrari-yellow)]/15 text-[var(--ferrari-yellow)] border border-[var(--ferrari-yellow)]/20">
                               +{POINTS.polePositionExact} pt
                             </span>
                           </div>
@@ -749,12 +749,12 @@ export default function FantaF1() {
                                 onClick={() => setPolePosition(d.id)}
                                 className={`flex items-center gap-2 p-3 rounded-xl border text-left transition-all text-xs font-bold
                                   ${polePosition === d.id
-                                    ? 'border-yellow-500/50 bg-yellow-500/10 text-white'
-                                    : 'border-white/5 bg-zinc-900/60 text-zinc-400 hover:border-white/15 hover:text-zinc-200'}`}
+                                    ? 'border-yellow-500/50 bg-[var(--ferrari-yellow)]/10 text-[var(--text-primary)]'
+                                    : 'border-[var(--border-light)] bg-[var(--bg-tertiary)]/60 text-[var(--text-secondary)] hover:border-[var(--border-strong)]/30 hover:text-[var(--text-primary)]'}`}
                               >
                                 <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
                                 <span>{d.name}</span>
-                                {polePosition === d.id && <Star className="w-3 h-3 text-yellow-400 ml-auto" />}
+                                {polePosition === d.id && <Star className="w-3 h-3 text-[var(--ferrari-yellow)] ml-auto" />}
                               </button>
                             ))}
                           </div>
@@ -766,7 +766,7 @@ export default function FantaF1() {
                             <div className="flex items-center justify-center w-7 h-7 rounded-xl bg-orange-500/10 border border-orange-500/20">
                               <Zap className="w-3.5 h-3.5 text-orange-400" />
                             </div>
-                            <p className="text-sm font-black text-white">Chi fa il giro veloce?</p>
+                            <p className="text-sm font-black text-[var(--text-primary)]">Chi fa il giro veloce?</p>
                             <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded-lg bg-orange-500/15 text-orange-400 border border-orange-500/20">
                               +{POINTS.fastestLapExact} pt
                             </span>
@@ -778,8 +778,8 @@ export default function FantaF1() {
                                 onClick={() => setFastestLap(d.id)}
                                 className={`flex items-center gap-2 p-3 rounded-xl border text-left transition-all text-xs font-bold
                                   ${fastestLap === d.id
-                                    ? 'border-orange-500/50 bg-orange-500/10 text-white'
-                                    : 'border-white/5 bg-zinc-900/60 text-zinc-400 hover:border-white/15 hover:text-zinc-200'}`}
+                                    ? 'border-orange-500/50 bg-orange-500/10 text-[var(--text-primary)]'
+                                    : 'border-[var(--border-light)] bg-[var(--bg-tertiary)]/60 text-[var(--text-secondary)] hover:border-[var(--border-strong)]/30 hover:text-[var(--text-primary)]'}`}
                               >
                                 <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
                                 <span>{d.name}</span>
@@ -795,7 +795,7 @@ export default function FantaF1() {
                             <div className="flex items-center justify-center w-7 h-7 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
                               <Shield className="w-3.5 h-3.5 text-cyan-400" />
                             </div>
-                            <p className="text-sm font-black text-white">Ci sarà la Safety Car?</p>
+                            <p className="text-sm font-black text-[var(--text-primary)]">Ci sarà la Safety Car?</p>
                             <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded-lg bg-cyan-500/15 text-cyan-400 border border-cyan-500/20">
                               +{POINTS.safetyCarCorrect} pt
                             </span>
@@ -808,7 +808,7 @@ export default function FantaF1() {
                                 className={`py-3.5 rounded-2xl border font-black text-sm transition-all
                                   ${safetyCar === val
                                     ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400 shadow-lg shadow-cyan-500/10'
-                                    : 'border-white/5 bg-zinc-900/60 text-zinc-500 hover:border-white/15'}`}
+                                    : 'border-[var(--border-light)] bg-[var(--bg-tertiary)]/60 text-[var(--text-tertiary)] hover:border-[var(--border-strong)]/30'}`}
                               >
                                 {label}
                               </button>
@@ -820,10 +820,10 @@ export default function FantaF1() {
                         <div>
                           <div className="flex items-center gap-2 mb-3">
                             <div className="flex items-center justify-center w-7 h-7 rounded-xl bg-green-500/10 border border-green-500/20">
-                              <Trophy className="w-3.5 h-3.5 text-green-400" />
+                              <Trophy className="w-3.5 h-3.5 text-[var(--success)]" />
                             </div>
-                            <p className="text-sm font-black text-white">Costruttore vincitore?</p>
-                            <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded-lg bg-green-500/15 text-green-400 border border-green-500/20">
+                            <p className="text-sm font-black text-[var(--text-primary)]">Costruttore vincitore?</p>
+                            <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded-lg bg-green-500/15 text-[var(--success)] border border-green-500/20">
                               +{POINTS.winningConstructor} pt
                             </span>
                           </div>
@@ -840,12 +840,12 @@ export default function FantaF1() {
                                       onClick={() => setWinningConstructor(sel ? '' : teamId)}
                                       className={`flex items-center gap-2 p-3 rounded-xl border text-left transition-all text-xs font-bold
                                         ${sel
-                                          ? 'border-green-500/50 bg-green-500/10 text-white'
-                                          : 'border-white/5 bg-zinc-900/60 text-zinc-400 hover:border-white/15 hover:text-zinc-200'}`}
+                                          ? 'border-green-500/50 bg-green-500/10 text-[var(--text-primary)]'
+                                          : 'border-[var(--border-light)] bg-[var(--bg-tertiary)]/60 text-[var(--text-secondary)] hover:border-[var(--border-strong)]/30 hover:text-[var(--text-primary)]'}`}
                                     >
                                       <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
                                       <span>{team}</span>
-                                      {sel && <CheckCircle2 className="w-3 h-3 text-green-400 ml-auto" />}
+                                      {sel && <CheckCircle2 className="w-3 h-3 text-[var(--success)] ml-auto" />}
                                     </button>
                                   );
                                 })}
@@ -858,10 +858,10 @@ export default function FantaF1() {
                         <div>
                           <div className="flex items-center gap-2 mb-3">
                             <div className="flex items-center justify-center w-7 h-7 rounded-xl bg-red-500/10 border border-red-500/20">
-                              <AlertCircle className="w-3.5 h-3.5 text-red-400" />
+                              <AlertCircle className="w-3.5 h-3.5 text-[var(--ferrari-red)]" />
                             </div>
-                            <p className="text-sm font-black text-white">Chi si ritira? (max 3)</p>
-                            <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded-lg bg-red-500/15 text-red-400 border border-red-500/20">
+                            <p className="text-sm font-black text-[var(--text-primary)]">Chi si ritira? (max 3)</p>
+                            <span className="ml-auto text-[10px] font-black px-2 py-0.5 rounded-lg bg-red-500/15 text-[var(--ferrari-red)] border border-red-500/20">
                               +{POINTS.dnfCorrect} pt cad.
                             </span>
                           </div>
@@ -878,34 +878,34 @@ export default function FantaF1() {
                                   )}
                                   className={`flex items-center gap-2 p-3 rounded-xl border text-left transition-all text-xs font-bold
                                     ${sel
-                                      ? 'border-red-500/50 bg-red-500/10 text-white'
+                                      ? 'border-red-500/50 bg-red-500/10 text-[var(--text-primary)]'
                                       : full
-                                      ? 'border-white/3 bg-zinc-900/30 text-zinc-700 cursor-not-allowed'
-                                      : 'border-white/5 bg-zinc-900/60 text-zinc-400 hover:border-white/15 hover:text-zinc-200'}`}
+                                      ? 'border-white/3 bg-[var(--bg-tertiary)]/30 text-zinc-700 cursor-not-allowed'
+                                      : 'border-[var(--border-light)] bg-[var(--bg-tertiary)]/60 text-[var(--text-secondary)] hover:border-[var(--border-strong)]/30 hover:text-[var(--text-primary)]'}`}
                                 >
                                   <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
                                   <span>{d.name}</span>
-                                  {sel && <span className="ml-auto text-red-400 text-[10px] font-black">DNF</span>}
+                                  {sel && <span className="ml-auto text-[var(--ferrari-red)] text-[10px] font-black">DNF</span>}
                                 </button>
                               );
                             })}
                           </div>
                           {dnfDrivers.length > 0 && (
-                            <p className="text-[10px] text-zinc-600 mt-2">
+                            <p className="text-[10px] text-[var(--text-muted)] mt-2">
                               Selezionati: {dnfDrivers.map(id => driverById(id).name).join(', ')}
-                              {' · '}<button onClick={() => setDnfDrivers([])} className="text-red-500/60 hover:text-red-400 transition-colors">Rimuovi tutti</button>
+                              {' · '}<button onClick={() => setDnfDrivers([])} className="text-red-500/60 hover:text-[var(--ferrari-red)] transition-colors">Rimuovi tutti</button>
                             </p>
                           )}
                         </div>
                       </div>
 
-                      <div className="px-5 py-4 border-t border-white/5 flex justify-between items-center bg-zinc-950/50">
-                        <button onClick={() => setStep('lasttail')} className="text-zinc-600 hover:text-white transition-colors text-xs font-black uppercase">
+                      <div className="px-5 py-4 border-t border-[var(--border-light)] flex justify-between items-center bg-[var(--bg-secondary)]/50">
+                        <button onClick={() => setStep('lasttail')} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors text-xs font-black uppercase">
                           ← Coda
                         </button>
                         <button
                           onClick={() => setStep('confirm')}
-                          className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-500 transition-all shadow-lg shadow-red-600/20 hover:scale-[1.02]"
+                          className="flex items-center gap-2 px-6 py-3 bg-[var(--ferrari-red)] text-[var(--text-primary)] rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-500 transition-all shadow-lg shadow-[var(--ferrari-red)]/20 hover:scale-[1.02]"
                         >
                           Conferma →
                         </button>
@@ -923,8 +923,8 @@ export default function FantaF1() {
                     exit={{ opacity: 0, x: -16 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <div className="rounded-3xl border border-white/8 bg-zinc-900/20 overflow-hidden">
-                      <div className="px-5 pt-5 pb-4 border-b border-white/5">
+                    <div className="rounded-3xl border border-white/8 bg-[var(--bg-tertiary)]/20 overflow-hidden">
+                      <div className="px-5 pt-5 pb-4 border-b border-[var(--border-light)]">
                         <SectionLabel>Riepilogo predizione — {race.name}</SectionLabel>
                       </div>
 
@@ -991,38 +991,38 @@ export default function FantaF1() {
                         {(polePosition || fastestLap || safetyCar !== null || dnfDrivers.length > 0) && (
                           <div className="flex flex-wrap gap-2">
                             {polePosition && (
-                              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-[10px]">
-                                <Star className="w-3 h-3 text-yellow-400" />
-                                <span className="text-zinc-400">Pole:</span>
-                                <span className="font-black text-white">{driverById(polePosition).name}</span>
+                              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--ferrari-yellow)]/10 border border-[var(--ferrari-yellow)]/20 text-[10px]">
+                                <Star className="w-3 h-3 text-[var(--ferrari-yellow)]" />
+                                <span className="text-[var(--text-secondary)]">Pole:</span>
+                                <span className="font-black text-[var(--text-primary)]">{driverById(polePosition).name}</span>
                               </div>
                             )}
                             {fastestLap && (
                               <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-[10px]">
                                 <Zap className="w-3 h-3 text-orange-400" />
-                                <span className="text-zinc-400">Giro veloce:</span>
-                                <span className="font-black text-white">{driverById(fastestLap).name}</span>
+                                <span className="text-[var(--text-secondary)]">Giro veloce:</span>
+                                <span className="font-black text-[var(--text-primary)]">{driverById(fastestLap).name}</span>
                               </div>
                             )}
                             {safetyCar !== null && (
                               <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-[10px]">
                                 <Shield className="w-3 h-3 text-cyan-400" />
-                                <span className="text-zinc-400">Safety car:</span>
-                                <span className="font-black text-white">{safetyCar ? 'Sì' : 'No'}</span>
+                                <span className="text-[var(--text-secondary)]">Safety car:</span>
+                                <span className="font-black text-[var(--text-primary)]">{safetyCar ? 'Sì' : 'No'}</span>
                               </div>
                             )}
                             {winningConstructor && (
                               <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-green-500/10 border border-green-500/20 text-[10px]">
-                                <Trophy className="w-3 h-3 text-green-400" />
-                                <span className="text-zinc-400">Costruttore:</span>
-                                <span className="font-black text-white capitalize">{winningConstructor.replace(/-/g,' ')}</span>
+                                <Trophy className="w-3 h-3 text-[var(--success)]" />
+                                <span className="text-[var(--text-secondary)]">Costruttore:</span>
+                                <span className="font-black text-[var(--text-primary)] capitalize">{winningConstructor.replace(/-/g,' ')}</span>
                               </div>
                             )}
                             {dnfDrivers.length > 0 && (
                               <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-red-500/10 border border-red-500/20 text-[10px]">
-                                <AlertCircle className="w-3 h-3 text-red-400" />
-                                <span className="text-zinc-400">DNF:</span>
-                                <span className="font-black text-white">{dnfDrivers.map(id => driverById(id).name).join(', ')}</span>
+                                <AlertCircle className="w-3 h-3 text-[var(--ferrari-red)]" />
+                                <span className="text-[var(--text-secondary)]">DNF:</span>
+                                <span className="font-black text-[var(--text-primary)]">{dnfDrivers.map(id => driverById(id).name).join(', ')}</span>
                               </div>
                             )}
                           </div>
@@ -1031,8 +1031,8 @@ export default function FantaF1() {
                         {/* Error */}
                         {error && (
                           <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
-                            <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-                            <p className="text-[11px] text-red-400">{error}</p>
+                            <AlertCircle className="w-4 h-4 text-[var(--ferrari-red)] shrink-0" />
+                            <p className="text-[11px] text-[var(--ferrari-red)]">{error}</p>
                           </div>
                         )}
 
@@ -1040,11 +1040,11 @@ export default function FantaF1() {
                         {saved ? (
                           <div className="flex items-center gap-3 p-4 rounded-2xl bg-green-500/8 border border-green-500/20">
                             <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-green-500/15 border border-green-500/20 shrink-0">
-                              <CheckCircle2 className="w-4 h-4 text-green-400" />
+                              <CheckCircle2 className="w-4 h-4 text-[var(--success)]" />
                             </div>
                             <div>
-                              <p className="font-black text-green-400 text-sm">Predizione salvata!</p>
-                              <p className="text-[10px] text-zinc-500 mt-0.5">
+                              <p className="font-black text-[var(--success)] text-sm">Predizione salvata!</p>
+                              <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">
                                 Modificabile fino a {lockDate.toLocaleDateString('it-IT', {
                                   weekday: 'long', hour: '2-digit', minute: '2-digit',
                                 })}
@@ -1057,11 +1057,11 @@ export default function FantaF1() {
                             disabled={saving || !session || locked}
                             className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-2 transition-all
                               ${saving || !session || locked
-                                ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-red-700 to-red-500 text-white hover:scale-[1.01] shadow-xl shadow-red-600/25'}`}
+                                ? 'bg-[var(--bg-tertiary)] text-[var(--text-muted)] cursor-not-allowed'
+                                : 'bg-gradient-to-r from-red-700 to-red-500 text-[var(--text-primary)] hover:scale-[1.01] shadow-xl shadow-[var(--ferrari-red)]/25'}`}
                           >
                             {saving
-                              ? <><div className="w-4 h-4 rounded-full border-t-2 border-white/50 animate-spin" /> Salvataggio...</>
+                              ? <><div className="w-4 h-4 rounded-full border-t-2 border-[var(--border-strong)]/50 animate-spin" /> Salvataggio...</>
                               : locked ? <><Lock className="w-4 h-4" /> Predizioni chiuse</>
                               : !session ? <><Shield className="w-4 h-4" /> Login richiesto</>
                               : <><Send className="w-4 h-4" /> Salva Predizione</>
@@ -1072,15 +1072,15 @@ export default function FantaF1() {
                         {saved && !locked && (
                           <button
                             onClick={() => { setSaved(false); setStep('grid'); resetToDefault(); }}
-                            className="w-full py-2 text-[10px] font-black uppercase tracking-widest text-zinc-600 hover:text-white transition-colors flex items-center justify-center gap-1.5"
+                            className="w-full py-2 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors flex items-center justify-center gap-1.5"
                           >
                             <RotateCcw className="w-3 h-3" /> Nuova predizione
                           </button>
                         )}
                       </div>
 
-                      <div className="px-5 py-4 border-t border-white/5 bg-zinc-950/50">
-                        <button onClick={() => setStep('bonus')} className="text-zinc-600 hover:text-white transition-colors text-xs font-black uppercase">
+                      <div className="px-5 py-4 border-t border-[var(--border-light)] bg-[var(--bg-secondary)]/50">
+                        <button onClick={() => setStep('bonus')} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors text-xs font-black uppercase">
                           ← Bonus
                         </button>
                       </div>
@@ -1100,13 +1100,13 @@ export default function FantaF1() {
                   <Lock className="w-6 h-6 text-red-500" />
                 </div>
                 <p className="font-black text-xl mb-2 uppercase italic tracking-tight">Predizioni chiuse</p>
-                <p className="text-zinc-500 text-sm max-w-xs mx-auto">
+                <p className="text-[var(--text-tertiary)] text-sm max-w-xs mx-auto">
                   Le qualifiche sono iniziate. Torna dopo la gara per vedere il tuo punteggio!
                 </p>
                 {saved && existingPred && (
                   <button
                     onClick={() => setStep('confirm')}
-                    className="mt-6 px-5 py-2 rounded-2xl border border-white/10 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white hover:border-white/20 transition-all"
+                    className="mt-6 px-5 py-2 rounded-2xl border border-[var(--border-strong)] text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-white/20 transition-all"
                   >
                     Visualizza la tua predizione →
                   </button>

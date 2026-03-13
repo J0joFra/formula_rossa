@@ -13,7 +13,7 @@ export default function Navigation() {
   const pathname = usePathname();
 
   return (
-    <nav className="bg-black/90 backdrop-blur-md border-b border-white/5 mx-auto fixed w-full top-0 z-[100]" role="navigation" aria-label="Navigazione principale">
+    <nav className="bg-[var(--bg-primary)]/90 backdrop-blur-md border-b border-[var(--border-light)] mx-auto fixed w-full top-0 z-[100]" role="navigation" aria-label="Navigazione principale">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
 
@@ -26,14 +26,13 @@ export default function Navigation() {
                 className="w-full h-full object-contain"
               />
             </div>
-            <span className="text-xl font-black tracking-tighter text-white uppercase italic group-hover:text-red-500 transition-colors">
-              Formula <span className="text-red-600">Rossa</span>
+            <span className="text-xl font-black tracking-tighter text-[var(--text-primary)] uppercase italic group-hover:text-red-500 transition-colors">
+              Formula <span className="text-[var(--ferrari-red)]">Rossa</span>
             </span>
           </Link>
 
           {/* Menu Desktop */}
           <div className="hidden md:flex items-center space-x-1">
-            <NavLink href="/"            icon={HomeIcon}   label="Home"        active={pathname === '/'} />
             <NavLink href="/standings"   icon={Trophy}     label="Standings"   active={pathname === '/standings'} />
             <NavLink href="/statistics"  icon={BarChart3}  label="Stats"       active={pathname === '/statistics'} />
             <NavLink href="/fanzone"     icon={Gamepad2}   label="Fan Zone"    active={pathname === '/fanzone'} />
@@ -44,26 +43,26 @@ export default function Navigation() {
               <ThemeToggle />
             </div>
 
-            <div className="ml-6 pl-6 border-l border-white/10 flex items-center">
+            <div className="ml-6 pl-6 border-l border-[var(--border-strong)] flex items-center">
               {session ? (
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="text-[10px] font-black uppercase text-red-600 leading-none">{session.user.name}</p>
+                    <p className="text-[10px] font-black uppercase text-[var(--ferrari-red)] leading-none">{session.user.name}</p>
                     <button
                       onClick={() => signOut()}
-                      className="text-[9px] text-zinc-500 uppercase hover:text-white flex items-center gap-1 ml-auto transition-colors"
+                      className="text-[9px] text-[var(--text-tertiary)] uppercase hover:text-[var(--text-primary)] flex items-center gap-1 ml-auto transition-colors"
                     >
                       Logout <LogOut className="w-2.5 h-2.5" aria-hidden="true" />
                     </button>
                   </div>
-                  <div className="relative w-10 h-10 rounded-full border-2 border-red-600 p-0.5 overflow-hidden shadow-lg shadow-red-600/20">
+                  <div className="relative w-10 h-10 rounded-full border-2 border-[var(--ferrari-red)] p-0.5 overflow-hidden shadow-lg shadow-[var(--ferrari-red)]/20">
                     <img src={session.user.image} alt={`Avatar di ${session.user.name}`} className="w-full h-full rounded-full object-cover" />
                   </div>
                 </div>
               ) : (
                 <button
                   onClick={() => signIn('google')}
-                  className="bg-red-600 text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all shadow-lg shadow-red-600/20"
+                  className="bg-[var(--ferrari-red)] text-[var(--text-primary)] px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all shadow-lg shadow-[var(--ferrari-red)]/20"
                 >
                   Login
                 </button>
@@ -74,13 +73,13 @@ export default function Navigation() {
           {/* Burger Button (Mobile) */}
           <div className="md:hidden flex items-center gap-4">
             {session && (
-              <img src={session.user.image} className="w-8 h-8 rounded-full border border-red-600" alt={`Avatar di ${session.user.name}`} />
+              <img src={session.user.image} className="w-8 h-8 rounded-full border border-[var(--ferrari-red)]" alt={`Avatar di ${session.user.name}`} />
             )}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label={isMenuOpen ? 'Chiudi menu di navigazione' : 'Apri menu di navigazione'}
               aria-expanded={isMenuOpen}
-              className="p-2 text-zinc-400 hover:text-white bg-zinc-900 rounded-lg border border-white/5"
+              className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-light)]"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 {isMenuOpen
@@ -100,10 +99,9 @@ export default function Navigation() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-zinc-950 border-t border-white/5"
+            className="md:hidden bg-[var(--bg-secondary)] border-t border-[var(--border-light)]"
           >
             <div className="px-4 py-6 space-y-2">
-              <MobileLink href="/"            label="Home"        active={pathname === '/'}                   onClick={() => setIsMenuOpen(false)} />
               <MobileLink href="/standings"   label="Standings"   active={pathname === '/standings'}          onClick={() => setIsMenuOpen(false)} />
               <MobileLink href="/statistics"  label="Statistics"  active={pathname === '/statistics'}         onClick={() => setIsMenuOpen(false)} />
               <MobileLink href="/fanzone"     label="Fan Zone"    active={pathname === '/fanzone'}            onClick={() => setIsMenuOpen(false)} />
@@ -114,21 +112,21 @@ export default function Navigation() {
                 <ThemeToggle />
               </div>
   
-              <div className="pt-6 border-t border-white/5">
+              <div className="pt-6 border-t border-[var(--border-light)]">
                 {session ? (
-                  <div className="flex items-center justify-between bg-white/5 p-4 rounded-2xl">
+                  <div className="flex items-center justify-between bg-[var(--bg-card)] p-4 rounded-2xl">
                     <div className="flex items-center gap-3">
-                      <img src={session.user.image} className="w-10 h-10 rounded-full border border-red-600" alt={`Avatar di ${session.user.name}`} />
+                      <img src={session.user.image} className="w-10 h-10 rounded-full border border-[var(--ferrari-red)]" alt={`Avatar di ${session.user.name}`} />
                       <span className="font-bold text-sm uppercase">{session.user.name}</span>
                     </div>
-                    <button onClick={() => signOut()} aria-label="Logout" className="p-2 bg-red-600/10 text-red-500 rounded-lg">
+                    <button onClick={() => signOut()} aria-label="Logout" className="p-2 bg-[var(--ferrari-red)]/10 text-red-500 rounded-lg">
                       <LogOut className="w-5 h-5" aria-hidden="true" />
                     </button>
                   </div>
                 ) : (
                   <button
                     onClick={() => signIn('google')}
-                    className="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em]"
+                    className="w-full bg-[var(--ferrari-red)] text-[var(--text-primary)] py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em]"
                   >
                     Login with Google
                   </button>
@@ -148,7 +146,7 @@ function NavLink({ href, label, icon: Icon, active }) {
       href={href}
       aria-current={active ? 'page' : undefined}
       className={`relative px-4 py-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest transition-all rounded-xl
-        ${active ? 'text-white bg-white/5' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
+        ${active ? 'text-[var(--text-primary)] bg-[var(--bg-card)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]'}`}
     >
       <Icon className={`w-3.5 h-3.5 ${active ? 'text-red-500' : ''}`} aria-hidden="true" />
       {label}
@@ -168,7 +166,7 @@ function MobileLink({ href, label, onClick, active }) {
       href={href}
       aria-current={active ? 'page' : undefined}
       className={`flex items-center justify-between w-full px-4 py-3 rounded-xl font-black uppercase text-xs tracking-widest transition-all
-        ${active ? 'text-white bg-red-600/15 border border-red-600/30' : 'text-zinc-400 hover:text-white hover:bg-red-600/10'}`}
+        ${active ? 'text-[var(--text-primary)] bg-[var(--ferrari-red)]/15 border border-[var(--ferrari-red)]/30' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--ferrari-red)]/10'}`}
       onClick={onClick}
     >
       {label}

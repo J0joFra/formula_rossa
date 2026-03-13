@@ -79,7 +79,7 @@ export default function StatsSection() {
   }, []);
 
   return (
-    <section className="py-24 bg-black text-white overflow-hidden" aria-label="Statistiche e scheda tecnica Ferrari SF-26">
+    <section className="py-24 bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-hidden" aria-label="Statistiche e scheda tecnica Ferrari SF-26">
       <div className="max-w-7xl mx-auto px-4">
 
         {/* TITOLO SEZIONE */}
@@ -87,13 +87,13 @@ export default function StatsSection() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-600/10 border border-red-600/20 text-red-500 text-xs font-black uppercase tracking-[0.3em] mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--ferrari-red)]/10 border border-[var(--ferrari-red)]/20 text-red-500 text-xs font-black uppercase tracking-[0.3em] mb-6"
           >
             <Settings className="w-4 h-4 animate-spin-slow" aria-hidden="true" />
             Technical Blueprint 2026
           </motion.div>
           <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter">
-            Engineering <span className="text-red-600">Legend</span>
+            Engineering <span className="text-[var(--ferrari-red)]">Legend</span>
           </h2>
         </div>
 
@@ -101,9 +101,9 @@ export default function StatsSection() {
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           whileInView={{ opacity: 1, scale: 1 }}
-          className="relative w-full aspect-[21/9] rounded-3xl overflow-hidden border border-white/10 shadow-2xl mb-12 group"
+          className="relative w-full aspect-[21/9] rounded-3xl overflow-hidden border border-[var(--border-strong)] shadow-2xl mb-12 group"
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10" aria-hidden="true" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)] via-transparent to-transparent z-10" aria-hidden="true" />
           <img
             src="/data/images/sf26.jpg"
             alt="Ferrari SF-26 — monoposto Formula 1 stagione 2026"
@@ -115,8 +115,8 @@ export default function StatsSection() {
           <div className="absolute bottom-8 left-8 z-20">
             <h3 className="text-5xl md:text-8xl font-black italic uppercase tracking-tighter leading-none">SF-26</h3>
             <div className="flex items-center gap-4 mt-2">
-              <span className="bg-red-600 px-3 py-1 text-xs font-black tracking-widest uppercase">New Era</span>
-              <p className="text-zinc-400 font-bold tracking-[0.3em] uppercase text-sm">Project Code: 677</p>
+              <span className="bg-[var(--ferrari-red)] px-3 py-1 text-xs font-black tracking-widest uppercase">New Era</span>
+              <p className="text-[var(--text-secondary)] font-bold tracking-[0.3em] uppercase text-sm">Project Code: 677</p>
             </div>
           </div>
         </motion.div>
@@ -127,10 +127,10 @@ export default function StatsSection() {
           {/* VETTURA */}
           <motion.div
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-            className="bg-zinc-900/40 border border-white/5 p-8 rounded-3xl backdrop-blur-sm shadow-xl"
+            className="bg-[var(--bg-tertiary)]/40 border border-[var(--border-light)] p-8 rounded-3xl backdrop-blur-sm shadow-xl"
           >
-            <div className="flex items-center gap-3 mb-8 border-b border-red-600/30 pb-4">
-              <Shield className="text-red-600 w-6 h-6" aria-hidden="true" />
+            <div className="flex items-center gap-3 mb-8 border-b border-[var(--ferrari-red)]/30 pb-4">
+              <Shield className="text-[var(--ferrari-red)] w-6 h-6" aria-hidden="true" />
               <h4 className="text-xl font-black uppercase italic">Vettura</h4>
             </div>
             <ul className="space-y-6">
@@ -145,11 +145,11 @@ export default function StatsSection() {
           {/* POWER UNIT */}
           <motion.div
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="bg-zinc-900/60 border border-red-600/20 p-8 rounded-3xl backdrop-blur-sm relative shadow-xl"
+            className="bg-[var(--bg-tertiary)]/60 border border-[var(--ferrari-red)]/20 p-8 rounded-3xl backdrop-blur-sm relative shadow-xl"
           >
-            <Activity className="absolute top-4 right-4 text-red-600 w-4 h-4 animate-pulse" aria-hidden="true" />
-            <div className="flex items-center gap-3 mb-8 border-b border-red-600/30 pb-4">
-              <Cpu className="text-red-600 w-6 h-6" aria-hidden="true" />
+            <Activity className="absolute top-4 right-4 text-[var(--ferrari-red)] w-4 h-4 animate-pulse" aria-hidden="true" />
+            <div className="flex items-center gap-3 mb-8 border-b border-[var(--ferrari-red)]/30 pb-4">
+              <Cpu className="text-[var(--ferrari-red)] w-6 h-6" aria-hidden="true" />
               <h4 className="text-xl font-black uppercase italic">Power Unit</h4>
             </div>
             <ul className="space-y-6">
@@ -164,10 +164,10 @@ export default function StatsSection() {
           {/* ERS */}
           <motion.div
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="bg-zinc-900/40 border border-white/5 p-8 rounded-3xl backdrop-blur-sm shadow-xl"
+            className="bg-[var(--bg-tertiary)]/40 border border-[var(--border-light)] p-8 rounded-3xl backdrop-blur-sm shadow-xl"
           >
-            <div className="flex items-center gap-3 mb-8 border-b border-red-600/30 pb-4">
-              <Zap className="text-yellow-500 w-6 h-6" aria-hidden="true" />
+            <div className="flex items-center gap-3 mb-8 border-b border-[var(--ferrari-red)]/30 pb-4">
+              <Zap className="text-[var(--ferrari-yellow)] w-6 h-6" aria-hidden="true" />
               <h4 className="text-xl font-black uppercase italic">ERS System</h4>
             </div>
             <ul className="space-y-6">
@@ -199,11 +199,11 @@ export default function StatsSection() {
 
 function TechItem({ label, value, sub }) {
   return (
-    <li className="flex flex-col border-l border-white/10 pl-4 group hover:border-red-600 transition-colors">
-      <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">{label}</span>
+    <li className="flex flex-col border-l border-[var(--border-strong)] pl-4 group hover:border-[var(--ferrari-red)] transition-colors">
+      <span className="text-[10px] text-[var(--text-tertiary)] font-black uppercase tracking-widest mb-1">{label}</span>
       <div className="flex items-baseline gap-2 flex-wrap">
-        <span className="text-xl font-black text-white tracking-tight">{value}</span>
-        <span className="text-xs text-zinc-400 italic font-medium">{sub}</span>
+        <span className="text-xl font-black text-[var(--text-primary)] tracking-tight">{value}</span>
+        <span className="text-xs text-[var(--text-secondary)] italic font-medium">{sub}</span>
       </div>
     </li>
   );

@@ -10,7 +10,7 @@ export default function ErrorMessage({
       <div className="flex items-start gap-3">
         <span className="text-red-500 text-sm mt-0.5">⚠</span>
         <div className="flex-1">
-          <p className="text-xs text-red-400 font-mono leading-relaxed">
+          <p className="text-xs text-[var(--ferrari-red)] font-mono leading-relaxed">
             {context && (
               <span className="font-black uppercase tracking-widest mr-2">
                 {context}:
@@ -21,7 +21,7 @@ export default function ErrorMessage({
           {onRetry && (
             <button
               onClick={onRetry}
-              className="mt-2 text-[10px] text-red-500/60 hover:text-red-400 uppercase tracking-widest font-mono transition-colors"
+              className="mt-2 text-[10px] text-red-500/60 hover:text-[var(--ferrari-red)] uppercase tracking-widest font-mono transition-colors"
             >
               → Riprova
             </button>

@@ -392,7 +392,7 @@ export default function PredictorSection() {
   }, [dbData, driverSearch]);
 
   const trendLabel = (t) => t === 'up' ? '↑ In forma' : t === 'down' ? '↓ In calo' : '→ Stabile';
-  const trendColor = (t) => t === 'up' ? 'text-green-400' : t === 'down' ? 'text-[var(--ferrari-red)]' : 'text-[var(--text-primary)]-400';
+  const trendColor = (t) => t === 'up' ? 'text-[var(--success)]' : t === 'down' ? 'text-[var(--ferrari-red)]' : 'text-[var(--text-primary)]-400';
   const DRIVER_COLOR = { primary: '#DC0000', secondary: '#FFD700' };
 
   return (
@@ -571,10 +571,10 @@ export default function PredictorSection() {
                           <div className="flex items-center gap-1.5 mb-1.5">
                             <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${
                               isSelected ? 'bg-red-500 text-[var(--text-primary)]' :
-                              isDone     ? 'bg-green-500/20 text-green-400' :
+                              isDone     ? 'bg-green-500/20 text-[var(--success)]' :
                               'bg-[var(--bg-tertiary)]/80 text-[var(--text-primary)]-500'
                             }`}>R{r.round}</span>
-                            {isDone && <span className="text-[9px] text-green-400 font-black">✓</span>}
+                            {isDone && <span className="text-[9px] text-[var(--success)] font-black">✓</span>}
                           </div>
                           <p className="font-black text-xs text-[var(--text-primary)] leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                             {r.name.replace(' GP', '')}
@@ -737,11 +737,11 @@ export default function PredictorSection() {
 
               {/* AVVISO DATI STORICI SE MANCANO ANNI RECENTI */}
               {predictions.dataMaxYear < new Date().getFullYear() - 1 && (
-                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-4 flex gap-3 mb-4">
+                <div className="bg-[var(--ferrari-yellow)]/10 border border-yellow-500/30 rounded-2xl p-4 flex gap-3 mb-4">
                   <AlertCircle className="w-4 h-4 text-[var(--ferrari-yellow)] shrink-0 mt-0.5" />
                   <p className="text-[11px] text-yellow-300 leading-relaxed">
                     I dati più recenti in Supabase arrivano al <strong>{predictions.dataMaxYear}</strong>.
-                    Per vedere le gare 2025–2026, importa i JSON aggiornati da <strong>f1db.com</strong> nella tabella <code className="bg-yellow-500/10 px-1 rounded">race_results</code>.
+                    Per vedere le gare 2025–2026, importa i JSON aggiornati da <strong>f1db.com</strong> nella tabella <code className="bg-[var(--ferrari-yellow)]/10 px-1 rounded">race_results</code>.
                   </p>
                 </div>
               )}
@@ -749,7 +749,7 @@ export default function PredictorSection() {
                             {/* PROIEZIONE CAMPIONATO */}
               <div className="bg-[var(--bg-card)] border border-[var(--border-light)] rounded-3xl p-6">
                 <div className="flex items-center gap-2 mb-5">
-                  <TrendingUp className="w-4 h-4 text-blue-400" />
+                  <TrendingUp className="w-4 h-4 text-[var(--info)]" />
                   <p className="text-[10px] font-black text-[var(--text-primary)]-500 uppercase tracking-widest">
                     Proiezione Campionato 2026 · {predictions.racesLeft} gare rimanenti
                   </p>
@@ -765,7 +765,7 @@ export default function PredictorSection() {
                         <p className="text-[9px] text-[var(--text-primary)]-600 uppercase font-black mb-2">{drv?.id?.split('-').pop()}</p>
                         <p className="text-5xl font-black mb-1" style={{ color }}>{champ.projected}</p>
                         <p className="text-[10px] font-mono text-[var(--text-primary)]-600">
-                          <span className="text-[var(--ferrari-red)]">{champ.low}</span>{' – '}<span className="text-green-400">{champ.high}</span> pts
+                          <span className="text-[var(--ferrari-red)]">{champ.low}</span>{' – '}<span className="text-[var(--success)]">{champ.high}</span> pts
                         </p>
                         <div className="mt-3 h-1.5 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
                           <motion.div className="h-full rounded-full" style={{ backgroundColor: color }}

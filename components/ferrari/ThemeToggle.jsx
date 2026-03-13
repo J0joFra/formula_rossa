@@ -16,13 +16,12 @@ export default function ThemeToggle() {
     <button
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
       aria-label={isDark ? 'Attiva tema chiaro' : 'Attiva tema scuro'}
-      className="p-2 rounded-lg border border-zinc-800 hover:border-red-600/40 bg-zinc-900 hover:bg-zinc-800 transition-all duration-200"
+      className="p-2 rounded-lg border border-[var(--border-light)] hover:border-[var(--ferrari-red)]/40 bg-[var(--bg-tertiary)] hover:bg-[var(--bg-tertiary)] transition-all duration-200"
     >
       {isDark
-        ? <Sun  className="w-4 h-4 text-yellow-400" />
-        : <Moon className="w-4 h-4 text-zinc-400" />
+        ? <Sun  className="w-4 h-4 text-[var(--ferrari-yellow)]" />
+        : <Moon className="w-4 h-4 text-[var(--text-secondary)]" />
       }
     </button>
   );
 }
-

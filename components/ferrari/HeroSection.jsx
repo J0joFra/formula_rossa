@@ -78,28 +78,28 @@ export default function HeroSection() {
   }, []);
 
   const statsConfig = [
-    { id: 'wins', icon: Trophy, value: dynamicStats.wins, label: 'Vittorie GP', color: 'from-red-600 to-red-800' },
-    { id: 'podiums', icon: Star, value: dynamicStats.podiums, label: 'Podi Totali', color: 'from-yellow-400 to-yellow-600' },
-    { id: 'poles', icon: Timer, value: dynamicStats.poles, label: 'Pole Positions', color: 'from-red-600 to-red-800' },
-    { id: 'fastest-laps', icon: Zap, value: dynamicStats.fastestLaps, label: 'Giri Veloci', color: 'from-yellow-400 to-yellow-600' },
-    { id: 'points', icon: Gauge, value: dynamicStats.totalPoints.toLocaleString(), label: 'Punti Storici', color: 'from-red-600 to-red-800' },
-    { id: 'grand-slams', icon: Award, value: dynamicStats.grandSlams, label: 'Grand Slams', color: 'from-yellow-400 to-yellow-600' },
+    { id: 'wins', icon: Trophy, value: dynamicStats.wins, label: 'Vittorie GP', color: 'from-[var(--ferrari-red)] to-[var(--ferrari-red-dark)]' },
+    { id: 'podiums', icon: Star, value: dynamicStats.podiums, label: 'Podi Totali', color: 'from-[var(--ferrari-yellow)] to-[var(--ferrari-yellow-dark)]' },
+    { id: 'poles', icon: Timer, value: dynamicStats.poles, label: 'Pole Positions', color: 'from-[var(--ferrari-red)] to-[var(--ferrari-red-dark)]' },
+    { id: 'fastest-laps', icon: Zap, value: dynamicStats.fastestLaps, label: 'Giri Veloci', color: 'from-[var(--ferrari-yellow)] to-[var(--ferrari-yellow-dark)]' },
+    { id: 'points', icon: Gauge, value: dynamicStats.totalPoints.toLocaleString(), label: 'Punti Storici', color: 'from-[var(--ferrari-red)] to-[var(--ferrari-red-dark)]' },
+    { id: 'grand-slams', icon: Award, value: dynamicStats.grandSlams, label: 'Grand Slams', color: 'from-[var(--ferrari-yellow)] to-[var(--ferrari-yellow-dark)]' },
   ];
 
   const StatSkeleton = () => (
     <div className="animate-pulse">
-      <div className="w-16 h-16 bg-zinc-800 rounded-2xl mb-6 mx-auto"></div>
-      <div className="w-24 h-12 bg-zinc-800 rounded-lg mb-2 mx-auto"></div>
-      <div className="w-32 h-4 bg-zinc-800 rounded mx-auto"></div>
+      <div className="w-16 h-16 bg-[var(--bg-tertiary)] rounded-2xl mb-6 mx-auto"></div>
+      <div className="w-24 h-12 bg-[var(--bg-tertiary)] rounded-lg mb-2 mx-auto"></div>
+      <div className="w-32 h-4 bg-[var(--bg-tertiary)] rounded mx-auto"></div>
     </div>
   );
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-black via-gray-900 to-black pt-32 pb-20">
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[var(--bg-primary)] via-gray-900 to-black pt-32 pb-20">
       {/* Sfondo animato */}
       <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-600/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-yellow-500/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--ferrari-red)]/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[var(--ferrari-yellow)]/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
       </div>
 
       <div className="relative z-10 text-center px-4 max-w-7xl mx-auto flex flex-col items-center w-full">
@@ -115,19 +115,19 @@ export default function HeroSection() {
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
-            className="inline-flex items-center gap-3 bg-red-600/10 backdrop-blur-sm border border-red-600/20 rounded-full px-6 py-2 mb-8"
+            className="inline-flex items-center gap-3 bg-[var(--ferrari-red)]/10 backdrop-blur-sm border border-[var(--ferrari-red)]/20 rounded-full px-6 py-2 mb-8"
           >
             <div className="relative">
-              <div className="w-2 h-2 rounded-full bg-red-600 animate-ping absolute"></div>
-              <div className="w-2 h-2 rounded-full bg-red-600 relative"></div>
+              <div className="w-2 h-2 rounded-full bg-[var(--ferrari-red)] animate-ping absolute"></div>
+              <div className="w-2 h-2 rounded-full bg-[var(--ferrari-red)] relative"></div>
             </div>
-            <span className="text-xs font-bold uppercase tracking-[0.3em] text-red-600">
+            <span className="text-xs font-bold uppercase tracking-[0.3em] text-[var(--ferrari-red)]">
               LIVE TIMING • SEASON {new Date().getFullYear()}
             </span>
             <div className="flex items-center gap-1 ml-2">
-              <div className="w-1 h-4 bg-red-600/40 rounded-full"></div>
-              <div className="w-1 h-6 bg-red-600 rounded-full"></div>
-              <div className="w-1 h-4 bg-red-600/40 rounded-full"></div>
+              <div className="w-1 h-4 bg-[var(--ferrari-red)]/40 rounded-full"></div>
+              <div className="w-1 h-6 bg-[var(--ferrari-red)] rounded-full"></div>
+              <div className="w-1 h-4 bg-[var(--ferrari-red)]/40 rounded-full"></div>
             </div>
           </motion.div>
 
@@ -146,12 +146,12 @@ export default function HeroSection() {
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-0 rounded-full border-2 border-dashed border-red-600/30"
+                  className="absolute inset-0 rounded-full border-2 border-dashed border-[var(--ferrari-red)]/30"
                 />
                 
                 {/* Logo container */}
-                <div className="absolute inset-2 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-2xl shadow-2xl shadow-yellow-500/30 overflow-hidden transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                  <div className="absolute inset-0 bg-black/10"></div>
+                <div className="absolute inset-2 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-2xl shadow-2xl shadow-[var(--ferrari-yellow)]/30 overflow-hidden transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                  <div className="absolute inset-0 bg-[var(--bg-primary)]/10"></div>
                   <img 
                     src="/data/images/formula-rossa-logo.png" 
                     alt="Formula Rossa — logo piattaforma dati Ferrari F1" 
@@ -176,24 +176,24 @@ export default function HeroSection() {
                 transition={{ delay: 0.5, duration: 0.8 }}
               >
                 <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-none">
-                  <span className="text-white relative inline-block">
+                  <span className="text-[var(--text-primary)] relative inline-block">
                     FORMULA
                     {/* Linea di velocità sotto */}
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: "100%" }}
                       transition={{ delay: 1.2, duration: 0.8 }}
-                      className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-red-600 to-transparent"
+                      className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-[var(--ferrari-red)] to-transparent"
                     />
                   </span>
-                  <span className="text-red-600 relative inline-block ml-2 md:ml-4">
+                  <span className="text-[var(--ferrari-red)] relative inline-block ml-2 md:ml-4">
                     ROSSA
                     {/* Effetto scia */}
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: [0, 1, 0] }}
                       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                      className="absolute -right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-gradient-to-l from-red-600/20 to-transparent blur-xl"
+                      className="absolute -right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-gradient-to-l from-[var(--ferrari-red)]/20 to-transparent blur-xl"
                     />
                   </span>
                 </h1>
@@ -207,7 +207,7 @@ export default function HeroSection() {
                 className="mt-4 space-y-2"
               >
                 <div className="flex items-center justify-center md:justify-start gap-3">
-                  <div className="h-12 w-1 bg-gradient-to-b from-red-600 via-red-400 to-transparent rounded-full" />
+                  <div className="h-12 w-1 bg-gradient-to-b from-[var(--ferrari-red)] via-red-400 to-transparent rounded-full" />
                   
                   <div className="text-left">
                     <div className="overflow-hidden">
@@ -223,7 +223,7 @@ export default function HeroSection() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 1 + i * 0.05 }}
-                            className={`inline-block ${char === " " ? "w-2" : ""} text-white`}
+                            className={`inline-block ${char === " " ? "w-2" : ""} text-[var(--text-primary)]`}
                           >
                             {char}
                           </motion.span>
@@ -238,11 +238,11 @@ export default function HeroSection() {
                       transition={{ delay: 1.8 }}
                       className="flex items-center gap-2 mt-1"
                     >
-                      <span className="text-xs font-mono text-red-600/80">&lt;/&gt;</span>
-                      <span className="text-sm md:text-base text-gray-400 font-mono tracking-wider">
+                      <span className="text-xs font-mono text-[var(--ferrari-red)]/80">&lt;/&gt;</span>
+                      <span className="text-sm md:text-base text-[var(--text-secondary)] font-mono tracking-wider">
                         F1 STATISTICS ENGINE
                       </span>
-                      <span className="text-xs font-mono text-red-600/80">v2.0</span>
+                      <span className="text-xs font-mono text-[var(--ferrari-red)]/80">v2.0</span>
                     </motion.div>
                   </div>
                 </div>
@@ -252,7 +252,7 @@ export default function HeroSection() {
                   initial={{ width: 0 }}
                   animate={{ width: "100%" }}
                   transition={{ delay: 2, duration: 1 }}
-                  className="h-px bg-gradient-to-r from-red-600 via-yellow-500 to-transparent max-w-md mx-auto md:mx-0"
+                  className="h-px bg-gradient-to-r from-[var(--ferrari-red)] via-yellow-500 to-transparent max-w-md mx-auto md:mx-0"
                 />
               </motion.div>
             </div>
@@ -266,9 +266,9 @@ export default function HeroSection() {
             className="relative max-w-3xl mx-auto mt-12"
           >
             {/* Sfondo pit board */}
-            <div className="absolute inset-0 bg-gradient-to-r from-red-600/5 via-transparent to-red-600/5 rounded-3xl blur-3xl" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--ferrari-red)]/5 via-transparent to-red-600/5 rounded-3xl blur-3xl" />
             
-            <div className="relative bg-zinc-900/50 backdrop-blur-sm border border-white/5 rounded-2xl p-6 overflow-hidden">
+            <div className="relative bg-[var(--bg-tertiary)]/50 backdrop-blur-sm border border-[var(--border-light)] rounded-2xl p-6 overflow-hidden">
               {/* Griglia di fondo stile telemetria */}
               <div className="absolute inset-0 opacity-5">
                 <div className="w-full h-full" style={{
@@ -279,25 +279,25 @@ export default function HeroSection() {
               
               {/* Contenuto citazione */}
               <div className="relative flex items-start gap-4">
-                <div className="text-4xl font-serif text-red-600/40 leading-none">"</div>
+                <div className="text-4xl font-serif text-[var(--ferrari-red)]/40 leading-none">"</div>
                 <div className="flex-1">
                   <p className="text-lg md:text-xl text-gray-300 font-light italic">
                     Datemi una macchina che sia veloce in rettilineo e che stia in strada in curva.
                   </p>
                   <div className="flex items-center justify-end gap-2 mt-2">
-                    <span className="text-xs text-red-600/60">—</span>
-                    <span className="text-xs font-mono text-red-600/80 uppercase tracking-wider">
+                    <span className="text-xs text-[var(--ferrari-red)]/60">—</span>
+                    <span className="text-xs font-mono text-[var(--ferrari-red)]/80 uppercase tracking-wider">
                       Enzo Ferrari • Il Drake
                     </span>
                     {/* Mini semaforo */}
                     <div className="flex gap-1 ml-2">
-                      <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+                      <div className="w-2 h-2 rounded-full bg-[var(--ferrari-red)] animate-pulse" />
                       <div className="w-2 h-2 rounded-full bg-yellow-600/30" />
                       <div className="w-2 h-2 rounded-full bg-green-600/30" />
                     </div>
                   </div>
                 </div>
-                <div className="text-4xl font-serif text-red-600/40 leading-none self-end">"</div>
+                <div className="text-4xl font-serif text-[var(--ferrari-red)]/40 leading-none self-end">"</div>
               </div>
 
               {/* Barra di avanzamento stile giro */}
@@ -305,7 +305,7 @@ export default function HeroSection() {
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ delay: 3, duration: 2, repeat: Infinity, repeatType: "reverse" }}
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 via-yellow-500 to-red-600 origin-left"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[var(--ferrari-red)] via-yellow-500 to-red-600 origin-left"
                 style={{ transformOrigin: 'left' }}
               />
             </div>
@@ -336,12 +336,12 @@ export default function HeroSection() {
                     loading="lazy"
                     quality={85}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-60" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)]/70 via-transparent to-transparent opacity-60" />
                 </div>
               ))}
             </motion.div>
-            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black via-black/80 to-transparent z-10" />
-            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/80 to-transparent z-10" />
+            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[var(--bg-primary)] via-black/80 to-transparent z-10" />
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--bg-primary)] via-black/80 to-transparent z-10" />
           </div>
 
           {/* COLONNA DESTRA */}
@@ -366,12 +366,12 @@ export default function HeroSection() {
                     loading="lazy"
                     quality={85}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-60" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)]/70 via-transparent to-transparent opacity-60" />
                 </div>
               ))}
             </motion.div>
-            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black via-black/80 to-transparent z-10" />
-            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black via-black/80 to-transparent z-10" />
+            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[var(--bg-primary)] via-black/80 to-transparent z-10" />
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--bg-primary)] via-black/80 to-transparent z-10" />
           </div>
 
           {/* Stats Grid Centrale */}
@@ -388,20 +388,20 @@ export default function HeroSection() {
                   transition={{ delay: index * 0.1 + 0.5 }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="group bg-zinc-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-8 hover:border-red-600/40 hover:bg-zinc-900/90 transition-all duration-500 shadow-2xl flex flex-col items-center cursor-pointer h-full relative overflow-hidden"
+                  className="group bg-[var(--bg-tertiary)]/70 backdrop-blur-xl border border-[var(--border-strong)] rounded-2xl p-8 hover:border-[var(--ferrari-red)]/40 hover:bg-[var(--bg-tertiary)]/90 transition-all duration-500 shadow-2xl flex flex-col items-center cursor-pointer h-full relative overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-transparent via-red-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   
                   <div className={`relative inline-flex p-4 rounded-2xl bg-gradient-to-br ${stat.color} mb-6 shadow-lg group-hover:shadow-red-500/30 group-hover:scale-110 transition-all duration-300 z-10`}>
-                    <stat.icon className="w-8 h-8 text-white" />
+                    <stat.icon className="w-8 h-8 text-[var(--text-primary)]" />
                     <div className="absolute inset-0 rounded-2xl bg-red-500/20 blur-xl group-hover:blur-2xl transition-all duration-300" />
                   </div>
                   
-                  <div className="relative text-4xl md:text-5xl font-black text-white mb-2 tabular-nums z-10">
+                  <div className="relative text-4xl md:text-5xl font-black text-[var(--text-primary)] mb-2 tabular-nums z-10">
                     {loading ? (
                       <span className="animate-pulse opacity-30">---</span>
                     ) : statsError ? (
-                      <span className="text-red-600">N/A</span>
+                      <span className="text-[var(--ferrari-red)]">N/A</span>
                     ) : (
                       <motion.span
                         key={stat.value}
@@ -414,7 +414,7 @@ export default function HeroSection() {
                     )}
                   </div>
                   
-                  <div className="relative text-gray-400 text-xs md:text-sm uppercase font-semibold tracking-[0.2em] leading-tight z-10">
+                  <div className="relative text-[var(--text-secondary)] text-xs md:text-sm uppercase font-semibold tracking-[0.2em] leading-tight z-10">
                     {stat.label}
                   </div>
                   
