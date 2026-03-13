@@ -197,7 +197,7 @@ export default function StatDetail() {
       try {
         const { data: rows, error } = await supabase
           .from('driver_ferrari_stats')
-          .select('driver_id, first_year, last_year, drivers(first_name, last_name)')
+          .select(`driver_id, first_year, last_year, ${cfg.field}, drivers(first_name, last_name)`)
           .order(cfg.field, { ascending: false })
           .gt(cfg.field, 0);
 
