@@ -43,12 +43,12 @@ function OracleCard() {
 
         <div className="relative z-10 flex flex-col h-full p-5 md:p-7">
           <div className="flex items-center justify-between mb-5">
-            <span className="inline-flex items-center gap-1.5 text-[10px] tracking-[0.28em] uppercase text-zinc-500 font-medium">
-              <Cpu className="w-3.5 h-3.5 text-red-600" aria-hidden="true" />
+            <span className="inline-flex items-center gap-1.5 text-[10px] tracking-[0.28em] uppercase text-[var(--text-tertiary)] font-medium">
+              <Cpu className="w-3.5 h-3.5 text-[var(--ferrari-red)]" aria-hidden="true" />
               AI Oracle System
             </span>
             <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" aria-hidden="true" />
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--ferrari-red)] animate-pulse" aria-hidden="true" />
               <span className="text-[10px] text-red-500 tracking-widest uppercase font-semibold">Live</span>
             </div>
           </div>
@@ -69,8 +69,8 @@ function OracleCard() {
               <span className="absolute inset-0 flex items-center justify-center text-xs font-black text-red-500" aria-label="Accuracy 82%">82%</span>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-zinc-600 mb-0.5">Accuracy</p>
-              <p className="text-white font-black text-xl leading-none">Oracle</p>
+              <p className="text-[10px] uppercase tracking-widest text-[var(--text-muted)] mb-0.5">Accuracy</p>
+              <p className="text-[var(--text-primary)] font-black text-xl leading-none">Oracle</p>
             </div>
           </div>
 
@@ -81,7 +81,7 @@ function OracleCard() {
             </span>
           </h3>
 
-          <p className="text-zinc-500 text-xs leading-relaxed mb-6 flex-grow">
+          <p className="text-[var(--text-tertiary)] text-xs leading-relaxed mb-6 flex-grow">
             Algoritmo AI analizza dati storici, condizioni meteo e strategia team. Tu fai la chiamata definitiva.
           </p>
 
@@ -89,7 +89,7 @@ function OracleCard() {
             whileHover={{ x: 3 }}
             className={`mt-auto inline-flex items-center justify-between w-full px-4 py-3 rounded-xl border transition-all duration-300 ${s.oracleCta}`}
           >
-            <span className="text-xs font-bold uppercase tracking-widest text-red-400">Accedi all'Oracolo</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-[var(--ferrari-red)]">Accedi all'Oracolo</span>
             <ArrowRight className="w-4 h-4 text-red-500 transition-transform group-hover:translate-x-1" aria-hidden="true" />
           </motion.div>
         </div>
@@ -113,7 +113,7 @@ function FanZoneCard() {
         <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none ${s.fanzoneGlow}`} aria-hidden="true" />
         {[0, 1, 2].map(i => (
           <motion.div key={i}
-            className="absolute w-1 h-1 rounded-full pointer-events-none bg-yellow-400"
+            className="absolute w-1 h-1 rounded-full pointer-events-none bg-[var(--ferrari-yellow)]"
             style={{ left: `${20 + i * 30}%`, top: '15%', opacity: 0.3 }}
             animate={{ y: [0, -12, 0], opacity: [0.3, 0.7, 0.3] }}
             transition={{ duration: 2 + i * 0.5, repeat: Infinity, delay: i * 0.7 }}
@@ -124,13 +124,13 @@ function FanZoneCard() {
 
         <div className="relative z-10 flex flex-col h-full p-5 md:p-7">
           <div className="flex items-center justify-between mb-5">
-            <span className="inline-flex items-center gap-1.5 text-[10px] tracking-[0.28em] uppercase text-yellow-500 font-bold">
+            <span className="inline-flex items-center gap-1.5 text-[10px] tracking-[0.28em] uppercase text-[var(--ferrari-yellow)] font-bold">
               <Coins className="w-3.5 h-3.5" aria-hidden="true" />
               Members Club
             </span>
             <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" aria-hidden="true" />
-              <span className="text-[10px] text-yellow-500 tracking-widest uppercase font-semibold">Live Now</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--ferrari-yellow)] animate-pulse" aria-hidden="true" />
+              <span className="text-[10px] text-[var(--ferrari-yellow)] tracking-widest uppercase font-semibold">Live Now</span>
             </div>
           </div>
 
@@ -139,7 +139,7 @@ function FanZoneCard() {
               <Gamepad2 className="w-7 h-7 text-yellow-400" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-zinc-600 mb-0.5">Earn up to</p>
+              <p className="text-[10px] uppercase tracking-widest text-[var(--text-muted)] mb-0.5">Earn up to</p>
               <p className="text-yellow-400 font-black text-xl leading-none">+500 <span className="text-base font-bold">SF Tokens</span></p>
             </div>
           </div>
@@ -149,7 +149,7 @@ function FanZoneCard() {
             <span className="text-yellow-400">Fan Zone</span>
           </h3>
 
-          <p className="text-zinc-500 text-xs leading-relaxed mb-4 flex-grow">
+          <p className="text-[var(--text-tertiary)] text-xs leading-relaxed mb-4 flex-grow">
             Mini-games esclusivi, SF Tokens e premi reali: dal merchandise ai biglietti GP.
           </p>
 
@@ -166,7 +166,7 @@ function FanZoneCard() {
             className={`mt-auto inline-flex items-center justify-between w-full px-4 py-3 rounded-xl border transition-all duration-300 ${s.fanzoneCta}`}
           >
             <span className="text-xs font-bold uppercase tracking-widest text-yellow-400">Inizia a Giocare</span>
-            <ArrowRight className="w-4 h-4 text-yellow-500 transition-transform" aria-hidden="true" />
+            <ArrowRight className="w-4 h-4 text-[var(--ferrari-yellow)] transition-transform" aria-hidden="true" />
           </motion.div>
         </div>
       </motion.div>
@@ -204,23 +204,23 @@ function ArchiveCard() {
 
         <div className="relative z-10 flex flex-col h-full p-5 md:p-7">
           <div className="flex items-center justify-between mb-5">
-            <span className="inline-flex items-center gap-1.5 text-[10px] tracking-[0.28em] uppercase text-blue-400 font-medium">
+            <span className="inline-flex items-center gap-1.5 text-[10px] tracking-[0.28em] uppercase text-[var(--info)] font-medium">
               <Database className="w-3.5 h-3.5" aria-hidden="true" />
               Analytics Archive
             </span>
             <div className="flex items-center gap-1.5">
-              <History className="w-3 h-3 text-zinc-600" aria-hidden="true" />
-              <span className="text-[10px] text-zinc-600 tracking-widest uppercase font-medium">1950 → 2025</span>
+              <History className="w-3 h-3 text-[var(--text-muted)]" aria-hidden="true" />
+              <span className="text-[10px] text-[var(--text-muted)] tracking-widest uppercase font-medium">1950 → 2025</span>
             </div>
           </div>
 
           <div className="flex items-center gap-4 mb-5">
             <div className={`shrink-0 w-14 h-14 rounded-xl flex items-center justify-center ${s.archiveIconBox}`}>
-              <BarChart2 className="w-7 h-7 text-blue-400" aria-hidden="true" />
+              <BarChart2 className="w-7 h-7 text-[var(--info)]" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-zinc-600 mb-0.5">Ferrari F1 Data</p>
-              <p className="text-white font-black text-xl leading-none">Deep <span className="text-blue-400">Analytics</span></p>
+              <p className="text-[10px] uppercase tracking-widest text-[var(--text-muted)] mb-0.5">Ferrari F1 Data</p>
+              <p className="text-[var(--text-primary)] font-black text-xl leading-none">Deep <span className="text-[var(--info)]">Analytics</span></p>
             </div>
           </div>
 
@@ -231,15 +231,15 @@ function ArchiveCard() {
             </span>
           </h3>
 
-          <p className="text-zinc-500 text-xs leading-relaxed mb-5 flex-grow">
+          <p className="text-[var(--text-tertiary)] text-xs leading-relaxed mb-5 flex-grow">
             Oltre 74 anni di dati Ferrari: telemetria, classifiche, pit stop e strategie in grafici interattivi.
           </p>
 
           <div className="grid grid-cols-3 gap-2 mb-5">
             {stats.map(st => (
               <div key={st.label} className={`text-center py-2 rounded-lg ${s.archiveStatBox}`}>
-                <p className="text-blue-400 font-black text-sm leading-none">{st.value}</p>
-                <p className="text-zinc-600 text-[9px] uppercase tracking-wider mt-0.5">{st.label}</p>
+                <p className="text-[var(--info)] font-black text-sm leading-none">{st.value}</p>
+                <p className="text-[var(--text-muted)] text-[9px] uppercase tracking-wider mt-0.5">{st.label}</p>
               </div>
             ))}
           </div>
@@ -248,7 +248,7 @@ function ArchiveCard() {
             whileHover={{ x: 3 }}
             className={`mt-auto inline-flex items-center justify-between w-full px-4 py-3 rounded-xl border transition-all duration-300 ${s.archiveCta}`}
           >
-            <span className="text-xs font-bold uppercase tracking-widest text-blue-400">Esplora l'Archivio</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-[var(--info)]">Esplora l'Archivio</span>
             <ArrowRight className="w-4 h-4 text-blue-500 transition-transform" aria-hidden="true" />
           </motion.div>
         </div>
@@ -326,7 +326,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] relative overflow-hidden">
 
       <SEO
         title="Statistiche e Analisi Dati Ferrari F1"
@@ -357,7 +357,7 @@ export default function Home() {
                 <p className="text-[10px] tracking-[0.4em] uppercase mb-3 font-medium">
                   <span className="text-emerald-600">Formula </span>{' '}
                   <span className="text-slate-100">Rossa </span>{' '}
-                  <span className="text-red-600">Platform </span>
+                  <span className="text-[var(--ferrari-red)]">Platform </span>
                 </p>
                 <h2 className="text-3xl md:text-5xl font-black tracking-tight uppercase">
                   <span className="text-red-500">Esperienze</span> Interattive

@@ -5,7 +5,6 @@ import Footer from '../../components/ferrari/Footer';
 import { motion } from 'framer-motion';
 import { User, Trophy, Timer, Zap, Star, Award, Gauge, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
-
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = typeof window !== 'undefined'
@@ -15,22 +14,13 @@ const supabase = typeof window !== 'undefined'
     )
   : null;
 
-/* ─── Config stat types con relative query ─────────────────────────────────── */
+/* ─── Config — ora solo metadati, niente query ──────────────────────────── */
 const CONFIG = {
   'wins': {
     title: 'Vittorie GP',
     subtitle: 'Race Wins',
     description: 'Ogni volta che un pilota ha tagliato il traguardo in prima posizione con una Ferrari.',
-    query: async () => {
-      const { data, error } = await supabase
-        .from('race_results')
-        .select('driver_id, year, points')
-        .eq('constructor_id', 'ferrari')
-        .eq('position_number', 1);
-      
-      if (error) throw error;
-      return data;
-    },
+    field: 'wins',
     color: '#DC0000',
     colorMuted: 'rgba(220,0,0,0.15)',
     icon: Trophy,
@@ -39,16 +29,7 @@ const CONFIG = {
     title: 'Podi Totali',
     subtitle: 'Podium Finishes',
     description: 'Piazzamenti tra i primi tre classificati: simbolo di costanza al vertice.',
-    query: async () => {
-      const { data, error } = await supabase
-        .from('race_results')
-        .select('driver_id, year, points')
-        .eq('constructor_id', 'ferrari')
-        .lte('position_number', 3);
-      
-      if (error) throw error;
-      return data;
-    },
+    field: 'podiums',
     color: '#EAB308',
     colorMuted: 'rgba(234,179,8,0.15)',
     icon: Star,
@@ -57,16 +38,7 @@ const CONFIG = {
     title: 'Pole Positions',
     subtitle: 'Starting Grid P1',
     description: 'Il miglior tempo assoluto in qualifica: la perfezione espressa in un singolo giro.',
-    query: async () => {
-      const { data, error } = await supabase
-        .from('race_results')
-        .select('driver_id, year, points')
-        .eq('constructor_id', 'ferrari')
-        .eq('grid_position_number', 1);
-      
-      if (error) throw error;
-      return data;
-    },
+    field: 'poles',
     color: '#DC0000',
     colorMuted: 'rgba(220,0,0,0.15)',
     icon: Timer,
@@ -75,16 +47,7 @@ const CONFIG = {
     title: 'Giri Veloci',
     subtitle: 'Fastest Laps',
     description: 'Il giro più rapido in gara: velocità pura della vettura e talento assoluto.',
-    query: async () => {
-      const { data, error } = await supabase
-        .from('race_results')
-        .select('driver_id, year, points')
-        .eq('constructor_id', 'ferrari')
-        .eq('fastest_lap', true);
-      
-      if (error) throw error;
-      return data;
-    },
+    field: 'fastest_laps',
     color: '#EAB308',
     colorMuted: 'rgba(234,179,8,0.15)',
     icon: Zap,
@@ -93,17 +56,7 @@ const CONFIG = {
     title: 'Punti Storici',
     subtitle: 'All-Time Points',
     description: 'La somma totale dei punti conquistati, calcolata su tutti i sistemi di punteggio F1 dal 1950.',
-    query: async () => {
-      // Query che restituisce driver_id, year e points per calcolare la somma
-      const { data, error } = await supabase
-        .from('race_results')
-        .select('driver_id, year, points')
-        .eq('constructor_id', 'ferrari')
-        .gt('points', 0);
-      
-      if (error) throw error;
-      return data;
-    },
+    field: 'points',
     isSum: true,
     color: '#DC0000',
     colorMuted: 'rgba(220,0,0,0.15)',
@@ -113,82 +66,25 @@ const CONFIG = {
     title: 'Grand Slams',
     subtitle: 'Perfect Weekends',
     description: "L'impresa suprema: Pole, Vittoria, Giro Veloce e in testa dal primo all'ultimo giro.",
-    query: async () => {
-      const { data, error } = await supabase
-        .from('race_results')
-        .select('driver_id, year, points')
-        .eq('constructor_id', 'ferrari')
-        .eq('grand_slam', true);
-      
-      if (error) throw error;
-      return data;
-    },
+    field: 'grand_slams',
     color: '#EAB308',
     colorMuted: 'rgba(234,179,8,0.15)',
     icon: Award,
   },
 };
 
-/* ─── Versione alternativa con aggregazione lato client ─────────────────── */
-// Se preferisci un'aggregazione più completa che include anche gli anni
-const CONFIG_WITH_YEARS = {
-  // ... tutte le altre config uguali
-  'points': {
-    title: 'Punti Storici',
-    subtitle: 'All-Time Points',
-    description: 'La somma totale dei punti conquistati, calcolata su tutti i sistemi di punteggio F1 dal 1950.',
-    query: async () => {
-      const { data, error } = await supabase
-        .from('race_results')
-        .select('driver_id, year, points')
-        .eq('constructor_id', 'ferrari')
-        .gt('points', 0)
-        .order('year', { ascending: false });
-      
-      if (error) throw error;
-      
-      // Raggruppa per pilota sommando i punti e raccogliendo gli anni
-      const aggregated = data.reduce((acc, curr) => {
-        if (!acc[curr.driver_id]) {
-          acc[curr.driver_id] = {
-            driver_id: curr.driver_id,
-            total_points: 0,
-            years: new Set()
-          };
-        }
-        acc[curr.driver_id].total_points += curr.points;
-        acc[curr.driver_id].years.add(curr.year);
-        return acc;
-      }, {});
-      
-      // Converti in array e ordina per punti totali
-      return Object.values(aggregated)
-        .map(item => ({
-          driver_id: item.driver_id,
-          total_points: item.total_points,
-          years: Array.from(item.years).sort((a, b) => b - a)
-        }))
-        .sort((a, b) => b.total_points - a.total_points);
-    },
-    isSum: true,
-    color: '#DC0000',
-    colorMuted: 'rgba(220,0,0,0.15)',
-    icon: Gauge,
-  }
-};
-
-/* ─── Medal colors for top 3 ───────────────────────────────────────────────── */
+/* ─── Medal colors ──────────────────────────────────────────────────────── */
 const MEDAL = [
-  { ring: '#DC0000', glow: 'rgba(220,0,0,0.4)',  label: '1ST' },
+  { ring: '#DC0000', glow: 'rgba(220,0,0,0.4)',     label: '1ST' },
   { ring: '#C0C0C0', glow: 'rgba(192,192,192,0.3)', label: '2ND' },
   { ring: '#CD7F32', glow: 'rgba(205,127,50,0.3)',  label: '3RD' },
 ];
 
-/* ─── Driver row ────────────────────────────────────────────────────────────── */
-function DriverRow({ driver, index, max, cfg, isSum }) {
+/* ─── Driver row ────────────────────────────────────────────────────────── */
+function DriverRow({ driver, index, max, cfg }) {
   const pct = max > 0 ? (driver.count / max) * 100 : 0;
   const medal = MEDAL[index] ?? null;
-  const displayValue = isSum
+  const displayValue = cfg.isSum
     ? Math.floor(driver.count).toLocaleString('it-IT')
     : driver.count.toLocaleString('it-IT');
 
@@ -199,7 +95,6 @@ function DriverRow({ driver, index, max, cfg, isSum }) {
       transition={{ duration: 0.4, delay: index * 0.04, ease: 'easeOut' }}
       className="group relative flex items-center gap-4 md:gap-6 px-5 md:px-8 py-5 border-b border-white/5 last:border-0 hover:bg-white/[0.03] transition-colors duration-200"
     >
-      {/* Hover accent line */}
       <motion.div
         className="absolute left-0 top-0 bottom-0 w-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
         style={{ background: cfg.color }}
@@ -208,10 +103,7 @@ function DriverRow({ driver, index, max, cfg, isSum }) {
       {/* Rank */}
       <div className="shrink-0 w-10 md:w-14 text-right select-none">
         {index < 3 ? (
-          <span
-            className="text-xs font-black tracking-widest"
-            style={{ color: medal.ring }}
-          >
+          <span className="text-xs font-black tracking-widest" style={{ color: medal.ring }}>
             {medal.label}
           </span>
         ) : (
@@ -251,14 +143,15 @@ function DriverRow({ driver, index, max, cfg, isSum }) {
       {/* Name + progress + years */}
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-3 mb-2 flex-wrap">
-          <span className="text-base md:text-lg font-black uppercase tracking-tight group-hover:text-red-400 transition-colors truncate"
-            style={{ color: medal ? medal.ring : 'white' }}>
+          <span
+            className="text-base md:text-lg font-black uppercase tracking-tight group-hover:text-red-400 transition-colors truncate"
+            style={{ color: medal ? medal.ring : 'white' }}
+          >
             {driver.name}
           </span>
-          {/* Year range */}
           <span className="text-[10px] text-zinc-600 font-mono shrink-0">
-            {driver.years && driver.years.length > 0 ? Math.min(...driver.years) : ''}
-            {driver.years && driver.years.length > 1 ? ` – ${Math.max(...driver.years)}` : ''}
+            {driver.first_year}
+            {driver.last_year && driver.last_year !== driver.first_year ? ` – ${driver.last_year}` : ''}
           </span>
         </div>
 
@@ -272,32 +165,12 @@ function DriverRow({ driver, index, max, cfg, isSum }) {
             style={{ background: `linear-gradient(to right, ${cfg.color}, ${cfg.color}99)` }}
           />
         </div>
-
-        {/* Year pills — visible on md+ */}
-        {driver.years && driver.years.length > 0 && (
-          <div className="hidden md:flex flex-wrap gap-1 mt-2">
-            {driver.years.sort((a, b) => b - a).slice(0, 12).map((year) => (
-              <span
-                key={year}
-                className="text-[9px] px-1.5 py-0.5 rounded font-black"
-                style={{ background: cfg.colorMuted, color: cfg.color }}
-              >
-                {year}
-              </span>
-            ))}
-            {driver.years.length > 12 && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded font-black text-zinc-500">
-                +{driver.years.length - 12}
-              </span>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Value */}
       <div className="shrink-0 text-right">
         <span
-          className="text-3xl md:text-4xl font-black tabular-nums transition-colors"
+          className="text-3xl md:text-4xl font-black tabular-nums"
           style={{ color: medal ? medal.ring : 'white' }}
         >
           {displayValue}
@@ -307,105 +180,49 @@ function DriverRow({ driver, index, max, cfg, isSum }) {
   );
 }
 
-/* ─── Page ──────────────────────────────────────────────────────────────────── */
+/* ─── Page ──────────────────────────────────────────────────────────────── */
 export default function StatDetail() {
   const router = useRouter();
   const { type } = router.query;
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [drivers, setDrivers] = useState({});
 
   const cfg = type ? CONFIG[type] : null;
 
-  // Carica i piloti una volta sola
   useEffect(() => {
-    if (!supabase) return;
+    if (!type || !cfg || !supabase) return;
 
-    async function loadDrivers() {
-      const { data: drData } = await supabase
-        .from('drivers')
-        .select('id, first_name, last_name');
-      
-      const drMap = {};
-      drData?.forEach(d => {
-        drMap[d.id] = {
-          fullName: `${d.first_name} ${d.last_name}`,
-          id: d.id
-        };
-      });
-      setDrivers(drMap);
-    }
-
-    loadDrivers();
-  }, []);
-
-  // Carica la statistica specifica
-  useEffect(() => {
-    if (!type || !cfg || !supabase || Object.keys(drivers).length === 0) return;
-
-    async function processStats() {
+    async function loadStats() {
       setLoading(true);
       try {
-        // Esegue la query specifica per questa statistica
-        const results = await cfg.query();
-        
-        // Per i punti, results potrebbe essere già aggregato dalla query
-        if (cfg.isSum && results[0]?.total_points) {
-          // Caso in cui la query ha già aggregato
-          const agg = {};
-          results.forEach(item => {
-            const driverInfo = drivers[item.driver_id] || { 
-              fullName: item.driver_id, 
-              id: item.driver_id 
-            };
-            
-            agg[driverInfo.fullName] = {
-              name: driverInfo.fullName,
-              id: driverInfo.id,
-              count: item.total_points,
-              years: item.years || []
-            };
-          });
-          setData(Object.values(agg).sort((a, b) => b.count - a.count));
-        } else {
-          // Aggregazione standard
-          const agg = results.reduce((acc, curr) => {
-            const driverInfo = drivers[curr.driver_id] || { 
-              fullName: curr.driver_id, 
-              id: curr.driver_id 
-            };
-            
-            if (!acc[driverInfo.fullName]) {
-              acc[driverInfo.fullName] = { 
-                name: driverInfo.fullName, 
-                id: driverInfo.id, 
-                count: 0, 
-                years: [] 
-              };
-            }
-            
-            acc[driverInfo.fullName].count += cfg.isSum ? curr.points : 1;
-            
-            if (curr.year && !acc[driverInfo.fullName].years.includes(curr.year)) {
-              acc[driverInfo.fullName].years.push(curr.year);
-            }
-            
-            return acc;
-          }, {});
+        const { data: rows, error } = await supabase
+          .from('driver_ferrari_stats')
+          .select('driver_id, first_year, last_year, drivers(first_name, last_name)')
+          .order(cfg.field, { ascending: false })
+          .gt(cfg.field, 0);
 
-          setData(Object.values(agg).sort((a, b) => b.count - a.count));
-        }
+        if (error) throw error;
+
+        const formatted = rows.map(row => ({
+          id: row.driver_id,
+          name: `${row.drivers.first_name} ${row.drivers.last_name}`,
+          count: row[cfg.field],
+          first_year: row.first_year,
+          last_year: row.last_year,
+        }));
+
+        setData(formatted);
       } catch (err) {
         console.error('Errore:', err);
       }
       setLoading(false);
     }
 
-    processStats();
-  }, [type, drivers]);
+    loadStats();
+  }, [type]);
 
   /* ── Loading ── */
-  if (loading || !cfg || Object.keys(drivers).length === 0) {
+  if (loading || !cfg) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4">
         <div className="flex gap-1.5" aria-label="Caricamento">
@@ -433,13 +250,15 @@ export default function StatDetail() {
 
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute inset-0 opacity-[0.03]"
+        <div
+          className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage: 'linear-gradient(to right,#DC0000 1px,transparent 1px),linear-gradient(to bottom,#DC0000 1px,transparent 1px)',
             backgroundSize: '48px 48px',
           }}
         />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full blur-[120px] opacity-10"
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full blur-[120px] opacity-10"
           style={{ background: cfg.color }}
         />
       </div>
@@ -471,7 +290,6 @@ export default function StatDetail() {
           transition={{ duration: 0.5 }}
           className="mb-14"
         >
-          {/* Eyebrow */}
           <div className="flex items-center gap-3 mb-5">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
@@ -479,49 +297,37 @@ export default function StatDetail() {
             >
               <Icon className="w-4.5 h-4.5" style={{ color: cfg.color }} aria-hidden="true" />
             </div>
-            <span className="text-[10px] tracking-[0.4em] uppercase font-black"
-              style={{ color: cfg.color }}>
+            <span className="text-[10px] tracking-[0.4em] uppercase font-black" style={{ color: cfg.color }}>
               Scuderia Ferrari — {cfg.subtitle}
             </span>
           </div>
 
-          {/* Title */}
           <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none mb-6">
             {cfg.title}
           </h1>
 
-          {/* Description */}
           <div
             className="max-w-2xl pl-5 py-3 rounded-r-xl"
-            style={{ borderLeft: `3px solid ${cfg.color}`, background: `${cfg.colorMuted}` }}
+            style={{ borderLeft: `3px solid ${cfg.color}`, background: cfg.colorMuted }}
           >
             <p className="text-zinc-300 text-sm md:text-base leading-relaxed italic">
               {cfg.description}
             </p>
           </div>
 
-          {/* Summary strip */}
           <div className="flex flex-wrap gap-6 mt-8">
             <div>
               <p className="text-[10px] uppercase tracking-widest text-zinc-600 mb-0.5">Piloti in classifica</p>
               <p className="text-2xl font-black tabular-nums">{data.length}</p>
             </div>
-            <div
-              className="w-px self-stretch"
-              style={{ background: 'rgba(255,255,255,0.06)' }}
-              aria-hidden="true"
-            />
+            <div className="w-px self-stretch" style={{ background: 'rgba(255,255,255,0.06)' }} aria-hidden="true" />
             <div>
               <p className="text-[10px] uppercase tracking-widest text-zinc-600 mb-0.5">Record assoluto</p>
               <p className="text-2xl font-black tabular-nums" style={{ color: cfg.color }}>
                 {cfg.isSum ? Math.floor(max).toLocaleString('it-IT') : max}
               </p>
             </div>
-            <div
-              className="w-px self-stretch"
-              style={{ background: 'rgba(255,255,255,0.06)' }}
-              aria-hidden="true"
-            />
+            <div className="w-px self-stretch" style={{ background: 'rgba(255,255,255,0.06)' }} aria-hidden="true" />
             <div>
               <p className="text-[10px] uppercase tracking-widest text-zinc-600 mb-0.5">Record di</p>
               <p className="text-sm font-black uppercase tracking-tight">{data[0]?.name ?? '—'}</p>
@@ -542,9 +348,10 @@ export default function StatDetail() {
             boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
           }}
         >
-          {/* Table header */}
-          <div className="flex items-center gap-4 md:gap-6 px-5 md:px-8 py-4 border-b"
-            style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+          <div
+            className="flex items-center gap-4 md:gap-6 px-5 md:px-8 py-4 border-b"
+            style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}
+          >
             <div className="w-10 md:w-14" />
             <div className="w-12 md:w-14 shrink-0" />
             <div className="flex-1 text-[10px] uppercase tracking-widest font-black text-zinc-600">Pilota</div>
@@ -552,20 +359,11 @@ export default function StatDetail() {
             <div className="text-[10px] uppercase tracking-widest font-black text-zinc-600 text-right shrink-0 w-20 md:w-24">Totale</div>
           </div>
 
-          {/* Rows */}
           {data.map((driver, i) => (
-            <DriverRow
-              key={driver.id}
-              driver={driver}
-              index={i}
-              max={max}
-              cfg={cfg}
-              isSum={!!cfg.isSum}
-            />
+            <DriverRow key={driver.id} driver={driver} index={i} max={max} cfg={cfg} />
           ))}
         </motion.div>
 
-        {/* Footer note */}
         <p className="text-center text-zinc-700 text-[11px] mt-8 tracking-wider">
           Dati aggiornati · Scuderia Ferrari F1 1950 – {new Date().getFullYear()}
         </p>
