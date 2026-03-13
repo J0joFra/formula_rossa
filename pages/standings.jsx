@@ -89,12 +89,11 @@ export default function StandingsPage() {
 
       // ── 1. Stagioni disponibili ──────────────────────────────────
       const { data: seasonsData, error: seasonsErr } = await supabase
-        .from('race')
+        .from('season')
         .select('year')
-        .order('year', { ascending: false })
-        .limit(1000);
+        .order('year', { ascending: false });
       if (seasonsErr) console.error('❌ stagioni:', seasonsErr.message);
-      const seasons = [...new Set(seasonsData?.map(s => s.year))];
+      const seasons = seasonsData?.map(s => s.year) ?? [];
       setAvailableSeasons(seasons);
 
       // ── 2. Piloti e costruttori ─────────────────────────────────
@@ -109,45 +108,41 @@ export default function StandingsPage() {
       setDrivers(drMap);
       setConstructors(coMap);
 
-      // ── 3. Driver standings ────────────────────────────────────
+      // ── 3. Driver standings — usa season_driver_standing (ha year direttamente) ──
       const { data: drStData, error: drStErr } = await supabase
-        .from('race_driver_standing')
-        .select('*, race(year, round)')
-        .eq('race.year', selectedSeason)
-        .order('round', { ascending: false })
+        .from('season_driver_standing')
+        .select('*')
+        .eq('year', selectedSeason)
         .order('position_number', { ascending: true });
 
       if (drStErr) console.error('❌ driver_standings year:', drStErr.message);
       else console.log('✅ driver standings:', drStData?.length, 'righe per anno', selectedSeason);
       if (drStData && drStData.length > 0) {
-        const maxRound = drStData[0].round;
         setDriverStandings(
           drStData
-            .filter(s => (s.race?.round ?? s.round) === maxRound && s.position_number)
+            .filter(s => s.position_number)
             .sort((a, b) => a.position_number - b.position_number)
         );
       }
 
-      // ── 4. Constructor standings ───────────────────────────────
+      // ── 4. Constructor standings — usa season_constructor_standing ─────────────
       const { data: coStData, error: coStErr } = await supabase
-        .from('race_constructor_standing')
-        .select('*, race(year, round)')
-        .eq('race.year', selectedSeason)
-        .order('round', { ascending: false })
+        .from('season_constructor_standing')
+        .select('*')
+        .eq('year', selectedSeason)
         .order('position_number', { ascending: true });
 
       if (coStErr) console.error('❌ constructor_standings:', coStErr.message);
       else console.log('✅ constructor standings:', coStData?.length);
       if (coStData && coStData.length > 0) {
-        const maxRound = coStData[0].round;
         setConstructorStandings(
           coStData
-            .filter(s => (s.race?.round ?? s.round) === maxRound && s.position_number)
+            .filter(s => s.position_number)
             .sort((a, b) => a.position_number - b.position_number)
         );
       }
 
-      // ── 5. Calendario con info sulle sprint race ───────────────
+      // ── 5. Calendario ─────────────────────────────────────────
       const { data: racesData, error: racesErr } = await supabase
         .from('race')
         .select('id, round, date, circuit_id, official_name, sprint_race_date, qualifying_date')
