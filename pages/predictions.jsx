@@ -53,8 +53,12 @@ const CALENDAR_2026 = [
 ];
 
 
-const PTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
-const ptsFor = (p) => (p >= 1 && p <= 10) ? PTS[p - 1] : 0;
+const PTS       = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
+const PTS_SPRINT = [8, 7, 6, 5, 4, 3, 2, 1];
+const ptsFor       = (p) => (p >= 1 && p <= 10) ? PTS[p - 1] : 0;
+const ptsForSprint = (p) => (p >= 1 && p <= 8)  ? PTS_SPRINT[p - 1] : 0;
+// Le sprint pesano meno delle gare normali nell'engine statistico
+const SPRINT_STAT_WEIGHT = 0.4;
 
 function yearWeight(year, currentYear) {
   const d = currentYear - year;
@@ -173,13 +177,13 @@ function buildDriverStats(results, driverId, circuitId = null, realYear = null) 
   let wins = 0, podiums = 0, top5 = 0;
 
   filtered.forEach(r => {
-    const w = yearWeight(r.year, currentYear);
+    const w = yearWeight(r.year, currentYear) * (r.isSprint ? SPRINT_STAT_WEIGHT : 1);
     wPosSum  += r.positionNumber * w;
     wSum     += w;
-    wPtsSum  += ptsFor(r.positionNumber) * w;
-    if (r.positionNumber === 1) wins++;
-    if (r.positionNumber <= 3) podiums++;
-    if (r.positionNumber <= 5) top5++;
+    wPtsSum  += (r.isSprint ? ptsForSprint(r.positionNumber) : ptsFor(r.positionNumber)) * w;
+    if (!r.isSprint && r.positionNumber === 1) wins++;
+    if (!r.isSprint && r.positionNumber <= 3) podiums++;
+    if (!r.isSprint && r.positionNumber <= 5) top5++;
   });
 
   const avgPos = wPosSum / wSum;
@@ -188,7 +192,7 @@ function buildDriverStats(results, driverId, circuitId = null, realYear = null) 
   const variance = filtered.reduce((s, r) => s + Math.pow(r.positionNumber - avgPos, 2), 0) / n;
 
   const allRecent = results
-    .filter(r => r.driverId === driverId && r.positionNumber != null)
+    .filter(r => r.driverId === driverId && r.positionNumber != null && !r.isSprint)
     .sort((a, b) => b.year - a.year || b.round - a.round)
     .slice(0, 5);
 
@@ -224,9 +228,10 @@ function computePrediction(globalStats, circuitStats) {
 }
 
 function projectChampionship(results2026, driverId, racesLeft, globalStats) {
+  // Punti reali 2026: gare normali + sprint (con punteggio sprint corretto)
   const pts2026 = results2026
     .filter(r => r.driverId === driverId && r.positionNumber != null)
-    .reduce((s, r) => s + ptsFor(r.positionNumber), 0);
+    .reduce((s, r) => s + (r.isSprint ? ptsForSprint(r.positionNumber) : ptsFor(r.positionNumber)), 0);
   const avgPts    = globalStats?.avgPts ?? 8;
   const projected = Math.round(pts2026 + avgPts * racesLeft);
   const sigma     = Math.sqrt(racesLeft) * 4;
@@ -270,6 +275,7 @@ export default function PredictorSection() {
 
         const [
           { data: rawResults, error: e1 },
+          { data: rawSprintResults, error: e1s },
           { data: rawCircuits, error: e2 },
           { data: rawDrivers,  error: e3 },
           { data: rawRaces,    error: e4 },
@@ -281,6 +287,12 @@ export default function PredictorSection() {
             .order('race_id', { ascending: false })
             .limit(50000),
           supabase
+            .from('race_data')
+            .select('race_id, driver_id, constructor_id, position_number, position_text, race_points, race(year, round)')
+            .eq('type', 'SPRINT_RACE_RESULT')
+            .order('race_id', { ascending: false })
+            .limit(10000),
+          supabase
             .from('circuit')
             .select('id, name, full_name, type, length, turns, country_id')
             .limit(200),
@@ -290,7 +302,7 @@ export default function PredictorSection() {
             .limit(1000),
           supabase
             .from('race')
-            .select('id, year, round, circuit_id')
+            .select('id, year, round, circuit_id, sprint_race_date')
             .gte('year', MIN_YEAR)
             .order('year', { ascending: false })
             .order('round', { ascending: false })
@@ -299,7 +311,7 @@ export default function PredictorSection() {
 
         const years = [...new Set((rawRaces ?? []).map(r => r.year))].sort((a,b) => b-a);
         console.log('📊 Supabase:', {
-          race_data: rawResults?.length, e1: e1?.message,
+          race_data: rawResults?.length, sprint_data: rawSprintResults?.length, e1: e1?.message,
           circuits: rawCircuits?.length,    e2: e2?.message,
           drivers: rawDrivers?.length,      e3: e3?.message,
           races: rawRaces?.length,          e4: e4?.message,
@@ -317,7 +329,12 @@ export default function PredictorSection() {
         const circuitsMap = Object.fromEntries((rawCircuits ?? []).map(c => [c.id, c]));
         const driverMap   = Object.fromEntries((rawDrivers  ?? []).map(d => [d.id, d]));
 
-        const results = (rawResults ?? []).map(r => ({
+        // Round con sprint race (per badge nel calendario)
+        const sprintRounds = new Set(
+          (rawRaces ?? []).filter(r => r.sprint_race_date).map(r => r.round)
+        );
+
+        const normalizeResult = (r, isSprint = false) => ({
           raceId:         r.race_id,
           year:           r.race?.year ?? null,
           round:          r.race?.round ?? null,
@@ -326,8 +343,14 @@ export default function PredictorSection() {
           positionNumber: r.position_number,
           positionText:   r.position_text,
           points:         r.race_points,
+          isSprint,
           _circuitId:     racesMap[r.race_id]?.circuit_id ?? null,
-        }));
+        });
+
+        const results = [
+          ...(rawResults       ?? []).map(r => normalizeResult(r, false)),
+          ...(rawSprintResults ?? []).map(r => normalizeResult(r, true)),
+        ];
 
         const drivers2026Ids = [...new Set(results.filter(r => r.year === currentYear).map(r => r.driverId))];
         const driverPool = drivers2026Ids.length > 0
@@ -340,6 +363,7 @@ export default function PredictorSection() {
           .sort((a, b) => a.id.localeCompare(b.id));
 
         const results2026     = results.filter(r => r.year === currentYear);
+        // Un round è "completato" se ha almeno un risultato (gara o sprint)
         const completedRounds = new Set(results2026.map(r => r.round));
         const nextRace        = CALENDAR_2026.find(r => !completedRounds.has(r.round)) ?? CALENDAR_2026[0];
 
@@ -347,7 +371,7 @@ export default function PredictorSection() {
         setPrimaryDriver(activeDrivers.find(d => d.id === 'charles-leclerc') ?? activeDrivers[0]);
         setSecondaryDriver(activeDrivers.find(d => d.id === 'lewis-hamilton') ?? activeDrivers[1]);
         const dataMaxYear = Math.max(...(rawRaces ?? []).map(r => r.year));
-        setDbData({ results, results2026, activeDrivers, circuitsMap, completedRounds, dataMaxYear });
+        setDbData({ results, results2026, activeDrivers, circuitsMap, completedRounds, sprintRounds, dataMaxYear });
       } catch (e) {
         console.error('❌ Predictor:', e.message);
         setLoadError(e.message);
@@ -387,6 +411,7 @@ export default function PredictorSection() {
       circuitInfo,
       racesLeft: CALENDAR_2026.length - targetRace.round + 1,
       completedRounds: dbData.completedRounds,
+      sprintRounds: dbData.sprintRounds,
       dataMaxYear,
     };
   }, [dbData, primaryDriver, secondaryDriver, targetRace]);
@@ -549,9 +574,10 @@ export default function PredictorSection() {
                 <p className="text-[10px] font-black text-[var(--text-primary)]-500 uppercase tracking-widest mb-4">Calendario 2026</p>
                 <div className="grid grid-cols-2 gap-2">
                   {CALENDAR_2026.map(r => {
-                    const isDone = predictions.completedRounds.has(r.round);
-                    const isNext = !isDone && CALENDAR_2026.find(c => !predictions.completedRounds.has(c.round))?.round === r.round;
+                    const isDone     = predictions.completedRounds.has(r.round);
+                    const isNext     = !isDone && CALENDAR_2026.find(c => !predictions.completedRounds.has(c.round))?.round === r.round;
                     const isSelected = targetRace.round === r.round;
+                    const hasSprint  = predictions.sprintRounds?.has(r.round);
                     const cc = CIRCUIT_COUNTRY[r.circuitId];
                     return (
                       <button key={r.round} onClick={() => setTargetRace(r)}
@@ -588,6 +614,9 @@ export default function PredictorSection() {
                               'bg-[var(--bg-tertiary)]/80 text-[var(--text-primary)]-500'
                             }`}>R{r.round}</span>
                             {isDone && <span className="text-[9px] text-[var(--success)] font-black">✓</span>}
+                            {hasSprint && (
+                              <span className="text-[8px] font-black px-1 py-0.5 rounded bg-purple-500/30 text-purple-300">S</span>
+                            )}
                           </div>
                           <p className="font-black text-xs text-[var(--text-primary)] leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                             {r.name.replace(' GP', '')}
@@ -695,7 +724,7 @@ export default function PredictorSection() {
                               <p className="font-black text-sm" style={{ color }}>{data.pred.estPts}</p>
                             </div>
                             <div className="bg-[var(--bg-tertiary)]/40 rounded-xl p-2 border border-[var(--border-light)]">
-                              <p className="text-[8px] text-[var(--text-primary)]-600 uppercase font-bold">Pts 2026</p>
+                              <p className="text-[8px] text-[var(--text-primary)]-600 uppercase font-bold">Pts 2026 (inc. sprint)</p>
                               <p className="font-black text-sm text-[var(--text-primary)]">{data.champ?.current ?? 0}</p>
                             </div>
                           </div>
