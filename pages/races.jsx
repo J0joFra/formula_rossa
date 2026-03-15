@@ -258,7 +258,9 @@ export default function RaceDetailsPage() {
                               {constructors[s.constructor_id]?.name}
                             </td>
                             <td className="p-4 text-right font-mono text-xs text-zinc-300 whitespace-nowrap">
-                              {s.position_text === "1" ? (s.time || "Winner") : (s.gap || s.reason_retired || "Finished")}
+                              {s.position_text === "1"
+                                ? (s.race_time || "Winner")
+                                : (s.race_gap || s.race_reason_retired || "Finished")}
                             </td>
                           </tr>
                         );
@@ -292,7 +294,7 @@ export default function RaceDetailsPage() {
                     {qualifyingResults.map((s, i) => {
                       const isFerrariItem = isFerrari(s.constructor_id);
                       const driver = drivers[s.driver_id];
-                      const bestTime = s.q3 || s.q2 || s.q1 || s.time || '—';
+                      const bestTime = s.qualifying_q3 || s.qualifying_q2 || s.qualifying_q1 || s.qualifying_time || '—';
                       return (
                         <tr key={i} className={`${getPositionBackground(s.position_text)} transition-all border-b border-zinc-800/30`}>
                           <td className={`p-4 text-center font-black italic ${getPositionTextColor(s.position_text)}`}>{s.position_text}</td>
@@ -303,8 +305,8 @@ export default function RaceDetailsPage() {
                             </div>
                           </td>
                           <td className={`p-4 text-xs font-bold uppercase ${isFerrariItem ? 'text-[#ff2800]' : 'text-zinc-400'}`}>{constructors[s.constructor_id]?.name}</td>
-                          <td className="p-4 text-right font-mono text-xs text-zinc-400">{s.q1 || '—'}</td>
-                          <td className="p-4 text-right font-mono text-xs text-zinc-400">{s.q2 || '—'}</td>
+                          <td className="p-4 text-right font-mono text-xs text-zinc-400">{s.qualifying_q1 || '—'}</td>
+                          <td className="p-4 text-right font-mono text-xs text-zinc-400">{s.qualifying_q2 || '—'}</td>
                           <td className="p-4 text-right font-mono text-xs text-white font-black">{bestTime}</td>
                         </tr>
                       );
@@ -353,9 +355,9 @@ export default function RaceDetailsPage() {
                         <><td className={`p-4 text-center font-black italic ${getPositionTextColor(s.position_text)}`}>{s.position_text}</td>
                         <td className="p-4"><div className={`font-bold uppercase ${isFerrari(s.constructor_id) ? 'text-[#ff2800]' : 'text-white'}`}><span className="opacity-40 mr-1 hidden sm:inline">{drivers[s.driver_id]?.first_name}</span><span>{drivers[s.driver_id]?.last_name}</span></div></td>
                         <td className={`p-4 text-xs font-bold uppercase ${isFerrari(s.constructor_id) ? 'text-[#ff2800]' : 'text-zinc-400'}`}>{constructors[s.constructor_id]?.name}</td>
-                        <td className="p-4 text-right font-mono text-xs text-zinc-400">{s.q1 || '—'}</td>
-                        <td className="p-4 text-right font-mono text-xs text-zinc-400">{s.q2 || '—'}</td>
-                        <td className="p-4 text-right font-mono text-xs text-white font-black">{s.q3 || s.q2 || s.q1 || '—'}</td></>
+                        <td className="p-4 text-right font-mono text-xs text-zinc-400">{s.qualifying_q1 || '—'}</td>
+                        <td className="p-4 text-right font-mono text-xs text-zinc-400">{s.qualifying_q2 || '—'}</td>
+                        <td className="p-4 text-right font-mono text-xs text-white font-black">{s.qualifying_q3 || s.qualifying_q2 || s.qualifying_q1 || '—'}</td></>
                       )}
                     />
                   )}
@@ -367,7 +369,7 @@ export default function RaceDetailsPage() {
                         <><td className={`p-4 text-center font-black italic ${getPositionTextColor(s.position_text)}`}>{s.position_text}</td>
                         <td className="p-4"><div className={`font-bold uppercase ${isFerrari(s.constructor_id) ? 'text-[#ff2800]' : 'text-white'}`}><span className="opacity-40 mr-1 hidden sm:inline">{drivers[s.driver_id]?.first_name}</span><span>{drivers[s.driver_id]?.last_name}</span></div></td>
                         <td className={`p-4 text-xs font-bold uppercase ${isFerrari(s.constructor_id) ? 'text-[#ff2800]' : 'text-zinc-400'}`}>{constructors[s.constructor_id]?.name}</td>
-                        <td className="p-4 text-right font-mono text-xs text-zinc-300">{s.position_text === "1" ? (s.time || "Winner") : (s.gap || s.reason_retired || "—")}</td>
+                        <td className="p-4 text-right font-mono text-xs text-zinc-300">{s.position_text === "1" ? (s.race_time || "Winner") : (s.race_gap || s.race_reason_retired || "—")}</td>
                         <td className="p-4 text-right font-black text-yellow-400">{s.race_points ?? '—'}</td></>
                       )}
                     />
@@ -387,7 +389,7 @@ export default function RaceDetailsPage() {
                   <tr key={i} className={`${getPositionBackground(s.position_text)} hover:bg-white/5 transition-all duration-300 border-b border-zinc-800/20`}>
                     <td className={`p-4 w-12 text-center font-black italic ${getPositionTextColor(s.position_text)}`}>{s.position_text}</td>
                     <td className={`p-4 font-bold uppercase text-xs tracking-tight ${isFerrari(s.constructor_id) ? 'text-[#ff2800]' : 'text-white'}`}>{constructors[s.constructor_id]?.name}</td>
-                    <td className="p-4 text-right font-black text-white px-6">{s.race_points}</td>
+                    <td className="p-4 text-right font-black text-white px-6">{s.points}</td>
                   </tr>
                 ))}
               </tbody>
