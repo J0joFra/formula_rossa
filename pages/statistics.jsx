@@ -677,154 +677,59 @@ export default function StatisticsPage() {
     if (!supabase) return;
     async function loadData() {
       try {
-        // ── 1. Vittorie Ferrari per pilota ─────────────────────────────────────
-        const { data: winsRaw } = await supabase
-          .from('race_data')
-          .select('driver_id, driver:driver_id(first_name, last_name)')
-          .eq('constructor_id', 'ferrari')
-          .eq('type', 'RACE_RESULT')
-          .eq('position_number', 1);
+        // Tutte le query ora usano le VIEW — una sola riga per query, zero join pesanti
+        const [
+          { data: wins },
+          { data: pts },
+          { data: nats },
+          { data: circs },
+          { data: poles },
+          { data: fl },
+          { data: champs },
+          { data: pods },
+        ] = await Promise.all([
+          supabase.from('ferrari_driver_wins').select('*'),
+          supabase.from('ferrari_points_by_year').select('*'),
+          supabase.from('ferrari_driver_nationalities').select('*'),
+          supabase.from('ferrari_wins_by_circuit').select('*').limit(10),
+          supabase.from('ferrari_driver_poles').select('*').limit(8),
+          supabase.from('ferrari_driver_fastest_laps').select('*').limit(8),
+          supabase.from('ferrari_championship_seasons').select('*'),
+          supabase.from('ferrari_driver_podiums').select('*').limit(8),
+        ]);
 
-        if (winsRaw) {
-          const agg = {};
-          winsRaw.forEach(r => {
-            const id   = r.driver_id;
-            const name = r.driver ? `${r.driver.first_name} ${r.driver.last_name}` : id;
-            if (!agg[id]) agg[id] = { id, name, count: 0 };
-            agg[id].count++;
-          });
-          setPilotWins(Object.values(agg).sort((a,b) => b.count - a.count).slice(0, 10));
-        }
+        if (wins) setPilotWins(wins.slice(0, 10).map(d => ({ id: d.driver_id, name: d.full_name, count: d.wins })));
 
-        // ── 2. Punti Ferrari per anno (timeline) ───────────────────────────────
-        const { data: ptsRaw } = await supabase
-          .from('season_constructor_standing')
-          .select('year, points')
-          .eq('constructor_id', 'ferrari')
-          .order('year', { ascending: true });
+        if (pts) setHistory(pts.map(r => ({ year: r.year.toString(), points: r.points ?? 0 })));
 
-        if (ptsRaw) {
-          setHistory(ptsRaw.map(r => ({ year: r.year.toString(), points: r.points ?? 0 })));
-        }
-
-        // ── 3. Nazionalità piloti Ferrari ─────────────────────────────────────
-        const { data: drvRaw } = await supabase
-          .from('season_entrant_driver')
-          .select('driver_id, driver:driver_id(nationality_country_id)')
-          .eq('constructor_id', 'ferrari');
-
-        if (drvRaw) {
-          const uniqueDrivers = [...new Map(drvRaw.map(r => [r.driver_id, r])).values()];
-          const nAgg = {};
-          uniqueDrivers.forEach(r => {
-            const nat = (r.driver?.nationality_country_id || 'unknown').toLowerCase().trim();
-            nAgg[nat] = (nAgg[nat] || 0) + 1;
-          });
+        if (nats) {
           setNationalities(
-            Object.entries(nAgg)
-              .map(([id, value]) => {
-                const cfg = countryConfig[id] || countryConfig['unknown'];
-                return { id, name: cfg.name, value, color: cfg.color, flag: cfg.code };
-              })
-              .sort((a,b) => b.value - a.value)
-              .slice(0, 10)
+            nats.map(r => {
+              const cfg = countryConfig[r.country_id] || countryConfig['unknown'];
+              return { id: r.country_id, name: cfg.name, value: r.driver_count, color: cfg.color, flag: cfg.code };
+            })
           );
         }
 
-        // ── 4. Circuiti con più vittorie Ferrari ───────────────────────────────
-        const { data: circRaw } = await supabase
-          .from('race_data')
-          .select('race:race_id(circuit_id, circuit:circuit_id(name, country_id))')
-          .eq('constructor_id', 'ferrari')
-          .eq('type', 'RACE_RESULT')
-          .eq('position_number', 1);
-
-        if (circRaw) {
-          const cAgg = {};
-          circRaw.forEach(r => {
-            const cId   = r.race?.circuit_id;
-            const cName = r.race?.circuit?.name || cId;
-            const cCode = r.race?.circuit?.country_id;
-            if (!cId) return;
-            if (!cAgg[cId]) {
-              const flag = countryConfig[cCode]?.code || getFlagCode(cName);
-              cAgg[cId] = { name: cName, wins: 0, flag, color: countryConfig[cCode]?.color || getCountryColor(cName) };
-            }
-            cAgg[cId].wins++;
-          });
-          setCircuits(Object.values(cAgg).sort((a,b) => b.wins - a.wins).slice(0, 10));
+        if (circs) {
+          setCircuits(circs.map(c => ({
+            name: c.circuit_name,
+            wins: c.wins,
+            flag: countryConfig[c.country_id]?.code || getFlagCode(c.circuit_name),
+            color: countryConfig[c.country_id]?.color || getCountryColor(c.circuit_name),
+          })));
         }
 
-        // ── 5. NEW: Pole positions per pilota Ferrari ──────────────────────────
-        const { data: polesRaw } = await supabase
-          .from('race_data')
-          .select('driver_id, driver:driver_id(first_name, last_name)')
-          .eq('constructor_id', 'ferrari')
-          .eq('type', 'RACE_RESULT')
-          .eq('race_pole_position', true);
+        if (poles) setPoleStats(poles.map(d => ({ id: d.driver_id, name: d.full_name, count: d.poles })));
 
-        if (polesRaw) {
-          const agg = {};
-          polesRaw.forEach(r => {
-            const id   = r.driver_id;
-            const name = r.driver ? `${r.driver.first_name} ${r.driver.last_name}` : id;
-            if (!agg[id]) agg[id] = { id, name, count: 0 };
-            agg[id].count++;
-          });
-          setPoleStats(Object.values(agg).sort((a,b) => b.count - a.count).slice(0, 8));
-        }
+        if (fl) setFastestLaps(fl.map(d => ({ id: d.driver_id, name: d.full_name, count: d.fastest_laps })));
 
-        // ── 6. NEW: Giri veloci per pilota Ferrari ─────────────────────────────
-        const { data: flRaw } = await supabase
-          .from('race_data')
-          .select('driver_id, driver:driver_id(first_name, last_name)')
-          .eq('constructor_id', 'ferrari')
-          .eq('type', 'RACE_RESULT')
-          .eq('race_fastest_lap', true);
+        if (champs) setChampSeasons(champs);
 
-        if (flRaw) {
-          const agg = {};
-          flRaw.forEach(r => {
-            const id   = r.driver_id;
-            const name = r.driver ? `${r.driver.first_name} ${r.driver.last_name}` : id;
-            if (!agg[id]) agg[id] = { id, name, count: 0 };
-            agg[id].count++;
-          });
-          setFastestLaps(Object.values(agg).sort((a,b) => b.count - a.count).slice(0, 8));
-        }
-
-        // ── 7. NEW: Stagioni campione costruttori Ferrari ──────────────────────
-        const { data: champRaw } = await supabase
-          .from('season_constructor_standing')
-          .select('year, points, position_number')
-          .eq('constructor_id', 'ferrari')
-          .eq('championship_won', true)
-          .order('year', { ascending: true });
-
-        if (champRaw) setChampSeasons(champRaw);
-
-        // ── 8. NEW: Podii per pilota Ferrari ──────────────────────────────────
-        const { data: podRaw } = await supabase
-          .from('race_data')
-          .select('driver_id, position_number, driver:driver_id(first_name, last_name)')
-          .eq('constructor_id', 'ferrari')
-          .eq('type', 'RACE_RESULT')
-          .lte('position_number', 3)
-          .not('position_number', 'is', null);
-
-        if (podRaw) {
-          const agg = {};
-          podRaw.forEach(r => {
-            const id   = r.driver_id;
-            const name = r.driver ? `${r.driver.first_name} ${r.driver.last_name}` : id;
-            if (!agg[id]) agg[id] = { id, name, wins: 0, p2: 0, p3: 0 };
-            if (r.position_number === 1) agg[id].wins++;
-            else if (r.position_number === 2) agg[id].p2++;
-            else agg[id].p3++;
-          });
-          const withTotal = Object.values(agg).map(d => ({ ...d, total: d.wins + d.p2 + d.p3 }));
-          setPodiumDrivers(withTotal.sort((a,b) => b.total - a.total).slice(0, 8));
-        }
+        if (pods) setPodiumDrivers(pods.map(d => ({
+          id: d.driver_id, name: d.full_name,
+          wins: d.wins, p2: d.p2, p3: d.p3, total: d.total_podiums,
+        })));
 
       } catch (err) {
         console.error('Error loading data:', err);

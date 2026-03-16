@@ -30,38 +30,25 @@ export default function StatsSection() {
       try {
         const currentYear = new Date().getFullYear();
 
-        // Vittorie Ferrari per pilota — query diretta
-        const { data: winsRaw } = await supabase
-          .from('race_data')
-          .select('driver_id, driver:driver_id(last_name)')
-          .eq('constructor_id', 'ferrari')
-          .eq('type', 'RACE_RESULT')
-          .eq('position_number', 1);
+        // Vittorie per pilota — dalla view
+        const { data: wins } = await supabase
+          .from('ferrari_driver_wins')
+          .select('driver_id, full_name, wins')
+          .limit(8);
 
-        if (winsRaw) {
-          const winsCount = {};
-          winsRaw.forEach(r => {
-            const name = r.driver?.last_name || r.driver_id;
-            winsCount[name] = (winsCount[name] || 0) + 1;
-          });
-          setPilotWins(
-            Object.entries(winsCount)
-              .map(([name, wins]) => ({ name, wins }))
-              .sort((a, b) => b.wins - a.wins)
-              .slice(0, 8)
-          );
+        if (wins) {
+          setPilotWins(wins.map(d => ({ name: d.full_name.split(' ').pop(), wins: d.wins })));
         }
 
-        // Punti Ferrari per anno — da season_constructor_standing (più preciso, già aggregato)
-        const { data: ptsRaw } = await supabase
-          .from('season_constructor_standing')
+        // Punti per anno — dalla view, ultimi 12 anni
+        const { data: pts } = await supabase
+          .from('ferrari_points_by_year')
           .select('year, points')
-          .eq('constructor_id', 'ferrari')
           .gte('year', currentYear - 12)
           .order('year', { ascending: true });
 
-        if (ptsRaw) {
-          setPointsHistory(ptsRaw.map(r => ({ year: r.year.toString(), points: r.points ?? 0 })));
+        if (pts) {
+          setPointsHistory(pts.map(r => ({ year: r.year.toString(), points: r.points ?? 0 })));
         }
 
       } catch (err) {
