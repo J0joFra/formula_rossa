@@ -16,6 +16,14 @@ import {
   getWeather, getMeetings, getSessionsForMeeting, getLatestSession,
   getAllDriversSectors, getRacePositions, getAllLaps, openf1Fetch,
 } from '../lib/openf1';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = typeof window !== 'undefined'
+  ? createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    )
+  : null;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -988,172 +996,130 @@ export default function LiveTimingPage() {
   const [loadingResults, setLoadingResults] = useState(false);
 
   const loadQualiResults = async (year, meetingObj) => {
-    if (typeof window === 'undefined' || !meetingObj) return;
+    if (!supabase || !meetingObj) return;
     try {
-      const [q1Res, q2Res, qRes, racesRes] = await Promise.all([
-        fetch('/data/f1db-races-qualifying-1-results.json').catch(() => null),
-        fetch('/data/f1db-races-qualifying-2-results.json').catch(() => null),
-        fetch('/data/f1db-races-qualifying-results.json').catch(() => null),
-        fetch('/data/f1db-races.json').catch(() => null),
-      ]);
-      if (!racesRes?.ok) return;
-      const allRaces   = await racesRes.json();
-      const q1All      = q1Res?.ok ? await q1Res.json() : [];
-      const q2All      = q2Res?.ok ? await q2Res.json() : [];
-      const qAll       = qRes?.ok  ? await qRes.json()  : [];
+      // Trova la race in Supabase corrispondente al meeting OpenF1
+      const loc         = (meetingObj.location      || '').toLowerCase();
+      const country     = (meetingObj.country_name  || '').toLowerCase();
+      const meetingName = (meetingObj.meeting_name  || '').toLowerCase()
+        .replace(' grand prix','').replace(' gp','').trim();
 
-      const loc         = (meetingObj.location || '').toLowerCase();
-      const country     = (meetingObj.country_name || '').toLowerCase();
-      const meetingName = (meetingObj.meeting_name || '').toLowerCase().replace(' grand prix','').replace(' gp','').trim();
+      const { data: races } = await supabase
+        .from('race')
+        .select('id, round, circuit_id, official_name, grand_prix_id')
+        .eq('year', parseInt(year));
 
-      const racesForYear = allRaces.filter(r => r.year === parseInt(year));
-      const matchedRace  = racesForYear.find(r => {
-        const fields = [r.name, r.officialName, r.grandPrixId, r.circuitId].map(f => (f||'').toLowerCase());
-        return fields.some(f => f && (f.includes(loc)||loc.includes(f)||f.includes(country)||country.includes(f)||f.includes(meetingName)||meetingName.includes(f)));
-      });
-      if (!matchedRace) return;
+      if (!races?.length) return;
 
-      const rId = matchedRace.id;
-      const q1  = q1All.filter(r => r.raceId === rId);
-      const q2  = q2All.filter(r => r.raceId === rId);
-      const q   = qAll.filter(r => r.raceId === rId);
+      // Match fuzzy: cerca il round con più corrispondenze nel nome
+      const matched = races.find(r => {
+        const fields = [r.official_name, r.circuit_id, r.grand_prix_id]
+          .map(f => (f || '').toLowerCase());
+        return fields.some(f =>
+          f.includes(loc) || loc.includes(f) ||
+          f.includes(country) || country.includes(f) ||
+          f.includes(meetingName) || meetingName.includes(f)
+        );
+      }) || races[0];
 
-      // Merge into per-driver objects
+      if (!matched) return;
+
+      // Carica dati qualifiche dalla view
+      const { data: qualiRaw } = await supabase
+        .from('race_qualifying_results')
+        .select('driver_id, constructor_id, position_number, qualifying_q1_millis, qualifying_q2_millis, qualifying_q3_millis, qualifying_q1, qualifying_q2, qualifying_q3')
+        .eq('race_id', matched.id)
+        .order('position_number');
+
+      if (!qualiRaw?.length) return;
+
+      // Converti in formato atteso da QualiProgressionChart
       const driverMap = {};
-      const addRound = (arr, posKey, timeKey) => arr.forEach(r => {
-        if (!driverMap[r.driverId]) driverMap[r.driverId] = { driverId: r.driverId, constructorId: r.constructorId };
-        driverMap[r.driverId][posKey]  = r.positionNumber;
-        driverMap[r.driverId][timeKey] = r.timeMillis;
+      qualiRaw.forEach(r => {
+        driverMap[r.driver_id] = {
+          driverId:       r.driver_id,
+          constructorId:  r.constructor_id,
+          q1pos:  r.qualifying_q1_millis ? null : null, // calcolato sotto
+          q1Millis: r.qualifying_q1_millis ?? (r.qualifying_q1 ? parseFloat(r.qualifying_q1.replace(':','').replace('.','')/1000) : null),
+          q2Millis: r.qualifying_q2_millis ?? null,
+          q3Millis: r.qualifying_q3_millis ?? null,
+        };
       });
 
-      if (q1.length && q2.length) {
-        // Has separate Q1/Q2 files
-        addRound(q1, 'q1pos', 'q1Millis');
-        addRound(q2, 'q2pos', 'q2Millis');
-        // Q3 would be in a separate file; for now mark Q3 as q2pos<=10
-        Object.values(driverMap).forEach(d => {
-          if (d.q2pos != null && d.q2pos <= 10) { d.q3pos = d.q2pos; d.q3Millis = d.q2Millis; }
-        });
-      } else if (q.length) {
-        // Modern Q1/Q2/Q3 combined
-        q.forEach(r => {
-          if (!driverMap[r.driverId]) driverMap[r.driverId] = { driverId: r.driverId, constructorId: r.constructorId };
-          const d = driverMap[r.driverId];
-          if (r.q1Millis) { d.q1pos = r.positionNumber; d.q1Millis = r.q1Millis; }
-          if (r.q2Millis) { d.q2pos = r.positionNumber; d.q2Millis = r.q2Millis; }
-          if (r.q3Millis) { d.q3pos = r.positionNumber; d.q3Millis = r.q3Millis; }
-        });
-        // Assign Q1 positions to those that only have q1Millis
-        const byQ1 = Object.values(driverMap).filter(d => d.q1Millis).sort((a,b)=>a.q1Millis-b.q1Millis);
-        byQ1.forEach((d, i) => { if (!d.q1pos) d.q1pos = i + 1; });
-        const byQ2 = Object.values(driverMap).filter(d => d.q2Millis).sort((a,b)=>a.q2Millis-b.q2Millis);
-        byQ2.forEach((d, i) => { if (!d.q2pos) d.q2pos = i + 1; });
-        const byQ3 = Object.values(driverMap).filter(d => d.q3Millis).sort((a,b)=>a.q3Millis-b.q3Millis);
-        byQ3.forEach((d, i) => { if (!d.q3pos) d.q3pos = i + 1; });
-      }
+      // Assegna posizioni per round in base al tempo
+      const assignPos = (key, posKey) => {
+        const sorted = Object.values(driverMap)
+          .filter(d => d[key] != null)
+          .sort((a,b) => a[key] - b[key]);
+        sorted.forEach((d, i) => { driverMap[d.driverId][posKey] = i + 1; });
+      };
+      assignPos('q1Millis', 'q1pos');
+      assignPos('q2Millis', 'q2pos');
+      assignPos('q3Millis', 'q3pos');
 
       const result = Object.values(driverMap);
       if (result.length) setQualiResults(result);
-    } catch(e) { console.error('Quali load error:', e); }
+    } catch(e) { console.error('Quali Supabase load error:', e); }
   };
 
   const loadRaceResults = async (year, meetingObj) => {
-    if (typeof window === 'undefined' || !meetingObj) return;
+    if (!supabase || !meetingObj) return;
 
     setLoadingResults(true);
     try {
-      const [resultsRes, racesRes] = await Promise.all([
-        fetch('/data/f1db-races-race-results.json'),
-        fetch('/data/f1db-races.json').catch(() => null),
-      ]);
-      const allResults = await resultsRes.json();
+      const loc         = (meetingObj.location      || '').toLowerCase();
+      const country     = (meetingObj.country_name  || '').toLowerCase();
+      const circuitShort = (meetingObj.circuit_short_name || '').toLowerCase();
+      const meetingName = (meetingObj.meeting_name  || '').toLowerCase()
+        .replace(' grand prix', '').replace(' gp', '').trim();
 
-      const sampleResult = allResults.find(r => r.year === parseInt(year));
-      console.log('🏁 Sample result entry:', sampleResult);
-      console.log('🏟 Meeting obj:', { 
-        meeting_name: meetingObj.meeting_name, 
-        location: meetingObj.location,
-        country_name: meetingObj.country_name,
-        circuit_key: meetingObj.circuit_key,
-        circuit_short_name: meetingObj.circuit_short_name,
+      // 1. Trova la race corrispondente
+      const { data: races } = await supabase
+        .from('race')
+        .select('id, round, circuit_id, official_name, grand_prix_id')
+        .eq('year', parseInt(year));
+
+      if (!races?.length) { setRaceResults(null); return; }
+
+      const matched = races.find(r => {
+        const fields = [r.official_name, r.circuit_id, r.grand_prix_id]
+          .map(f => (f || '').toLowerCase());
+        return fields.some(f =>
+          f.includes(loc) || loc.includes(f) ||
+          f.includes(country) || country.includes(f) ||
+          f.includes(meetingName) || meetingName.includes(f) ||
+          (circuitShort && (f.includes(circuitShort) || circuitShort.includes(f)))
+        );
       });
 
-      let filtered = [];
+      if (!matched) { setRaceResults(null); return; }
 
-      if (racesRes?.ok) {
-        const allRaces = await racesRes.json();
-        const racesForYear = allRaces.filter(r => r.year === parseInt(year));
-        console.log('📋 Races for year, first entry:', racesForYear[0]);
+      // 2. Carica risultati gara dalla view
+      const { data: resultsRaw } = await supabase
+        .from('race_grid_results')
+        .select('driver_id, constructor_id, position_number, position_text, points, grid_position_number, reason_retired, laps')
+        .eq('race_id', matched.id)
+        .order('position_number');
 
-        const loc = (meetingObj.location || '').toLowerCase();
-        const country = (meetingObj.country_name || '').toLowerCase();
-        const circuitShort = (meetingObj.circuit_short_name || '').toLowerCase();
-        const meetingName = (meetingObj.meeting_name || '').toLowerCase()
-          .replace(' grand prix', '').replace(' gp', '').trim();
+      if (!resultsRaw?.length) { setRaceResults(null); return; }
 
-        const matchedRace = racesForYear.find(r => {
-          const fields = [
-            r.name, r.officialName, r.grandPrixId, r.circuitId,
-            r.location, r.country, r.circuit,
-          ].map(f => (f || '').toLowerCase());
-
-          return fields.some(f =>
-            f && (
-              f.includes(loc) || loc.includes(f) ||
-              f.includes(country) || country.includes(f) ||
-              f.includes(meetingName) || meetingName.includes(f) ||
-              (circuitShort && (f.includes(circuitShort) || circuitShort.includes(f)))
-            )
-          );
-        });
-
-        console.log('🎯 Matched race:', matchedRace);
-
-        if (matchedRace) {
-          filtered = allResults.filter(r =>
-            r.year === parseInt(year) && r.round === matchedRace.round
-          );
-          console.log('✅ Filtered results count:', filtered.length);
-        }
-      }
-
-      if (!filtered.length) {
-        const loc = (meetingObj.location || '').toLowerCase();
-        const country = (meetingObj.country_name || '').toLowerCase();
-        const meetingName = (meetingObj.meeting_name || '').toLowerCase()
-          .replace(' grand prix', '').replace(' gp', '').trim();
-
-        const rounds = [...new Set(allResults.filter(r => r.year === parseInt(year)).map(r => r.round))];
-        let bestRound = null, bestScore = -1;
-
-        for (const round of rounds) {
-          const sample = allResults.find(r => r.year === parseInt(year) && r.round === round);
-          if (!sample) continue;
-          
-          const fields = Object.values(sample)
-            .filter(v => typeof v === 'string')
-            .map(v => v.toLowerCase());
-          
-          let score = 0;
-          for (const f of fields) {
-            if (f.includes(loc) || loc.includes(f)) score += 3;
-            if (f.includes(country) || country.includes(f)) score += 2;
-            if (f.includes(meetingName) || meetingName.includes(f)) score += 1;
-          }
-          
-          console.log(`Round ${round} score: ${score}`, Object.values(sample).filter(v => typeof v === 'string').slice(0,5));
-          if (score > bestScore) { bestScore = score; bestRound = round; }
-        }
-
-        if (bestRound && bestScore > 0) {
-          filtered = allResults.filter(r => r.year === parseInt(year) && r.round === bestRound);
-          console.log(`✅ Fallback matched round ${bestRound} (score ${bestScore}), results:`, filtered.length);
-        }
-      }
+      // 3. Converti in formato atteso da GridToRaceChart / QualifyingToRaceProgression
+      const filtered = resultsRaw.map(r => ({
+        driverId:            r.driver_id,
+        constructorId:       r.constructor_id,
+        positionNumber:      r.position_number,
+        positionText:        r.position_text,
+        points:              r.points ?? 0,
+        gridPositionNumber:  r.grid_position_number,
+        reasonRetired:       r.reason_retired,
+        laps:                r.laps,
+        year:                parseInt(year),
+        round:               matched.round,
+      }));
 
       setRaceResults(filtered.length ? filtered : null);
     } catch (error) {
-      console.error('❌ Error loading race results:', error);
+      console.error('❌ Error loading race results from Supabase:', error);
       setRaceResults(null);
     } finally {
       setLoadingResults(false);
@@ -1792,7 +1758,7 @@ const fetchAll = async () => {
           )}
 
           <div className="mt-8 flex items-center justify-between border-t border-zinc-900 pt-4 text-xs text-white/15 font-mono">
-            <span>OpenF1 API · openf1.org · 2023–2025</span>
+            <span>OpenF1 API · openf1.org · 2023–{new Date().getFullYear()}</span>
             <span>{meeting?.meeting_name||'—'} · {driverCode||'—'} · {sessionType} · {year||'—'}</span>
             <span>{telemetry.length ? `${telemetry.length} pts` : 'No data'}</span>
           </div>
