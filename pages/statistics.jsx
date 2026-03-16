@@ -10,8 +10,15 @@ import {
 } from 'lucide-react';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
-import { fetchWithCache } from '../lib/cache';
 import Link from 'next/link';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = typeof window !== 'undefined'
+  ? createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    )
+  : null;
 
 /* ─────────────────────────────────────────────────────────────────────────────
    CONSTANTS
@@ -655,84 +662,170 @@ function WinnerRow({ driver, index, max }) {
    PAGE
 ───────────────────────────────────────────────────────────────────────────── */
 export default function StatisticsPage() {
-  const [loading,       setLoading]       = useState(true);
-  const [pilotWins,     setPilotWins]     = useState([]);
-  const [history,       setHistory]       = useState([]);
-  const [nationalities, setNationalities] = useState([]);
-  const [circuits,      setCircuits]      = useState([]);
-  const [openSection,   setOpenSection]   = useState('winners');
+  const [loading,        setLoading]        = useState(true);
+  const [pilotWins,      setPilotWins]      = useState([]);
+  const [history,        setHistory]        = useState([]);
+  const [nationalities,  setNationalities]  = useState([]);
+  const [circuits,       setCircuits]       = useState([]);
+  const [poleStats,      setPoleStats]      = useState([]);   // NEW: pole positions per driver
+  const [fastestLaps,    setFastestLaps]    = useState([]);   // NEW: fastest laps per driver
+  const [champSeasons,   setChampSeasons]   = useState([]);   // NEW: championship winning seasons
+  const [podiumDrivers,  setPodiumDrivers]  = useState([]);   // NEW: podiums per driver
+  const [openSection,    setOpenSection]    = useState('winners');
 
   useEffect(() => {
+    if (!supabase) return;
     async function loadData() {
       try {
-        const [results, driversData, historical, racesData] = await Promise.all([
-        fetchWithCache('/data/f1db-races-race-results.json'),
-        fetchWithCache('/data/f1db-drivers.json'),
-        fetchWithCache('/data/ferrari_historical.json'),
-        fetchWithCache('/data/f1db-races.json'),
-      ]);
+        // ── 1. Vittorie Ferrari per pilota ─────────────────────────────────────
+        const { data: winsRaw } = await supabase
+          .from('race_data')
+          .select('driver_id, driver:driver_id(first_name, last_name)')
+          .eq('constructor_id', 'ferrari')
+          .eq('type', 'RACE_RESULT')
+          .eq('position_number', 1);
 
-        const driverMap = {};
-        driversData.forEach(d => { driverMap[d.id] = d; });
+        if (winsRaw) {
+          const agg = {};
+          winsRaw.forEach(r => {
+            const id   = r.driver_id;
+            const name = r.driver ? `${r.driver.first_name} ${r.driver.last_name}` : id;
+            if (!agg[id]) agg[id] = { id, name, count: 0 };
+            agg[id].count++;
+          });
+          setPilotWins(Object.values(agg).sort((a,b) => b.count - a.count).slice(0, 10));
+        }
 
-        const ferrariWins = results.filter(r => r.constructorId === 'ferrari' && r.positionNumber === 1);
+        // ── 2. Punti Ferrari per anno (timeline) ───────────────────────────────
+        const { data: ptsRaw } = await supabase
+          .from('season_constructor_standing')
+          .select('year, points')
+          .eq('constructor_id', 'ferrari')
+          .order('year', { ascending: true });
 
-        // Winners
-        const wAgg = ferrariWins.reduce((acc, curr) => {
-          const d = driverMap[curr.driverId];
-          const name = d ? `${d.firstName} ${d.lastName}` : curr.driverId;
-          if (!acc[name]) acc[name] = { name, id: curr.driverId, count: 0, years: new Set() };
-          acc[name].count++;
-          acc[name].years.add(curr.year);
-          return acc;
-        }, {});
-        setPilotWins(
-          Object.values(wAgg)
-            .map(x => ({ ...x, yearsArray: Array.from(x.years).sort((a,b) => b-a) }))
-            .sort((a,b) => b.count - a.count)
-            .slice(0, 10)
-        );
+        if (ptsRaw) {
+          setHistory(ptsRaw.map(r => ({ year: r.year.toString(), points: r.points ?? 0 })));
+        }
 
-        // Nationalities
-        const ferrariIds = [...new Set(results.filter(r => r.constructorId === 'ferrari').map(r => r.driverId))];
-        const nAgg = ferrariIds.reduce((acc, dId) => {
-          const nat = (driverMap[dId]?.nationalityCountryId || 'unknown').toLowerCase().trim();
-          acc[nat] = (acc[nat] || 0) + 1;
-          return acc;
-        }, {});
-        setNationalities(
-          Object.entries(nAgg)
-            .map(([id, value]) => {
-              const cfg = countryConfig[id] || countryConfig['unknown'];
-              return { id, name: cfg.name, value, color: cfg.color, flag: cfg.code };
-            })
-            .sort((a,b) => b.value - a.value)
-            .slice(0, 10)
-        );
+        // ── 3. Nazionalità piloti Ferrari ─────────────────────────────────────
+        const { data: drvRaw } = await supabase
+          .from('season_entrant_driver')
+          .select('driver_id, driver:driver_id(nationality_country_id)')
+          .eq('constructor_id', 'ferrari');
 
-        // Circuits
-        const raceMap = {};
-        racesData.forEach(r => { raceMap[r.id] = { grandPrixId: r.grandPrixId, circuitName: r.circuitName || r.grandPrixName }; });
-        const cAgg = ferrariWins.reduce((acc, curr) => {
-          const rd = raceMap[curr.raceId];
-          if (!rd) return acc;
-          const cId   = rd.grandPrixId || 'Unknown';
-          const cName = rd.circuitName || cId;
-          const flag  = getFlagCode(cName);
-          const validFlag = flag && Object.values(countryConfig).some(v => v.code === flag) ? flag : '';
-          if (!acc[cId]) acc[cId] = { 
-            name: getCountryName(flag) || cId.replace(/-/g,' ').toUpperCase(), 
-            originalName: cName, 
-            wins: 0, 
-            flag: validFlag, 
-            color: getCountryColor(cName) 
-          };
-          acc[cId].wins++;
-          return acc;
-        }, {});
-        setCircuits(Object.values(cAgg).sort((a,b) => b.wins - a.wins).slice(0, 10));
+        if (drvRaw) {
+          const uniqueDrivers = [...new Map(drvRaw.map(r => [r.driver_id, r])).values()];
+          const nAgg = {};
+          uniqueDrivers.forEach(r => {
+            const nat = (r.driver?.nationality_country_id || 'unknown').toLowerCase().trim();
+            nAgg[nat] = (nAgg[nat] || 0) + 1;
+          });
+          setNationalities(
+            Object.entries(nAgg)
+              .map(([id, value]) => {
+                const cfg = countryConfig[id] || countryConfig['unknown'];
+                return { id, name: cfg.name, value, color: cfg.color, flag: cfg.code };
+              })
+              .sort((a,b) => b.value - a.value)
+              .slice(0, 10)
+          );
+        }
 
-        setHistory(historical.filter(h => h.points !== null));
+        // ── 4. Circuiti con più vittorie Ferrari ───────────────────────────────
+        const { data: circRaw } = await supabase
+          .from('race_data')
+          .select('race:race_id(circuit_id, circuit:circuit_id(name, country_id))')
+          .eq('constructor_id', 'ferrari')
+          .eq('type', 'RACE_RESULT')
+          .eq('position_number', 1);
+
+        if (circRaw) {
+          const cAgg = {};
+          circRaw.forEach(r => {
+            const cId   = r.race?.circuit_id;
+            const cName = r.race?.circuit?.name || cId;
+            const cCode = r.race?.circuit?.country_id;
+            if (!cId) return;
+            if (!cAgg[cId]) {
+              const flag = countryConfig[cCode]?.code || getFlagCode(cName);
+              cAgg[cId] = { name: cName, wins: 0, flag, color: countryConfig[cCode]?.color || getCountryColor(cName) };
+            }
+            cAgg[cId].wins++;
+          });
+          setCircuits(Object.values(cAgg).sort((a,b) => b.wins - a.wins).slice(0, 10));
+        }
+
+        // ── 5. NEW: Pole positions per pilota Ferrari ──────────────────────────
+        const { data: polesRaw } = await supabase
+          .from('race_data')
+          .select('driver_id, driver:driver_id(first_name, last_name)')
+          .eq('constructor_id', 'ferrari')
+          .eq('type', 'RACE_RESULT')
+          .eq('race_pole_position', true);
+
+        if (polesRaw) {
+          const agg = {};
+          polesRaw.forEach(r => {
+            const id   = r.driver_id;
+            const name = r.driver ? `${r.driver.first_name} ${r.driver.last_name}` : id;
+            if (!agg[id]) agg[id] = { id, name, count: 0 };
+            agg[id].count++;
+          });
+          setPoleStats(Object.values(agg).sort((a,b) => b.count - a.count).slice(0, 8));
+        }
+
+        // ── 6. NEW: Giri veloci per pilota Ferrari ─────────────────────────────
+        const { data: flRaw } = await supabase
+          .from('race_data')
+          .select('driver_id, driver:driver_id(first_name, last_name)')
+          .eq('constructor_id', 'ferrari')
+          .eq('type', 'RACE_RESULT')
+          .eq('race_fastest_lap', true);
+
+        if (flRaw) {
+          const agg = {};
+          flRaw.forEach(r => {
+            const id   = r.driver_id;
+            const name = r.driver ? `${r.driver.first_name} ${r.driver.last_name}` : id;
+            if (!agg[id]) agg[id] = { id, name, count: 0 };
+            agg[id].count++;
+          });
+          setFastestLaps(Object.values(agg).sort((a,b) => b.count - a.count).slice(0, 8));
+        }
+
+        // ── 7. NEW: Stagioni campione costruttori Ferrari ──────────────────────
+        const { data: champRaw } = await supabase
+          .from('season_constructor_standing')
+          .select('year, points, position_number')
+          .eq('constructor_id', 'ferrari')
+          .eq('championship_won', true)
+          .order('year', { ascending: true });
+
+        if (champRaw) setChampSeasons(champRaw);
+
+        // ── 8. NEW: Podii per pilota Ferrari ──────────────────────────────────
+        const { data: podRaw } = await supabase
+          .from('race_data')
+          .select('driver_id, position_number, driver:driver_id(first_name, last_name)')
+          .eq('constructor_id', 'ferrari')
+          .eq('type', 'RACE_RESULT')
+          .lte('position_number', 3)
+          .not('position_number', 'is', null);
+
+        if (podRaw) {
+          const agg = {};
+          podRaw.forEach(r => {
+            const id   = r.driver_id;
+            const name = r.driver ? `${r.driver.first_name} ${r.driver.last_name}` : id;
+            if (!agg[id]) agg[id] = { id, name, wins: 0, p2: 0, p3: 0 };
+            if (r.position_number === 1) agg[id].wins++;
+            else if (r.position_number === 2) agg[id].p2++;
+            else agg[id].p3++;
+          });
+          const withTotal = Object.values(agg).map(d => ({ ...d, total: d.wins + d.p2 + d.p3 }));
+          setPodiumDrivers(withTotal.sort((a,b) => b.total - a.total).slice(0, 8));
+        }
+
       } catch (err) {
         console.error('Error loading data:', err);
       } finally {
@@ -803,9 +896,10 @@ export default function StatisticsPage() {
 
           <div className="flex flex-wrap gap-8 mt-8 pt-8 border-t border-white/[0.06]">
             {[
-              { label: 'Vittorie totali',  value: pilotWins.reduce((a,d) => a+d.count, 0).toLocaleString('it-IT') },
-              { label: 'Piloti vincitori', value: pilotWins.length },
-              { label: 'Stagioni',         value: '75+' },
+              { label: 'Vittorie totali',      value: pilotWins.reduce((a,d) => a+d.count, 0).toLocaleString('it-IT') },
+              { label: 'Piloti vincitori',      value: pilotWins.length },
+              { label: 'Titoli costruttori',    value: champSeasons.length },
+              { label: 'Pole positions',        value: poleStats.reduce((a,d) => a+d.count, 0).toLocaleString('it-IT') },
             ].map(s => (
               <div key={s.label}>
                 <p className="text-[10px] uppercase tracking-widest text-white-600 mb-0.5">{s.label}</p>
@@ -1153,6 +1247,121 @@ export default function StatisticsPage() {
               </div>
             </div>
           </AccordionSection>
+
+          {/* CHAMPIONSHIP SEASONS */}
+          <AccordionSection id="championships" title="Titoli Costruttori" subtitle="Stagioni campione Ferrari" icon={Trophy} isOpen={openSection==='championships'} onToggle={()=>toggle('championships')} accent="gold">
+            <div className="mt-6">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                {champSeasons.map((s) => (
+                  <div key={s.year}
+                    className="flex flex-col items-center justify-center p-4 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 hover:bg-yellow-500/10 transition-colors"
+                  >
+                    <span className="text-2xl font-black" style={{ color: GOLD }}>{s.year}</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-white/40 mt-1">{s.points} pts</span>
+                  </div>
+                ))}
+              </div>
+              {champSeasons.length === 0 && <p className="text-white/30 text-xs text-center py-8">Nessun dato disponibile</p>}
+            </div>
+          </AccordionSection>
+
+          {/* POLE POSITIONS */}
+          <AccordionSection id="poles" title="Pole Masters" subtitle="Pole positions per pilota Ferrari" icon={Activity} isOpen={openSection==='poles'} onToggle={()=>toggle('poles')} accent="red">
+            <div className="mt-6 space-y-3">
+              {poleStats.map((d, i) => {
+                const pct = poleStats[0]?.count ? (d.count / poleStats[0].count) * 100 : 0;
+                return (
+                  <div key={d.id} className="flex items-center gap-4 group">
+                    <span className="text-[10px] font-black w-5 text-right shrink-0"
+                      style={{ color: i === 0 ? RED : 'rgba(255,255,255,0.2)' }}>{i+1}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-black uppercase tracking-tight group-hover:text-red-400 transition-colors"
+                          style={{ color: i === 0 ? RED : 'white' }}>{d.name}</span>
+                        <span className="text-sm font-black tabular-nums" style={{ color: i === 0 ? RED : 'rgba(255,255,255,0.6)' }}>{d.count}</span>
+                      </div>
+                      <div className="h-1 rounded-full bg-white/5 overflow-hidden">
+                        <motion.div className="h-full rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${pct}%` }}
+                          transition={{ duration: 0.8, delay: i * 0.05 }}
+                          style={{ background: i === 0 ? RED : 'rgba(220,0,0,0.4)' }} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </AccordionSection>
+
+          {/* FASTEST LAPS */}
+          <AccordionSection id="fastestlaps" title="Speed Icons" subtitle="Giri veloci per pilota Ferrari" icon={Activity} isOpen={openSection==='fastestlaps'} onToggle={()=>toggle('fastestlaps')} accent="red">
+            <div className="mt-6 space-y-3">
+              {fastestLaps.map((d, i) => {
+                const pct = fastestLaps[0]?.count ? (d.count / fastestLaps[0].count) * 100 : 0;
+                return (
+                  <div key={d.id} className="flex items-center gap-4 group">
+                    <span className="text-[10px] font-black w-5 text-right shrink-0"
+                      style={{ color: i === 0 ? GOLD : 'rgba(255,255,255,0.2)' }}>{i+1}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-black uppercase tracking-tight group-hover:text-yellow-400 transition-colors"
+                          style={{ color: i === 0 ? GOLD : 'white' }}>{d.name}</span>
+                        <span className="text-sm font-black tabular-nums" style={{ color: i === 0 ? GOLD : 'rgba(255,255,255,0.6)' }}>{d.count}</span>
+                      </div>
+                      <div className="h-1 rounded-full bg-white/5 overflow-hidden">
+                        <motion.div className="h-full rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${pct}%` }}
+                          transition={{ duration: 0.8, delay: i * 0.05 }}
+                          style={{ background: i === 0 ? GOLD : 'rgba(234,179,8,0.4)' }} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </AccordionSection>
+
+          {/* PODIUM BREAKDOWN */}
+          <AccordionSection id="podiums" title="Podio Club" subtitle="Distribuzione 1°/2°/3° per pilota Ferrari" icon={Trophy} isOpen={openSection==='podiums'} onToggle={()=>toggle('podiums')} accent="gold">
+            <div className="mt-6 space-y-4">
+              {podiumDrivers.map((d, i) => (
+                <div key={d.id} className="group">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-black uppercase tracking-tight group-hover:text-red-400 transition-colors">{d.name}</span>
+                    <span className="text-sm font-black tabular-nums text-white/60">{d.total} podi</span>
+                  </div>
+                  <div className="flex h-2 rounded-full overflow-hidden gap-px">
+                    {d.wins > 0 && (
+                      <motion.div
+                        initial={{ width: 0 }} animate={{ width: `${(d.wins/d.total)*100}%` }}
+                        transition={{ duration: 0.7, delay: i*0.05 }}
+                        className="h-full rounded-l-full" style={{ background: RED, minWidth: 4 }} />
+                    )}
+                    {d.p2 > 0 && (
+                      <motion.div
+                        initial={{ width: 0 }} animate={{ width: `${(d.p2/d.total)*100}%` }}
+                        transition={{ duration: 0.7, delay: i*0.05+0.1 }}
+                        className="h-full" style={{ background: '#EBEBEB', minWidth: 4 }} />
+                    )}
+                    {d.p3 > 0 && (
+                      <motion.div
+                        initial={{ width: 0 }} animate={{ width: `${(d.p3/d.total)*100}%` }}
+                        transition={{ duration: 0.7, delay: i*0.05+0.2 }}
+                        className="h-full rounded-r-full" style={{ background: '#D58936', minWidth: 4 }} />
+                    )}
+                  </div>
+                  <div className="flex gap-4 mt-1.5">
+                    <span className="text-[9px] font-black" style={{ color: RED }}>🥇 {d.wins}</span>
+                    <span className="text-[9px] font-black" style={{ color: '#EBEBEB' }}>🥈 {d.p2}</span>
+                    <span className="text-[9px] font-black" style={{ color: '#D58936' }}>🥉 {d.p3}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </AccordionSection>
+
         </motion.div>
 
         <p className="text-center text-white-800 text-[11px] mt-8 tracking-wider">

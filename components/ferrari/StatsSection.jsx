@@ -26,19 +26,21 @@ export default function StatsSection() {
 
   useEffect(() => {
     async function loadData() {
+      if (!supabase) { setLoading(false); return; }
       try {
-        
         const currentYear = new Date().getFullYear();
-        const { data: winsData } = await supabase
+
+        // Vittorie Ferrari per pilota — query diretta
+        const { data: winsRaw } = await supabase
           .from('race_data')
-          .select('driver_id, driver(last_name)')
+          .select('driver_id, driver:driver_id(last_name)')
           .eq('constructor_id', 'ferrari')
           .eq('type', 'RACE_RESULT')
           .eq('position_number', 1);
 
-        if (winsData) {
+        if (winsRaw) {
           const winsCount = {};
-          winsData.forEach(r => {
+          winsRaw.forEach(r => {
             const name = r.driver?.last_name || r.driver_id;
             winsCount[name] = (winsCount[name] || 0) + 1;
           });
@@ -50,26 +52,18 @@ export default function StatsSection() {
           );
         }
 
-        const { data: pointsData } = await supabase
-          .from('race_data')
-          .select('race_points, race(year)')
+        // Punti Ferrari per anno — da season_constructor_standing (più preciso, già aggregato)
+        const { data: ptsRaw } = await supabase
+          .from('season_constructor_standing')
+          .select('year, points')
           .eq('constructor_id', 'ferrari')
-          .eq('type', 'RACE_RESULT')
-          .gte('race.year', currentYear - 12);
+          .gte('year', currentYear - 12)
+          .order('year', { ascending: true });
 
-        if (pointsData) {
-          const pointsByYear = {};
-          pointsData.forEach(r => {
-            const year = r.race?.year;
-            if (!year) return;
-            pointsByYear[year] = (pointsByYear[year] || 0) + (r.race_points || 0);
-          });
-          setPointsHistory(
-            Object.entries(pointsByYear)
-              .map(([year, points]) => ({ year: year.toString(), points: Math.floor(points) }))
-              .sort((a, b) => a.year - b.year)
-          );
+        if (ptsRaw) {
+          setPointsHistory(ptsRaw.map(r => ({ year: r.year.toString(), points: r.points ?? 0 })));
         }
+
       } catch (err) {
         console.error("Errore caricamento dati:", err);
       } finally {
