@@ -9,6 +9,14 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowRight, Cpu, Coins, Gamepad2, Database, BarChart2, History } from 'lucide-react';
 import s from '../styles/cards.module.css';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = typeof window !== 'undefined'
+  ? createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    )
+  : null;
 
 /* ─────────────────────────────────────────────────────────────────────────────
    Utility: scan line animata
@@ -178,10 +186,33 @@ function FanZoneCard() {
    CARD 3 – DEEP ANALYTICS ARCHIVE → /statistics
 ───────────────────────────────────────────────────────────────────────────── */
 function ArchiveCard() {
+  const [archiveStats, setArchiveStats] = useState({
+    seasons: '75+',
+    gps: '1.1K+',
+    rows: '48M+',
+  });
+
+  useEffect(() => {
+    if (!supabase) return;
+    supabase
+      .from('ferrari_archive_stats')
+      .select('seasons_count, gp_count, total_rows')
+      .single()
+      .then(({ data }) => {
+        if (!data) return;
+        setArchiveStats({
+          seasons: data.seasons_count ? `${data.seasons_count}` : '75+',
+          gps:     data.gp_count     ? (data.gp_count > 1000 ? `${(data.gp_count / 1000).toFixed(1)}K` : `${data.gp_count}`) : '1.1K+',
+          rows:    data.total_rows   ? (data.total_rows > 1_000_000 ? `${(data.total_rows / 1_000_000).toFixed(0)}M` : `${(data.total_rows / 1000).toFixed(0)}K`) : '48M+',
+        });
+      })
+      .catch(() => {});
+  }, []);
+
   const stats = [
-    { label: 'Stagioni', value: '74+' },
-    { label: 'GP Analizzati', value: '1.1K+' },
-    { label: 'Dataset', value: '48M' },
+    { label: 'Stagioni',      value: archiveStats.seasons },
+    { label: 'GP Analizzati', value: archiveStats.gps     },
+    { label: 'Dataset',       value: archiveStats.rows    },
   ];
   return (
     <Link href="/statistics" className="flex-1 min-w-0">

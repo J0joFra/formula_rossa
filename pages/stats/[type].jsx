@@ -186,6 +186,7 @@ export default function StatDetail() {
   const { type } = router.query;
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   const cfg = type ? CONFIG[type] : null;
 
@@ -195,31 +196,48 @@ export default function StatDetail() {
     async function loadStats() {
       setLoading(true);
       try {
+        // Seleziona driver_id + il campo richiesto + join driver per il nome
         const { data: rows, error } = await supabase
           .from('driver_ferrari_stats')
-          .select(`driver_id, first_year, last_year, ${cfg.field}, driver(first_name, last_name)`)
+          .select(`driver_id, first_year, last_year, ${cfg.field}, driver:driver_id(first_name, last_name)`)
           .order(cfg.field, { ascending: false })
-          .gt(cfg.field, 0);
+          .gt(cfg.field, 0)
+          .limit(50);
 
         if (error) throw error;
 
-        const formatted = rows.map(row => ({
-          id: row.driver_id,
-          name: `${row.driver.first_name} ${row.driver.last_name}`,
-          count: row[cfg.field],
+        const formatted = (rows ?? []).map(row => ({
+          id:         row.driver_id,
+          name:       row.driver
+                        ? `${row.driver.first_name} ${row.driver.last_name}`
+                        : row.driver_id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+          count:      Number(row[cfg.field]) || 0,
           first_year: row.first_year,
-          last_year: row.last_year,
+          last_year:  row.last_year,
         }));
 
         setData(formatted);
+        setLoadError(null);
       } catch (err) {
-        console.error('Errore:', err);
+        console.error('Errore caricamento stats:', err);
+        setLoadError(err.message);
+        setData([]);
       }
       setLoading(false);
     }
 
     loadStats();
   }, [type]);
+
+  /* ── 404 per tipo non riconosciuto ── */
+  if (!loading && !cfg) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4">
+        <p className="text-zinc-400 text-lg font-black uppercase tracking-widest">Categoria non trovata</p>
+        <Link href="/statistics" className="text-red-500 underline text-sm">← Torna alle statistiche</Link>
+      </div>
+    );
+  }
 
   /* ── Loading ── */
   if (loading || !cfg) {
@@ -275,13 +293,25 @@ export default function StatDetail() {
           className="mb-10"
         >
           <Link
-            href="/"
+            href="/statistics"
             className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.25em] text-zinc-600 hover:text-white transition-colors"
           >
             <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
             Hall of Fame
           </Link>
         </motion.div>
+
+        {/* Error banner */}
+        {loadError && (
+          <div className="mb-8 px-5 py-4 rounded-xl border border-red-500/30 bg-red-500/10">
+            <p className="text-red-400 text-xs font-black uppercase tracking-widest">
+              Errore caricamento dati — {loadError}
+            </p>
+            <p className="text-zinc-500 text-xs mt-1">
+              Assicurati di aver creato la view <code className="text-red-400">driver_ferrari_stats</code> su Supabase.
+            </p>
+          </div>
+        )}
 
         {/* Header */}
         <motion.header
