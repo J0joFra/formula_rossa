@@ -671,6 +671,8 @@ export default function StatisticsPage() {
   const [fastestLaps,    setFastestLaps]    = useState([]);   // NEW: fastest laps per driver
   const [champSeasons,   setChampSeasons]   = useState([]);   // NEW: championship winning seasons
   const [podiumDrivers,  setPodiumDrivers]  = useState([]);   // NEW: podiums per driver
+  const [grandPrix,      setGrandPrix]      = useState([]);   // NEW: vittorie per GP
+  const [seasonSummary,  setSeasonSummary]  = useState([]);   // NEW: riepilogo per stagione
   const [openSection,    setOpenSection]    = useState('winners');
 
   useEffect(() => {
@@ -682,20 +684,22 @@ export default function StatisticsPage() {
           { data: wins },
           { data: pts },
           { data: nats },
-          { data: circs },
+          { data: gps },
           { data: poles },
           { data: fl },
           { data: champs },
           { data: pods },
+          { data: seasons },
         ] = await Promise.all([
           supabase.from('ferrari_driver_wins').select('*'),
           supabase.from('ferrari_points_by_year').select('*'),
           supabase.from('ferrari_driver_nationalities').select('*'),
-          supabase.from('ferrari_wins_by_circuit').select('*').limit(10),
+          supabase.from('ferrari_wins_by_grand_prix').select('*').limit(15),
           supabase.from('ferrari_driver_poles').select('*').limit(8),
           supabase.from('ferrari_driver_fastest_laps').select('*').limit(8),
           supabase.from('ferrari_championship_seasons').select('*'),
           supabase.from('ferrari_driver_podiums').select('*').limit(8),
+          supabase.from('ferrari_season_summary').select('*').limit(20),
         ]);
 
         if (wins) setPilotWins(wins.slice(0, 10).map(d => ({ id: d.driver_id, name: d.full_name, count: d.wins })));
@@ -711,12 +715,14 @@ export default function StatisticsPage() {
           );
         }
 
-        if (circs) {
-          setCircuits(circs.map(c => ({
-            name: c.circuit_name,
-            wins: c.wins,
-            flag: countryConfig[c.country_id]?.code || getFlagCode(c.circuit_name),
-            color: countryConfig[c.country_id]?.color || getCountryColor(c.circuit_name),
+        if (gps) {
+          setGrandPrix(gps.map(g => ({
+            name: g.grand_prix_name,
+            wins: g.ferrari_wins,
+            total: g.total_races_held,
+            winRate: g.win_rate_pct,
+            flag: countryConfig[g.country_id]?.code || '',
+            color: countryConfig[g.country_id]?.color || RED,
           })));
         }
 
@@ -730,6 +736,8 @@ export default function StatisticsPage() {
           id: d.driver_id, name: d.full_name,
           wins: d.wins, p2: d.p2, p3: d.p3, total: d.total_podiums,
         })));
+
+        if (seasons) setSeasonSummary(seasons);
 
       } catch (err) {
         console.error('Error loading data:', err);
@@ -1041,115 +1049,131 @@ export default function StatisticsPage() {
             </div>
           </AccordionSection>
 
-          {/* FORTRESS MARANELLO - CORRETTO CON GESTIONE DATI VUOTI */}
-          <AccordionSection id="circuits" title="Fortress Maranello" subtitle="Circuiti con più vittorie Ferrari" icon={Landmark} isOpen={openSection==='circuits'} onToggle={()=>toggle('circuits')} accent="gold">
+          {/* FORTRESS MARANELLO — Grand Prix wins */}
+          <AccordionSection id="circuits" title="Fortress Maranello" subtitle="Grand Prix con più vittorie Ferrari" icon={Landmark} isOpen={openSection==='circuits'} onToggle={()=>toggle('circuits')} accent="gold">
             <div className="mt-6 space-y-6">
-              
-              {/* Circuit chips - con controllo se circuits esiste e ha elementi */}
+
+              {/* GP chips */}
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                {circuits && circuits.length > 0 ? circuits.map(c => {
-                  const flagCode = c.flag || getFlagCode(c.originalName || c.name);
-                  
-                  return (
-                    <div 
-                      key={c.name} 
-                      className="flex items-center gap-3 bg-zinc-900/40 border border-white/5 p-3 rounded-2xl group hover:border-red-600/30 transition-all"
-                    >
-                      <div className="relative w-8 h-6 overflow-hidden rounded-sm shadow-sm shrink-0 border border-white/10">
-                        {flagCode && (
-                          <img 
-                            src={`https://flagcdn.com/w80/${flagCode}.png`}
-                            alt={c.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => { 
-                              e.target.src = `https://flagcdn.com/24x18/${flagCode}.png`;
-                              e.target.onerror = () => {
-                                e.target.style.display = 'none';
-                              };
-                            }} 
-                          />
-                        )}
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-black uppercase text-white truncate group-hover:text-red-400 transition-colors">
-                          {c.name}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="h-1 w-12 rounded-full bg-zinc-800 overflow-hidden">
-                            <div 
-                              className="h-full rounded-full" 
-                              style={{ 
-                                width: circuits[0]?.wins ? `${(c.wins / circuits[0].wins) * 100}%` : '0%',
-                                background: c.color || RED
-                              }} 
-                            />
-                          </div>
-                          <span className="text-[10px] font-black text-white-600">{c.wins}</span>
+                {grandPrix.length > 0 ? grandPrix.map(g => (
+                  <div key={g.name}
+                    className="flex items-center gap-3 bg-zinc-900/40 border border-white/5 p-3 rounded-2xl group hover:border-yellow-500/30 transition-all"
+                  >
+                    <div className="relative w-8 h-6 overflow-hidden rounded-sm shadow-sm shrink-0 border border-white/10">
+                      {g.flag && (
+                        <img src={`https://flagcdn.com/w80/${g.flag}.png`} alt={g.name}
+                          className="w-full h-full object-cover"
+                          onError={e => { e.target.style.display = 'none'; }} />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-black uppercase text-white truncate group-hover:text-yellow-400 transition-colors">
+                        {g.name.replace(' Grand Prix','').replace(' GP','')}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="h-1 w-12 rounded-full bg-zinc-800 overflow-hidden">
+                          <div className="h-full rounded-full transition-all"
+                            style={{ width: `${(g.wins / (grandPrix[0]?.wins || 1)) * 100}%`, background: g.color || GOLD }} />
                         </div>
+                        <span className="text-[10px] font-black" style={{ color: GOLD }}>{g.wins}</span>
+                        <span className="text-[9px] text-white/30 font-bold">/{g.total}</span>
                       </div>
                     </div>
-                  );
-                }) : (
-                  // Placeholder se non ci sono circuiti
-                  <div className="col-span-5 text-center py-8 text-white-500">Caricamento circuiti...</div>
+                  </div>
+                )) : (
+                  <div className="col-span-5 text-center py-8 text-white/30 text-xs">Nessun dato</div>
                 )}
               </div>
 
-              {/* Bar chart - con controllo se circuits esiste */}
+              {/* Bar chart orizzontale con win rate */}
               <div className="h-[460px] w-full">
-                {circuits && circuits.length > 0 ? (
+                {grandPrix.length > 0 && (
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={circuits} layout="vertical" margin={{ left: 8, right: 48, top: 4, bottom: 4 }}>
-                      <XAxis type="number" stroke="rgba(255,255,255,0.08)" tick={{ fill: '#555', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
-                      <YAxis dataKey="name" type="category" width={148} stroke="rgba(255,255,255,0.08)" tick={{ fill: '#ccc', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
-                      <Tooltip
-                        cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+                    <BarChart data={grandPrix} layout="vertical" margin={{ left: 8, right: 64, top: 4, bottom: 4 }}>
+                      <XAxis type="number" stroke="rgba(255,255,255,0.08)"
+                        tick={{ fill: '#555', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
+                      <YAxis dataKey="name" type="category" width={140}
+                        stroke="rgba(255,255,255,0.08)"
+                        tick={{ fill: '#ccc', fontSize: 10, fontWeight: 900 }}
+                        tickFormatter={v => v.replace(' Grand Prix','').replace(' GP','').toUpperCase()}
+                        axisLine={false} tickLine={false} />
+                      <Tooltip cursor={{ fill: 'rgba(255,255,255,0.02)' }}
                         content={({ active, payload }) => {
                           if (!active || !payload?.length) return null;
-                          const c = payload[0].payload;
-                          const flagCode = c.flag || getFlagCode(c.originalName || c.name);
-                          
+                          const g = payload[0].payload;
                           return (
-                            <DarkTooltip
-                              active={active}
-                              payload={[{ value: c.wins, name: 'vittorie', color: c.color }]}
-                              accentColor={c.color}
+                            <DarkTooltip active={active}
+                              payload={[{ value: g.wins, name: 'vittorie', color: g.color || GOLD }]}
+                              accentColor={g.color || GOLD}
                               extra={
-                                <div className="flex items-center gap-2 mb-1">
-                                  {flagCode && (
-                                    <div className="w-5 h-3.5 rounded-sm overflow-hidden border border-white/10">
-                                      <img 
-                                        src={`https://flagcdn.com/w40/${flagCode}.png`}
-                                        alt={c.name}
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => { 
-                                          e.target.src = `https://flagcdn.com/24x18/${flagCode}.png`;
-                                          e.target.onerror = () => {
-                                            e.target.style.display = 'none';
-                                          };
-                                        }}
-                                      />
-                                    </div>
-                                  )}
-                                  <span className="text-[10px] font-black uppercase tracking-wider text-white-400">{c.name}</span>
+                                <div className="flex items-center gap-3 mb-1">
+                                  {g.flag && <img src={`https://flagcdn.com/w40/${g.flag}.png`} className="w-5 h-3.5 object-cover rounded-sm border border-white/10" alt="" />}
+                                  <div>
+                                    <p className="text-[10px] font-black uppercase text-white/60">{g.name}</p>
+                                    <p className="text-[9px] text-white/40">{g.winRate}% win rate · {g.total} gare totali</p>
+                                  </div>
                                 </div>
                               }
                             />
                           );
                         }}
                       />
-                      <Bar dataKey="wins" radius={[0, 8, 8, 0]} barSize={20}>
-                        {circuits.map((c, i) => (
-                          <Cell key={i} fill={c.color || RED} style={{ filter: `drop-shadow(0 0 5px ${(c.color || RED)}44)` }} />
+                      <Bar dataKey="wins" radius={[0, 6, 6, 0]} barSize={18}>
+                        {grandPrix.map((g, i) => (
+                          <Cell key={i} fill={g.color || GOLD}
+                            style={{ filter: `drop-shadow(0 0 4px ${(g.color || GOLD)}44)` }} />
                         ))}
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                ) : (
-                  <div className="h-full flex items-center justify-center text-white-500">Caricamento dati circuiti...</div>
                 )}
               </div>
+            </div>
+          </AccordionSection>
+
+          {/* SEASON BY SEASON — riepilogo stagioni recenti */}
+          <AccordionSection id="seasons" title="Season Rewind" subtitle="Prestazioni Ferrari per stagione (ultime 20)" icon={Activity} isOpen={openSection==='seasons'} onToggle={()=>toggle('seasons')} accent="red">
+            <div className="mt-6 overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="text-[10px] font-black uppercase tracking-widest text-white/30 border-b border-white/5">
+                    <th className="py-2 pr-4">Anno</th>
+                    <th className="py-2 pr-4 text-right">Pos.</th>
+                    <th className="py-2 pr-4 text-right">Vittorie</th>
+                    <th className="py-2 pr-4 text-right">Podi</th>
+                    <th className="py-2 pr-4 text-right">Pole</th>
+                    <th className="py-2 pr-4 text-right">Giro V.</th>
+                    <th className="py-2 text-right">Punti</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {seasonSummary.map((s, i) => {
+                    const isChamp = champSeasons.some(c => c.year === s.year);
+                    return (
+                      <tr key={s.year}
+                        className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors group"
+                      >
+                        <td className="py-3 pr-4">
+                          <div className="flex items-center gap-2">
+                            <span className="font-black text-sm" style={{ color: isChamp ? GOLD : 'white' }}>{s.year}</span>
+                            {isChamp && <span className="text-[8px] font-black px-1.5 py-0.5 rounded" style={{ background: GOLD+'20', color: GOLD }}>🏆 CHAMP</span>}
+                          </div>
+                        </td>
+                        <td className="py-3 pr-4 text-right">
+                          <span className={`font-black text-sm ${s.championship_position === 1 ? 'text-yellow-400' : s.championship_position <= 3 ? 'text-orange-400' : 'text-white/50'}`}>
+                            {s.championship_position ?? '—'}°
+                          </span>
+                        </td>
+                        <td className="py-3 pr-4 text-right font-black" style={{ color: s.wins > 0 ? RED : 'rgba(255,255,255,0.2)' }}>{s.wins ?? 0}</td>
+                        <td className="py-3 pr-4 text-right font-bold text-white/60">{s.podiums ?? 0}</td>
+                        <td className="py-3 pr-4 text-right font-bold text-white/40">{s.poles ?? 0}</td>
+                        <td className="py-3 pr-4 text-right font-bold text-white/40">{s.fastest_laps ?? 0}</td>
+                        <td className="py-3 text-right font-black text-white/70">{s.points?.toLocaleString('it-IT') ?? 0}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </AccordionSection>
 
