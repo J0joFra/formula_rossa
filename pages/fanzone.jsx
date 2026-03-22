@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Gamepad2, Coins, Trophy, Zap, ChevronLeft,
-  Timer, Flame, Radio,
-  Award, Target, Loader2
+  Timer, Flame, Radio, Award, Target, Loader2,
+  Flag, ChevronRight
 } from 'lucide-react';
 import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
