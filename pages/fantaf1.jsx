@@ -18,29 +18,31 @@ import {
 } from '@/lib/fantaf1/fantaService';
 import { SCORING_RULES } from '@/lib/fantaf1/scoring';
 
-// ─── DRIVER LIST (2025 stagione) ─────────────────────────────────────────────
-// In produzione puoi fetchare da OpenF1 /drivers?session_key=latest
-const DRIVERS_2025 = [
-  { number: 16, name: 'Charles Leclerc',    team: 'Ferrari',        color: '#E8002D', short: 'LEC' },
-  { number: 44, name: 'Lewis Hamilton',     team: 'Ferrari',        color: '#E8002D', short: 'HAM' },
-  { number: 1,  name: 'Max Verstappen',     team: 'Red Bull',       color: '#3671C6', short: 'VER' },
-  { number: 63, name: 'George Russell',     team: 'Mercedes',       color: '#27F4D2', short: 'RUS' },
-  { number: 4,  name: 'Lando Norris',       team: 'McLaren',        color: '#FF8000', short: 'NOR' },
-  { number: 81, name: 'Oscar Piastri',      team: 'McLaren',        color: '#FF8000', short: 'PIA' },
-  { number: 14, name: 'Fernando Alonso',    team: 'Aston Martin',   color: '#358C75', short: 'ALO' },
-  { number: 55, name: 'Carlos Sainz',       team: 'Williams',       color: '#64C4FF', short: 'SAI' },
-  { number: 10, name: 'Pierre Gasly',       team: 'Alpine',         color: '#0093CC', short: 'GAS' },
-  { number: 23, name: 'Alexander Albon',    team: 'Williams',       color: '#64C4FF', short: 'ALB' },
-  { number: 31, name: 'Esteban Ocon',       team: 'Haas',           color: '#B6BABD', short: 'OCO' },
-  { number: 87, name: 'Oliver Bearman',     team: 'Haas',           color: '#B6BABD', short: 'BEA' },
-  { number: 5,  name: 'Gabriel Bortoleto', team: 'Kick Sauber',    color: '#52E252', short: 'BOR' },
-  { number: 6,  name: 'Isack Hadjar',      team: 'Racing Bulls',   color: '#6692FF', short: 'HAD' },
-  { number: 7,  name: 'Jack Doohan',       team: 'Alpine',         color: '#0093CC', short: 'DOO' },
-  { number: 22, name: 'Yuki Tsunoda',      team: 'Red Bull',       color: '#3671C6', short: 'TSU' },
-  { number: 18, name: 'Lance Stroll',      team: 'Aston Martin',   color: '#358C75', short: 'STR' },
-  { number: 30, name: 'Liam Lawson',       team: 'Racing Bulls',   color: '#6692FF', short: 'LAW' },
-  { number: 77, name: 'Valtteri Bottas',   team: 'Kick Sauber',    color: '#52E252', short: 'BOT' },
-  { number: 20, name: 'Kevin Magnussen',   team: 'Haas',           color: '#B6BABD', short: 'MAG' },
+// ─── DRIVER LIST 2026 — allineata a lib/fantaF1.js ──────────────────────────
+// I numeri di gara 2026 non sono ancora ufficiali per tutti — aggiorna a inizio stagione
+const DRIVERS_2026 = [
+  { number: 16, name: 'Charles Leclerc',   team: 'Ferrari',       color: '#DC0000', short: 'LEC' },
+  { number: 44, name: 'Lewis Hamilton',    team: 'Ferrari',       color: '#DC0000', short: 'HAM' },
+  { number: 1,  name: 'Max Verstappen',    team: 'Red Bull',      color: '#3671C6', short: 'VER' },
+  { number: 6,  name: 'Isack Hadjar',      team: 'Red Bull',      color: '#3671C6', short: 'HAD' },
+  { number: 63, name: 'George Russell',    team: 'Mercedes',      color: '#27F4D2', short: 'RUS' },
+  { number: 12, name: 'Kimi Antonelli',    team: 'Mercedes',      color: '#27F4D2', short: 'ANT' },
+  { number: 4,  name: 'Lando Norris',      team: 'McLaren',       color: '#FF8000', short: 'NOR' },
+  { number: 81, name: 'Oscar Piastri',     team: 'McLaren',       color: '#FF8000', short: 'PIA' },
+  { number: 14, name: 'Fernando Alonso',   team: 'Aston Martin',  color: '#358C75', short: 'ALO' },
+  { number: 18, name: 'Lance Stroll',      team: 'Aston Martin',  color: '#358C75', short: 'STR' },
+  { number: 10, name: 'Pierre Gasly',      team: 'Alpine',        color: '#FF87BC', short: 'GAS' },
+  { number: 43, name: 'Franco Colapinto',  team: 'Alpine',        color: '#FF87BC', short: 'COL' },
+  { number: 55, name: 'Carlos Sainz',      team: 'Williams',      color: '#64C4FF', short: 'SAI' },
+  { number: 23, name: 'Alexander Albon',   team: 'Williams',      color: '#64C4FF', short: 'ALB' },
+  { number: 27, name: 'Nico Hülkenberg',   team: 'Audi',          color: '#A8A8A8', short: 'HUL' },
+  { number: 5,  name: 'Gabriel Bortoleto', team: 'Audi',          color: '#A8A8A8', short: 'BOR' },
+  { number: 31, name: 'Esteban Ocon',      team: 'Haas',          color: '#B6BABD', short: 'OCO' },
+  { number: 87, name: 'Oliver Bearman',    team: 'Haas',          color: '#B6BABD', short: 'BEA' },
+  { number: 30, name: 'Liam Lawson',       team: 'Racing Bulls',  color: '#6692FF', short: 'LAW' },
+  { number: 8,  name: 'Arvid Lindblad',    team: 'Racing Bulls',  color: '#6692FF', short: 'LIN' },
+  { number: 11, name: 'Sergio Pérez',      team: 'Cadillac',      color: '#FFFFFF', short: 'PER' },
+  { number: 77, name: 'Valtteri Bottas',   team: 'Cadillac',      color: '#FFFFFF', short: 'BOT' },
 ];
 
 // ─── TABS ─────────────────────────────────────────────────────────────────────
@@ -117,7 +119,7 @@ export default function FantaF1Page() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.4em] text-red-500 mb-3">
-                🏎️ Season 2025
+                🏎️ Season 2026
               </p>
               <h1 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter leading-none">
                 Fanta<span className="text-red-600">F1</span>
@@ -296,7 +298,7 @@ function PickTab({ session, nextRace, leagues }) {
     }
   };
 
-  const filtered = DRIVERS_2025.filter(d =>
+  const filtered = DRIVERS_2026.filter(d =>
     d.name.toLowerCase().includes(filter.toLowerCase()) ||
     d.team.toLowerCase().includes(filter.toLowerCase())
   );
@@ -424,7 +426,7 @@ function PickTab({ session, nextRace, leagues }) {
           </button>
           {selected && (
             <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
-              Pilota selezionato: <span className="text-white">{DRIVERS_2025.find(d => d.number === selected)?.name}</span>
+              Pilota selezionato: <span className="text-white">{DRIVERS_2026.find(d => d.number === selected)?.name}</span>
             </p>
           )}
         </div>

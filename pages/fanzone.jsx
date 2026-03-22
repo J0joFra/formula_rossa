@@ -234,42 +234,53 @@ export default function FanZonePage() {
         <FantaF1 />
         {/* LEADERBOARD */}
         <section className="mb-24">
-          <SectionHeader icon={<Trophy className="text-yellow-500 w-7 h-7" />} label="Top Fan" />
-          <div className="bg-zinc-900/40 border border-white/5 rounded-[32px] overflow-hidden">
-            {leaderboardLoading ? (
-              <div className="flex items-center justify-center py-16 gap-3 text-zinc-600">
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span className="text-xs font-black uppercase tracking-widest">Caricamento classifica...</span>
+        <SectionHeader icon={<Flag className="text-red-500 w-7 h-7" />} label="FantaF1" />
+        <Link href="/fantaf1">
+          <motion.div
+            whileHover={{ y: -3 }}
+            className="relative overflow-hidden rounded-[40px] border border-red-500/20 bg-gradient-to-r from-red-950/30 via-black to-zinc-900/60 p-10 cursor-pointer group"
+          >
+            {/* Glow */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_left,rgba(220,38,38,0.07),transparent_60%)] pointer-events-none" />
+            {/* Grid pattern */}
+            <div className="absolute inset-0 opacity-[0.02]"
+              style={{ backgroundImage: 'linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)', backgroundSize: '32px 32px' }} />
+      
+            <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-8">
+              {/* Icon */}
+              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center shadow-2xl shadow-red-600/20 shrink-0">
+                <Flag className="w-10 h-10 text-white" />
               </div>
-            ) : leaderboard.length === 0 ? (
-              <div className="text-center py-16">
-                <p className="text-zinc-600 text-sm font-bold uppercase tracking-widest">Nessun giocatore ancora.</p>
-                <p className="text-zinc-700 text-xs mt-2">Sii il primo a guadagnare SFT!</p>
-              </div>
-            ) : (
-              leaderboard.map((player, i) => (
-                <LeaderboardRow
-                  key={player.email}
-                  player={player}
-                  index={i}
-                  isYou={session?.user?.email === player.email}
-                />
-              ))
-            )}
-
-            {session && !leaderboardLoading && (
-              <div className="p-4 border-t border-white/5 bg-yellow-500/5">
-                <p className="text-center text-[10px] text-zinc-500 font-black uppercase tracking-widest">
-                  {userRank
-                    ? <>La tua posizione: <span className="text-yellow-500">#{userRank}</span> — {tokens.toLocaleString()} SFT</>
-                    : <>Non sei ancora in classifica — guadagna SFT giocando!</>
-                  }
+      
+              {/* Text */}
+              <div className="flex-1">
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-red-500 mb-2">🏎️ Season 2026 · Nuovo!</p>
+                <h3 className="text-3xl md:text-4xl font-black uppercase italic tracking-tighter mb-2">
+                  Fanta<span className="text-red-600">F1</span>
+                </h3>
+                <p className="text-zinc-500 text-sm leading-relaxed max-w-md">
+                  Scegli il tuo pilota prima di ogni GP. Accumula punti con pit stop record, team radio epici e strategie suicide del muretto. Sfida i tuoi amici nella tua lega privata.
                 </p>
+      
+                {/* Feature pills */}
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {['🏆 Leghe private', '⚡ Pick pre-gara', '📻 Bonus ironici', '🔥 Classifica live'].map(f => (
+                    <span key={f} className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold text-zinc-400">
+                      {f}
+                    </span>
+                  ))}
+                </div>
               </div>
-            )}
-          </div>
-        </section>
-
+      
+              {/* CTA */}
+              <div className="shrink-0 flex items-center gap-2 px-6 py-3 bg-red-600 group-hover:bg-red-500 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all shadow-lg shadow-red-600/20">
+                Gioca ora
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+          </motion.div>
+        </Link>
+      </section>
       </main>
       <Footer />
     </div>

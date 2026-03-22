@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signIn, signOut } from "next-auth/react";
-import { Home as HomeIcon, BarChart3, Gamepad2, LogOut, Trophy, Zap, Info, Newspaper } from 'lucide-react';
+import { Home as HomeIcon, BarChart3, Gamepad2, LogOut, Trophy, Zap, Info, Newspaper, Flag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
 
@@ -36,6 +36,7 @@ export default function Navigation() {
             <NavLink href="/standings"   icon={Trophy}     label="Standings"   active={pathname === '/standings'} />
             <NavLink href="/statistics"  icon={BarChart3}  label="Stats"       active={pathname === '/statistics'} />
             <NavLink href="/fanzone"     icon={Gamepad2}   label="Fan Zone"    active={pathname === '/fanzone'} />
+            <NavLink href="/fantaf1"     icon={Flag}       label="FantaF1"     active={pathname === '/fantaf1'} />
             <NavLink href="/live-timing" icon={Zap}        label="Live Timing" active={pathname === '/live-timing'} />
             <NavLink href="/news"        icon={Newspaper}  label="News"        active={pathname?.startsWith('/news')} />
             <NavLink href="/about"       icon={Info}       label="Chi Siamo"   active={pathname === '/about'} />
@@ -105,6 +106,7 @@ export default function Navigation() {
               <MobileLink href="/standings"   label="Standings"   active={pathname === '/standings'}          onClick={() => setIsMenuOpen(false)} />
               <MobileLink href="/statistics"  label="Statistics"  active={pathname === '/statistics'}         onClick={() => setIsMenuOpen(false)} />
               <MobileLink href="/fanzone"     label="Fan Zone"    active={pathname === '/fanzone'}            onClick={() => setIsMenuOpen(false)} />
+              <MobileLink href="/fantaf1"     label="FantaF1"     active={pathname === '/fantaf1'}            onClick={() => setIsMenuOpen(false)} />
               <MobileLink href="/live-timing" label="Live Timing" active={pathname === '/live-timing'}        onClick={() => setIsMenuOpen(false)} />
               <MobileLink href="/news"        label="News"        active={pathname?.startsWith('/news')}      onClick={() => setIsMenuOpen(false)} />
               <MobileLink href="/about"       label="Chi Siamo"   active={pathname === '/about'}              onClick={() => setIsMenuOpen(false)} />
