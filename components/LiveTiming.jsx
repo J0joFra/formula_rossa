@@ -3,18 +3,18 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Clock, Zap, Radio, Map as MapIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import {
-  fetchLatestSession,
-  fetchDrivers,
-  fetchIntervals,
-  fetchLaps,
-  fetchCarData,
-  fetchWeather,
-  fetchTeamRadio,
+  getLatestSession,
+  getDrivers,
+  getIntervals,
+  openf1Fetch, // Per fetch generici
+  getCarData,
+  getWeatherData,
+  getTeamRadio,
   MOCK_STANDINGS,
   MOCK_TELEMETRY,
   MOCK_WEATHER,
   MOCK_RADIO
-} from '../services/openf1';
+} from '../lib/openf1';
 
 export default function LiveTiming() {
   const [activeSession, setActiveSession] = useState('Race');
@@ -50,7 +50,7 @@ export default function LiveTiming() {
         setLoading(true);
         setError(null);
         
-        const session = await fetchLatestSession(activeSession);
+        const session = await getLatestSession(activeSession);
         
         if (session) {
           setSessionKey(session.session_key);
@@ -58,7 +58,7 @@ export default function LiveTiming() {
           setUseMockData(false);
           
           // Fetch drivers
-          const driversData = await fetchDrivers(session.session_key);
+          const driversData = await getDrivers(session.session_key);
           setDrivers(driversData);
         } else {
           console.log('Nessuna sessione attiva, uso dati mock');
@@ -84,8 +84,11 @@ export default function LiveTiming() {
 
     const fetchLiveData = async () => {
       try {
-        // Fetch intervals
-        const intervals = await fetchIntervals(sessionKey);
+        // Fetch intervals and ALL laps once to optimize requests
+        const [intervals, allLaps] = await Promise.all([
+          getIntervals(sessionKey),
+          openf1Fetch('/laps', { session_key: sessionKey })
+        ]);
         
         if (intervals.length > 0) {
           // Raggruppa per driver (ultimo intervallo)
@@ -96,50 +99,53 @@ export default function LiveTiming() {
             return acc;
           }, {});
 
-          // Costruisci classifica
-          const standingsData = await Promise.all(
-            Object.values(latestByDriver).map(async (interval) => {
-              const driver = drivers.find(d => d.driver_number === interval.driver_number) || {};
-              const laps = await fetchLaps(sessionKey, interval.driver_number);
-              const latestLap = laps[laps.length - 1];
+          // Costruisci classifica usando i dati già fetchati
+          const standingsData = Object.values(latestByDriver).map((interval) => {
+            const driver = drivers.find(d => d.driver_number === interval.driver_number) || {};
+            // Filtra i laps per questo driver
+            const driverLaps = allLaps.filter(l => l.driver_number === interval.driver_number);
+            const latestLap = driverLaps[driverLaps.length - 1];
 
-              return {
-                pos: interval.position || 'N/A',
-                car: interval.driver_number,
-                driver: driver.full_name || `Driver ${interval.driver_number}`,
-                gap: interval.gap_to_leader === null ? 'LEADER' : `+${interval.gap_to_leader?.toFixed(3) || '0'}s`,
-                interval: interval.interval === null ? '-' : `+${interval.interval?.toFixed(3) || '0'}s`,
-                lastLap: latestLap ? formatLapTime(latestLap.lap_duration) : '--:--.---',
-                sector1: latestLap?.sectors?.[0] ? formatSectorTime(latestLap.sectors[0]) : '--.--',
-                sector2: latestLap?.sectors?.[1] ? formatSectorTime(latestLap.sectors[1]) : '--.--',
-                sector3: latestLap?.sectors?.[2] ? formatSectorTime(latestLap.sectors[2]) : '--.--',
-                tyres: latestLap?.compound?.[0] || '?',
-                tyreAge: latestLap?.tyre_age || 0,
-                team_colour: driver.team_colour || '666666'
-              };
-            })
-          );
+            return {
+              pos: interval.position || 'N/A',
+              car: interval.driver_number,
+              driver: driver.full_name || `Driver ${interval.driver_number}`,
+              gap: interval.gap_to_leader === null ? 'LEADER' : `+${interval.gap_to_leader?.toFixed(3) || '0'}s`,
+              interval: interval.interval === null ? '-' : `+${interval.interval?.toFixed(3) || '0'}s`,
+              lastLap: latestLap ? formatLapTime(latestLap.lap_duration) : '--:--.---',
+              sector1: latestLap?.duration_sector_1 ? formatSectorTime(latestLap.duration_sector_1) : '--.--',
+              sector2: latestLap?.duration_sector_2 ? formatSectorTime(latestLap.duration_sector_2) : '--.--',
+              sector3: latestLap?.duration_sector_3 ? formatSectorTime(latestLap.duration_sector_3) : '--.--',
+              tyres: latestLap?.compound || '?',
+              tyreAge: latestLap?.tyre_age || 0,
+              team_colour: driver.team_colour || '666666'
+            };
+          });
 
           standingsData.sort((a, b) => (a.pos > b.pos ? 1 : -1));
           setStandings(standingsData);
+          
+          // Aggiorna giro corrente (prendi il massimo giro trovato)
+          const maxLap = Math.max(...allLaps.map(l => l.lap_number || 0));
+          if (maxLap > 0) setCurrentLap(maxLap);
         }
 
-        // Fetch telemetry per Leclerc
-        const carData = await fetchCarData(sessionKey, 16);
+        // Fetch telemetry per Leclerc (driver 16)
+        const carData = await getCarData(sessionKey, 16);
         if (carData.length > 0) {
           const latest = carData[carData.length - 1];
           setTelemetry({
             speed: `${latest.speed || 0} km/h`,
             rpm: latest.rpm?.toLocaleString() || '0',
             throttle: `${latest.throttle || 0}%`,
-            brake: `${latest.brake || 0}%`,
+            brake: typeof latest.brake === 'boolean' ? (latest.brake ? '100%' : '0%') : `${latest.brake || 0}%`,
             gear: latest.n_gear || 0,
             drs: latest.drs || 0
           });
         }
 
         // Fetch weather
-        const weatherData = await fetchWeather(sessionKey);
+        const weatherData = await getWeatherData(sessionKey);
         if (weatherData.length > 0) {
           const latest = weatherData[weatherData.length - 1];
           setWeather({
@@ -151,7 +157,7 @@ export default function LiveTiming() {
         }
 
         // Fetch team radio
-        const radioData = await fetchTeamRadio(sessionKey);
+        const radioData = await getTeamRadio(sessionKey);
         if (radioData.length > 0) {
           const recent = radioData.slice(-3).reverse();
           setRadioMessages(recent.map(msg => ({
@@ -167,7 +173,7 @@ export default function LiveTiming() {
     };
 
     fetchLiveData();
-    const interval = setInterval(fetchLiveData, 5000); // Ogni 5 secondi
+    const interval = setInterval(fetchLiveData, 10000); // Riduciamo a 10 secondi per essere più sicuri
 
     return () => clearInterval(interval);
   }, [sessionKey, useMockData, drivers]);
