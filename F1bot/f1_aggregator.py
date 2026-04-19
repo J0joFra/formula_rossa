@@ -8,14 +8,15 @@ Installazione:
   pip install feedparser groq firebase-admin python-dotenv schedule
 
 Uso:
-  python f1_aggregator.py            # esegui una volta
-  python f1_aggregator.py --daemon   # loop ogni 4 ore
+  python f1_aggregator.py                         # normale, ogni 4h
+  python f1_aggregator.py --daemon                # loop automatico
+  python f1_aggregator.py --mode qualifiche       # articolo qualifiche
+  python f1_aggregator.py --mode post-gara        # articolo post-gara
+  python f1_aggregator.py --mode recap --gp Monaco
 """
 
-import sys
-import os
+import sys, os
 
-# Fix encoding Windows
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
@@ -24,13 +25,7 @@ import feedparser
 import groq
 import firebase_admin
 from firebase_admin import credentials, firestore
-import json
-import hashlib
-import re
-import time
-import logging
-import argparse
-import schedule
+import json, hashlib, re, time, logging, argparse, schedule
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 
@@ -39,19 +34,17 @@ load_dotenv()
 # ─── CONFIGURAZIONE ────────────────────────────────────────────────────────────
 
 RSS_FEEDS = [
-    {"name": "FormulaPassion", "url": "https://www.formulapassion.it/feed/"},
-    {"name": "Motorsport.com", "url": "https://it.motorsport.com/rss/f1/news/"},
-    {"name": "Autosprint", "url": "https://autosprint.corrieredellosport.it/feed/"},
-    {"name": "P300", "url": "https://www.p300.it/feed/"},
-    {"name": "FormulaUno.com", "url": "https://www.formulauno.com/feed/"},
-    
-    {"name": "Autosport F1", "url": "https://www.autosport.com/rss/f1/news/"},
-    {"name": "Pitpass", "url": "https://www.pitpass.com/rss-feed"},
-    {"name": "Formel1.de", "url": "https://www.formel1.de/f1_tools/rss/news"},
-    {"name": "SportsMole F1", "url": "https://www.sportsmole.co.uk/formula-1/rss.xml"},
+    {"name": "FormulaPassion",  "url": "https://www.formulapassion.it/feed/"},
+    {"name": "Motorsport.com",  "url": "https://it.motorsport.com/rss/f1/news/"},
+    {"name": "Autosprint",      "url": "https://autosprint.corrieredellosport.it/feed/"},
+    {"name": "P300",            "url": "https://www.p300.it/feed/"},
+    {"name": "FormulaUno.com",  "url": "https://www.formulauno.com/feed/"},
+    {"name": "Autosport F1",    "url": "https://www.autosport.com/rss/f1/news/"},
+    {"name": "Pitpass",         "url": "https://www.pitpass.com/rss-feed"},
+    {"name": "Formel1.de",      "url": "https://www.formel1.de/f1_tools/rss/news"},
+    {"name": "SportsMole F1",   "url": "https://www.sportsmole.co.uk/formula-1/rss.xml"},
     {"name": "F1 Destinations", "url": "https://f1destinations.com/feed/"},
 ]
-
 
 MAX_ITEMS_PER_FEED   = 3
 ITEMS_PER_DIGEST     = 5
@@ -60,7 +53,44 @@ FIRESTORE_COLLECTION = "news"
 FIREBASE_CREDENTIALS = os.getenv("FIREBASE_CREDENTIALS", "firebase-credentials.json")
 GROQ_API_KEY         = os.getenv("GROQ_API_KEY")
 
+# ─── MODALITÀ WEEKEND GARA ─────────────────────────────────────────────────────
+# Ogni modalità ha un prompt dedicato che orienta Groq verso l'argomento giusto
+
+RACE_WEEKEND_MODES = {
+    "preview": {
+        "label":    "Anteprima weekend",
+        "tags":     ["F1", "Preview", "Weekend"],
+        "focus":    "analisi tecnica pre-weekend, aspettative delle squadre, condizioni meteo, storia del circuito, probabili strategie",
+        "title_hint": "Anteprima GP – le aspettative e le strategie del weekend",
+    },
+    "qualifiche": {
+        "label":    "Qualifiche",
+        "tags":     ["F1", "Qualifiche", "Gara"],
+        "focus":    "risultati qualifiche, analisi dei tempi sul giro, errori e sorprese, griglia di partenza, prospettive per la gara",
+        "title_hint": "Qualifiche GP – analisi della griglia e colpi di scena",
+    },
+    "pre-gara": {
+        "label":    "Pre-gara",
+        "tags":     ["F1", "Gara", "Strategie"],
+        "focus":    "analisi strategica pre-gara, possibili soste ai box, condizioni pista, stato delle gomme, dichiarazioni piloti",
+        "title_hint": "Verso il via del GP – strategie e variabili decisive",
+    },
+    "post-gara": {
+        "label":    "Post-gara",
+        "tags":     ["F1", "Gara", "Risultati"],
+        "focus":    "risultati gara completi, analisi tattica, momenti chiave, vincitore, Ferrari, classifica campionato aggiornata",
+        "title_hint": "GP – il bilancio della gara e la nuova classifica",
+    },
+    "recap": {
+        "label":    "Recap lunedì",
+        "tags":     ["F1", "Recap", "Analisi"],
+        "focus":    "bilancio completo del weekend, approfondimento tecnico, conseguenze in campionato, cosa aspettarsi al prossimo GP",
+        "title_hint": "Il lunedì dopo il GP – analisi, numeri e classifiche",
+    },
+}
+
 # ─── LOGGING ───────────────────────────────────────────────────────────────────
+
 logger = logging.getLogger("f1bot")
 logger.setLevel(logging.INFO)
 fh = logging.FileHandler("f1_bot.log", encoding="utf-8")
@@ -127,12 +157,12 @@ def fetch_all_news(seen: set) -> list:
     log.info(f"Notizie nuove da elaborare: {len(result)}")
     return result
 
-# ─── GENERAZIONE CON GROQ ──────────────────────────────────────────────────────
+# ─── CLEAN JSON ────────────────────────────────────────────────────────────────
 
 def clean_json_string(text: str) -> str:
     text = re.sub(r"^```json|^```|```$", "", text, flags=re.MULTILINE).strip()
     text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
-    
+
     def fix_newlines_in_strings(json_text):
         result = []
         in_string = False
@@ -140,38 +170,40 @@ def clean_json_string(text: str) -> str:
         while i < len(json_text):
             ch = json_text[i]
             if ch == '\\' and in_string:
-                result.append(ch)
-                i += 1
-                if i < len(json_text):
-                    result.append(json_text[i])
-                i += 1
-                continue
+                result.append(ch); i += 1
+                if i < len(json_text): result.append(json_text[i])
+                i += 1; continue
             if ch == '"':
                 in_string = not in_string
-            if in_string and ch == '\n':
-                result.append('\\n')
-            elif in_string and ch == '\r':
-                result.append('\\r')
-            else:
-                result.append(ch)
+            if in_string and ch == '\n':   result.append('\\n')
+            elif in_string and ch == '\r': result.append('\\r')
+            else: result.append(ch)
             i += 1
         return ''.join(result)
-    
-    text = fix_newlines_in_strings(text)
-    return text
 
-def generate_digest(articles: list) -> dict:
+    return fix_newlines_in_strings(text)
+
+# ─── GENERAZIONE CON GROQ ──────────────────────────────────────────────────────
+
+def generate_digest(articles: list, mode: str = "normale", gp_name: str = "") -> dict:
     if not articles:
         return None
 
     client = groq.Groq(api_key=GROQ_API_KEY)
 
-    # Blocco notizie per il prompt
+    # Info modalità
+    mode_cfg  = RACE_WEEKEND_MODES.get(mode, {})
+    mode_focus = mode_cfg.get("focus", "le ultime notizie di Formula 1")
+    mode_tags  = mode_cfg.get("tags", ["F1", "Ferrari", "news"])
+    title_hint = mode_cfg.get("title_hint", "")
+    gp_context = f"Gran Premio di {gp_name}" if gp_name else "Gran Premio in corso"
+
+    # Blocco notizie
     news_block = ""
     for i, art in enumerate(articles, 1):
         news_block += f"\nNOTIZIA {i}:\nTitolo: {art['title']}\nURL: {art['url']}\nRiassunto: {art['summary']}\n---"
 
-    # Footer fonti (link discreti in fondo all'articolo)
+    # Footer fonti
     sources_html = " &nbsp;|&nbsp; ".join(
         f'<a href="{art["url"]}" target="_blank" rel="noopener">{art["source"]}</a>'
         for art in articles
@@ -180,15 +212,29 @@ def generate_digest(articles: list) -> dict:
 
     today = datetime.now().strftime("%d %B %Y")
 
+    # Istruzione extra per i weekend di gara
+    if mode in RACE_WEEKEND_MODES:
+        race_instruction = f"""
+CONTESTO WEEKEND GARA:
+Modalità articolo: {mode_cfg.get('label', mode)} — {gp_context}
+Focus principale: {mode_focus}
+Titolo suggerito (puoi adattarlo): "{title_hint.replace('{GP}', gp_name or 'GP')}"
+Assicurati che l'articolo sia fortemente orientato alla Ferrari e alle sue performance.
+Includi contesto storico del circuito se rilevante.
+"""
+    else:
+        race_instruction = ""
+
     prompt = f"""Sei un giornalista sportivo esperto di Formula 1 che scrive per formula-rossa.it, sito italiano dedicato alla Ferrari.
 
 Oggi e' {today}. Hai raccolto queste informazioni:
 {news_block}
+{race_instruction}
 
 COMPITO: Scrivi un articolo giornalistico completo, originale e approfondito in italiano.
 
 REGOLE FONDAMENTALI:
-- NON citare mai le fonti nel testo (zero "secondo X", zero "come riporta Y", zero nomi di siti)
+- NON citare mai le fonti nel testo (zero "secondo X", zero "come riporta Y")
 - Scrivi tutto come se fossi tu ad aver seguito le notizie direttamente
 - Usa "oggi", "nelle ultime ore", "in questa giornata" per contestualizzare
 - Ogni sezione deve avere almeno 5-7 righe di testo ricco e originale
@@ -205,9 +251,9 @@ STRUTTURA HTML da usare:
 Niente <a> nel corpo dell'articolo
 
 Rispondi SOLO con questo JSON valido (niente backtick, niente newline nei valori):
-{{"title": "titolo accattivante della giornata", "slug": "titolo-kebab-case-data-{datetime.now().strftime('%d-%m-%Y')}", "html_content": "HTML completo qui", "excerpt": "2 righe di riassunto per anteprima", "tags": ["F1", "Ferrari", "news"], "footer_html": "{footer_html}"}}"""
+{{"title": "titolo accattivante della giornata", "slug": "titolo-kebab-case-data-{datetime.now().strftime('%d-%m-%Y')}", "html_content": "HTML completo qui", "excerpt": "2 righe di riassunto per anteprima", "tags": {json.dumps(mode_tags)}, "footer_html": "{footer_html}"}}"""
 
-    log.info("Generazione articolo con Groq (Llama 3)...")
+    log.info(f"Generazione articolo con Groq — modalità: {mode}")
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
@@ -227,8 +273,10 @@ Rispondi SOLO con questo JSON valido (niente backtick, niente newline nei valori
 
     try:
         result = json.loads(raw)
-        # Aggiungi il footer fonti in fondo al contenuto HTML
         result["html_content"] = result.get("html_content", "") + result.get("footer_html", footer_html)
+        # Forza i tag corretti per la modalità
+        if mode in RACE_WEEKEND_MODES:
+            result["tags"] = list(set(result.get("tags", []) + mode_tags))
     except json.JSONDecodeError as e:
         log.error(f"Errore parsing JSON: {e}")
         log.error(f"Risposta raw (primi 300 char): {raw[:300]}")
@@ -239,7 +287,7 @@ Rispondi SOLO con questo JSON valido (niente backtick, niente newline nei valori
 
 # ─── PUBBLICAZIONE FIRESTORE ───────────────────────────────────────────────────
 
-def publish_to_firestore(article: dict, db) -> bool:
+def publish_to_firestore(article: dict, db, mode: str = "normale") -> bool:
     try:
         now = datetime.now(timezone.utc)
         doc = {
@@ -254,7 +302,7 @@ def publish_to_firestore(article: dict, db) -> bool:
             "published_at": now,
             "created_at":   now,
             "status":       "published",
-            "type":         "digest",
+            "type":         mode if mode in RACE_WEEKEND_MODES else "digest",
         }
         db.collection(FIRESTORE_COLLECTION).document(article["slug"]).set(doc)
         log.info(f"Pubblicato su Firestore: {FIRESTORE_COLLECTION}/{article['slug']}")
@@ -265,26 +313,26 @@ def publish_to_firestore(article: dict, db) -> bool:
 
 # ─── CICLO PRINCIPALE ──────────────────────────────────────────────────────────
 
-def run():
-    log.info("=" * 50)
-    log.info("F1 Aggregator Bot — formula-rossa.it")
+def run(mode: str = "normale", gp_name: str = ""):
+    log.info("=" * 55)
+    log.info(f"F1 Aggregator Bot — formula-rossa.it  [{mode.upper()}]")
     log.info(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-    log.info("=" * 50)
+    log.info("=" * 55)
 
-    seen = load_seen()
+    seen     = load_seen()
     articles = fetch_all_news(seen)
 
     if not articles:
         log.info("Nessuna notizia nuova. A presto!")
         return
 
-    digest = generate_digest(articles)
+    digest = generate_digest(articles, mode=mode, gp_name=gp_name)
     if not digest:
         log.warning("Impossibile generare l'articolo.")
         return
 
-    db = init_firebase()
-    success = publish_to_firestore(digest, db)
+    db      = init_firebase()
+    success = publish_to_firestore(digest, db, mode=mode)
 
     if success:
         for art in articles:
@@ -299,14 +347,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--daemon", action="store_true",
                         help=f"Loop automatico ogni {RUN_EVERY_HOURS} ore")
+    parser.add_argument("--mode", default=os.getenv("F1_MODE", "normale"),
+                        help="Modalità: normale | preview | qualifiche | pre-gara | post-gara | recap")
+    parser.add_argument("--gp", default=os.getenv("GP_NAME", ""),
+                        help="Nome del GP (es. Monaco, Monza, Silverstone)")
     args = parser.parse_args()
 
     if args.daemon:
-        log.info(f"Daemon attivo: ogni {RUN_EVERY_HOURS} ore")
-        run()
-        schedule.every(RUN_EVERY_HOURS).hours.do(run)
+        log.info(f"Daemon attivo: ogni {RUN_EVERY_HOURS} ore | modalità: {args.mode}")
+        run(mode=args.mode, gp_name=args.gp)
+        schedule.every(RUN_EVERY_HOURS).hours.do(run, mode=args.mode, gp_name=args.gp)
         while True:
             schedule.run_pending()
             time.sleep(60)
     else:
-        run()
+        run(mode=args.mode, gp_name=args.gp)
