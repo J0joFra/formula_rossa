@@ -240,9 +240,9 @@ jobs:
           F1_MODE: ${{ steps.detect_mode.outputs.mode }}
           GP_NAME: ${{ github.event.inputs.gp_name }}
         run: |
-          # Scrivi le credenziali Firebase dal secret
-          echo "$FIREBASE_CREDENTIALS_JSON" > firebase-credentials.json
-          python f1_aggregator.py --mode "$F1_MODE" ${GP_NAME:+--gp "$GP_NAME"}
+          # Credenziali Firebase dal secret
+          echo "$FIREBASE_CREDENTIALS_JSON" > F1bot/firebase-credentials.json
+          python F1bot/f1_aggregator.py --mode "$F1_MODE" ${GP_NAME:+--gp "$GP_NAME"}
 
       - name: Salva seen_articles.json aggiornato
         uses: actions/cache@v4
