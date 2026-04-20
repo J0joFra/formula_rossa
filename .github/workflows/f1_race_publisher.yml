@@ -239,8 +239,8 @@ jobs:
           FIREBASE_CREDENTIALS_JSON: ${{ secrets.FIREBASE_CREDENTIALS_JSON }}
           F1_MODE: ${{ steps.detect_mode.outputs.mode }}
           GP_NAME: ${{ github.event.inputs.gp_name }}
+          FIREBASE_CREDENTIALS: F1bot/firebase-credentials.json
         run: |
-          # Credenziali Firebase dal secret
           echo "$FIREBASE_CREDENTIALS_JSON" > F1bot/firebase-credentials.json
           python F1bot/f1_aggregator.py --mode "$F1_MODE" ${GP_NAME:+--gp "$GP_NAME"}
 
