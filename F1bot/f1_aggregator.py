@@ -5,7 +5,7 @@ F1 News Aggregator Bot — formula-rossa.it
 Stack: Firebase Firestore + Next.js + Groq (gratuito)
 
 Installazione:
-  pip install feedparser groq firebase-admin python-dotenv schedule
+  pip install feedparser groq firebase-admin python-dotenv schedule requests beautifulsoup4
 
 Uso:
   python f1_aggregator.py                         # normale, ogni 4h
@@ -28,6 +28,14 @@ from firebase_admin import credentials, firestore
 import json, hashlib, re, time, logging, argparse, schedule
 from datetime import datetime, timezone
 from dotenv import load_dotenv
+
+# Librerie per image scraping (opzionali ma consigliate)
+try:
+    import requests
+    from bs4 import BeautifulSoup
+    SCRAPING_AVAILABLE = True
+except ImportError:
+    SCRAPING_AVAILABLE = False
 
 load_dotenv()
 
@@ -53,8 +61,20 @@ FIRESTORE_COLLECTION = "news"
 FIREBASE_CREDENTIALS = os.getenv("FIREBASE_CREDENTIALS", "firebase-credentials.json")
 GROQ_API_KEY         = os.getenv("GROQ_API_KEY")
 
+# Dimensione minima accettabile per un'immagine di copertina (evita icone/tracking pixel)
+MIN_IMAGE_WIDTH  = 300
+MIN_IMAGE_HEIGHT = 150
+
+# Timeout per le richieste HTTP di scraping
+SCRAPE_TIMEOUT = 8
+
+# Domini da cui NON fare scraping (paywall, GDPR aggressivo, ecc.)
+SCRAPE_BLACKLIST = {
+    "autosprint.corrieredellosport.it",
+    "corrieredellosport.it",
+}
+
 # ─── MODALITÀ WEEKEND GARA ─────────────────────────────────────────────────────
-# Ogni modalità ha un prompt dedicato che orienta Groq verso l'argomento giusto
 
 RACE_WEEKEND_MODES = {
     "preview": {
@@ -126,6 +146,152 @@ def save_seen(seen: set):
 def article_id(url: str) -> str:
     return hashlib.md5(url.encode()).hexdigest()
 
+# ─── ESTRAZIONE IMMAGINE DI COPERTINA ──────────────────────────────────────────
+
+def _is_valid_image_url(url: str) -> bool:
+    """Filtra URL che non sembrano immagini reali."""
+    if not url or not url.startswith("http"):
+        return False
+    low = url.lower()
+    # Escludi icone, gif animati, SVG, tracking pixel
+    bad_exts = (".svg", ".gif", ".ico", ".webp")
+    bad_keywords = ("logo", "icon", "avatar", "banner-ad", "pixel", "tracking",
+                    "gravatar", "author", "placeholder", "1x1", "spacer")
+    if any(low.endswith(e) for e in bad_exts):
+        return False
+    if any(k in low for k in bad_keywords):
+        return False
+    return True
+
+def _domain(url: str) -> str:
+    try:
+        from urllib.parse import urlparse
+        return urlparse(url).netloc.lower().replace("www.", "")
+    except Exception:
+        return ""
+
+def extract_image_from_entry(entry) -> str:
+    """
+    Prova a estrarre un'immagine dall'entry RSS in quest'ordine di priorità:
+    1. media:content  (tag RSS media)
+    2. media:thumbnail
+    3. enclosure (tipo image/*)
+    4. img tag nell'HTML del content/summary
+    5. og:image scraping della pagina originale (se requests disponibile)
+    """
+
+    # ── 1. media:content ──
+    media_content = entry.get("media_content", [])
+    for m in media_content:
+        url = m.get("url", "")
+        if _is_valid_image_url(url):
+            # Controlla dimensioni se disponibili
+            try:
+                w = int(m.get("width", 0))
+                h = int(m.get("height", 0))
+                if (w == 0 and h == 0) or (w >= MIN_IMAGE_WIDTH and h >= MIN_IMAGE_HEIGHT):
+                    return url
+            except (ValueError, TypeError):
+                return url
+
+    # ── 2. media:thumbnail ──
+    thumbnail = entry.get("media_thumbnail", [])
+    for t in thumbnail:
+        url = t.get("url", "")
+        if _is_valid_image_url(url):
+            return url
+
+    # ── 3. enclosure ──
+    for enc in entry.get("enclosures", []):
+        if enc.get("type", "").startswith("image/"):
+            url = enc.get("href", "") or enc.get("url", "")
+            if _is_valid_image_url(url):
+                return url
+
+    # ── 4. <img> nell'HTML del content/summary ──
+    html_body = ""
+    for field in ("content", "summary", "description"):
+        val = entry.get(field)
+        if isinstance(val, list) and val:
+            html_body = val[0].get("value", "")
+        elif isinstance(val, str):
+            html_body = val
+        if html_body:
+            break
+
+    if html_body:
+        # Cerca src in tag <img>
+        img_matches = re.findall(r'<img[^>]+src=["\']([^"\']+)["\']', html_body, re.IGNORECASE)
+        for url in img_matches:
+            if _is_valid_image_url(url):
+                return url
+
+    # ── 5. Scraping og:image dalla pagina ──
+    article_url = entry.get("link", "")
+    if article_url and SCRAPING_AVAILABLE and _domain(article_url) not in SCRAPE_BLACKLIST:
+        img = scrape_og_image(article_url)
+        if img:
+            return img
+
+    return ""
+
+def scrape_og_image(url: str) -> str:
+    """Recupera l'og:image (o twitter:image) dalla pagina dell'articolo."""
+    try:
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (compatible; FormulaRossaBot/1.0; "
+                "+https://formula-rossa.it)"
+            ),
+            "Accept": "text/html,application/xhtml+xml",
+            "Accept-Language": "it-IT,it;q=0.9,en;q=0.8",
+        }
+        resp = requests.get(url, headers=headers, timeout=SCRAPE_TIMEOUT,
+                            allow_redirects=True)
+        if resp.status_code != 200:
+            return ""
+
+        soup = BeautifulSoup(resp.text, "html.parser")
+
+        # og:image
+        for prop in ("og:image", "og:image:secure_url",
+                     "twitter:image", "twitter:image:src"):
+            tag = soup.find("meta", property=prop) or soup.find("meta", attrs={"name": prop})
+            if tag:
+                img_url = tag.get("content", "")
+                if _is_valid_image_url(img_url):
+                    log.info(f"  og:image trovata: {img_url[:80]}…")
+                    return img_url
+
+        # Fallback: prima <img> grande nella pagina
+        for img in soup.find_all("img", src=True):
+            src = img["src"]
+            if not src.startswith("http"):
+                # Risolvi URL relativi
+                from urllib.parse import urljoin
+                src = urljoin(url, src)
+            width  = int(img.get("width",  0) or 0)
+            height = int(img.get("height", 0) or 0)
+            if _is_valid_image_url(src) and (width == 0 or width >= MIN_IMAGE_WIDTH):
+                return src
+
+    except Exception as e:
+        log.debug(f"  Scraping fallito per {url}: {e}")
+
+    return ""
+
+def pick_best_cover(articles: list) -> str:
+    """
+    Scorre gli articoli sorgente e restituisce la prima immagine valida trovata.
+    Utilizzata come cover_image dell'articolo sintetizzato.
+    """
+    for art in articles:
+        img = art.get("cover_image", "")
+        if img:
+            log.info(f"  Cover selezionata da '{art['source']}': {img[:80]}…")
+            return img
+    return ""
+
 # ─── FETCH RSS ─────────────────────────────────────────────────────────────────
 
 def fetch_feed(feed: dict) -> list:
@@ -136,12 +302,22 @@ def fetch_feed(feed: dict) -> list:
             summary = re.sub(r"<[^>]+>", "", entry.get("summary", "")).strip()[:600]
             summary = re.sub(r"[\x00-\x1f\x7f]", " ", summary)
             title   = re.sub(r"[\x00-\x1f\x7f]", " ", entry.get("title", ""))
+
+            # ── Estrai immagine di copertina ──
+            cover_image = extract_image_from_entry(entry)
+
             articles.append({
-                "source":  feed["name"],
-                "title":   title,
-                "url":     entry.get("link", ""),
-                "summary": summary,
+                "source":      feed["name"],
+                "title":       title,
+                "url":         entry.get("link", ""),
+                "summary":     summary,
+                "cover_image": cover_image,
             })
+            if cover_image:
+                log.info(f"  [{feed['name']}] Immagine trovata: {cover_image[:70]}…")
+            else:
+                log.debug(f"  [{feed['name']}] Nessuna immagine per: {title[:60]}")
+
         log.info(f"{feed['name']}: {len(articles)} articoli trovati")
     except Exception as e:
         log.warning(f"{feed['name']}: errore — {e}")
@@ -154,7 +330,8 @@ def fetch_all_news(seen: set) -> list:
             if article_id(art["url"]) not in seen:
                 all_articles.append(art)
     result = all_articles[:ITEMS_PER_DIGEST]
-    log.info(f"Notizie nuove da elaborare: {len(result)}")
+    covered = sum(1 for a in result if a.get("cover_image"))
+    log.info(f"Notizie nuove da elaborare: {len(result)} ({covered} con immagine)")
     return result
 
 # ─── CLEAN JSON ────────────────────────────────────────────────────────────────
@@ -191,19 +368,16 @@ def generate_digest(articles: list, mode: str = "normale", gp_name: str = "") ->
 
     client = groq.Groq(api_key=GROQ_API_KEY)
 
-    # Info modalità
-    mode_cfg  = RACE_WEEKEND_MODES.get(mode, {})
+    mode_cfg   = RACE_WEEKEND_MODES.get(mode, {})
     mode_focus = mode_cfg.get("focus", "le ultime notizie di Formula 1")
     mode_tags  = mode_cfg.get("tags", ["F1", "Ferrari", "news"])
     title_hint = mode_cfg.get("title_hint", "")
     gp_context = f"Gran Premio di {gp_name}" if gp_name else "Gran Premio in corso"
 
-    # Blocco notizie
     news_block = ""
     for i, art in enumerate(articles, 1):
         news_block += f"\nNOTIZIA {i}:\nTitolo: {art['title']}\nURL: {art['url']}\nRiassunto: {art['summary']}\n---"
 
-    # Footer fonti
     sources_html = " &nbsp;|&nbsp; ".join(
         f'<a href="{art["url"]}" target="_blank" rel="noopener">{art["source"]}</a>'
         for art in articles
@@ -212,7 +386,6 @@ def generate_digest(articles: list, mode: str = "normale", gp_name: str = "") ->
 
     today = datetime.now().strftime("%d %B %Y")
 
-    # Istruzione extra per i weekend di gara
     if mode in RACE_WEEKEND_MODES:
         race_instruction = f"""
 CONTESTO WEEKEND GARA:
@@ -274,7 +447,6 @@ Rispondi SOLO con questo JSON valido (niente backtick, niente newline nei valori
     try:
         result = json.loads(raw)
         result["html_content"] = result.get("html_content", "") + result.get("footer_html", footer_html)
-        # Forza i tag corretti per la modalità
         if mode in RACE_WEEKEND_MODES:
             result["tags"] = list(set(result.get("tags", []) + mode_tags))
     except json.JSONDecodeError as e:
@@ -306,6 +478,10 @@ def publish_to_firestore(article: dict, db, mode: str = "normale") -> bool:
         }
         db.collection(FIRESTORE_COLLECTION).document(article["slug"]).set(doc)
         log.info(f"Pubblicato su Firestore: {FIRESTORE_COLLECTION}/{article['slug']}")
+        if article.get("cover_image"):
+            log.info(f"  Cover image: {article['cover_image'][:80]}…")
+        else:
+            log.info("  Cover image: nessuna")
         return True
     except Exception as e:
         log.error(f"Errore Firestore: {e}")
@@ -317,6 +493,9 @@ def run(mode: str = "normale", gp_name: str = ""):
     log.info("=" * 55)
     log.info(f"F1 Aggregator Bot — formula-rossa.it  [{mode.upper()}]")
     log.info(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+    if not SCRAPING_AVAILABLE:
+        log.warning("requests/beautifulsoup4 non installati — lo scraping og:image è disabilitato.")
+        log.warning("Esegui: pip install requests beautifulsoup4")
     log.info("=" * 55)
 
     seen     = load_seen()
@@ -330,6 +509,9 @@ def run(mode: str = "normale", gp_name: str = ""):
     if not digest:
         log.warning("Impossibile generare l'articolo.")
         return
+
+    # ── Assegna la migliore cover image disponibile ──
+    digest["cover_image"] = pick_best_cover(articles)
 
     db      = init_firebase()
     success = publish_to_firestore(digest, db, mode=mode)
