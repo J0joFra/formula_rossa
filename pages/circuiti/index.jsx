@@ -58,9 +58,9 @@ function getFlagCode(countryId = '') {
     'fiji': 'fj', 'kiribati': 'ki', 'marshall-islands': 'mh', 'micronesia': 'fm', 'nauru': 'nr',
     'new-zealand': 'nz', 'palau': 'pw', 'papua-new-guinea': 'pg', 'samoa': 'ws', 'solomon-islands': 'sb',
     'tonga': 'to', 'tuvalu': 'tv', 'vanuatu': 'vu',
-
+    'united states of america': 'us',
     'morocco': 'ma', 'sweden': 'se', 'argentina': 'ar', 'india': 'in', 'mexico': 'mx', 'turkey': 'tr', 'hungary': 'hu', 'china': 'cn', 
-    'malaysia': 'my', 'singapore': 'sg', 'qatar': 'qa', 'russia': 'ru', 'switzerland': 'ch', 'azerbaijan': 'az',
+    'malaysia': 'my', 'singapore': 'sg', 'qatar': 'qa', 'russia': 'ru', 'switzerland': 'ch', 'azerbaijan': 'az', 'south africa': 'za',
     'united-states-of-america': 'us', 'south-korea': 'kr', 'saudi-arabia': 'sa', 'united-arab-emirates': 'ae',
     'united states of america': 'us', 'south korea': 'kr', 'saudi arabia': 'sa', 'united arab emirates': 'ae'
   };
@@ -71,7 +71,7 @@ function getFlagCode(countryId = '') {
 function getRegion(countryId = '') {
   const europe   = ['united-kingdom','italy','monaco','spain','france','germany','belgium','austria','hungary','netherlands','portugal','san-marino','switzerland','sweden','russia','turkey'];
   const asia     = ['japan','china','singapore','bahrain','saudi-arabia','qatar','united-arab-emirates','azerbaijan','india','south-korea','malaysia','vietnam'];
-  const americas = ['united-states','mexico','brazil','canada','argentina'];
+  const americas = ['united-states','mexico','brazil','canada','argentina', 'united states of america'];
   const oceania  = ['australia'];
   const k = countryId.toLowerCase();
   if (europe.includes(k))   return 'Europe';
