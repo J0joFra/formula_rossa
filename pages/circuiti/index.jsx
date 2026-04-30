@@ -71,7 +71,7 @@ function getFlagCode(countryId = '') {
 function getRegion(countryId = '') {
   const europe   = ['united-kingdom','italy','monaco','spain','france','germany','belgium','austria','hungary','netherlands','portugal','san-marino','switzerland','sweden','russia','turkey'];
   const asia     = ['japan','china','singapore','bahrain','saudi-arabia','qatar','united-arab-emirates','azerbaijan','india','south-korea','malaysia','vietnam'];
-  const americas = ['united-states','mexico','brazil','canada','argentina', 'united states of america'];
+  const americas = ['united-states','mexico','brazil','canada','argentina', 'united states of america', 'united-states-of-america'];
   const oceania  = ['australia'];
   const k = countryId.toLowerCase();
   if (europe.includes(k))   return 'Europe';
