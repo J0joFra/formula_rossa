@@ -77,7 +77,7 @@ function calcAge(dob, dod) {
   if (m<0||(m===0&&end.getDate()<new Date(dob).getDate())) age--;
   return age;
 }
-
+ 
 // Barra progresso lettura
 function ReadingProgress() {
   const [p, setP] = useState(0);
@@ -97,7 +97,7 @@ function ReadingProgress() {
     </div>
   );
 }
-
+ 
 // Grande avatar con iniziali
 function HeroAvatar({ driver }) {
   const initials = `${driver.first_name?.[0]||''}${driver.last_name?.[0]||''}`.toUpperCase();
@@ -143,7 +143,7 @@ function HeroAvatar({ driver }) {
     </div>
   );
 }
-
+ 
 // Stat card grande per hero
 function BigStat({ label, value, accent, sub }) {
   return (
@@ -166,7 +166,7 @@ function BigStat({ label, value, accent, sub }) {
     </div>
   );
 }
-
+ 
 // Barra statistica con percentuale
 function StatBar({ label, value, max, color='#dc2626' }) {
   const pct = max > 0 ? Math.min(100, (value/max)*100) : 0;
@@ -187,7 +187,7 @@ function StatBar({ label, value, max, color='#dc2626' }) {
     </div>
   );
 }
-
+ 
 export default function DriverDetail() {
   const router = useRouter();
   const { slug } = router.query;
@@ -196,9 +196,9 @@ export default function DriverDetail() {
   const [error,   setError]   = useState(null);
   const [tab,     setTab]     = useState('stats');
   const [mounted, setMounted] = useState(false);
-
+ 
   useEffect(()=>{ setMounted(true); },[]);
-
+ 
   useEffect(()=>{
     if (!slug) return;
     async function fetchDriver() {
@@ -214,7 +214,7 @@ export default function DriverDetail() {
     }
     fetchDriver();
   }, [slug]);
-
+ 
   if (loading) return (
     <div style={{ minHeight:'100vh', background:'#080808', color:'#fff' }}>
       <Navigation/>
@@ -239,7 +239,7 @@ export default function DriverDetail() {
       <style>{`@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}`}</style>
     </div>
   );
-
+ 
   if (error||!driver) return (
     <div style={{ minHeight:'100vh', background:'#080808', color:'#fff' }}>
       <Navigation/>
@@ -249,7 +249,7 @@ export default function DriverDetail() {
       </main>
     </div>
   );
-
+ 
   const flag    = getFlagCode(driver.nationality_country_id||'');
   const age     = calcAge(driver.date_of_birth, driver.date_of_death);
   const isDead  = !!driver.date_of_death;
@@ -258,7 +258,7 @@ export default function DriverDetail() {
     { id:'stats',   label:'Statistiche' },
     { id:'info',    label:'Biografia'   },
   ];
-
+ 
   // Rate stats per le barre
   const winRate = driver.total_race_starts > 0
     ? ((driver.total_race_wins / driver.total_race_starts)*100).toFixed(1)
@@ -266,7 +266,7 @@ export default function DriverDetail() {
   const podiumRate = driver.total_race_starts > 0
     ? ((driver.total_podiums / driver.total_race_starts)*100).toFixed(1)
     : 0;
-
+ 
   return (
     <>
       <Head>
@@ -285,14 +285,14 @@ export default function DriverDetail() {
           ::-webkit-scrollbar-thumb{background:#dc2626;border-radius:2px}
         `}</style>
       </Head>
-
+ 
       <ReadingProgress/>
-
+ 
       <div style={{ minHeight:'100vh', background:'#080808', color:'#fff', opacity: mounted ? 1 : 0, transition:'opacity .45s ease' }}>
         <Navigation/>
-
+ 
         <main style={{ maxWidth:'900px', margin:'0 auto', padding:'84px 24px 96px' }}>
-
+ 
           {/* ── BREADCRUMB ── */}
           <nav style={{ marginBottom:'32px', display:'flex', alignItems:'center', gap:'10px', animation:'fadeUp .5s ease both' }}>
             <Link href="/piloti" style={{
@@ -306,7 +306,7 @@ export default function DriverDetail() {
             <span style={{ color:'rgba(255,255,255,.1)', fontSize:'11px' }}>/</span>
             <span style={{ fontSize:'11px', color:'rgba(255,255,255,.2)', fontFamily:'monospace' }}>{driver.abbreviation}</span>
           </nav>
-
+ 
           {/* ── HERO ── */}
           <header style={{ marginBottom:'40px', animation:'fadeUp .5s .05s ease both', opacity:0 }}>
             {/* Sfondo decorativo */}
@@ -330,10 +330,10 @@ export default function DriverDetail() {
                   background:'radial-gradient(ellipse at 15% 50%, rgba(220,38,38,.12) 0%, transparent 60%)',
                 }}/>
               )}
-
+ 
               <div style={{ position:'relative', zIndex:1, display:'flex', gap:'28px', alignItems:'flex-start', flexWrap:'wrap' }}>
                 <HeroAvatar driver={driver}/>
-
+ 
                 <div style={{ flex:1, minWidth:'200px' }}>
                   {/* Tags */}
                   <div style={{ display:'flex', gap:'6px', flexWrap:'wrap', marginBottom:'12px' }}>
@@ -362,7 +362,7 @@ export default function DriverDetail() {
                       }}>†</span>
                     )}
                   </div>
-
+ 
                   {/* Nome */}
                   <h1 style={{
                     margin:'0 0 6px',
@@ -370,13 +370,13 @@ export default function DriverDetail() {
                     fontSize:'clamp(36px,6vw,64px)',
                     fontWeight:'400', letterSpacing:'3px', lineHeight:1, color:'#fff',
                   }}>{driver.full_name}</h1>
-
+ 
                   {/* Abbreviazione */}
                   <div style={{
                     fontSize:'13px', fontFamily:'monospace', fontWeight:'800',
                     color:'rgba(255,255,255,.2)', letterSpacing:'3px', marginBottom:'14px',
                   }}>{driver.abbreviation}</div>
-
+ 
                   {/* Nazione */}
                   <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'6px' }}>
                     {flag && (
@@ -387,14 +387,14 @@ export default function DriverDetail() {
                       {driver.nationality_country_id?.replace(/-/g,' ')}
                     </span>
                   </div>
-
+ 
                   {/* Nascita / Morte */}
                   <div style={{ fontSize:'11px', color:'rgba(255,255,255,.3)', fontFamily:'monospace' }}>
                     {formatDate(driver.date_of_birth)}
                     {driver.date_of_death && ` — † ${formatDate(driver.date_of_death)}`}
                     {age && <span style={{ marginLeft:'8px', color:'rgba(255,255,255,.2)' }}>({isDead ? `† ${age} anni` : `${age} anni`})</span>}
                   </div>
-
+ 
                   {driver.place_of_birth && (
                     <div style={{ fontSize:'11px', color:'rgba(255,255,255,.22)', fontFamily:'monospace', marginTop:'3px' }}>
                       📍 {driver.place_of_birth}
@@ -404,7 +404,7 @@ export default function DriverDetail() {
               </div>
             </div>
           </header>
-
+ 
           {/* ── BIG STATS ── */}
           <div style={{
             display:'grid',
@@ -419,7 +419,7 @@ export default function DriverDetail() {
             <BigStat label="Giri veloci" value={driver.total_fastest_laps}/>
             <BigStat label="Gare"        value={driver.total_race_starts}/>
           </div>
-
+ 
           {/* ── TABS ── */}
           <div style={{
             display:'flex', gap:'2px',
@@ -438,11 +438,11 @@ export default function DriverDetail() {
               }}>{t.label}</button>
             ))}
           </div>
-
+ 
           {/* ── TAB: STATISTICHE ── */}
           {tab==='stats' && (
             <div style={{ display:'flex', flexDirection:'column', gap:'16px', animation:'fadeUp .4s ease both' }}>
-
+ 
               {/* Barre performance */}
               <div style={{
                 padding:'24px', borderRadius:'4px',
@@ -462,7 +462,7 @@ export default function DriverDetail() {
                   <StatBar label="Grand Slam"    value={driver.total_grand_slams}     max={10}   color='#fecaca'/>
                 </div>
               </div>
-
+ 
               {/* Percentuali */}
               <div style={{
                 display:'grid', gridTemplateColumns:'1fr 1fr',
@@ -483,7 +483,7 @@ export default function DriverDetail() {
                   </div>
                 ))}
               </div>
-
+ 
               {/* Tabella completa stats */}
               <div style={{
                 padding:'24px', borderRadius:'4px',
@@ -495,43 +495,74 @@ export default function DriverDetail() {
                   color:'rgba(255,255,255,.25)', fontFamily:'monospace',
                   letterSpacing:'2.5px', textTransform:'uppercase',
                 }}>Statistiche complete</h2>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0' }}>
-                  {[
-                    { label:'Gare disputate',        value: driver.total_race_starts },
-                    { label:'Gare iscritto',          value: driver.total_race_entries },
-                    { label:'Vittorie',               value: driver.total_race_wins },
-                    { label:'Podi',                   value: driver.total_podiums },
-                    { label:'Pole position',          value: driver.total_pole_positions },
-                    { label:'Giri veloci',            value: driver.total_fastest_laps },
-                    { label:'Campionati vinti',       value: driver.total_championship_wins },
-                    { label:'Punti totali',           value: driver.total_points },
-                    { label:'Punti in campionato',    value: driver.total_championship_points },
-                    { label:'Giri percorsi',          value: driver.total_race_laps?.toLocaleString('it-IT') },
-                    { label:'Miglior pos. campionato',value: driver.best_championship_position },
-                    { label:'Miglior pos. in griglia',value: driver.best_starting_grid_position },
-                    { label:'Miglior risultato gara', value: driver.best_race_result },
-                    { label:'Sprint race disputate',  value: driver.total_sprint_race_starts },
-                    { label:'Sprint race vinte',      value: driver.total_sprint_race_wins },
-                    { label:'Driver of the Day',      value: driver.total_driver_of_the_day },
-                    { label:'Grand Slam',             value: driver.total_grand_slams },
-                    { label:'Miglior sprint result',  value: driver.best_sprint_race_result ?? '—' },
-                  ].map(({label, value})=>(
-                    <div key={label} style={{
-                      display:'flex', justifyContent:'space-between', alignItems:'center',
-                      padding:'10px 0',
-                      borderBottom:'1px solid rgba(255,255,255,.04)',
-                    }}>
-                      <span style={{ fontSize:'11px', color:'rgba(255,255,255,.35)', fontFamily:'monospace' }}>{label}</span>
-                      <span style={{ fontSize:'13px', fontWeight:'800', fontFamily:'monospace', color:'rgba(255,255,255,.85)' }}>
-                        {value ?? '—'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                {/* Griglia 2 righe affiancate: label sinistra | valore | label destra | valore */}
+                {(() => {
+                  const rows = [
+                    { label:'Gare disputate',         value: driver.total_race_starts },
+                    { label:'Gare iscritto',           value: driver.total_race_entries },
+                    { label:'Vittorie',                value: driver.total_race_wins },
+                    { label:'Podi',                    value: driver.total_podiums },
+                    { label:'Pole position',           value: driver.total_pole_positions },
+                    { label:'Giri veloci',             value: driver.total_fastest_laps },
+                    { label:'Campionati vinti',        value: driver.total_championship_wins },
+                    { label:'Punti totali',            value: driver.total_points },
+                    { label:'Punti in campionato',     value: driver.total_championship_points },
+                    { label:'Giri percorsi',           value: driver.total_race_laps?.toLocaleString('it-IT') },
+                    { label:'Miglior pos. campionato', value: driver.best_championship_position },
+                    { label:'Miglior pos. in griglia', value: driver.best_starting_grid_position },
+                    { label:'Miglior risultato gara',  value: driver.best_race_result },
+                    { label:'Sprint race disputate',   value: driver.total_sprint_race_starts },
+                    { label:'Sprint race vinte',       value: driver.total_sprint_race_wins },
+                    { label:'Driver of the Day',       value: driver.total_driver_of_the_day },
+                    { label:'Grand Slam',              value: driver.total_grand_slams },
+                    { label:'Miglior sprint result',   value: driver.best_sprint_race_result ?? '—' },
+                  ];
+                  // Dividi in coppie (sinistra | destra) per ogni riga
+                  const half = Math.ceil(rows.length / 2);
+                  const left  = rows.slice(0, half);
+                  const right = rows.slice(half);
+                  return Array.from({ length: half }).map((_, i) => {
+                    const l = left[i];
+                    const r = right[i];
+                    return (
+                      <div key={i} style={{
+                        display:'grid',
+                        gridTemplateColumns:'1fr auto 24px 1fr auto',
+                        alignItems:'center',
+                        padding:'10px 0',
+                        borderBottom:'1px solid rgba(255,255,255,.05)',
+                        gap:'8px',
+                      }}>
+                        {/* Label sinistra */}
+                        <span style={{ fontSize:'11px', color:'rgba(255,255,255,.4)', fontFamily:'monospace' }}>
+                          {l?.label}
+                        </span>
+                        {/* Valore sinistra */}
+                        <span style={{ fontSize:'13px', fontWeight:'800', fontFamily:'monospace', color:'#fff', textAlign:'right' }}>
+                          {l?.value ?? '—'}
+                        </span>
+                        {/* Divisore verticale */}
+                        <div style={{ width:'1px', height:'100%', background:'rgba(255,255,255,.07)', margin:'0 auto' }}/>
+                        {/* Label destra */}
+                        {r ? (
+                          <span style={{ fontSize:'11px', color:'rgba(255,255,255,.4)', fontFamily:'monospace' }}>
+                            {r.label}
+                          </span>
+                        ) : <span/>}
+                        {/* Valore destra */}
+                        {r ? (
+                          <span style={{ fontSize:'13px', fontWeight:'800', fontFamily:'monospace', color:'#fff', textAlign:'right' }}>
+                            {r.value ?? '—'}
+                          </span>
+                        ) : <span/>}
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             </div>
           )}
-
+ 
           {/* ── TAB: BIOGRAFIA ── */}
           {tab==='info' && (
             <div style={{ display:'flex', flexDirection:'column', gap:'12px', animation:'fadeUp .4s ease both' }}>
@@ -579,7 +610,7 @@ export default function DriverDetail() {
               </div>
             </div>
           )}
-
+ 
           {/* ── BACK ── */}
           <div style={{ marginTop:'48px', paddingTop:'24px', borderTop:'1px solid rgba(255,255,255,.06)', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
             <Link href="/piloti" style={{
@@ -593,7 +624,7 @@ export default function DriverDetail() {
             >← Tutti i piloti</Link>
             <span style={{ fontSize:'10px', color:'rgba(255,255,255,.14)', fontFamily:'monospace' }}>formula-rossa.it</span>
           </div>
-
+ 
         </main>
         <Footer/>
       </div>
