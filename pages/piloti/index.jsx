@@ -210,6 +210,7 @@ export default function PilotiIndex() {
           @keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:.3} }
           @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
           * { box-sizing: border-box; }
+          html, body { background: #080808 !important; color: #ffffff !important; }
           ::-webkit-scrollbar{width:4px}
           ::-webkit-scrollbar-track{background:#080808}
           ::-webkit-scrollbar-thumb{background:#dc2626;border-radius:2px}
@@ -363,7 +364,7 @@ export default function PilotiIndex() {
                 <div key={i} style={{
                   height:'72px', borderRadius:'4px',
                   border:'1px solid rgba(255,255,255,.05)',
-                  background:'rgba(255,255,255,.02)',
+                  background:'#0d0d0d',
                   overflow:'hidden', position:'relative',
                 }}>
                   <div style={{
@@ -395,9 +396,11 @@ export default function PilotiIndex() {
                 display:'grid',
                 gridTemplateColumns:'32px 1fr 60px 60px 60px 60px 60px',
                 gap:'12px', padding:'8px 16px',
-                fontSize:'8px', color:'rgba(255,255,255,.2)',
+                fontSize:'8px', color:'rgba(255,255,255,.55)',
                 fontFamily:'monospace', letterSpacing:'1.5px', textTransform:'uppercase',
-                borderBottom:'1px solid rgba(255,255,255,.05)',
+                borderBottom:'1px solid rgba(255,255,255,.08)',
+                background:'#0f0f0f',
+                borderRadius:'4px 4px 0 0',
               }}>
                 <span>#</span>
                 <span>Pilota</span>
@@ -462,10 +465,10 @@ function DriverRow({ driver: d, rank, sortBy }) {
           padding:'12px 16px', borderRadius:'4px',
           border: hovered
             ? `1px solid ${isChamp ? 'rgba(220,38,38,.35)' : 'rgba(255,255,255,.1)'}`
-            : '1px solid transparent',
+            : '1px solid rgba(255,255,255,.04)',
           background: hovered
-            ? (isChamp ? 'rgba(220,38,38,.04)' : 'rgba(255,255,255,.03)')
-            : 'transparent',
+            ? (isChamp ? '#0f0303' : '#0f0f0f')
+            : '#0a0a0a',
           cursor:'pointer', transition:'all .18s ease',
           position:'relative',
         }}
