@@ -13,14 +13,55 @@ const supabase = createClient(
 );
 
 const FLAG_MAP = {
-  'australia':'au','austria':'at','azerbaijan':'az','bahrain':'bh','belgium':'be',
-  'brazil':'br','canada':'ca','china':'cn','france':'fr','germany':'de','hungary':'hu',
-  'italy':'it','japan':'jp','mexico':'mx','monaco':'mc','netherlands':'nl','portugal':'pt',
-  'qatar':'qa','saudi-arabia':'sa','singapore':'sg','spain':'es','united-arab-emirates':'ae',
-  'united-kingdom':'gb','united-states':'us','russia':'ru','turkey':'tr','finland':'fi',
-  'denmark':'dk','sweden':'se','switzerland':'ch','argentina':'ar','south-africa':'za',
-  'new-zealand':'nz','ireland':'ie','poland':'pl','thailand':'th','indonesia':'id',
-  'india':'in','colombia':'co',
+        'australia': 'au', 'austria': 'at', 'azerbaijan': 'az', 'bahrain': 'bh',
+    'belgium': 'be', 'brazil': 'br', 'canada': 'ca', 'china': 'cn',
+    'france': 'fr', 'germany': 'de', 'hungary': 'hu', 'italy': 'it',
+    'japan': 'jp', 'mexico': 'mx', 'monaco': 'mc', 'netherlands': 'nl',
+    'portugal': 'pt', 'qatar': 'qa', 'saudi-arabia': 'sa', 'singapore': 'sg',
+    'spain': 'es', 'united-arab-emirates': 'ae', 'united-kingdom': 'gb',
+    'united-states': 'us', 'miami': 'us', 'las-vegas': 'us',
+    'albania': 'al', 'andorra': 'ad', 'armenia': 'am', 'belarus': 'by', 'bosnia-and-herzegovina': 'ba',
+    'bulgaria': 'bg', 'croatia': 'hr', 'cyprus': 'cy', 'czech-republic': 'cz', 'denmark': 'dk',
+    'estonia': 'ee', 'finland': 'fi', 'georgia': 'ge', 'greece': 'gr', 'iceland': 'is',
+    'ireland': 'ie', 'latvia': 'lv', 'liechtenstein': 'li', 'lithuania': 'lt', 'luxembourg': 'lu',
+    'malta': 'mt', 'moldova': 'md', 'montenegro': 'me', 'north-macedonia': 'mk', 'norway': 'no',
+    'poland': 'pl', 'romania': 'ro', 'russia': 'ru', 'san-marino': 'sm', 'serbia': 'rs',
+    'slovakia': 'sk', 'slovenia': 'si', 'sweden': 'se', 'switzerland': 'ch', 'turkey': 'tr',
+    'ukraine': 'ua', 'vatican-city': 'va',
+    'afghanistan': 'af', 'bangladesh': 'bd', 'bhutan': 'bt', 'brunei': 'bn', 'cambodia': 'kh',
+    'india': 'in', 'indonesia': 'id', 'iran': 'ir', 'iraq': 'iq', 'israel': 'il',
+    'jordan': 'jo', 'kazakhstan': 'kz', 'kuwait': 'kw', 'kyrgyzstan': 'kg', 'laos': 'la',
+    'lebanon': 'lb', 'malaysia': 'my', 'maldives': 'mv', 'mongolia': 'mn', 'myanmar': 'mm',
+    'nepal': 'np', 'north-korea': 'kp', 'oman': 'om', 'pakistan': 'pk', 'palestine': 'ps',
+    'philippines': 'ph', 'south-korea': 'kr', 'sri-lanka': 'lk', 'syria': 'sy', 'taiwan': 'tw',
+    'tajikistan': 'tj', 'thailand': 'th', 'timor-leste': 'tl', 'turkmenistan': 'tm', 'uzbekistan': 'uz',
+    'vietnam': 'vn', 'yemen': 'ye',
+    'antigua-and-barbuda': 'ag', 'argentina': 'ar', 'bahamas': 'bs', 'barbados': 'bb', 'belize': 'bz',
+    'bolivia': 'bo', 'chile': 'cl', 'colombia': 'co', 'costa-rica': 'cr', 'cuba': 'cu',
+    'dominica': 'dm', 'dominican-republic': 'do', 'ecuador': 'ec', 'el-salvador': 'sv', 'grenada': 'gd',
+    'guatemala': 'gt', 'guyana': 'gy', 'haiti': 'ht', 'honduras': 'hn', 'jamaica': 'jm',
+    'nicaragua': 'ni', 'panama': 'pa', 'paraguay': 'py', 'peru': 'pe', 'saint-kitts-and-nevis': 'kn',
+    'saint-lucia': 'lc', 'saint-vincent-and-the-grenadines': 'vc', 'suriname': 'sr', 'trinidad-and-tobago': 'tt', 'uruguay': 'uy',
+    'venezuela': 've',
+    'algeria': 'dz', 'angola': 'ao', 'benin': 'bj', 'botswana': 'bw', 'burkina-faso': 'bf',
+    'burundi': 'bi', 'cabo-verde': 'cv', 'cameroon': 'cm', 'central-african-republic': 'cf', 'chad': 'td',
+    'comoros': 'km', 'congo-brazzaville': 'cg', 'congo-kinshasa': 'cd', 'cote-divoire': 'ci', 'djibouti': 'dj',
+    'egypt': 'eg', 'equatorial-guinea': 'gq', 'eritrea': 'er', 'eswatini': 'sz', 'ethiopia': 'et',
+    'gabon': 'ga', 'gambia': 'gm', 'ghana': 'gh', 'guinea': 'gn', 'guinea-bissau': 'gw',
+    'kenya': 'ke', 'lesotho': 'ls', 'liberia': 'lr', 'libya': 'ly', 'madagascar': 'mg',
+    'malawi': 'mw', 'mali': 'ml', 'mauritania': 'mr', 'mauritius': 'mu', 'morocco': 'ma',
+    'mozambique': 'mz', 'namibia': 'na', 'niger': 'ne', 'nigeria': 'ng', 'rwanda': 'rw',
+    'sao-tome-and-principe': 'st', 'senegal': 'sn', 'seychelles': 'sc', 'sierra-leone': 'sl', 'somalia': 'so',
+    'south-africa': 'za', 'south-sudan': 'ss', 'sudan': 'sd', 'tanzania': 'tz', 'togo': 'tg',
+    'tunisia': 'tn', 'uganda': 'ug', 'zambia': 'zm', 'zimbabwe': 'zw',
+    'fiji': 'fj', 'kiribati': 'ki', 'marshall-islands': 'mh', 'micronesia': 'fm', 'nauru': 'nr',
+    'new-zealand': 'nz', 'palau': 'pw', 'papua-new-guinea': 'pg', 'samoa': 'ws', 'solomon-islands': 'sb',
+    'tonga': 'to', 'tuvalu': 'tv', 'vanuatu': 'vu',
+    'united states of america': 'us',
+    'morocco': 'ma', 'sweden': 'se', 'argentina': 'ar', 'india': 'in', 'mexico': 'mx', 'turkey': 'tr', 'hungary': 'hu', 'china': 'cn', 
+    'malaysia': 'my', 'singapore': 'sg', 'qatar': 'qa', 'russia': 'ru', 'switzerland': 'ch', 'azerbaijan': 'az', 'south africa': 'za',
+    'united-states-of-america': 'us', 'south-korea': 'kr', 'saudi-arabia': 'sa', 'united-arab-emirates': 'ae',
+    'united states of america': 'us', 'south korea': 'kr', 'saudi arabia': 'sa', 'united arab emirates': 'ae'
 };
 function getFlagCode(id='') { return FLAG_MAP[id?.toLowerCase().replace(/\s+/g,'-')] || null; }
 
@@ -109,7 +150,7 @@ function BigStat({ label, value, accent, sub }) {
     <div style={{
       padding:'16px 20px', borderRadius:'4px',
       border: accent ? '1px solid rgba(220,38,38,.25)' : '1px solid rgba(255,255,255,.07)',
-      background: accent ? 'rgba(220,38,38,.06)' : 'rgba(255,255,255,.02)',
+      background: accent ? 'rgba(220,38,38,.08)' : '#0d0d0d',
       textAlign:'center',
     }}>
       <div style={{
@@ -182,7 +223,7 @@ export default function DriverDetail() {
           {[140, 60, 60, 200].map((h,i)=>(
             <div key={i} style={{
               height:h, borderRadius:'4px',
-              background:'rgba(255,255,255,.03)',
+              background:'#0f0f0f',
               border:'1px solid rgba(255,255,255,.05)',
               overflow:'hidden', position:'relative',
             }}>
@@ -238,6 +279,7 @@ export default function DriverDetail() {
           @keyframes ringpulse{ 0%,100%{transform:scale(1);opacity:.4} 50%{transform:scale(1.06);opacity:.1} }
           @keyframes shimmer  { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
           *{box-sizing:border-box}
+          html, body { background: #080808 !important; color: #ffffff !important; }
           ::-webkit-scrollbar{width:4px}
           ::-webkit-scrollbar-track{background:#080808}
           ::-webkit-scrollbar-thumb{background:#dc2626;border-radius:2px}
@@ -273,7 +315,7 @@ export default function DriverDetail() {
               border:`1px solid ${isChamp ? 'rgba(220,38,38,.2)' : 'rgba(255,255,255,.06)'}`,
               background: isChamp
                 ? 'linear-gradient(135deg, #080808 0%, #0f0303 60%, #130505 100%)'
-                : 'rgba(255,255,255,.02)',
+                : '#0d0d0d',
               padding:'32px',
             }}>
               {/* Pattern decorativo */}
@@ -315,7 +357,7 @@ export default function DriverDetail() {
                       <span style={{
                         fontSize:'9px', fontFamily:'monospace', fontWeight:'800',
                         padding:'3px 10px', borderRadius:'2px', letterSpacing:'1px',
-                        background:'rgba(255,255,255,.03)', color:'rgba(255,255,255,.3)',
+                        background:'#0f0f0f', color:'rgba(255,255,255,.3)',
                         border:'1px solid rgba(255,255,255,.06)',
                       }}>†</span>
                     )}
@@ -405,7 +447,7 @@ export default function DriverDetail() {
               <div style={{
                 padding:'24px', borderRadius:'4px',
                 border:'1px solid rgba(255,255,255,.07)',
-                background:'rgba(255,255,255,.02)',
+                background:'#0d0d0d',
               }}>
                 <h2 style={{
                   margin:'0 0 20px', fontSize:'9px',
@@ -433,7 +475,7 @@ export default function DriverDetail() {
                   <div key={s.label} style={{
                     padding:'18px 20px', borderRadius:'4px',
                     border:'1px solid rgba(255,255,255,.07)',
-                    background:'rgba(255,255,255,.02)',
+                    background:'#0d0d0d',
                   }}>
                     <div style={{ fontSize:'28px', fontWeight:'900', fontFamily:'monospace', color:'#dc2626', lineHeight:1 }}>{s.value}</div>
                     <div style={{ fontSize:'9px', color:'rgba(255,255,255,.25)', fontFamily:'monospace', letterSpacing:'1px', textTransform:'uppercase', marginTop:'6px' }}>{s.label}</div>
@@ -446,7 +488,7 @@ export default function DriverDetail() {
               <div style={{
                 padding:'24px', borderRadius:'4px',
                 border:'1px solid rgba(255,255,255,.07)',
-                background:'rgba(255,255,255,.02)',
+                background:'#0d0d0d',
               }}>
                 <h2 style={{
                   margin:'0 0 16px', fontSize:'9px',
@@ -496,7 +538,7 @@ export default function DriverDetail() {
               <div style={{
                 padding:'24px', borderRadius:'4px',
                 border:'1px solid rgba(255,255,255,.07)',
-                background:'rgba(255,255,255,.02)',
+                background:'#0d0d0d',
               }}>
                 <h2 style={{
                   margin:'0 0 16px', fontSize:'9px',
