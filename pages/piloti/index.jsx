@@ -73,7 +73,7 @@ function calcAge(dob, dod) {
   if (m < 0 || (m === 0 && end.getDate() < birth.getDate())) age--;
   return age;
 }
-
+ 
 function getEra(dob) {
   if (!dob) return 'Unknown';
   const y = new Date(dob).getFullYear();
@@ -84,7 +84,7 @@ function getEra(dob) {
   if (y < 2000) return 'Anni \'90';
   return 'Era Moderna';
 }
-
+ 
 const ERA_META = {
   'Pionieri':    { color:'#a78bfa', glow:'rgba(167,139,250,0.12)' },
   'Anni \'60':   { color:'#fb923c', glow:'rgba(251,146,60,0.12)'  },
@@ -94,7 +94,7 @@ const ERA_META = {
   'Era Moderna': { color:'#f87171', glow:'rgba(248,113,113,0.12)' },
   'Unknown':     { color:'#9ca3af', glow:'rgba(156,163,175,0.05)' },
 };
-
+ 
 // Iniziali stilizzate come avatar
 function DriverAvatar({ firstName, lastName, number, size = 64, championships = 0 }) {
   const initials = `${firstName?.[0]||''}${lastName?.[0]||''}`.toUpperCase();
@@ -128,7 +128,7 @@ function DriverAvatar({ firstName, lastName, number, size = 64, championships = 
     </div>
   );
 }
-
+ 
 export default function PilotiIndex() {
   const [drivers,  setDrivers]  = useState([]);
   const [loading,  setLoading]  = useState(true);
@@ -138,9 +138,9 @@ export default function PilotiIndex() {
   const [sortBy,   setSortBy]   = useState('wins');
   const [champOnly,setChampOnly]= useState(false);
   const [mounted,  setMounted]  = useState(false);
-
+ 
   useEffect(() => { setMounted(true); }, []);
-
+ 
   useEffect(() => {
     async function fetchDrivers() {
       setLoading(true);
@@ -160,12 +160,12 @@ export default function PilotiIndex() {
     }
     fetchDrivers();
   }, []);
-
+ 
   const eras = useMemo(() => {
     const s = new Set(drivers.map(d=>d.era).filter(Boolean));
     return ['all', ...['Pionieri',"Anni '60","Anni '70","Anni '80","Anni '90",'Era Moderna'].filter(e=>s.has(e))];
   }, [drivers]);
-
+ 
   const filtered = useMemo(() => {
     let list = drivers;
     if (champOnly) list = list.filter(d => d.total_championship_wins > 0);
@@ -190,7 +190,7 @@ export default function PilotiIndex() {
     };
     return [...list].sort(sorts[sortBy] || sorts['wins']);
   }, [drivers, search, eraFilter, sortBy, champOnly]);
-
+ 
   // Stats globali
   const stats = useMemo(() => ({
     total:   drivers.length,
@@ -198,7 +198,7 @@ export default function PilotiIndex() {
     maxWins: Math.max(...drivers.map(d=>d.total_race_wins||0)),
     maxWinner: drivers.reduce((acc,d) => (d.total_race_wins||0)>(acc.total_race_wins||0) ? d : acc, {}),
   }), [drivers]);
-
+ 
   return (
     <>
       <Head>
@@ -216,17 +216,17 @@ export default function PilotiIndex() {
           ::-webkit-scrollbar-thumb{background:#dc2626;border-radius:2px}
         `}</style>
       </Head>
-
+ 
       <div style={{ minHeight:'100vh', background:'#080808', color:'#fff' }}>
         <Navigation />
-
+ 
         <main style={{
           maxWidth:'1200px', margin:'0 auto',
           padding:'88px 24px 96px',
           opacity: mounted ? 1 : 0,
           transition: 'opacity .5s ease',
         }}>
-
+ 
           {/* ── HERO HEADER ── */}
           <header style={{ marginBottom:'48px', animation:'fadeUp .6s ease both' }}>
             <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'14px' }}>
@@ -245,7 +245,7 @@ export default function PilotiIndex() {
             <p style={{ margin:'14px 0 0', fontSize:'12px', fontFamily:'monospace', color:'rgba(255,255,255,.25)', letterSpacing:'1px' }}>
               Vittorie, pole position, campionati e ogni record del Mondiale F1
             </p>
-
+ 
             {/* Stats globali */}
             {!loading && (
               <div style={{
@@ -269,7 +269,7 @@ export default function PilotiIndex() {
               </div>
             )}
           </header>
-
+ 
           {/* ── CONTROLS ── */}
           {!loading && (
             <div style={{
@@ -299,7 +299,7 @@ export default function PilotiIndex() {
                   }}>×</button>
                 )}
               </div>
-
+ 
               {/* Champion filter toggle */}
               <button onClick={()=>setChampOnly(v=>!v)} style={{
                 padding:'9px 16px', borderRadius:'4px', cursor:'pointer',
@@ -313,7 +313,7 @@ export default function PilotiIndex() {
               }}>
                 🏆 {champOnly ? 'Solo campioni' : 'Tutti i piloti'}
               </button>
-
+ 
               {/* Era pills */}
               <div style={{ display:'flex', flexWrap:'wrap', gap:'6px' }}>
                 {eras.map(e => {
@@ -332,7 +332,7 @@ export default function PilotiIndex() {
                   );
                 })}
               </div>
-
+ 
               {/* Sort */}
               <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{
                 background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)',
@@ -349,14 +349,14 @@ export default function PilotiIndex() {
               </select>
             </div>
           )}
-
+ 
           {/* ── ERROR ── */}
           {error && (
             <div style={{ padding:'16px 20px', borderRadius:'4px', border:'1px solid rgba(220,38,38,.3)', background:'rgba(220,38,38,.06)', color:'#f87171', fontFamily:'monospace', fontSize:'13px', marginBottom:'24px' }}>
               ⚠ Errore: {error}
             </div>
           )}
-
+ 
           {/* ── SKELETON ── */}
           {loading && (
             <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
@@ -376,7 +376,7 @@ export default function PilotiIndex() {
               ))}
             </div>
           )}
-
+ 
           {/* ── EMPTY ── */}
           {!loading && filtered.length===0 && !error && (
             <div style={{ textAlign:'center', padding:'80px 0', color:'rgba(255,255,255,.2)', fontFamily:'monospace' }}>
@@ -384,7 +384,7 @@ export default function PilotiIndex() {
               <p style={{ fontSize:'12px', letterSpacing:'2px', textTransform:'uppercase' }}>Nessun pilota trovato</p>
             </div>
           )}
-
+ 
           {/* ── LIST ── */}
           {!loading && filtered.length>0 && (
             <div style={{
@@ -410,11 +410,11 @@ export default function PilotiIndex() {
                 <span style={{textAlign:'right'}}>Pole</span>
                 <span style={{textAlign:'right'}}>Gare</span>
               </div>
-
+ 
               {filtered.map((d,i)=><DriverRow key={d.id} driver={d} rank={i+1} sortBy={sortBy}/>)}
             </div>
           )}
-
+ 
           {/* Count footer */}
           {!loading && filtered.length>0 && (
             <p style={{
@@ -425,16 +425,16 @@ export default function PilotiIndex() {
               {filtered.length} / {drivers.length} PILOTI
             </p>
           )}
-
+ 
         </main>
         <Footer />
       </div>
     </>
   );
 }
-
+ 
 // ── Driver Row ────────────────────────────────────────────────────────────────
-
+ 
 function DriverRow({ driver: d, rank, sortBy }) {
   const [hovered, setHovered] = useState(false);
   const flag = getFlagCode(d.nationality_country_id||'');
@@ -442,7 +442,7 @@ function DriverRow({ driver: d, rank, sortBy }) {
   const isChamp = d.total_championship_wins > 0;
   const age  = calcAge(d.date_of_birth, d.date_of_death);
   const isDead = !!d.date_of_death;
-
+ 
   // Valore evidenziato in base al sort attivo
   const highlight = {
     wins:    d.total_race_wins,
@@ -452,7 +452,7 @@ function DriverRow({ driver: d, rank, sortBy }) {
     points:  d.total_points,
     starts:  d.total_race_starts,
   }[sortBy];
-
+ 
   return (
     <Link href={`/piloti/${d.id}`} style={{ textDecoration:'none', color:'inherit' }}>
       <article
@@ -479,7 +479,7 @@ function DriverRow({ driver: d, rank, sortBy }) {
           color: rank <= 3 ? '#dc2626' : 'rgba(255,255,255,.18)',
           textAlign:'center',
         }}>{rank <= 3 ? ['①','②','③'][rank-1] : rank}</div>
-
+ 
         {/* Pilota info */}
         <div style={{ display:'flex', alignItems:'center', gap:'12px', minWidth:0 }}>
           <DriverAvatar
@@ -529,7 +529,7 @@ function DriverRow({ driver: d, rank, sortBy }) {
             </div>
           </div>
         </div>
-
+ 
         {/* Stats columns */}
         {[
           { val: d.total_race_wins,      key:'wins'    },
@@ -550,7 +550,7 @@ function DriverRow({ driver: d, rank, sortBy }) {
             </span>
           </div>
         ))}
-
+ 
         {/* Hover right arrow */}
         <div style={{
           position:'absolute', right:'14px', top:'50%', transform:'translateY(-50%)',
