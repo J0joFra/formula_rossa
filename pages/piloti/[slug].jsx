@@ -495,69 +495,96 @@ export default function DriverDetail() {
                   color:'rgba(255,255,255,.25)', fontFamily:'monospace',
                   letterSpacing:'2.5px', textTransform:'uppercase',
                 }}>Statistiche complete</h2>
-                {/* Griglia 2 righe affiancate: label sinistra | valore | label destra | valore */}
                 {(() => {
                   const rows = [
-                    { label:'Gare disputate',         value: driver.total_race_starts },
-                    { label:'Gare iscritto',           value: driver.total_race_entries },
-                    { label:'Vittorie',                value: driver.total_race_wins },
-                    { label:'Podi',                    value: driver.total_podiums },
-                    { label:'Pole position',           value: driver.total_pole_positions },
-                    { label:'Giri veloci',             value: driver.total_fastest_laps },
-                    { label:'Campionati vinti',        value: driver.total_championship_wins },
-                    { label:'Punti totali',            value: driver.total_points },
-                    { label:'Punti in campionato',     value: driver.total_championship_points },
-                    { label:'Giri percorsi',           value: driver.total_race_laps?.toLocaleString('it-IT') },
-                    { label:'Miglior pos. campionato', value: driver.best_championship_position },
-                    { label:'Miglior pos. in griglia', value: driver.best_starting_grid_position },
-                    { label:'Miglior risultato gara',  value: driver.best_race_result },
-                    { label:'Sprint race disputate',   value: driver.total_sprint_race_starts },
-                    { label:'Sprint race vinte',       value: driver.total_sprint_race_wins },
-                    { label:'Driver of the Day',       value: driver.total_driver_of_the_day },
-                    { label:'Grand Slam',              value: driver.total_grand_slams },
-                    { label:'Miglior sprint result',   value: driver.best_sprint_race_result ?? '—' },
+                    { label:'Gare disputate',         value: driver.total_race_starts,              icon:'🏁' },
+                    { label:'Gare iscritto',           value: driver.total_race_entries,             icon:'📋' },
+                    { label:'Vittorie',                value: driver.total_race_wins,                icon:'🥇' },
+                    { label:'Podi',                    value: driver.total_podiums,                  icon:'🏆' },
+                    { label:'Pole position',           value: driver.total_pole_positions,           icon:'⚡' },
+                    { label:'Giri veloci',             value: driver.total_fastest_laps,             icon:'⏱' },
+                    { label:'Campionati vinti',        value: driver.total_championship_wins,        icon:'👑' },
+                    { label:'Punti totali',            value: driver.total_points,                   icon:'📊' },
+                    { label:'Punti in campionato',     value: driver.total_championship_points,      icon:'📈' },
+                    { label:'Giri percorsi',           value: driver.total_race_laps?.toLocaleString('it-IT'), icon:'🔄' },
+                    { label:'Miglior pos. campionato', value: driver.best_championship_position,     icon:'🎯' },
+                    { label:'Miglior pos. in griglia', value: driver.best_starting_grid_position,    icon:'🚦' },
+                    { label:'Miglior risultato gara',  value: driver.best_race_result,               icon:'🏎' },
+                    { label:'Sprint race disputate',   value: driver.total_sprint_race_starts,       icon:'⚡' },
+                    { label:'Sprint race vinte',       value: driver.total_sprint_race_wins,         icon:'🥇' },
+                    { label:'Driver of the Day',       value: driver.total_driver_of_the_day,        icon:'⭐' },
+                    { label:'Grand Slam',              value: driver.total_grand_slams,              icon:'💎' },
+                    { label:'Miglior sprint result',   value: driver.best_sprint_race_result ?? '—', icon:'🏅' },
                   ];
-                  // Dividi in coppie (sinistra | destra) per ogni riga
-                  const half = Math.ceil(rows.length / 2);
-                  const left  = rows.slice(0, half);
-                  const right = rows.slice(half);
-                  return Array.from({ length: half }).map((_, i) => {
-                    const l = left[i];
-                    const r = right[i];
-                    return (
-                      <div key={i} style={{
-                        display:'grid',
-                        gridTemplateColumns:'1fr auto 24px 1fr auto',
-                        alignItems:'center',
-                        padding:'10px 0',
-                        borderBottom:'1px solid rgba(255,255,255,.05)',
-                        gap:'8px',
-                      }}>
-                        {/* Label sinistra */}
-                        <span style={{ fontSize:'11px', color:'rgba(255,255,255,.4)', fontFamily:'monospace' }}>
-                          {l?.label}
-                        </span>
-                        {/* Valore sinistra */}
-                        <span style={{ fontSize:'13px', fontWeight:'800', fontFamily:'monospace', color:'#fff', textAlign:'right' }}>
-                          {l?.value ?? '—'}
-                        </span>
-                        {/* Divisore verticale */}
-                        <div style={{ width:'1px', height:'100%', background:'rgba(255,255,255,.07)', margin:'0 auto' }}/>
-                        {/* Label destra */}
-                        {r ? (
-                          <span style={{ fontSize:'11px', color:'rgba(255,255,255,.4)', fontFamily:'monospace' }}>
-                            {r.label}
-                          </span>
-                        ) : <span/>}
-                        {/* Valore destra */}
-                        {r ? (
-                          <span style={{ fontSize:'13px', fontWeight:'800', fontFamily:'monospace', color:'#fff', textAlign:'right' }}>
-                            {r.value ?? '—'}
-                          </span>
-                        ) : <span/>}
-                      </div>
-                    );
-                  });
+ 
+                  return (
+                    <table style={{ width:'100%', borderCollapse:'collapse' }}>
+                      <thead>
+                        <tr style={{ borderBottom:'2px solid rgba(220,38,38,.3)' }}>
+                          {['Statistica','Valore','Statistica','Valore'].map((h,i)=>(
+                            <th key={i} style={{
+                              padding:'8px 12px',
+                              fontSize:'8px', fontFamily:'monospace', fontWeight:'800',
+                              letterSpacing:'2px', textTransform:'uppercase',
+                              color:'rgba(255,255,255,.35)',
+                              textAlign: i%2===0 ? 'left' : 'right',
+                              background:'#0a0a0a',
+                              ...(i===2 ? {borderLeft:'1px solid rgba(255,255,255,.06)', paddingLeft:'20px'} : {}),
+                            }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Array.from({ length: Math.ceil(rows.length / 2) }).map((_, i) => {
+                          const l = rows[i];
+                          const r = rows[i + Math.ceil(rows.length / 2)];
+                          const isEven = i % 2 === 0;
+                          const rowBg = isEven ? '#0d0d0d' : '#0a0a0a';
+                          return (
+                            <tr key={i} style={{ background: rowBg }}>
+                              {/* Label sinistra */}
+                              <td style={{
+                                padding:'11px 12px',
+                                fontSize:'11px', fontFamily:'monospace',
+                                color:'rgba(255,255,255,.45)',
+                                borderBottom:'1px solid rgba(255,255,255,.04)',
+                              }}>
+                                <span style={{ marginRight:'7px', fontSize:'12px' }}>{l?.icon}</span>
+                                {l?.label}
+                              </td>
+                              {/* Valore sinistra */}
+                              <td style={{
+                                padding:'11px 12px',
+                                fontSize:'14px', fontWeight:'900', fontFamily:'monospace',
+                                color: l?.value > 0 ? '#fff' : 'rgba(255,255,255,.25)',
+                                textAlign:'right',
+                                borderBottom:'1px solid rgba(255,255,255,.04)',
+                              }}>{l?.value ?? '—'}</td>
+ 
+                              {/* Label destra */}
+                              <td style={{
+                                padding:'11px 12px 11px 20px',
+                                fontSize:'11px', fontFamily:'monospace',
+                                color:'rgba(255,255,255,.45)',
+                                borderBottom:'1px solid rgba(255,255,255,.04)',
+                                borderLeft:'1px solid rgba(255,255,255,.06)',
+                              }}>
+                                {r && <><span style={{ marginRight:'7px', fontSize:'12px' }}>{r.icon}</span>{r.label}</>}
+                              </td>
+                              {/* Valore destra */}
+                              <td style={{
+                                padding:'11px 12px',
+                                fontSize:'14px', fontWeight:'900', fontFamily:'monospace',
+                                color: r?.value > 0 ? '#fff' : 'rgba(255,255,255,.25)',
+                                textAlign:'right',
+                                borderBottom:'1px solid rgba(255,255,255,.04)',
+                              }}>{r?.value ?? ''}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  );
                 })()}
               </div>
             </div>
