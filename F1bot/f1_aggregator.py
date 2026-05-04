@@ -179,7 +179,7 @@ def fetch_all_news(seen: set) -> list:
 def get_ferrari_current_context() -> str:
     """Restituisce un contesto forzato e verificato sulla situazione Ferrari attuale"""
     return """
-    ⚠️ INFORMAZIONE VERIFICATA E ATTUALE (STAGIONE 2025):
+    ⚠️ INFORMAZIONE VERIFICATA E ATTUALE (STAGIONE 2026):
     
     **SCUDERIA FERRARI**:
     - Piloti ufficiali: **Charles Leclerc** (numero 16) e **Lewis Hamilton** (numero 44)
@@ -340,7 +340,7 @@ Rispondi SOLO con questo JSON valido (niente backtick, niente newline nei valori
         messages=[
             {
                 "role": "system",
-                "content": "Sei un giornalista sportivo italiano esperto di Formula 1 e Ferrari. Scrivi articoli lunghi, originali e approfonditi. Ricorda: i piloti Ferrari per la stagione 2025 sono Charles Leclerc e Lewis Hamilton (NON Sainz). Rispondi SEMPRE e SOLO con JSON valido, senza testo aggiuntivo, senza backtick, senza newline nei valori stringa."
+                "content": "Sei un giornalista sportivo italiano esperto di Formula 1 e Ferrari. Scrivi articoli lunghi, originali e approfonditi. Ricorda: i piloti Ferrari per la stagione 2026 sono Charles Leclerc e Lewis Hamilton (NON Sainz). Rispondi SEMPRE e SOLO con JSON valido, senza testo aggiuntivo, senza backtick, senza newline nei valori stringa."
             },
             {"role": "user", "content": prompt}
         ]
