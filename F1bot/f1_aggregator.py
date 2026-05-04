@@ -125,6 +125,48 @@ def save_seen(seen: set):
 def article_id(url: str) -> str:
     return hashlib.md5(url.encode()).hexdigest()
 
+# ─── FILTRO PER DATA ───────────────────────────────────────────────────────────
+
+def is_recent_article(entry, max_days_old: int = 1) -> bool:
+    """
+    Verifica se l'articolo è recente (max_days_old giorni fa o oggi)
+    Supporta multiple formati di data nei feed RSS
+    """
+    date_fields = ['published_parsed', 'updated_parsed', 'created_parsed', 'date_parsed']
+    
+    for field in date_fields:
+        date_struct = entry.get(field)
+        if date_struct:
+            try:
+                article_date = datetime(*date_struct[:6], tzinfo=timezone.utc)
+                now = datetime.now(timezone.utc)
+                days_diff = (now - article_date).days
+                
+                if days_diff <= max_days_old:
+                    return True
+                else:
+                    log.debug(f"Articolo troppo vecchio: {article_date.date()} (diff: {days_diff} giorni)")
+                    return False
+            except Exception as e:
+                log.debug(f"Errore parsing data: {e}")
+                continue
+    
+    # Se non troviamo data, accettiamo comunque (fallback)
+    return True
+
+def get_article_date(entry) -> str:
+    """Estrae la data dell'articolo in formato leggibile"""
+    date_fields = ['published_parsed', 'updated_parsed', 'created_parsed', 'date_parsed']
+    for field in date_fields:
+        date_struct = entry.get(field)
+        if date_struct:
+            try:
+                article_date = datetime(*date_struct[:6], tzinfo=timezone.utc)
+                return article_date.strftime("%Y-%m-%d %H:%M")
+            except:
+                pass
+    return "data sconosciuta"
+
 # ─── FETCH RSS ─────────────────────────────────────────────────────────────────
 
 def fetch_full_article_text(entry) -> str:
@@ -141,16 +183,25 @@ def fetch_full_article_text(entry) -> str:
     
     return ""
 
-def fetch_feed(feed: dict) -> list:
+def fetch_feed(feed: dict, max_days_old: int = 1) -> list:
     articles = []
     try:
         parsed = feedparser.parse(feed["url"])
-        for entry in parsed.entries[:MAX_ITEMS_PER_FEED]:
+        recent_count = 0
+        skipped_count = 0
+        
+        for entry in parsed.entries[:MAX_ITEMS_PER_FEED * 3]:
+            if not is_recent_article(entry, max_days_old):
+                skipped_count += 1
+                continue
+            
+            recent_count += 1
             summary = re.sub(r"<[^>]+>", "", entry.get("summary", "")).strip()[:600]
             summary = re.sub(r"[\x00-\x1f\x7f]", " ", summary)
             title   = re.sub(r"[\x00-\x1f\x7f]", " ", entry.get("title", ""))
             
             full_text = fetch_full_article_text(entry)
+            article_date = get_article_date(entry)
             
             articles.append({
                 "source":  feed["name"],
@@ -158,39 +209,46 @@ def fetch_feed(feed: dict) -> list:
                 "url":     entry.get("link", ""),
                 "summary": summary,
                 "full_text": full_text,
+                "date":    article_date,
             })
-        log.info(f"{feed['name']}: {len(articles)} articoli trovati")
+            
+            if len(articles) >= MAX_ITEMS_PER_FEED:
+                break
+                
+        log.info(f"{feed['name']}: {recent_count} recenti, {skipped_count} vecchi -> {len(articles)} presi")
     except Exception as e:
         log.warning(f"{feed['name']}: errore — {e}")
     return articles
 
-def fetch_all_news(seen: set) -> list:
+def fetch_all_news(seen: set, max_days_old: int = 1) -> list:
     all_articles = []
     for feed in RSS_FEEDS:
-        for art in fetch_feed(feed):
+        for art in fetch_feed(feed, max_days_old):
             if article_id(art["url"]) not in seen:
                 all_articles.append(art)
     result = all_articles[:ITEMS_PER_DIGEST]
-    log.info(f"Notizie nuove da elaborare: {len(result)}")
+    log.info(f"Notizie nuove da elaborare: {len(result)} (ultimi {max_days_old} giorni)")
+    
+    for art in result:
+        log.info(f"  📅 {art['date']} | {art['source']} | {art['title'][:50]}...")
+    
     return result
 
 # ─── CONTESTO FERRARI AGGIORNATO ───────────────────────────────────────────────
 
 def get_ferrari_current_context() -> str:
-    """Restituisce un contesto forzato e verificato sulla situazione Ferrari attuale"""
+    """Restituisce un contesto forzato e verificato sulla situazione Ferrari attuale (2026)"""
     return """
     ⚠️ INFORMAZIONE VERIFICATA E ATTUALE (STAGIONE 2026):
     
     **SCUDERIA FERRARI**:
     - Piloti ufficiali: **Charles Leclerc** (numero 16) e **Lewis Hamilton** (numero 44)
-    - Lewis Hamilton è entrato in Ferrari a partire dalla stagione 2025
-    - Carlos Sainz NON È PIÙ un pilota Ferrari (è passato alla Williams)
+    - Lewis Hamilton è entrato in Ferrari a partire dalla stagione 2025 (ora al secondo anno)
+    - Carlos Sainz NON È PIÙ un pilota Ferrari dal 2025
     - Team Principal: Frederic Vasseur
-    - Motore: Ferrari 066/12
     
     **REGOLA OBBLIGATORIA**:
-    IGNORA COMPLETAMENTE QUALSIASI INFORMAZIONE INTERNA CHE MENZIONA "Sainz" COME PILOTA FERRARI.
-    Se le notizie parlano di Carlos Sainz, specifica che è un ex-pilota Ferrari o pilota Williams.
+    IGNORA COMPLETAMENTE QUALSIASI INFORMAZIONE CHE MENZIONA "Sainz" COME PILOTA FERRARI.
     """
 
 # ─── CLEAN JSON ────────────────────────────────────────────────────────────────
@@ -225,14 +283,9 @@ def validate_and_fix_ferrari_drivers(html_content: str, title: str) -> tuple:
     """Corregge eventuali menzioni errate dei piloti Ferrari"""
     
     fixes = [
-        (r"(?i)\bCarlos Sainz\b(?=\s*(?:[^.]*Ferrari|alla Ferrari|della Ferrari|nel weekend Ferrari|con la Ferrari))", 
-         "Lewis Hamilton"),
-        (r"(?i)\bSainz\b(?=\s*(?:[^.]*alla Ferrari|con la Ferrari|della Ferrari|nel weekend Ferrari|alla Rossa|della Rossa))",
-         "Hamilton"),
-        (r"(?i)(Ferrari\s+(?:ha|aveva|schierava|può contare su|presenta|allinea)\s+)(?:Carlos\s+Sainz|Sainz)",
-         r"\1Lewis Hamilton"),
-        (r"(?i)(il\s+)[Ss]pagnolo\s+(?:Sainz|Carlos Sainz)(?=\s*(?:[^.]*Ferrari|della Ferrari))",
-         r"\1inglese Hamilton"),
+        (r"(?i)\bCarlos Sainz\b(?=\s*(?:[^.]*Ferrari|alla Ferrari|della Ferrari))", "Lewis Hamilton"),
+        (r"(?i)\bSainz\b(?=\s*(?:[^.]*alla Ferrari|con la Ferrari|della Ferrari))", "Hamilton"),
+        (r"(?i)(Ferrari\s+(?:ha|aveva|schierava|allinea)\s+)(?:Carlos\s+Sainz|Sainz)", r"\1Lewis Hamilton"),
     ]
     
     fixed_content = html_content
@@ -241,13 +294,10 @@ def validate_and_fix_ferrari_drivers(html_content: str, title: str) -> tuple:
         title = re.sub(pattern, replacement, title)
     
     if "Sainz" in title and "Ferrari" in title:
-        title = title.replace("Sainz", "Hamilton")
-        title = title.replace("Carlos", "Lewis")
-        title = title.replace("spagnolo", "inglese")
+        title = title.replace("Sainz", "Hamilton").replace("Carlos", "Lewis")
     
     if "Sainz" in fixed_content and "Ferrari" in fixed_content:
-        fixed_content = fixed_content.replace("Carlos Sainz", "Lewis Hamilton")
-        fixed_content = fixed_content.replace("Sainz", "Hamilton")
+        fixed_content = fixed_content.replace("Carlos Sainz", "Lewis Hamilton").replace("Sainz", "Hamilton")
     
     return fixed_content, title
 
@@ -260,16 +310,11 @@ def generate_digest(articles: list, mode: str = "normale", gp_name: str = "") ->
     client = groq.Groq(api_key=GROQ_API_KEY)
 
     mode_cfg  = RACE_WEEKEND_MODES.get(mode, {})
-    mode_focus = mode_cfg.get("focus", "le ultime notizie di Formula 1")
     mode_tags  = mode_cfg.get("tags", ["F1", "Ferrari", "news"])
-    title_hint = mode_cfg.get("title_hint", "")
-    gp_context = f"Gran Premio di {gp_name}" if gp_name else "Gran Premio in corso"
 
     news_block = ""
     for i, art in enumerate(articles, 1):
-        news_block += f"\nNOTIZIA {i}:\nTitolo: {art['title']}\nURL: {art['url']}\nRiassunto: {art['summary']}\n---"
-        if art.get('full_text'):
-            news_block += f"\nTESTO COMPLETO (estratto): {art['full_text'][:800]}\n---"
+        news_block += f"\nNOTIZIA {i} ({art['date']}):\nTitolo: {art['title']}\nURL: {art['url']}\nRiassunto: {art['summary']}\n---"
 
     sources_html = " &nbsp;|&nbsp; ".join(
         f'<a href="{art["url"]}" target="_blank" rel="noopener">{art["source"]}</a>'
@@ -280,68 +325,31 @@ def generate_digest(articles: list, mode: str = "normale", gp_name: str = "") ->
     today = datetime.now().strftime("%d %B %Y")
     ferrari_context = get_ferrari_current_context()
 
-    if mode in RACE_WEEKEND_MODES:
-        race_instruction = f"""
-CONTESTO WEEKEND GARA:
-Modalità articolo: {mode_cfg.get('label', mode)} — {gp_context}
-Focus principale: {mode_focus}
-Titolo suggerito (puoi adattarlo): "{title_hint.replace('{GP}', gp_name or 'GP')}"
-Assicurati che l'articolo sia fortemente orientato alla Ferrari e alle sue performance.
-Includi contesto storico del circuito se rilevante.
-"""
-    else:
-        race_instruction = ""
-
-    prompt = f"""Sei un giornalista sportivo esperto di Formula 1 che scrive per formula-rossa.it, sito italiano dedicato alla Ferrari.
+    prompt = f"""Sei un giornalista sportivo esperto di Formula 1 che scrive per formula-rossa.it.
 
 Oggi è {today}.
 
 {ferrari_context}
 
-NOTIZIE RACCOLTE DALLE FONTI (QUESTO È IL SOLO DATO AGGIORNATO CHE DEVI USARE):
+NOTIZIE DEL GIORNO (SOLO DATI AGGIORNATI):
 {news_block}
 
-{race_instruction}
+⚠️ REGOLE:
+- I piloti Ferrari sono SOLO Charles Leclerc e Lewis Hamilton
+- NON menzionare Sainz come pilota Ferrari
+- Usa "oggi" per contestualizzare
 
-⚠️ REGOLE OBBLIGATORIE SUI PILOTI FERRARI:
-- I piloti Ferrari sono SOLAMENTE **Charles Leclerc** e **Lewis Hamilton**
-- NON menzionare MAI Carlos Sainz come pilota Ferrari
-- Se le notizie parlano di Sainz, specifica che è un ex-pilota Ferrari o pilota Williams
-- Hamilton ha sostituito Sainz a partire dal 2025
+Rispondi SOLO con JSON valido:
+{{"title": "titolo", "slug": "titolo-kebab-case-{datetime.now().strftime('%d-%m-%Y')}", "html_content": "HTML", "excerpt": "riassunto", "tags": {json.dumps(mode_tags)}}}"""
 
-COMPITO: Scrivi un articolo giornalistico completo, originale e approfondito in italiano.
-
-REGOLE FONDAMENTALI:
-- NON citare mai le fonti nel testo (zero "secondo X", zero "come riporta Y")
-- Scrivi tutto come se fossi tu ad aver seguito le notizie direttamente
-- Usa "oggi", "nelle ultime ore", "in questa giornata" per contestualizzare
-- Ogni sezione deve avere almeno 5-7 righe di testo ricco e originale
-- Aggiungi contesto tecnico, storico o sportivo per arricchire ogni argomento
-- Tono: professionale, appassionato, tecnico ma leggibile
-- Lunghezza minima: 700 parole
-
-STRUTTURA HTML da usare:
-<h1> per il titolo principale
-<p> per l'introduzione (4-5 righe)
-<h2> per ogni sottotitolo di sezione
-<p> per i paragrafi (minimo 2 paragrafi per sezione)
-<strong> per i concetti chiave
-Niente <a> nel corpo dell'articolo
-
-Rispondi SOLO con questo JSON valido (niente backtick, niente newline nei valori):
-{{"title": "titolo accattivante della giornata", "slug": "titolo-kebab-case-data-{datetime.now().strftime('%d-%m-%Y')}", "html_content": "HTML completo qui", "excerpt": "2 righe di riassunto per anteprima", "tags": {json.dumps(mode_tags)}}}"""
-
-    log.info(f"Generazione articolo con Groq — modalità: {mode}")
+    log.info(f"Generazione articolo — modalità: {mode}")
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         max_tokens=4000,
         temperature=0.7,
         messages=[
-            {
-                "role": "system",
-                "content": "Sei un giornalista sportivo italiano esperto di Formula 1 e Ferrari. Scrivi articoli lunghi, originali e approfonditi. Ricorda: i piloti Ferrari per la stagione 2026 sono Charles Leclerc e Lewis Hamilton (NON Sainz). Rispondi SEMPRE e SOLO con JSON valido, senza testo aggiuntivo, senza backtick, senza newline nei valori stringa."
-            },
+            {"role": "system", "content": "Sei un giornalista F1. Stagione 2026: Ferrari ha Leclerc e Hamilton. Sainz non è più in Ferrari. Rispondi SOLO con JSON valido."},
             {"role": "user", "content": prompt}
         ]
     )
@@ -351,26 +359,19 @@ Rispondi SOLO con questo JSON valido (niente backtick, niente newline nei valori
 
     try:
         result = json.loads(raw)
-        
-        # Validazione e correzione dei nomi dei piloti Ferrari
         fixed_content, fixed_title = validate_and_fix_ferrari_drivers(
             result.get("html_content", ""), 
             result.get("title", "")
         )
-        result["html_content"] = fixed_content
+        result["html_content"] = fixed_content + footer_html
         result["title"] = fixed_title
         
-        result["html_content"] = result.get("html_content", "") + footer_html
-        
         if mode in RACE_WEEKEND_MODES:
-            result["tags"] = list(set(result.get("tags", []) + mode_tags))
-            
+            result["tags"] = list(set(result.get("tags", []) + mode_cfg.get("tags", [])))
     except json.JSONDecodeError as e:
-        log.error(f"Errore parsing JSON: {e}")
-        log.error(f"Risposta raw (primi 300 char): {raw[:300]}")
+        log.error(f"Errore JSON: {e}")
         return None
 
-    log.info(f"Articolo generato: {result.get('title', '?')}")
     return result
 
 # ─── PUBBLICAZIONE FIRESTORE ───────────────────────────────────────────────────
@@ -384,7 +385,7 @@ def publish_to_firestore(article: dict, db, mode: str = "normale") -> bool:
             "html_content": article["html_content"],
             "excerpt":      article["excerpt"],
             "tags":         article["tags"],
-            "cover_image":  article.get("cover_image", ""),
+            "cover_image":  "",
             "author":       "Redazione Formula Rossa",
             "category":     "news",
             "published_at": now,
@@ -393,7 +394,7 @@ def publish_to_firestore(article: dict, db, mode: str = "normale") -> bool:
             "type":         mode if mode in RACE_WEEKEND_MODES else "digest",
         }
         db.collection(FIRESTORE_COLLECTION).document(article["slug"]).set(doc)
-        log.info(f"Pubblicato su Firestore: {FIRESTORE_COLLECTION}/{article['slug']}")
+        log.info(f"Pubblicato: {article['slug']}")
         return True
     except Exception as e:
         log.error(f"Errore Firestore: {e}")
@@ -403,46 +404,42 @@ def publish_to_firestore(article: dict, db, mode: str = "normale") -> bool:
 
 def run(mode: str = "normale", gp_name: str = ""):
     log.info("=" * 55)
-    log.info(f"F1 Aggregator Bot — formula-rossa.it  [{mode.upper()}]")
+    log.info(f"F1 Aggregator Bot — formula-rossa.it (SOLO NOTIZIE RECENTI) [{mode.upper()}]")
     log.info(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
     log.info("=" * 55)
 
-    seen     = load_seen()
-    articles = fetch_all_news(seen)
+    seen = load_seen()
+    articles = fetch_all_news(seen, max_days_old=1)  # ← solo oggi e ieri
 
     if not articles:
-        log.info("Nessuna notizia nuova. A presto!")
+        log.info("Nessuna notizia nuova degli ultimi 2 giorni.")
         return
 
     digest = generate_digest(articles, mode=mode, gp_name=gp_name)
     if not digest:
-        log.warning("Impossibile generare l'articolo.")
+        log.warning("Generazione fallita.")
         return
 
-    db      = init_firebase()
+    db = init_firebase()
     success = publish_to_firestore(digest, db, mode=mode)
 
     if success:
         for art in articles:
             seen.add(article_id(art["url"]))
         save_seen(seen)
-        log.info("Ciclo completato con successo!")
+        log.info("✅ Ciclo completato!")
     else:
-        log.error("Pubblicazione fallita.")
-
+        log.error("❌ Pubblicazione fallita.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--daemon", action="store_true",
-                        help=f"Loop automatico ogni {RUN_EVERY_HOURS} ore")
-    parser.add_argument("--mode", default=os.getenv("F1_MODE", "normale"),
-                        help="Modalità: normale | preview | qualifiche | pre-gara | post-gara | recap")
-    parser.add_argument("--gp", default=os.getenv("GP_NAME", ""),
-                        help="Nome del GP (es. Monaco, Monza, Silverstone)")
+    parser.add_argument("--daemon", action="store_true")
+    parser.add_argument("--mode", default=os.getenv("F1_MODE", "normale"))
+    parser.add_argument("--gp", default=os.getenv("GP_NAME", ""))
     args = parser.parse_args()
 
     if args.daemon:
-        log.info(f"Daemon attivo: ogni {RUN_EVERY_HOURS} ore | modalità: {args.mode}")
+        log.info(f"Daemon attivo ogni {RUN_EVERY_HOURS}h | modalità: {args.mode}")
         run(mode=args.mode, gp_name=args.gp)
         schedule.every(RUN_EVERY_HOURS).hours.do(run, mode=args.mode, gp_name=args.gp)
         while True:
