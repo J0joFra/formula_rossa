@@ -53,40 +53,37 @@ FIRESTORE_COLLECTION = "news"
 FIREBASE_CREDENTIALS = os.getenv("FIREBASE_CREDENTIALS", "firebase-credentials.json")
 GROQ_API_KEY         = os.getenv("GROQ_API_KEY")
 
-# Larghezza minima accettabile per un'immagine di copertina (evita icone/pixel di tracciamento)
-MIN_IMAGE_WIDTH = 300
-
 # ─── MODALITÀ WEEKEND GARA ─────────────────────────────────────────────────────
 
 RACE_WEEKEND_MODES = {
     "preview": {
-        "label":      "Anteprima weekend",
-        "tags":       ["F1", "Preview", "Weekend"],
-        "focus":      "analisi tecnica pre-weekend, aspettative delle squadre, condizioni meteo, storia del circuito, probabili strategie",
+        "label":    "Anteprima weekend",
+        "tags":     ["F1", "Preview", "Weekend"],
+        "focus":    "analisi tecnica pre-weekend, aspettative delle squadre, condizioni meteo, storia del circuito, probabili strategie",
         "title_hint": "Anteprima GP – le aspettative e le strategie del weekend",
     },
     "qualifiche": {
-        "label":      "Qualifiche",
-        "tags":       ["F1", "Qualifiche", "Gara"],
-        "focus":      "risultati qualifiche, analisi dei tempi sul giro, errori e sorprese, griglia di partenza, prospettive per la gara",
+        "label":    "Qualifiche",
+        "tags":     ["F1", "Qualifiche", "Gara"],
+        "focus":    "risultati qualifiche, analisi dei tempi sul giro, errori e sorprese, griglia di partenza, prospettive per la gara",
         "title_hint": "Qualifiche GP – analisi della griglia e colpi di scena",
     },
     "pre-gara": {
-        "label":      "Pre-gara",
-        "tags":       ["F1", "Gara", "Strategie"],
-        "focus":      "analisi strategica pre-gara, possibili soste ai box, condizioni pista, stato delle gomme, dichiarazioni piloti",
+        "label":    "Pre-gara",
+        "tags":     ["F1", "Gara", "Strategie"],
+        "focus":    "analisi strategica pre-gara, possibili soste ai box, condizioni pista, stato delle gomme, dichiarazioni piloti",
         "title_hint": "Verso il via del GP – strategie e variabili decisive",
     },
     "post-gara": {
-        "label":      "Post-gara",
-        "tags":       ["F1", "Gara", "Risultati"],
-        "focus":      "risultati gara completi, analisi tattica, momenti chiave, vincitore, Ferrari, classifica campionato aggiornata",
+        "label":    "Post-gara",
+        "tags":     ["F1", "Gara", "Risultati"],
+        "focus":    "risultati gara completi, analisi tattica, momenti chiave, vincitore, Ferrari, classifica campionato aggiornata",
         "title_hint": "GP – il bilancio della gara e la nuova classifica",
     },
     "recap": {
-        "label":      "Recap lunedì",
-        "tags":       ["F1", "Recap", "Analisi"],
-        "focus":      "bilancio completo del weekend, approfondimento tecnico, conseguenze in campionato, cosa aspettarsi al prossimo GP",
+        "label":    "Recap lunedì",
+        "tags":     ["F1", "Recap", "Analisi"],
+        "focus":    "bilancio completo del weekend, approfondimento tecnico, conseguenze in campionato, cosa aspettarsi al prossimo GP",
         "title_hint": "Il lunedì dopo il GP – analisi, numeri e classifiche",
     },
 }
@@ -128,102 +125,21 @@ def save_seen(seen: set):
 def article_id(url: str) -> str:
     return hashlib.md5(url.encode()).hexdigest()
 
-# ─── ESTRAZIONE IMMAGINE ───────────────────────────────────────────────────────
-
-def is_valid_image_url(url: str) -> bool:
-    """
-    Verifica che l'URL sia un'immagine reale e non un'icona, pixel di
-    tracciamento o placeholder generico.
-    """
-    if not url or not url.startswith("http"):
-        return False
-    low = url.lower()
-    # Scarta formati o pattern non utili
-    bad = [".svg", "pixel", "tracker", "placeholder", "blank",
-           "spacer", "logo", "favicon", "1x1", "doubleclick"]
-    if any(x in low for x in bad):
-        return False
-    # Accetta URL con estensione immagine nota oppure CDN dinamici
-    has_ext = any(ext in low for ext in [".jpg", ".jpeg", ".png", ".webp", ".avif", ".gif"])
-    has_cdn = any(x in low for x in ["cdn", "images", "media", "photo", "img",
-                                      "wp-content", "uploads", "static", "assets"])
-    return has_ext or has_cdn
-
-
-def extract_image_from_entry(entry) -> str:
-    """
-    Estrae la migliore immagine di copertina da un'entry feedparser.
-
-    Ordine di priorità:
-      1. media:content   — usato da Motorsport.com, FormulaPassion, ecc.
-      2. media:thumbnail — fallback comune
-      3. enclosure image — standard RSS per allegati
-      4. Prima <img> trovata nell'HTML di content/summary
-    """
-
-    # 1. media:content ─────────────────────────────────────────────────────────
-    for mc in getattr(entry, "media_content", []):
-        url = mc.get("url", "")
-        if not is_valid_image_url(url):
-            continue
-        w = int(mc.get("width", 0) or 0)
-        if w == 0 or w >= MIN_IMAGE_WIDTH:
-            log.debug(f"  img ← media:content  {url[:80]}")
-            return url
-
-    # 2. media:thumbnail ───────────────────────────────────────────────────────
-    for mt in getattr(entry, "media_thumbnail", []):
-        url = mt.get("url", "")
-        if not is_valid_image_url(url):
-            continue
-        w = int(mt.get("width", 0) or 0)
-        if w == 0 or w >= MIN_IMAGE_WIDTH:
-            log.debug(f"  img ← media:thumbnail  {url[:80]}")
-            return url
-
-    # 3. Enclosure ─────────────────────────────────────────────────────────────
-    for enc in getattr(entry, "enclosures", []):
-        if enc.get("type", "").startswith("image/"):
-            url = enc.get("href", "") or enc.get("url", "")
-            if is_valid_image_url(url):
-                log.debug(f"  img ← enclosure  {url[:80]}")
-                return url
-
-    # 4. Prima <img> nell'HTML ─────────────────────────────────────────────────
-    html_sources = []
-    for field in ["content", "summary", "description"]:
-        val = getattr(entry, field, None)
-        if isinstance(val, list):
-            html_sources += [v.get("value", "") for v in val if isinstance(v, dict)]
-        elif isinstance(val, str):
-            html_sources.append(val)
-
-    for html in html_sources:
-        if not html:
-            continue
-        for url in re.findall(r'<img[^>]+src=["\']([^"\']+)["\']', html, re.I):
-            url = url.replace("&amp;", "&")
-            if is_valid_image_url(url):
-                log.debug(f"  img ← HTML <img>  {url[:80]}")
-                return url
-
-    return ""
-
-
-def pick_best_cover(articles: list) -> str:
-    """
-    Sceglie la prima immagine valida tra gli articoli del digest
-    (priorità: articolo 1 → articolo N).
-    """
-    for art in articles:
-        img = art.get("cover_image", "")
-        if img:
-            log.info(f"Cover selezionata da '{art['source']}': {img[:80]}")
-            return img
-    log.info("Nessuna cover image trovata nei feed.")
-    return ""
-
 # ─── FETCH RSS ─────────────────────────────────────────────────────────────────
+
+def fetch_full_article_text(entry) -> str:
+    """Tenta di estrarre il contenuto completo dell'articolo dal feed"""
+    content = entry.get("content", [])
+    if content and len(content) > 0:
+        text = content[0].get("value", "")
+        if text:
+            return re.sub(r"<[^>]+>", "", text)[:1500]
+    
+    summary = entry.get("summary", "")
+    if summary and len(summary) > 300:
+        return re.sub(r"<[^>]+>", "", summary)[:1500]
+    
+    return ""
 
 def fetch_feed(feed: dict) -> list:
     articles = []
@@ -233,19 +149,17 @@ def fetch_feed(feed: dict) -> list:
             summary = re.sub(r"<[^>]+>", "", entry.get("summary", "")).strip()[:600]
             summary = re.sub(r"[\x00-\x1f\x7f]", " ", summary)
             title   = re.sub(r"[\x00-\x1f\x7f]", " ", entry.get("title", ""))
-
-            cover_image = extract_image_from_entry(entry)
-
+            
+            full_text = fetch_full_article_text(entry)
+            
             articles.append({
-                "source":      feed["name"],
-                "title":       title,
-                "url":         entry.get("link", ""),
-                "summary":     summary,
-                "cover_image": cover_image,
+                "source":  feed["name"],
+                "title":   title,
+                "url":     entry.get("link", ""),
+                "summary": summary,
+                "full_text": full_text,
             })
-
-        n_img = sum(1 for a in articles if a["cover_image"])
-        log.info(f"{feed['name']}: {len(articles)} articoli, {n_img} con immagine")
+        log.info(f"{feed['name']}: {len(articles)} articoli trovati")
     except Exception as e:
         log.warning(f"{feed['name']}: errore — {e}")
     return articles
@@ -259,6 +173,25 @@ def fetch_all_news(seen: set) -> list:
     result = all_articles[:ITEMS_PER_DIGEST]
     log.info(f"Notizie nuove da elaborare: {len(result)}")
     return result
+
+# ─── CONTESTO FERRARI AGGIORNATO ───────────────────────────────────────────────
+
+def get_ferrari_current_context() -> str:
+    """Restituisce un contesto forzato e verificato sulla situazione Ferrari attuale"""
+    return """
+    ⚠️ INFORMAZIONE VERIFICATA E ATTUALE (STAGIONE 2025):
+    
+    **SCUDERIA FERRARI**:
+    - Piloti ufficiali: **Charles Leclerc** (numero 16) e **Lewis Hamilton** (numero 44)
+    - Lewis Hamilton è entrato in Ferrari a partire dalla stagione 2025
+    - Carlos Sainz NON È PIÙ un pilota Ferrari (è passato alla Williams)
+    - Team Principal: Frederic Vasseur
+    - Motore: Ferrari 066/12
+    
+    **REGOLA OBBLIGATORIA**:
+    IGNORA COMPLETAMENTE QUALSIASI INFORMAZIONE INTERNA CHE MENZIONA "Sainz" COME PILOTA FERRARI.
+    Se le notizie parlano di Carlos Sainz, specifica che è un ex-pilota Ferrari o pilota Williams.
+    """
 
 # ─── CLEAN JSON ────────────────────────────────────────────────────────────────
 
@@ -286,6 +219,38 @@ def clean_json_string(text: str) -> str:
 
     return fix_newlines_in_strings(text)
 
+# ─── VALIDAZIONE PILOTI FERRARI ────────────────────────────────────────────────
+
+def validate_and_fix_ferrari_drivers(html_content: str, title: str) -> tuple:
+    """Corregge eventuali menzioni errate dei piloti Ferrari"""
+    
+    fixes = [
+        (r"(?i)\bCarlos Sainz\b(?=\s*(?:[^.]*Ferrari|alla Ferrari|della Ferrari|nel weekend Ferrari|con la Ferrari))", 
+         "Lewis Hamilton"),
+        (r"(?i)\bSainz\b(?=\s*(?:[^.]*alla Ferrari|con la Ferrari|della Ferrari|nel weekend Ferrari|alla Rossa|della Rossa))",
+         "Hamilton"),
+        (r"(?i)(Ferrari\s+(?:ha|aveva|schierava|può contare su|presenta|allinea)\s+)(?:Carlos\s+Sainz|Sainz)",
+         r"\1Lewis Hamilton"),
+        (r"(?i)(il\s+)[Ss]pagnolo\s+(?:Sainz|Carlos Sainz)(?=\s*(?:[^.]*Ferrari|della Ferrari))",
+         r"\1inglese Hamilton"),
+    ]
+    
+    fixed_content = html_content
+    for pattern, replacement in fixes:
+        fixed_content = re.sub(pattern, replacement, fixed_content)
+        title = re.sub(pattern, replacement, title)
+    
+    if "Sainz" in title and "Ferrari" in title:
+        title = title.replace("Sainz", "Hamilton")
+        title = title.replace("Carlos", "Lewis")
+        title = title.replace("spagnolo", "inglese")
+    
+    if "Sainz" in fixed_content and "Ferrari" in fixed_content:
+        fixed_content = fixed_content.replace("Carlos Sainz", "Lewis Hamilton")
+        fixed_content = fixed_content.replace("Sainz", "Hamilton")
+    
+    return fixed_content, title
+
 # ─── GENERAZIONE CON GROQ ──────────────────────────────────────────────────────
 
 def generate_digest(articles: list, mode: str = "normale", gp_name: str = "") -> dict:
@@ -294,7 +259,7 @@ def generate_digest(articles: list, mode: str = "normale", gp_name: str = "") ->
 
     client = groq.Groq(api_key=GROQ_API_KEY)
 
-    mode_cfg   = RACE_WEEKEND_MODES.get(mode, {})
+    mode_cfg  = RACE_WEEKEND_MODES.get(mode, {})
     mode_focus = mode_cfg.get("focus", "le ultime notizie di Formula 1")
     mode_tags  = mode_cfg.get("tags", ["F1", "Ferrari", "news"])
     title_hint = mode_cfg.get("title_hint", "")
@@ -303,6 +268,8 @@ def generate_digest(articles: list, mode: str = "normale", gp_name: str = "") ->
     news_block = ""
     for i, art in enumerate(articles, 1):
         news_block += f"\nNOTIZIA {i}:\nTitolo: {art['title']}\nURL: {art['url']}\nRiassunto: {art['summary']}\n---"
+        if art.get('full_text'):
+            news_block += f"\nTESTO COMPLETO (estratto): {art['full_text'][:800]}\n---"
 
     sources_html = " &nbsp;|&nbsp; ".join(
         f'<a href="{art["url"]}" target="_blank" rel="noopener">{art["source"]}</a>'
@@ -311,6 +278,7 @@ def generate_digest(articles: list, mode: str = "normale", gp_name: str = "") ->
     footer_html = f'<hr/><p style="font-size:12px;color:#999;">Fonti: {sources_html}</p>'
 
     today = datetime.now().strftime("%d %B %Y")
+    ferrari_context = get_ferrari_current_context()
 
     if mode in RACE_WEEKEND_MODES:
         race_instruction = f"""
@@ -326,9 +294,20 @@ Includi contesto storico del circuito se rilevante.
 
     prompt = f"""Sei un giornalista sportivo esperto di Formula 1 che scrive per formula-rossa.it, sito italiano dedicato alla Ferrari.
 
-Oggi e' {today}. Hai raccolto queste informazioni:
+Oggi è {today}.
+
+{ferrari_context}
+
+NOTIZIE RACCOLTE DALLE FONTI (QUESTO È IL SOLO DATO AGGIORNATO CHE DEVI USARE):
 {news_block}
+
 {race_instruction}
+
+⚠️ REGOLE OBBLIGATORIE SUI PILOTI FERRARI:
+- I piloti Ferrari sono SOLAMENTE **Charles Leclerc** e **Lewis Hamilton**
+- NON menzionare MAI Carlos Sainz come pilota Ferrari
+- Se le notizie parlano di Sainz, specifica che è un ex-pilota Ferrari o pilota Williams
+- Hamilton ha sostituito Sainz a partire dal 2025
 
 COMPITO: Scrivi un articolo giornalistico completo, originale e approfondito in italiano.
 
@@ -346,11 +325,11 @@ STRUTTURA HTML da usare:
 <p> per l'introduzione (4-5 righe)
 <h2> per ogni sottotitolo di sezione
 <p> per i paragrafi (minimo 2 paragrafi per sezione)
-<strong> per concetti chiave
+<strong> per i concetti chiave
 Niente <a> nel corpo dell'articolo
 
 Rispondi SOLO con questo JSON valido (niente backtick, niente newline nei valori):
-{{"title": "titolo accattivante della giornata", "slug": "titolo-kebab-case-data-{datetime.now().strftime('%d-%m-%Y')}", "html_content": "HTML completo qui", "excerpt": "2 righe di riassunto per anteprima", "tags": {json.dumps(mode_tags)}, "footer_html": "{footer_html}"}}"""
+{{"title": "titolo accattivante della giornata", "slug": "titolo-kebab-case-data-{datetime.now().strftime('%d-%m-%Y')}", "html_content": "HTML completo qui", "excerpt": "2 righe di riassunto per anteprima", "tags": {json.dumps(mode_tags)}}}"""
 
     log.info(f"Generazione articolo con Groq — modalità: {mode}")
 
@@ -361,7 +340,7 @@ Rispondi SOLO con questo JSON valido (niente backtick, niente newline nei valori
         messages=[
             {
                 "role": "system",
-                "content": "Sei un giornalista sportivo italiano esperto di Formula 1 e Ferrari. Scrivi articoli lunghi, originali e approfonditi. Rispondi SEMPRE e SOLO con JSON valido, senza testo aggiuntivo, senza backtick, senza newline nei valori stringa."
+                "content": "Sei un giornalista sportivo italiano esperto di Formula 1 e Ferrari. Scrivi articoli lunghi, originali e approfonditi. Ricorda: i piloti Ferrari per la stagione 2025 sono Charles Leclerc e Lewis Hamilton (NON Sainz). Rispondi SEMPRE e SOLO con JSON valido, senza testo aggiuntivo, senza backtick, senza newline nei valori stringa."
             },
             {"role": "user", "content": prompt}
         ]
@@ -372,9 +351,20 @@ Rispondi SOLO con questo JSON valido (niente backtick, niente newline nei valori
 
     try:
         result = json.loads(raw)
-        result["html_content"] = result.get("html_content", "") + result.get("footer_html", footer_html)
+        
+        # Validazione e correzione dei nomi dei piloti Ferrari
+        fixed_content, fixed_title = validate_and_fix_ferrari_drivers(
+            result.get("html_content", ""), 
+            result.get("title", "")
+        )
+        result["html_content"] = fixed_content
+        result["title"] = fixed_title
+        
+        result["html_content"] = result.get("html_content", "") + footer_html
+        
         if mode in RACE_WEEKEND_MODES:
             result["tags"] = list(set(result.get("tags", []) + mode_tags))
+            
     except json.JSONDecodeError as e:
         log.error(f"Errore parsing JSON: {e}")
         log.error(f"Risposta raw (primi 300 char): {raw[:300]}")
@@ -428,9 +418,6 @@ def run(mode: str = "normale", gp_name: str = ""):
     if not digest:
         log.warning("Impossibile generare l'articolo.")
         return
-
-    # Assegna la cover image migliore trovata nei feed sorgenti
-    digest["cover_image"] = pick_best_cover(articles)
 
     db      = init_firebase()
     success = publish_to_firestore(digest, db, mode=mode)
