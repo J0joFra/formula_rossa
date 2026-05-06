@@ -145,7 +145,7 @@ export default function StandingsPage() {
       // ── 5. Calendario ─────────────────────────────────────────
       const { data: racesData, error: racesErr } = await supabase
         .from('race')
-        .select('id, round, date, circuit_id, official_name, sprint_race_date, qualifying_date')
+        .select('id, round, date, circuit_id, official_name, sprint_race_date, qualifying_date, grand_prix_id')
         .eq('year', selectedSeason)
         .order('round', { ascending: true });
       if (racesErr) console.error('❌ races:', racesErr.message);
@@ -164,6 +164,9 @@ export default function StandingsPage() {
   const visibleDrivers = showFullDrivers ? driverStandings : driverStandings.slice(0, 5);
   const visibleConstructors = showFullConstructors ? constructorStandings : constructorStandings.slice(0, 5);
   
+  // Gare sospese/cancellate (Bahrain e Arabia Saudita per conflitto Medio Oriente)
+  const SUSPENDED_GP = ['saudi-arabia', 'bahrain'];
+
   // Filtra le gare che hanno una sprint race
   const sprintRaces = calendar.filter(race => race.sprint_race_date);
   // Filtra le gare in base al toggle
@@ -270,45 +273,80 @@ export default function StandingsPage() {
             {displayedCalendar.map((race) => {
               const countryCode = circuitToCountry[race.circuit_id];
               const hasSprint = race.sprint_race_date;
-              
+              const isSuspended = SUSPENDED_GP.includes(race.grand_prix_id);
+
               return (
                 <Link
                   key={race.id}
                   href={`/races?id=${race.id}`}
-                  className={`relative group bg-[var(--bg-tertiary)] border border-[var(--border-light)] rounded-sm overflow-hidden hover:border-red-600 transition-all ${
-                    hasSprint ? 'border-l-4 border-l-[var(--ferrari-red)]' : ''
-                  }`}
+                  className={`relative group rounded-sm overflow-hidden transition-all
+                    ${isSuspended
+                      ? 'bg-zinc-900/60 border border-zinc-700/50 cursor-default pointer-events-none grayscale opacity-60'
+                      : `bg-[var(--bg-tertiary)] border border-[var(--border-light)] hover:border-red-600 ${hasSprint ? 'border-l-4 border-l-[var(--ferrari-red)]' : ''}`
+                    }`}
                 >
-                  {hasSprint && (
+                  {/* Badge SPRINT */}
+                  {hasSprint && !isSuspended && (
                     <div className="absolute -top-1 -right-1 z-30 bg-[var(--ferrari-red)] text-white text-[8px] font-black px-1 py-0.5 uppercase rotate-12 shadow-lg">
                       Sprint
                     </div>
                   )}
-                  <div className="absolute top-2 left-2 z-20 w-6 h-6 bg-[var(--ferrari-red)] rounded-full flex items-center justify-center border border-black/20 shadow-md">
+
+                  {/* Badge SOSPESO */}
+                  {isSuspended && (
+                    <div className="absolute -top-1 -right-1 z-30 bg-zinc-600 text-zinc-300 text-[8px] font-black px-1.5 py-0.5 uppercase rotate-12 shadow-lg tracking-wider">
+                      Sospeso
+                    </div>
+                  )}
+
+                  {/* Round bubble */}
+                  <div className={`absolute top-2 left-2 z-20 w-6 h-6 rounded-full flex items-center justify-center border border-black/20 shadow-md
+                    ${isSuspended ? 'bg-zinc-600' : 'bg-[var(--ferrari-red)]'}`}>
                     <span className="text-[var(--text-primary)] text-[10px] font-black">{race.round}</span>
                   </div>
+
+                  {/* Bandiera */}
                   <div className="relative h-28 w-full overflow-hidden bg-[var(--bg-tertiary)]">
                     {countryCode ? (
                       <img
                         src={`https://flagcdn.com/w320/${countryCode}.png`}
-                        className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
+                        className={`w-full h-full object-cover transition-all duration-500
+                          ${isSuspended
+                            ? 'opacity-25'
+                            : 'opacity-60 group-hover:opacity-100 group-hover:scale-110'}`}
                         alt="Bandiera nazione"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-[8px] text-[var(--text-muted)] uppercase font-black">No Flag</div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 to-transparent" />
+
+                    {/* Overlay icona sospeso */}
+                    {isSuspended && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-zinc-500 text-2xl" title="Gara sospesa">⏸</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="p-3 bg-[var(--bg-tertiary)]">
-                    <div className="font-black text-[10px] uppercase truncate text-[var(--text-primary)] mb-1 tracking-tighter">
+
+                  {/* Info testo */}
+                  <div className={`p-3 ${isSuspended ? 'bg-zinc-900/80' : 'bg-[var(--bg-tertiary)]'}`}>
+                    <div className={`font-black text-[10px] uppercase truncate mb-1 tracking-tighter
+                      ${isSuspended ? 'text-zinc-500' : 'text-[var(--text-primary)]'}`}>
                       {race.official_name?.replace('Grand Prix', 'GP')}
                     </div>
-                    <div className="text-[9px] font-bold text-[var(--text-tertiary)] group-hover:text-red-500 transition-colors">
-                      {race.date}
+                    <div className={`text-[9px] font-bold transition-colors
+                      ${isSuspended ? 'text-zinc-600' : 'text-[var(--text-tertiary)] group-hover:text-red-500'}`}>
+                      {isSuspended ? 'Data da definire' : race.date}
                     </div>
-                    {hasSprint && (
+                    {hasSprint && !isSuspended && (
                       <div className="text-[8px] font-black text-[var(--ferrari-red)] uppercase mt-1">
                         Sprint: {race.sprint_race_date}
+                      </div>
+                    )}
+                    {isSuspended && (
+                      <div className="text-[8px] font-black text-zinc-600 uppercase mt-1 tracking-wider">
+                        ⚠ Gara sospesa
                       </div>
                     )}
                   </div>
