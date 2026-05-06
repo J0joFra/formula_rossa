@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signIn, signOut } from "next-auth/react";
-import { BarChart3, Gamepad2, LogOut, Trophy, Zap, Info, Newspaper, Flag } from 'lucide-react';
+import { Home as HomeIcon, BarChart3, Gamepad2, LogOut, Trophy, Zap, Info, Newspaper, Flag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
 
@@ -13,118 +13,57 @@ export default function Navigation() {
   const pathname = usePathname();
 
   return (
-    <nav
-      role="navigation"
-      aria-label="Navigazione principale"
-      style={{
-        position: 'fixed',
-        top: 0, left: 0, right: 0,
-        zIndex: 100,
-        background: 'rgba(6, 6, 6, 0.92)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-      }}
-    >
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '64px' }}>
+    <nav className="bg-[var(--bg-primary)]/90 backdrop-blur-md border-b border-[var(--border-light)] mx-auto fixed w-full top-0 z-[100]" role="navigation" aria-label="Navigazione principale">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
 
-          {/* ── Logo ── */}
-          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}
-            className="nav-logo-link"
-          >
-            <div style={{
-              width: '36px', height: '36px',
-              background: '#FFD700',
-              borderRadius: '10px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: '4px', overflow: 'hidden', flexShrink: 0,
-              boxShadow: '0 0 12px rgba(220,0,0,0.35)',
-              transition: 'transform 0.2s ease',
-            }}>
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-3 group">
+            <div className="w-10 h-10 bg-[#FFD700] rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(220,0,0,0.4)] group-hover:scale-110 transition-transform overflow-hidden p-1">
               <img
                 src="/data/images/formula-rossa-logo.png"
-                alt="Formula Rossa"
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                alt="Formula Rossa — torna alla home"
+                className="w-full h-full object-contain"
               />
             </div>
-            <span style={{
-              fontSize: '17px', fontWeight: '900',
-              letterSpacing: '-0.5px', textTransform: 'uppercase',
-              fontStyle: 'italic', color: '#fff',
-              fontFamily: 'inherit',
-              lineHeight: 1,
-            }}>
-              Formula <span style={{ color: '#dc2626' }}>Rossa</span>
+            <span className="text-xl font-black tracking-tighter text-[var(--text-primary)] uppercase italic group-hover:text-red-500 transition-colors">
+              Formula <span className="text-[var(--ferrari-red)]">Rossa</span>
             </span>
           </Link>
 
-          {/* ── Menu Desktop ── */}
-          <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-            <NavLink href="/standings"   icon={Trophy}    label="Standings"   active={pathname === '/standings'} />
-            <NavLink href="/statistics"  icon={BarChart3} label="Stats"       active={pathname === '/statistics'} />
-            <NavLink href="/fanzone"     icon={Gamepad2}  label="Fan Zone"    active={pathname === '/fanzone'} />
-            <NavLink href="/fantaf1"     icon={Flag}      label="FantaF1"     active={pathname === '/fantaf1'} />
-            <NavLink href="/live-timing" icon={Zap}       label="Live Timing" active={pathname === '/live-timing'} />
-            <NavLink href="/news"        icon={Newspaper} label="News"        active={pathname?.startsWith('/news')} />
-            <NavLink href="/about"       icon={Info}      label="Chi Siamo"   active={pathname === '/about'} />
-
-            <div style={{ marginLeft: '8px' }}>
+          {/* Menu Desktop */}
+          <div className="hidden md:flex items-center space-x-1">
+            <NavLink href="/standings"   icon={Trophy}     label="Standings"   active={pathname === '/standings'} />
+            <NavLink href="/statistics"  icon={BarChart3}  label="Stats"       active={pathname === '/statistics'} />
+            <NavLink href="/fanzone"     icon={Gamepad2}   label="Fan Zone"    active={pathname === '/fanzone'} />
+            <NavLink href="/fantaf1"     icon={Flag}       label="FantaF1"     active={pathname === '/fantaf1'} />
+            <NavLink href="/live-timing" icon={Zap}        label="Live Timing" active={pathname === '/live-timing'} soon />
+            <NavLink href="/news"        icon={Newspaper}  label="News"        active={pathname?.startsWith('/news')} />
+            <NavLink href="/about"       icon={Info}       label="Chi Siamo"   active={pathname === '/about'} />
+            <div className="px-4 py-2">
               <ThemeToggle />
             </div>
 
-            {/* Divisore + Utente */}
-            <div style={{
-              marginLeft: '16px', paddingLeft: '16px',
-              borderLeft: '1px solid rgba(255,255,255,0.08)',
-              display: 'flex', alignItems: 'center',
-            }}>
+            <div className="ml-6 pl-6 border-l border-[var(--border-strong)] flex items-center">
               {session ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ textAlign: 'right' }}>
-                    <p style={{
-                      fontSize: '10px', fontWeight: '800',
-                      textTransform: 'uppercase', color: '#dc2626',
-                      margin: 0, letterSpacing: '0.5px', lineHeight: 1,
-                    }}>{session.user.name}</p>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-[10px] font-black uppercase text-[var(--ferrari-red)] leading-none">{session.user.name}</p>
                     <button
                       onClick={() => signOut()}
-                      style={{
-                        background: 'none', border: 'none', cursor: 'pointer',
-                        fontSize: '9px', color: 'rgba(255,255,255,0.3)',
-                        textTransform: 'uppercase', letterSpacing: '0.5px',
-                        display: 'flex', alignItems: 'center', gap: '4px',
-                        marginTop: '3px', padding: 0,
-                        transition: 'color 0.2s',
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
-                      onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
+                      className="text-[9px] text-[var(--text-tertiary)] uppercase hover:text-[var(--text-primary)] flex items-center gap-1 ml-auto transition-colors"
                     >
-                      Logout <LogOut size={9} />
+                      Logout <LogOut className="w-2.5 h-2.5" aria-hidden="true" />
                     </button>
                   </div>
-                  <div style={{
-                    width: '36px', height: '36px', borderRadius: '50%',
-                    border: '2px solid #dc2626', padding: '2px', overflow: 'hidden',
-                    flexShrink: 0,
-                  }}>
-                    <img src={session.user.image} alt={`Avatar di ${session.user.name}`}
-                      style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                  <div className="relative w-10 h-10 rounded-full border-2 border-[var(--ferrari-red)] p-0.5 overflow-hidden shadow-lg shadow-[var(--ferrari-red)]/20">
+                    <img src={session.user.image} alt={`Avatar di ${session.user.name}`} className="w-full h-full rounded-full object-cover" />
                   </div>
                 </div>
               ) : (
                 <button
                   onClick={() => signIn('google')}
-                  style={{
-                    background: '#dc2626', color: '#fff',
-                    border: 'none', cursor: 'pointer',
-                    padding: '8px 18px', borderRadius: '4px',
-                    fontSize: '10px', fontWeight: '800',
-                    textTransform: 'uppercase', letterSpacing: '1.5px',
-                    transition: 'background 0.2s',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#ef4444'}
-                  onMouseLeave={e => e.currentTarget.style.background = '#dc2626'}
+                  className="bg-[var(--ferrari-red)] text-[var(--text-primary)] px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all shadow-lg shadow-[var(--ferrari-red)]/20"
                 >
                   Login
                 </button>
@@ -132,26 +71,18 @@ export default function Navigation() {
             </div>
           </div>
 
-          {/* ── Burger (Mobile) ── */}
-          <div className="nav-mobile" style={{ display: 'none', alignItems: 'center', gap: '12px' }}>
+          {/* Burger Button (Mobile) */}
+          <div className="md:hidden flex items-center gap-4">
             {session && (
-              <img src={session.user.image}
-                style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid #dc2626' }}
-                alt={`Avatar di ${session.user.name}`} />
+              <img src={session.user.image} className="w-8 h-8 rounded-full border border-[var(--ferrari-red)]" alt={`Avatar di ${session.user.name}`} />
             )}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label={isMenuOpen ? 'Chiudi menu' : 'Apri menu'}
+              aria-label={isMenuOpen ? 'Chiudi menu di navigazione' : 'Apri menu di navigazione'}
               aria-expanded={isMenuOpen}
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: '6px', padding: '8px', cursor: 'pointer',
-                color: 'rgba(255,255,255,0.7)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}
+              className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-light)]"
             >
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 {isMenuOpen
                   ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -162,66 +93,42 @@ export default function Navigation() {
         </div>
       </div>
 
-      {/* ── Menu Mobile ── */}
+      {/* Menu Mobile */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            style={{
-              background: '#080808',
-              borderTop: '1px solid rgba(255,255,255,0.05)',
-              overflow: 'hidden',
-            }}
+            className="md:hidden bg-[var(--bg-secondary)] border-t border-[var(--border-light)]"
           >
-            <div style={{ padding: '16px 24px 24px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <MobileLink href="/standings"   label="Standings"   active={pathname === '/standings'}       onClick={() => setIsMenuOpen(false)} />
-              <MobileLink href="/statistics"  label="Stats"       active={pathname === '/statistics'}      onClick={() => setIsMenuOpen(false)} />
-              <MobileLink href="/fanzone"     label="Fan Zone"    active={pathname === '/fanzone'}         onClick={() => setIsMenuOpen(false)} />
-              <MobileLink href="/fantaf1"     label="FantaF1"     active={pathname === '/fantaf1'}         onClick={() => setIsMenuOpen(false)} />
-              <MobileLink href="/live-timing" label="Live Timing" active={pathname === '/live-timing'}     onClick={() => setIsMenuOpen(false)} />
-              <MobileLink href="/news"        label="News"        active={pathname?.startsWith('/news')}   onClick={() => setIsMenuOpen(false)} />
-              <MobileLink href="/about"       label="Chi Siamo"   active={pathname === '/about'}           onClick={() => setIsMenuOpen(false)} />
-
-              <div style={{ paddingTop: '4px' }}>
+            <div className="px-4 py-6 space-y-2">
+              <MobileLink href="/standings"   label="Standings"   active={pathname === '/standings'}          onClick={() => setIsMenuOpen(false)} />
+              <MobileLink href="/statistics"  label="Statistics"  active={pathname === '/statistics'}         onClick={() => setIsMenuOpen(false)} />
+              <MobileLink href="/fanzone"     label="Fan Zone"    active={pathname === '/fanzone'}            onClick={() => setIsMenuOpen(false)} />
+              <MobileLink href="/fantaf1"     label="FantaF1"     active={pathname === '/fantaf1'}            onClick={() => setIsMenuOpen(false)} />
+              <MobileLink href="/live-timing" label="Live Timing" active={pathname === '/live-timing'}        onClick={() => setIsMenuOpen(false)} soon />
+              <MobileLink href="/news"        label="News"        active={pathname?.startsWith('/news')}      onClick={() => setIsMenuOpen(false)} />
+              <MobileLink href="/about"       label="Chi Siamo"   active={pathname === '/about'}              onClick={() => setIsMenuOpen(false)} />
+              <div className="px-4 py-2">
                 <ThemeToggle />
               </div>
-
-              <div style={{ paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '8px' }}>
+  
+              <div className="pt-6 border-t border-[var(--border-light)]">
                 {session ? (
-                  <div style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    background: 'rgba(255,255,255,0.03)', padding: '12px 16px', borderRadius: '6px',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <img src={session.user.image}
-                        style={{ width: '36px', height: '36px', borderRadius: '50%', border: '1px solid #dc2626' }}
-                        alt={`Avatar di ${session.user.name}`} />
-                      <span style={{ fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', color: '#fff' }}>
-                        {session.user.name}
-                      </span>
+                  <div className="flex items-center justify-between bg-[var(--bg-card)] p-4 rounded-2xl">
+                    <div className="flex items-center gap-3">
+                      <img src={session.user.image} className="w-10 h-10 rounded-full border border-[var(--ferrari-red)]" alt={`Avatar di ${session.user.name}`} />
+                      <span className="font-bold text-sm uppercase">{session.user.name}</span>
                     </div>
-                    <button onClick={() => signOut()}
-                      style={{
-                        background: 'rgba(220,38,38,0.1)', border: 'none', cursor: 'pointer',
-                        padding: '8px', borderRadius: '6px', color: '#dc2626',
-                        display: 'flex', alignItems: 'center',
-                      }}>
-                      <LogOut size={16} />
+                    <button onClick={() => signOut()} aria-label="Logout" className="p-2 bg-[var(--ferrari-red)]/10 text-red-500 rounded-lg">
+                      <LogOut className="w-5 h-5" aria-hidden="true" />
                     </button>
                   </div>
                 ) : (
                   <button
                     onClick={() => signIn('google')}
-                    style={{
-                      width: '100%', background: '#dc2626', color: '#fff',
-                      border: 'none', cursor: 'pointer',
-                      padding: '14px', borderRadius: '4px',
-                      fontSize: '11px', fontWeight: '800',
-                      textTransform: 'uppercase', letterSpacing: '2px',
-                    }}
+                    className="w-full bg-[var(--ferrari-red)] text-[var(--text-primary)] py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em]"
                   >
                     Login with Google
                   </button>
@@ -231,77 +138,55 @@ export default function Navigation() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <style>{`
-        @media (max-width: 768px) {
-          .nav-desktop { display: none !important; }
-          .nav-mobile  { display: flex !important; }
-        }
-      `}</style>
     </nav>
   );
 }
 
-function NavLink({ href, label, icon: Icon, active }) {
-  const [hovered, setHovered] = useState(false);
-  const isOn = active || hovered;
+function NavLink({ href, label, icon: Icon, active, soon }) {
   return (
     <Link
       href={href}
       aria-current={active ? 'page' : undefined}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        position: 'relative',
-        display: 'flex', alignItems: 'center', gap: '6px',
-        padding: '6px 12px', borderRadius: '4px',
-        fontSize: '10px', fontWeight: '800',
-        textTransform: 'uppercase', letterSpacing: '0.8px',
-        textDecoration: 'none',
-        color: active ? '#fff' : hovered ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.4)',
-        background: active ? 'rgba(255,255,255,0.06)' : hovered ? 'rgba(255,255,255,0.04)' : 'transparent',
-        transition: 'all 0.18s ease',
-        fontFamily: 'monospace',
-      }}
+      className={`relative px-4 py-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest transition-all rounded-xl
+        ${active ? 'text-[var(--text-primary)] bg-[var(--bg-card)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]'}`}
     >
-      <Icon size={13} style={{ color: active ? '#dc2626' : hovered ? 'rgba(220,38,38,0.7)' : 'rgba(255,255,255,0.25)', transition: 'color 0.18s' }} aria-hidden="true" />
+      <Icon className={`w-3.5 h-3.5 ${active ? 'text-red-500' : ''}`} aria-hidden="true" />
       {label}
+      {/* PATCH 4: badge "Soon" per sezioni WIP */}
+      {soon && (
+        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-[var(--ferrari-red)]/20 text-[var(--ferrari-red)] border border-[var(--ferrari-red)]/30 leading-none">
+          Soon
+        </span>
+      )}
       {active && (
         <motion.div
-          layoutId="nav-indicator"
-          style={{
-            position: 'absolute', bottom: '-1px',
-            left: '50%', transform: 'translateX(-50%)',
-            width: '16px', height: '2px',
-            background: '#dc2626', borderRadius: '1px',
-          }}
+          layoutId="nav-active-indicator"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-red-500 rounded-full"
         />
       )}
     </Link>
   );
 }
 
-function MobileLink({ href, label, onClick, active }) {
+function MobileLink({ href, label, onClick, active, soon }) {
   return (
     <Link
       href={href}
       aria-current={active ? 'page' : undefined}
+      className={`flex items-center justify-between w-full px-4 py-3 rounded-xl font-black uppercase text-xs tracking-widest transition-all
+        ${active ? 'text-[var(--text-primary)] bg-[var(--ferrari-red)]/15 border border-[var(--ferrari-red)]/30' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--ferrari-red)]/10'}`}
       onClick={onClick}
-      style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '11px 14px', borderRadius: '4px',
-        fontSize: '11px', fontWeight: '800',
-        textTransform: 'uppercase', letterSpacing: '1.5px',
-        textDecoration: 'none',
-        color: active ? '#fff' : 'rgba(255,255,255,0.45)',
-        background: active ? 'rgba(220,38,38,0.1)' : 'transparent',
-        border: active ? '1px solid rgba(220,38,38,0.2)' : '1px solid transparent',
-        transition: 'all 0.18s ease',
-        fontFamily: 'monospace',
-      }}
     >
-      {label}
-      {active && <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#dc2626' }} />}
+      <span className="flex items-center gap-2">
+        {label}
+        {/* PATCH 4: badge "Soon" per sezioni WIP */}
+        {soon && (
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-[var(--ferrari-red)]/20 text-[var(--ferrari-red)] border border-[var(--ferrari-red)]/30 leading-none">
+            Soon
+          </span>
+        )}
+      </span>
+      {active && <div className="w-1.5 h-1.5 rounded-full bg-red-500" aria-hidden="true" />}
     </Link>
   );
 }
