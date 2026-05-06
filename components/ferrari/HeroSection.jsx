@@ -96,6 +96,13 @@ export default function HeroSection() {
 
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[var(--bg-primary)] via-gray-900 to-black pt-32 pb-20">
+      {/* PATCH 3: keyframe per shimmer skeleton */}
+      <style jsx global>{`
+        @keyframes skeletonShimmer {
+          0%   { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+      `}</style>
       {/* Sfondo animato */}
       <div className="absolute inset-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--ferrari-red)]/10 rounded-full blur-3xl animate-pulse"></div>
@@ -122,7 +129,7 @@ export default function HeroSection() {
               <div className="w-2 h-2 rounded-full bg-[var(--ferrari-red)] relative"></div>
             </div>
             <span className="text-xs font-bold uppercase tracking-[0.3em] text-[var(--ferrari-red)]">
-              LIVE TIMING • SEASON {new Date().getFullYear()}
+              DATA INTELLIGENCE • SEASON {new Date().getFullYear()}
             </span>
             <div className="flex items-center gap-1 ml-2">
               <div className="w-1 h-4 bg-[var(--ferrari-red)]/40 rounded-full"></div>
@@ -254,6 +261,41 @@ export default function HeroSection() {
                   transition={{ delay: 2, duration: 1 }}
                   className="h-px bg-gradient-to-r from-[var(--ferrari-red)] via-yellow-500 to-transparent max-w-md mx-auto md:mx-0"
                 />
+
+                {/* PATCH 1: Sottotitolo esplicativo */}
+                <motion.p
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 2.3, duration: 0.6 }}
+                  className="mt-4 text-sm md:text-base text-[var(--text-secondary)] leading-relaxed max-w-sm mx-auto md:mx-0 text-center md:text-left"
+                >
+                  La piattaforma italiana di statistiche e analisi dati della{' '}
+                  <span className="text-[var(--ferrari-red)] font-semibold">Scuderia Ferrari</span>{' '}
+                  in Formula 1.
+                </motion.p>
+
+                {/* PATCH 1: CTA buttons */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 2.6, duration: 0.6 }}
+                  className="mt-6 flex flex-col sm:flex-row gap-3 justify-center md:justify-start"
+                >
+                  <Link
+                    href="/statistics"
+                    className="inline-flex items-center justify-center gap-2 bg-[var(--ferrari-red)] text-white px-7 py-3 rounded-xl font-black text-[11px] uppercase tracking-[0.14em] transition-all duration-200 hover:bg-red-700 hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(220,0,0,0.4)]"
+                  >
+                    <BarChart3 className="w-4 h-4" aria-hidden="true" />
+                    Esplora le Statistiche
+                  </Link>
+                  <Link
+                    href="/standings"
+                    className="inline-flex items-center justify-center gap-2 bg-transparent text-[var(--text-primary)] px-7 py-3 rounded-xl font-black text-[11px] uppercase tracking-[0.14em] border-2 border-[var(--border-strong)] transition-all duration-200 hover:border-[var(--ferrari-red)] hover:-translate-y-0.5"
+                  >
+                    <Trophy className="w-4 h-4" aria-hidden="true" />
+                    Classifiche {new Date().getFullYear()}
+                  </Link>
+                </motion.div>
               </motion.div>
             </div>
           </div>
@@ -399,7 +441,17 @@ export default function HeroSection() {
                   
                   <div className="relative text-4xl md:text-5xl font-black text-[var(--text-primary)] mb-2 tabular-nums z-10">
                     {loading ? (
-                      <span className="animate-pulse opacity-30">---</span>
+                      /* PATCH 3: skeleton shimmer al posto di "---" */
+                      <span
+                        className="block w-28 h-12 rounded-xl"
+                        aria-label="Caricamento..."
+                        role="status"
+                        style={{
+                          background: 'linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0.06) 100%)',
+                          backgroundSize: '200% 100%',
+                          animation: 'skeletonShimmer 1.5s ease-in-out infinite',
+                        }}
+                      />
                     ) : statsError ? (
                       <span className="text-[var(--ferrari-red)]">N/A</span>
                     ) : (
