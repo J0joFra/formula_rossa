@@ -36,7 +36,7 @@ export default function Navigation() {
             <NavLink href="/standings"   icon={Trophy}     label="Standings"   active={pathname === '/standings'} />
             <NavLink href="/statistics"  icon={BarChart3}  label="Stats"       active={pathname === '/statistics'} />
             <NavLink href="/fanzone"     icon={Gamepad2}   label="Fan Zone"    active={pathname === '/fanzone'} />
-            <NavLink href="/live-timing" icon={Zap}        label="Live Timing" active={pathname === '/live-timing'} soon />
+            <NavLink href="/live-timing" icon={Zap}        label="Live Timing" active={pathname === '/live-timing'} />
             <NavLink href="/news"        icon={Newspaper}  label="News"        active={pathname?.startsWith('/news')} />
             <NavLink href="/about"       icon={Info}       label="Chi Siamo"   active={pathname === '/about'} />
             <div className="px-4 py-2">
@@ -105,7 +105,7 @@ export default function Navigation() {
               <MobileLink href="/standings"   label="Standings"   active={pathname === '/standings'}          onClick={() => setIsMenuOpen(false)} />
               <MobileLink href="/statistics"  label="Statistics"  active={pathname === '/statistics'}         onClick={() => setIsMenuOpen(false)} />
               <MobileLink href="/fanzone"     label="Fan Zone"    active={pathname === '/fanzone'}            onClick={() => setIsMenuOpen(false)} />
-              <MobileLink href="/live-timing" label="Live Timing" active={pathname === '/live-timing'}        onClick={() => setIsMenuOpen(false)} soon />
+              <MobileLink href="/live-timing" label="Live Timing" active={pathname === '/live-timing'}        onClick={() => setIsMenuOpen(false)} />
               <MobileLink href="/news"        label="News"        active={pathname?.startsWith('/news')}      onClick={() => setIsMenuOpen(false)} />
               <MobileLink href="/about"       label="Chi Siamo"   active={pathname === '/about'}              onClick={() => setIsMenuOpen(false)} />
               <div className="px-4 py-2">
@@ -140,7 +140,7 @@ export default function Navigation() {
   );
 }
 
-function NavLink({ href, label, icon: Icon, active, soon }) {
+function NavLink({ href, label, icon: Icon, active }) {
   return (
     <Link
       href={href}
@@ -150,12 +150,6 @@ function NavLink({ href, label, icon: Icon, active, soon }) {
     >
       <Icon className={`w-3.5 h-3.5 ${active ? 'text-red-500' : ''}`} aria-hidden="true" />
       {label}
-      {/* PATCH 4: badge "Soon" per sezioni WIP */}
-      {soon && (
-        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-[var(--ferrari-red)]/20 text-[var(--ferrari-red)] border border-[var(--ferrari-red)]/30 leading-none">
-          Soon
-        </span>
-      )}
       {active && (
         <motion.div
           layoutId="nav-active-indicator"
@@ -166,7 +160,7 @@ function NavLink({ href, label, icon: Icon, active, soon }) {
   );
 }
 
-function MobileLink({ href, label, onClick, active, soon }) {
+function MobileLink({ href, label, onClick, active }) {
   return (
     <Link
       href={href}
@@ -176,13 +170,6 @@ function MobileLink({ href, label, onClick, active, soon }) {
       onClick={onClick}
     >
       <span className="flex items-center gap-2">
-        {label}
-        {/* PATCH 4: badge "Soon" per sezioni WIP */}
-        {soon && (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-[var(--ferrari-red)]/20 text-[var(--ferrari-red)] border border-[var(--ferrari-red)]/30 leading-none">
-            Soon
-          </span>
-        )}
       </span>
       {active && <div className="w-1.5 h-1.5 rounded-full bg-red-500" aria-hidden="true" />}
     </Link>
