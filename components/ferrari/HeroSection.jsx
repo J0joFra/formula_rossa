@@ -1,480 +1,149 @@
+/**
+ * components/ferrari/HeroSection.jsx
+ * Hero della home: tesi del sito a sinistra, riepilogo dati reali a destra.
+ * I numeri sono calcolati dall'archivio F1DB, non hardcodati.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Star, Timer, Zap, Gauge, Award, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { BarChart3, Trophy } from 'lucide-react';
+
+const FALLBACK = { wins: 0, podiums: 0, poles: 0, fastestLaps: 0, constructorTitles: 16, driverTitles: 15 };
 
 export default function HeroSection() {
-  const [dynamicStats, setDynamicStats] = useState({
-    wins: 0,
-    podiums: 0,
-    poles: 0,
-    fastestLaps: 0,
-    totalPoints: 0,
-    grandSlams: 0,
-    years: new Date().getFullYear() - 1950
-  });
+  const [stats, setStats] = useState(FALLBACK);
   const [loading, setLoading] = useState(true);
-  const [statsError, setStatsError] = useState(false);
-
-  const carouselImages = [
-    "/data/images/image1.jpg",
-    "/data/images/image2.jpg",
-    "/data/images/image3.jpg",
-    "/data/images/image4.jpg",
-    "/data/images/image5.jpg",
-    "/data/images/image6.jpg",
-    "/data/images/image7.jpg",
-    "/data/images/image8.jpg",
-    "/data/images/image9.jpg",
-    "/data/images/image10.jpg"
-  ];
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
+    let alive = true;
 
-    async function calculateFerrariStats() {
+    (async () => {
       try {
-        const response = await fetch('/data/f1db-races-race-results.json');
-        if (!response.ok) throw new Error('Network response was not ok');
-        if (!isMounted) return;
-        const data = await response.json();
-        if (!isMounted) return;
+        const res = await fetch('/data/f1db-races-race-results.json');
+        if (!res.ok) throw new Error('richiesta fallita');
+        const data = await res.json();
+        if (!alive) return;
 
-        const ferrariResults = data.filter(r => r.constructorId === 'ferrari');
-        const stats = ferrariResults.reduce((acc, curr) => {
-          if (curr.positionNumber === 1) acc.wins++;
-          if (curr.positionNumber >= 1 && curr.positionNumber <= 3) acc.podiums++;
-          if (curr.gridPositionNumber === 1) acc.poles++;
-          if (curr.fastestLap === true) acc.fastestLaps++;
-          if (curr.points) acc.totalPoints += curr.points;
-          if (curr.grandSlam === true) acc.grandSlams++;
-          return acc;
-        }, { wins: 0, podiums: 0, poles: 0, fastestLaps: 0, totalPoints: 0, grandSlams: 0 });
+        const agg = data
+          .filter(r => r.constructorId === 'ferrari')
+          .reduce((acc, r) => {
+            if (r.positionNumber === 1) acc.wins++;
+            if (r.positionNumber >= 1 && r.positionNumber <= 3) acc.podiums++;
+            if (r.gridPositionNumber === 1) acc.poles++;
+            if (r.fastestLap === true) acc.fastestLaps++;
+            return acc;
+          }, { wins: 0, podiums: 0, poles: 0, fastestLaps: 0 });
 
-        if (isMounted) {
-          setDynamicStats(prev => ({
-            ...prev,
-            wins: stats.wins,
-            podiums: stats.podiums,
-            poles: stats.poles,
-            fastestLaps: stats.fastestLaps,
-            totalPoints: Math.floor(stats.totalPoints),
-            grandSlams: stats.grandSlams
-          }));
-          setStatsError(false);
+        if (alive) {
+          setStats(s => ({ ...s, ...agg }));
+          setFailed(false);
         }
-      } catch (error) {
-        console.error("Errore nel calcolo statistiche Ferrari:", error);
-        if (isMounted) setStatsError(true);
+      } catch (err) {
+        console.error('Statistiche Ferrari non disponibili:', err);
+        if (alive) setFailed(true);
       } finally {
-        if (isMounted) setLoading(false);
+        if (alive) setLoading(false);
       }
-    }
+    })();
 
-    calculateFerrariStats();
-
-    return () => { isMounted = false; };
+    return () => { alive = false; };
   }, []);
 
-  const statsConfig = [
-    { id: 'wins', icon: Trophy, value: dynamicStats.wins, label: 'Vittorie GP', color: 'from-[var(--ferrari-red)] to-[var(--ferrari-red-dark)]' },
-    { id: 'podiums', icon: Star, value: dynamicStats.podiums, label: 'Podi Totali', color: 'from-[var(--ferrari-yellow)] to-[var(--ferrari-yellow-dark)]' },
-    { id: 'poles', icon: Timer, value: dynamicStats.poles, label: 'Pole Positions', color: 'from-[var(--ferrari-red)] to-[var(--ferrari-red-dark)]' },
-    { id: 'fastest-laps', icon: Zap, value: dynamicStats.fastestLaps, label: 'Giri Veloci', color: 'from-[var(--ferrari-yellow)] to-[var(--ferrari-yellow-dark)]' },
-    { id: 'points', icon: Gauge, value: dynamicStats.totalPoints.toLocaleString(), label: 'Punti Storici', color: 'from-[var(--ferrari-red)] to-[var(--ferrari-red-dark)]' },
-    { id: 'grand-slams', icon: Award, value: dynamicStats.grandSlams, label: 'Grand Slams', color: 'from-[var(--ferrari-yellow)] to-[var(--ferrari-yellow-dark)]' },
+  const cells = [
+    { key: 'wins',        label: 'Vittorie',       value: stats.wins,        accent: true },
+    { key: 'podiums',     label: 'Podi',           value: stats.podiums },
+    { key: 'poles',       label: 'Pole position',  value: stats.poles },
+    { key: 'fastestLaps', label: 'Giri veloci',    value: stats.fastestLaps },
   ];
 
-  const StatSkeleton = () => (
-    <div className="animate-pulse">
-      <div className="w-16 h-16 bg-[var(--bg-tertiary)] rounded-2xl mb-6 mx-auto"></div>
-      <div className="w-24 h-12 bg-[var(--bg-tertiary)] rounded-lg mb-2 mx-auto"></div>
-      <div className="w-32 h-4 bg-[var(--bg-tertiary)] rounded mx-auto"></div>
-    </div>
-  );
-
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[var(--bg-primary)] via-gray-900 to-black pt-32 pb-20">
-      {/* PATCH 3: keyframe per shimmer skeleton */}
-      <style jsx global>{`
-        @keyframes skeletonShimmer {
-          0%   { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-      `}</style>
-      {/* Sfondo animato */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--ferrari-red)]/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[var(--ferrari-yellow)]/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-      </div>
+    <section className="relative overflow-hidden pt-[70px]">
+      {/* Alone ambientale */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        aria-hidden="true"
+        style={{ background: 'radial-gradient(60% 80% at 85% 0%, var(--fr-red-soft), transparent 70%)' }}
+      />
 
-      <div className="relative z-10 text-center px-4 max-w-7xl mx-auto flex flex-col items-center w-full">
-        {/* NUOVO HEADER DINAMICO */}
-        <motion.div
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="mb-20 w-full"
-        >
-          {/* Badge in alto con effetto corsa */}
+      <div className="relative max-w-wrap mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div className="grid lg:grid-cols-[1.15fr_.85fr] gap-10 lg:gap-12 items-center">
+
+          {/* ── Tesi ── */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="inline-flex items-center gap-3 bg-[var(--ferrari-red)]/10 backdrop-blur-sm border border-[var(--ferrari-red)]/20 rounded-full px-6 py-2 mb-8"
-          >
-            <div className="relative">
-              <div className="w-2 h-2 rounded-full bg-[var(--ferrari-red)] animate-ping absolute"></div>
-              <div className="w-2 h-2 rounded-full bg-[var(--ferrari-red)] relative"></div>
-            </div>
-            <span className="text-xs font-bold uppercase tracking-[0.3em] text-[var(--ferrari-red)]">
-              DATA INTELLIGENCE • SEASON {new Date().getFullYear()}
-            </span>
-            <div className="flex items-center gap-1 ml-2">
-              <div className="w-1 h-4 bg-[var(--ferrari-red)]/40 rounded-full"></div>
-              <div className="w-1 h-6 bg-[var(--ferrari-red)] rounded-full"></div>
-              <div className="w-1 h-4 bg-[var(--ferrari-red)]/40 rounded-full"></div>
-            </div>
-          </motion.div>
-
-          {/* Logo e Titolo Principale con Animazione 3D */}
-          <div className="relative flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12">
-            {/* Logo Animato */}
-            <motion.div
-              initial={{ rotateY: 90, opacity: 0 }}
-              animate={{ rotateY: 0, opacity: 1 }}
-              transition={{ duration: 1, delay: 0.2 }}
-              className="relative group"
-              style={{ perspective: 1000 }}
-            >
-              <div className="relative w-28 h-28 md:w-36 md:h-36">
-                {/* Anello esterno rotante */}
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="absolute inset-0 rounded-full border-2 border-dashed border-[var(--ferrari-red)]/30"
-                />
-                
-                {/* Logo container */}
-                <div className="absolute inset-2 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-2xl shadow-2xl shadow-[var(--ferrari-yellow)]/30 overflow-hidden transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                  <div className="absolute inset-0 bg-[var(--bg-primary)]/10"></div>
-                  <img 
-                    src="/data/images/formula-rossa-logo.png" 
-                    alt="Formula Rossa — logo piattaforma dati Ferrari F1" 
-                    className="w-full h-full object-contain p-2"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.parentElement.innerHTML = '<span class="text-4xl font-black text-black">SF</span>';
-                    }}
-                  />
-                </div>
-                
-                {/* Riflessi luminosi */}
-                <div className="absolute -inset-4 bg-gradient-to-r from-transparent via-red-600/20 to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 animate-pulse" />
-              </div>
-            </motion.div>
-
-            {/* Titolo con Effetto Pista */}
-            <div className="relative text-center md:text-left">
-              <motion.div
-                initial={{ x: -50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.8 }}
-              >
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-none">
-                  <span className="text-[var(--text-primary)] relative inline-block">
-                    FORMULA
-                    {/* Linea di velocità sotto */}
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: "100%" }}
-                      transition={{ delay: 1.2, duration: 0.8 }}
-                      className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-[var(--ferrari-red)] to-transparent"
-                    />
-                  </span>
-                  <span className="text-[var(--ferrari-red)] relative inline-block ml-2 md:ml-4">
-                    ROSSA
-                    {/* Effetto scia */}
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: [0, 1, 0] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                      className="absolute -right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-gradient-to-l from-[var(--ferrari-red)]/20 to-transparent blur-xl"
-                    />
-                  </span>
-                </h1>
-              </motion.div>
-
-              {/* Sottotitolo con effetto telemetria */}
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.8, duration: 0.6 }}
-                className="mt-4 space-y-2"
-              >
-                <div className="flex items-center justify-center md:justify-start gap-3">
-                  <div className="h-12 w-1 bg-gradient-to-b from-[var(--ferrari-red)] via-red-400 to-transparent rounded-full" />
-                  
-                  <div className="text-left">
-                    <div className="overflow-hidden">
-                      <motion.div
-                        initial={{ y: 50 }}
-                        animate={{ y: 0 }}
-                        transition={{ delay: 1, duration: 0.5, staggerChildren: 0.1 }}
-                        className="text-2xl md:text-3xl font-black"
-                      >
-                        {"DATA INTELLIGENCE".split("").map((char, i) => (
-                          <motion.span
-                            key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 1 + i * 0.05 }}
-                            className={`inline-block ${char === " " ? "w-2" : ""} text-[var(--text-primary)]`}
-                          >
-                            {char}
-                          </motion.span>
-                        ))}
-                      </motion.div>
-                    </div>
-                    
-                    {/* Seconda riga con effetto fade */}
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 1.8 }}
-                      className="flex items-center gap-2 mt-1"
-                    >
-                      <span className="text-xs font-mono text-[var(--ferrari-red)]/80">&lt;/&gt;</span>
-                      <span className="text-sm md:text-base text-[var(--text-secondary)] font-mono tracking-wider">
-                        F1 STATISTICS ENGINE
-                      </span>
-                      <span className="text-xs font-mono text-[var(--ferrari-red)]/80">v2.0</span>
-                    </motion.div>
-                  </div>
-                </div>
-
-                {/* Barra dei tempi dinamica */}
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: "100%" }}
-                  transition={{ delay: 2, duration: 1 }}
-                  className="h-px bg-gradient-to-r from-[var(--ferrari-red)] via-yellow-500 to-transparent max-w-md mx-auto md:mx-0"
-                />
-
-                {/* PATCH 1: Sottotitolo esplicativo */}
-                <motion.p
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 2.3, duration: 0.6 }}
-                  className="mt-4 text-sm md:text-base text-[var(--text-secondary)] leading-relaxed max-w-sm mx-auto md:mx-0 text-center md:text-left"
-                >
-                  La piattaforma italiana di statistiche e analisi dati della{' '}
-                  <span className="text-[var(--ferrari-red)] font-semibold">Scuderia Ferrari</span>{' '}
-                  in Formula 1.
-                </motion.p>
-
-                {/* PATCH 1: CTA buttons */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 2.6, duration: 0.6 }}
-                  className="mt-6 flex flex-col sm:flex-row gap-3 justify-center md:justify-start"
-                >
-                  <Link
-                    href="/statistics"
-                    className="inline-flex items-center justify-center gap-2 bg-[var(--ferrari-red)] text-white px-7 py-3 rounded-xl font-black text-[11px] uppercase tracking-[0.14em] transition-all duration-200 hover:bg-red-700 hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(220,0,0,0.4)]"
-                  >
-                    <BarChart3 className="w-4 h-4" aria-hidden="true" />
-                    Esplora le Statistiche
-                  </Link>
-                  <Link
-                    href="/standings"
-                    className="inline-flex items-center justify-center gap-2 bg-transparent text-[var(--text-primary)] px-7 py-3 rounded-xl font-black text-[11px] uppercase tracking-[0.14em] border-2 border-[var(--border-strong)] transition-all duration-200 hover:border-[var(--ferrari-red)] hover:-translate-y-0.5"
-                  >
-                    <Trophy className="w-4 h-4" aria-hidden="true" />
-                    Classifiche {new Date().getFullYear()}
-                  </Link>
-                </motion.div>
-              </motion.div>
-            </div>
-          </div>
-
-          {/* Citazione con effetto pit board */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.2, duration: 0.8 }}
-            className="relative max-w-3xl mx-auto mt-12"
+            transition={{ duration: .55, ease: 'easeOut' }}
           >
-            {/* Sfondo pit board */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[var(--ferrari-red)]/5 via-transparent to-red-600/5 rounded-3xl blur-3xl" />
-            
-            <div className="relative bg-[var(--bg-tertiary)]/50 backdrop-blur-sm border border-[var(--border-light)] rounded-2xl p-6 overflow-hidden">
-              {/* Griglia di fondo stile telemetria */}
-              <div className="absolute inset-0 opacity-5">
-                <div className="w-full h-full" style={{
-                  backgroundImage: 'linear-gradient(to right, #DC0000 1px, transparent 1px), linear-gradient(to bottom, #DC0000 1px, transparent 1px)',
-                  backgroundSize: '20px 20px'
-                }} />
-              </div>
-              
-              {/* Contenuto citazione */}
-              <div className="relative flex items-start gap-4">
-                <div className="text-4xl font-serif text-[var(--ferrari-red)]/40 leading-none">"</div>
-                <div className="flex-1">
-                  <p className="text-lg md:text-xl text-gray-300 font-light italic">
-                    Datemi una macchina che sia veloce in rettilineo e che stia in strada in curva.
-                  </p>
-                  <div className="flex items-center justify-end gap-2 mt-2">
-                    <span className="text-xs text-[var(--ferrari-red)]/60">—</span>
-                    <span className="text-xs font-mono text-[var(--ferrari-red)]/80 uppercase tracking-wider">
-                      Enzo Ferrari • Il Drake
-                    </span>
-                    {/* Mini semaforo */}
-                    <div className="flex gap-1 ml-2">
-                      <div className="w-2 h-2 rounded-full bg-[var(--ferrari-red)] animate-pulse" />
-                      <div className="w-2 h-2 rounded-full bg-yellow-600/30" />
-                      <div className="w-2 h-2 rounded-full bg-green-600/30" />
-                    </div>
-                  </div>
-                </div>
-                <div className="text-4xl font-serif text-[var(--ferrari-red)]/40 leading-none self-end">"</div>
-              </div>
+            <span className="fr-eyebrow inline-flex items-center gap-2.5 mb-5">
+              <span className="w-[7px] h-[7px] rounded-full bg-[var(--fr-red)] shadow-[0_0_0_4px_var(--fr-red-soft)]" aria-hidden="true" />
+              Data Intelligence · Scuderia Ferrari
+            </span>
 
-              {/* Barra di avanzamento stile giro */}
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ delay: 3, duration: 2, repeat: Infinity, repeatType: "reverse" }}
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[var(--ferrari-red)] via-yellow-500 to-red-600 origin-left"
-                style={{ transformOrigin: 'left' }}
-              />
+            <h1 className="uppercase">
+              La Rossa<br />
+              <span className="text-[var(--fr-red)]">nei numeri</span>
+            </h1>
+
+            <p className="text-base md:text-lg text-[var(--fr-text-muted)] max-w-[46ch] mt-5 mb-8">
+              Ogni vittoria, pole e giro veloce della Scuderia Ferrari dal 1950 a oggi.
+              Statistiche, classifiche e archivio storico, in un&apos;unica piattaforma indipendente.
+            </p>
+
+            <div className="flex flex-wrap gap-3">
+              <Link href="/statistics" className="btn btn-primary">
+                <BarChart3 className="w-4 h-4" aria-hidden="true" />
+                Esplora le statistiche
+              </Link>
+              <Link href="/standings" className="btn btn-outline-light">
+                <Trophy className="w-4 h-4" aria-hidden="true" />
+                Classifiche {new Date().getFullYear()}
+              </Link>
             </div>
           </motion.div>
-        </motion.div>
 
-        {/* Container principale per Stats Grid con immagini laterali */}
-        <div className="relative w-full max-w-6xl mb-32">
-          {/* COLONNA SINISTRA*/}
-          <div className="hidden lg:block absolute -left-48 top-1/2 -translate-y-1/2 w-48 h-[120%] overflow-hidden z-0">
-            <motion.div
-              className="flex flex-col gap-8"
-              animate={{ y: [0, -1000] }}
-              transition={{ 
-                duration: 40,
-                repeat: Infinity,
-                ease: [0.25, 0.1, 0.25, 1]
-              }}
-            >
-              {[...carouselImages, ...carouselImages].map((img, index) => (
-                <div key={`left-${index}`} className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden group">
-                  <Image
-                    src={img}
-                    alt="Immagine del pilota Ferrari in azione durante un Gran Premio"
-                    width={192}
-                    height={256}
-                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                    loading="lazy"
-                    quality={85}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)]/70 via-transparent to-transparent opacity-60" />
-                </div>
-              ))}
-            </motion.div>
-            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[var(--bg-primary)] via-black/80 to-transparent z-10" />
-            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--bg-primary)] via-black/80 to-transparent z-10" />
-          </div>
+          {/* ── Riepilogo dati ── */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: .55, delay: .12, ease: 'easeOut' }}
+            className="rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)] shadow-[var(--fr-shadow)] overflow-hidden"
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--fr-border)]">
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[var(--fr-text-faint)]">
+                Ferrari · F1 all-time
+              </span>
+              <span className="font-mono text-[10px] tracking-[0.16em] uppercase font-bold text-[var(--fr-red)]">
+                1950 → {new Date().getFullYear()}
+              </span>
+            </div>
 
-          {/* COLONNA DESTRA */}
-          <div className="hidden lg:block absolute -right-48 top-1/2 -translate-y-1/2 w-48 h-[120%] overflow-hidden z-0">
-            <motion.div
-              className="flex flex-col gap-8"
-              animate={{ y: [-1000, 0] }}
-              transition={{ 
-                duration: 40,
-                repeat: Infinity,
-                ease: [0.25, 0.1, 0.25, 1]
-              }}
-            >
-              {[...carouselImages, ...carouselImages].map((img, index) => (
-                <div key={`right-${index}`} className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden group">
-                  <Image
-                    src={img}
-                    alt="Immagine del pilota Ferrari in azione durante un Gran Premio"
-                    width={192}
-                    height={256}
-                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                    loading="lazy"
-                    quality={85}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-primary)]/70 via-transparent to-transparent opacity-60" />
-                </div>
-              ))}
-            </motion.div>
-            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[var(--bg-primary)] via-black/80 to-transparent z-10" />
-            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--bg-primary)] via-black/80 to-transparent z-10" />
-          </div>
-
-          {/* Stats Grid Centrale */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl mx-auto relative z-10">
-            {statsConfig.map((stat, index) => (
-              <Link 
-                href={`/stats/${stat.id}`} 
-                key={stat.id}
-                aria-label={`Visualizza statistiche dettagliate per ${stat.label}`}
-              >
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 + 0.5 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="group bg-[var(--bg-tertiary)]/70 backdrop-blur-xl border border-[var(--border-strong)] rounded-2xl p-8 hover:border-[var(--ferrari-red)]/40 hover:bg-[var(--bg-tertiary)]/90 transition-all duration-500 shadow-2xl flex flex-col items-center cursor-pointer h-full relative overflow-hidden"
+            <div className="grid grid-cols-2">
+              {cells.map((c, i) => (
+                <div
+                  key={c.key}
+                  className={`px-5 py-6 border-b border-[var(--fr-border)] ${i % 2 === 0 ? 'border-r' : ''}`}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-transparent via-red-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  
-                  <div className={`relative inline-flex p-4 rounded-2xl bg-gradient-to-br ${stat.color} mb-6 shadow-lg group-hover:shadow-red-500/30 group-hover:scale-110 transition-all duration-300 z-10`}>
-                    <stat.icon className="w-8 h-8 text-[var(--text-primary)]" />
-                    <div className="absolute inset-0 rounded-2xl bg-red-500/20 blur-xl group-hover:blur-2xl transition-all duration-300" />
+                  <div className={`tabular text-[34px] font-bold leading-none tracking-tight ${c.accent ? 'text-[var(--fr-red)]' : 'text-[var(--fr-text)]'}`}>
+                    {loading
+                      ? <span className="skeleton block w-20 h-8 rounded-lg" role="status" aria-label="Caricamento" />
+                      : failed
+                        ? <span className="text-[var(--fr-text-faint)] text-2xl">N/D</span>
+                        : c.value.toLocaleString('it-IT')}
                   </div>
-                  
-                  <div className="relative text-4xl md:text-5xl font-black text-[var(--text-primary)] mb-2 tabular-nums z-10">
-                    {loading ? (
-                      /* PATCH 3: skeleton shimmer al posto di "---" */
-                      <span
-                        className="block w-28 h-12 rounded-xl"
-                        aria-label="Caricamento..."
-                        role="status"
-                        style={{
-                          background: 'linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0.06) 100%)',
-                          backgroundSize: '200% 100%',
-                          animation: 'skeletonShimmer 1.5s ease-in-out infinite',
-                        }}
-                      />
-                    ) : statsError ? (
-                      <span className="text-[var(--ferrari-red)]">N/A</span>
-                    ) : (
-                      <motion.span
-                        key={stat.value}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        {stat.value}
-                      </motion.span>
-                    )}
+                  <div className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--fr-text-muted)] mt-1.5">
+                    {c.label}
                   </div>
-                  
-                  <div className="relative text-[var(--text-secondary)] text-xs md:text-sm uppercase font-semibold tracking-[0.2em] leading-tight z-10">
-                    {stat.label}
-                  </div>
-                  
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-16 h-0.5 bg-gradient-to-r from-transparent via-red-600 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </motion.div>
-              </Link>
-            ))}
-          </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-between px-5 py-3.5 text-xs text-[var(--fr-text-faint)]">
+              <span>{stats.constructorTitles} Titoli Costruttori</span>
+              <span className="tabular">{stats.driverTitles} Titoli Piloti</span>
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>
