@@ -4,7 +4,7 @@ import React from 'react';
 import { 
   Instagram, Twitter, Youtube, Linkedin, Heart, Mail, MessageCircle, 
   Trophy, Gauge, Users, ChevronRight, Award, ExternalLink,
-  Sparkles, Zap, Shield, Terminal, Code, Database, Activity, Info
+  Sparkles, Zap, Shield, Terminal, Code, Database, Activity, Info, Cookie
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -211,6 +211,22 @@ export default function Footer() {
                     </Link>
                   </li>
                 ))}
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== 'undefined') window.dispatchEvent(new Event('open-cookie-settings'));
+                    }}
+                    className="group flex items-center justify-between w-full text-left text-xs lg:text-sm text-[var(--text-secondary)]
+                      hover:text-[var(--ferrari-red)] transition-colors p-1.5 lg:p-2 rounded-lg hover:bg-[var(--ferrari-red)]/5"
+                  >
+                    <div className="flex items-center gap-2 lg:gap-3">
+                      <Cookie className="w-3 h-3 lg:w-4 lg:h-4 text-[var(--text-tertiary)] group-hover:text-[var(--ferrari-red)] flex-shrink-0" aria-hidden="true" />
+                      <span className="truncate">Preferenze cookie</span>
+                    </div>
+                    <ChevronRight className="w-2.5 h-2.5 lg:w-3 lg:h-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" aria-hidden="true" />
+                  </button>
+                </li>
               </ul>
             </div>
           </div>

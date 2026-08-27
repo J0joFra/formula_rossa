@@ -101,8 +101,14 @@ export default function CookiesPage() {
 
         <section>
           <h2 className="text-xl font-bold text-white mb-4">Gestione cookie</h2>
+          <p className="text-gray-400 mb-4">
+            Al primo accesso ti chiediamo il consenso tramite un banner: i cookie analitici e
+            pubblicitari vengono attivati solo se li accetti. Puoi modificare la tua scelta in
+            qualsiasi momento dalla voce <strong className="text-white">&laquo;Preferenze cookie&raquo;</strong> nel
+            footer del sito.
+          </p>
           <p className="text-gray-400">
-            Puoi gestire le tue preferenze sui cookie direttamente dal browser:
+            Puoi inoltre gestire le tue preferenze sui cookie direttamente dal browser:
           </p>
           <ul className="list-disc pl-6 text-gray-400 space-y-2 mt-4">
             <li>

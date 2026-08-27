@@ -1,5 +1,6 @@
 import { Inter } from 'next/font/google';
 import Footer from '../components/ferrari/Footer';
+import CookieConsent from '../components/CookieConsent';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -55,6 +56,7 @@ export default function RootLayout({ children }) {
       <body className={inter.className}>
         {children}
         <Footer />
+        <CookieConsent />
       </body>
     </html>
   );

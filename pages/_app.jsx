@@ -1,7 +1,8 @@
 import { SessionProvider } from "next-auth/react";
 import Head from 'next/head';
 import { ThemeProvider } from 'next-themes';
-import Script from 'next/script'; 
+import Script from 'next/script';
+import CookieConsent from '../components/CookieConsent';
 import '../styles/globals.css';
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }) {
@@ -36,6 +37,9 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
           rel="stylesheet"
         />
       </Head>
+
+      {/* Google Consent Mode v2 default "denied" impostato in pages/_document.jsx,
+          così parte prima del caricamento di Analytics/AdSense. */}
 
       {/* Google Analytics (gtag.js) */}
       <Script
@@ -488,6 +492,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
       </div>
 
       <Component {...pageProps} />
+      <CookieConsent />
     </SessionProvider>
     </ThemeProvider>
   );
