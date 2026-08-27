@@ -4,6 +4,7 @@ import HeroSection from '../components/ferrari/HeroSection';
 import StatsSection from '../components/ferrari/StatsSection';
 import NewsSection from '../components/ferrari/NewsSection';
 import Footer from '../components/ferrari/Footer';
+import GridUpPromo from '../components/ferrari/GridUpPromo';
 import SEO from '../components/seo';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -14,7 +15,7 @@ import { createClient } from '@supabase/supabase-js';
 const supabase = typeof window !== 'undefined'
   ? createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     )
   : null;
 
@@ -356,6 +357,21 @@ export default function Home() {
     ],
   };
 
+  /* ── SoftwareApplication schema — rende scopribile l'app GridUp ── */
+  const appJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'MobileApplication',
+    name: 'GridUp',
+    operatingSystem: 'Android, Web',
+    applicationCategory: 'SportsApplication',
+    description: 'Calcola i punti necessari per vincere il Campionato del Mondo di F1: scenari in tempo reale, classifiche piloti e costruttori e confronti tra piloti.',
+    url: 'https://gridup-f1.web.app',
+    installUrl: 'https://play.google.com/store/apps/details?id=com.gridup.app',
+    inLanguage: 'it',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+    author: { '@type': 'Organization', name: 'Formula Rossa', url: 'https://formula-rossa.it' },
+  };
+
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] relative overflow-hidden">
 
@@ -370,6 +386,12 @@ export default function Home() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+      />
+
+      {/* SoftwareApplication schema — app GridUp */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(appJsonLd) }}
       />
 
       {/* Background dot grid — CSS module invece di inline style */}
@@ -400,7 +422,10 @@ export default function Home() {
                 <ArchiveCard />
               </div>
             </div>
-          </div>    
+          </div>
+
+          <GridUpPromo />
+
           <div ref={statsRef}><StatsSection /></div>
 
           <div ref={newsRef}><NewsSection /></div>

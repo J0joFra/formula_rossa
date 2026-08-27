@@ -147,24 +147,39 @@ export default function Footer() {
               </h4>
               <ul className="space-y-2 lg:space-y-3">
                 {[
-                  { name: 'Chi Siamo', href: '/about',   icon: Users    },
-                  { name: 'Contatti',  href: '/contact', icon: Mail     },
-                  { name: 'FAQ',       href: '/faq',     icon: Activity },
-                ].map((link, j) => (
-                  <li key={j}>
-                    <Link
-                      href={link.href}
-                      className="group flex items-center justify-between text-xs lg:text-sm text-[var(--text-secondary)] 
-                        hover:text-[var(--ferrari-red)] transition-colors p-1.5 lg:p-2 rounded-lg hover:bg-[var(--ferrari-red)]/5"
-                    >
+                  { name: 'Chi Siamo', href: '/about',                        icon: Users    },
+                  { name: 'Contatti',  href: 'mailto:info@formula-rossa.it',  icon: Mail     },
+                  { name: 'GridUp App', href: 'https://gridup-f1.web.app',    icon: Activity, external: true },
+                ].map((link, j) => {
+                  const isExternal = link.external || link.href.startsWith('mailto:') || link.href.startsWith('http');
+                  const inner = (
+                    <>
                       <div className="flex items-center gap-2 lg:gap-3">
                         <link.icon className="w-3 h-3 lg:w-4 lg:h-4 text-[var(--text-tertiary)] group-hover:text-[var(--ferrari-red)] flex-shrink-0" aria-hidden="true" />
                         <span className="truncate">{link.name}</span>
                       </div>
                       <ChevronRight className="w-2.5 h-2.5 lg:w-3 lg:h-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" aria-hidden="true" />
-                    </Link>
-                  </li>
-                ))}
+                    </>
+                  );
+                  const cls = "group flex items-center justify-between text-xs lg:text-sm text-[var(--text-secondary)] hover:text-[var(--ferrari-red)] transition-colors p-1.5 lg:p-2 rounded-lg hover:bg-[var(--ferrari-red)]/5";
+                  return (
+                    <li key={j}>
+                      {isExternal ? (
+                        <a
+                          href={link.href}
+                          className={cls}
+                          {...(link.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                        >
+                          {inner}
+                        </a>
+                      ) : (
+                        <Link href={link.href} className={cls}>
+                          {inner}
+                        </Link>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>
