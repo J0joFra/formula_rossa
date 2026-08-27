@@ -1,9 +1,6 @@
-import { Inter } from 'next/font/google';
 import Footer from '../components/ferrari/Footer';
 import CookieConsent from '../components/CookieConsent';
 import './globals.css';
-
-const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
   title: 'Formula Rossa - Data Intelligence Scuderia Ferrari F1',
@@ -52,8 +49,16 @@ export default function RootLayout({ children }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="keywords" content="Ferrari, Formula 1, F1, Scuderia Ferrari, dati F1, statistiche F1" />
         <meta name="author" content="Formula Rossa" />
+
+        {/* Font del design system — stessi del Pages Router */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+          rel="stylesheet"
+        />
       </head>
-      <body className={inter.className}>
+      <body>
         {children}
         <Footer />
         <CookieConsent />

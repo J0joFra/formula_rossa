@@ -1,0 +1,189 @@
+/* ============================================================================
+   FORMULA ROSSA — DESIGN SYSTEM (tokens)
+   ----------------------------------------------------------------------------
+   Unica fonte di verità per colori, tipografia, raggi e ombre.
+   Importato sia da styles/globals.css (Pages Router) sia da app/globals.css
+   (App Router): non duplicare questi valori altrove.
+
+   Linguaggio visivo allineato all'app GridUp:
+   - rosso  #E8002D
+   - fondo scuro blu-petrolio (non nero piatto)
+   - tipografia condensata sportiva (Barlow Condensed) + DM Sans + JetBrains Mono
+   - angoli generosi (radius 20px)
+
+   Il tema è gestito da next-themes con attribute="class":
+   <html class="dark"> (default) oppure <html class="light">.
+   ========================================================================== */
+
+:root {
+  /* ── Tipografia ─────────────────────────────────────────────────────────── */
+  --font-head: 'Barlow Condensed', 'Arial Narrow', Impact, sans-serif;
+  --font-body: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* ── Forma ──────────────────────────────────────────────────────────────── */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius:    20px;
+  --radius-lg: 26px;
+  --radius-pill: 9999px;
+
+  /* ── Layout ─────────────────────────────────────────────────────────────── */
+  --maxw: 1200px;
+  --nav-h: 70px;
+  --touch-min: 44px;
+
+  /* ── Spacing scale ──────────────────────────────────────────────────────── */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* ── Typography scale ───────────────────────────────────────────────────── */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+
+  /* ── Brand (invariante fra i temi) ──────────────────────────────────────── */
+  --fr-red-brand: #E8002D;
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     TEMA SCURO — default
+     ══════════════════════════════════════════════════════════════════════════ */
+  --fr-bg:         #04161b;
+  --fr-surface:    #0a2027;
+  --fr-surface-2:  #0f2c34;
+  --fr-surface-3:  #0c252d;
+  --fr-overlay:    rgba(255, 255, 255, 0.04);
+  --fr-overlay-2:  rgba(255, 255, 255, 0.08);
+
+  --fr-text:       #e9f1ea;
+  --fr-text-muted: #93a8ab;
+  --fr-text-faint: #5f767b;
+  --fr-text-dim:   #3f5257;
+
+  --fr-border:        #153039;
+  --fr-border-strong: #1e3f49;
+  --fr-border-hair:   rgba(255, 255, 255, 0.07);
+
+  --fr-red:      #FF2A46;
+  --fr-red-ink:  #ff5069;
+  --fr-red-soft: rgba(255, 42, 70, 0.12);
+  --fr-gold:     #E7B84E;
+  --fr-teal:     #37b0c0;
+
+  --fr-success: #2fd39a;
+  --fr-warning: #E7B84E;
+  --fr-danger:  #ff5069;
+  --fr-info:    #37b0c0;
+
+  --fr-shadow:    0 1px 2px rgba(0,0,0,.4), 0 24px 48px -20px rgba(0,0,0,.7);
+  --fr-shadow-sm: 0 1px 2px rgba(0,0,0,.35), 0 8px 20px -12px rgba(0,0,0,.6);
+  --fr-glow-red:  0 12px 30px -12px var(--fr-red);
+
+  color-scheme: dark;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TEMA CHIARO
+   ══════════════════════════════════════════════════════════════════════════ */
+:root[class~="light"] {
+  --fr-bg:         #f2f3f3;
+  --fr-surface:    #ffffff;
+  --fr-surface-2:  #e9ebec;
+  --fr-surface-3:  #fbfbfb;
+  --fr-overlay:    rgba(10, 30, 35, 0.03);
+  --fr-overlay-2:  rgba(10, 30, 35, 0.06);
+
+  --fr-text:       #12181a;
+  --fr-text-muted: #586268;
+  --fr-text-faint: #8b979c;
+  --fr-text-dim:   #a9b3b6;
+
+  --fr-border:        #e0e3e4;
+  --fr-border-strong: #cdd2d3;
+  --fr-border-hair:   rgba(10, 30, 35, 0.08);
+
+  --fr-red:      #E8002D;
+  --fr-red-ink:  #c00023;
+  --fr-red-soft: rgba(232, 0, 45, 0.08);
+  --fr-gold:     #C9922B;
+  --fr-teal:     #0d6f7e;
+
+  --fr-success: #0f8a63;
+  --fr-warning: #b07d19;
+  --fr-danger:  #c00023;
+  --fr-info:    #0d6f7e;
+
+  --fr-shadow:    0 1px 2px rgba(10,30,35,.04), 0 12px 32px -12px rgba(10,30,35,.14);
+  --fr-shadow-sm: 0 1px 2px rgba(10,30,35,.04), 0 6px 16px -10px rgba(10,30,35,.12);
+  --fr-glow-red:  0 12px 26px -12px rgba(232, 0, 45, .5);
+
+  color-scheme: light;
+}
+
+/* ============================================================================
+   ALIAS LEGACY
+   ----------------------------------------------------------------------------
+   Le pagine esistenti usano ancora questi nomi (--bg-primary, --ferrari-red…).
+   Mappandoli sui token nuovi, il restyle si propaga su tutto il sito senza
+   dover riscrivere ogni pagina. Da rimuovere progressivamente man mano che le
+   pagine migrano ai token --fr-*.
+   ========================================================================== */
+:root {
+  --bg-primary:    var(--fr-bg);
+  --bg-secondary:  var(--fr-surface);
+  --bg-tertiary:   var(--fr-surface-2);
+  --bg-card:       var(--fr-overlay);
+  --bg-card-hover: var(--fr-overlay-2);
+
+  --text-primary:   var(--fr-text);
+  --text-secondary: var(--fr-text-muted);
+  --text-tertiary:  var(--fr-text-faint);
+  --text-muted:     var(--fr-text-dim);
+
+  --border-light:  var(--fr-border);
+  --border-medium: var(--fr-border);
+  --border-strong: var(--fr-border-strong);
+
+  --ferrari-red:        var(--fr-red);
+  --ferrari-red-light:  var(--fr-red-ink);
+  --ferrari-red-dark:   var(--fr-red-ink);
+  --ferrari-yellow:     var(--fr-gold);
+  --ferrari-yellow-light: var(--fr-gold);
+  --ferrari-yellow-dark:  var(--fr-gold);
+  --ferrari-black:      var(--fr-surface);
+
+  --accent-primary:   var(--fr-red);
+  --accent-secondary: var(--fr-gold);
+
+  --success: var(--fr-success);
+  --warning: var(--fr-warning);
+  --error:   var(--fr-danger);
+  --info:    var(--fr-info);
+
+  --scrollbar-track:      var(--fr-surface-2);
+  --scrollbar-thumb:      var(--fr-border-strong);
+  --scrollbar-thumb-hover: var(--fr-red);
+
+  --gradient-ferrari: linear-gradient(135deg, var(--fr-red) 0%, var(--fr-surface) 55%, var(--fr-gold) 100%);
+  --gradient-red:     linear-gradient(135deg, var(--fr-red) 0%, var(--fr-red-ink) 100%);
+  --gradient-yellow:  linear-gradient(135deg, var(--fr-gold) 0%, #a97b1d 100%);
+
+  --shadow-sm: var(--fr-shadow-sm);
+  --shadow-md: var(--fr-shadow-sm);
+  --shadow-lg: var(--fr-shadow);
+  --shadow-xl: var(--fr-shadow);
+  --shadow-red:    var(--fr-glow-red);
+  --shadow-red-sm: var(--fr-shadow-sm);
+  --shadow-yellow: 0 12px 30px -14px var(--fr-gold);
+}

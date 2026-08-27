@@ -7,13 +7,60 @@ module.exports = {
   ],
   theme: {
     extend: {
+      /* ── DESIGN SYSTEM — vedi styles/tokens.css ── */
+      fontFamily: {
+        head: ['var(--font-head)'],
+        body: ['var(--font-body)'],
+        mono: ['var(--font-mono)'],
+      },
+      borderRadius: {
+        sm:   'var(--radius-sm)',
+        md:   'var(--radius-md)',
+        DEFAULT: 'var(--radius)',
+        lg:   'var(--radius)',
+        xl:   'var(--radius-lg)',
+        '2xl': 'var(--radius-lg)',
+      },
+      boxShadow: {
+        card: 'var(--fr-shadow-sm)',
+        float: 'var(--fr-shadow)',
+        glow: 'var(--fr-glow-red)',
+      },
+      maxWidth: {
+        wrap: 'var(--maxw)',
+      },
       colors: {
+        /* Token semantici: usare questi nel codice nuovo */
+        surface: {
+          DEFAULT: 'var(--fr-surface)',
+          2: 'var(--fr-surface-2)',
+          3: 'var(--fr-surface-3)',
+        },
+        ground: 'var(--fr-bg)',
+        ink: {
+          DEFAULT: 'var(--fr-text)',
+          muted: 'var(--fr-text-muted)',
+          faint: 'var(--fr-text-faint)',
+          dim: 'var(--fr-text-dim)',
+        },
+        hairline: {
+          DEFAULT: 'var(--fr-border)',
+          strong: 'var(--fr-border-strong)',
+        },
+        brand: {
+          DEFAULT: 'var(--fr-red)',
+          ink: 'var(--fr-red-ink)',
+          soft: 'var(--fr-red-soft)',
+        },
+        gold: 'var(--fr-gold)',
+        teal: 'var(--fr-teal)',
+
         // SCUDERIE F1 2026
 
         ferrari: {
-          red: '#DC0000',
-          yellow: '#FFD700',
-          black: '#111111',
+          red: 'var(--fr-red)',
+          yellow: 'var(--fr-gold)',
+          black: 'var(--fr-surface)',
         },
 
         mclaren: {

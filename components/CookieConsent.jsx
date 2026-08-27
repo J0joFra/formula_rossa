@@ -69,16 +69,16 @@ export default function CookieConsent() {
       aria-label="Preferenze cookie"
       className="fixed inset-x-0 bottom-0 z-[200] px-3 pb-3 sm:px-4 sm:pb-4"
     >
-      <div className="mx-auto max-w-3xl rounded-2xl border border-white/10 bg-zinc-900/95 backdrop-blur-md shadow-2xl shadow-black/50 p-5 sm:p-6">
+      <div className="mx-auto max-w-3xl rounded-2xl border border-[var(--fr-border)] bg-[var(--fr-surface)] backdrop-blur-md shadow-[var(--fr-shadow)] p-5 sm:p-6">
         <div className="flex items-start gap-3">
-          <span className="shrink-0 w-10 h-10 rounded-xl bg-red-600/15 flex items-center justify-center">
-            <Cookie className="w-5 h-5 text-red-500" aria-hidden="true" />
+          <span className="shrink-0 w-10 h-10 rounded-xl bg-[var(--fr-red-soft)] flex items-center justify-center">
+            <Cookie className="w-5 h-5 text-[var(--fr-red)]" aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1">
-            <h2 className="text-sm font-black uppercase tracking-wider text-white">
+            <h2 className="text-sm font-black uppercase tracking-wider text-[var(--fr-text)]">
               Rispettiamo la tua privacy
             </h2>
-            <p className="mt-1.5 text-xs leading-relaxed text-gray-400">
+            <p className="mt-1.5 text-xs leading-relaxed text-[var(--fr-text-muted)]">
               Usiamo cookie tecnici necessari e, con il tuo consenso, cookie analitici
               (Google Analytics) e pubblicitari (Google AdSense) per capire come viene usato il
               sito e sostenere il progetto. Puoi accettare, rifiutare o cambiare idea in qualsiasi
@@ -90,14 +90,14 @@ export default function CookieConsent() {
               <button
                 type="button"
                 onClick={() => decide(true)}
-                className="order-1 sm:order-2 inline-flex items-center justify-center bg-red-600 text-white px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-red-700 transition-colors"
+                className="order-1 sm:order-2 inline-flex items-center justify-center bg-[var(--fr-red)] text-white px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-[var(--fr-red-ink)] transition-colors"
               >
                 Accetta tutti
               </button>
               <button
                 type="button"
                 onClick={() => decide(false)}
-                className="order-2 sm:order-1 inline-flex items-center justify-center bg-transparent text-gray-300 px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest border border-white/15 hover:border-white/40 hover:text-white transition-colors"
+                className="order-2 sm:order-1 inline-flex items-center justify-center bg-transparent text-[var(--fr-text-muted)] px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest border border-[var(--fr-border-strong)] hover:border-[var(--fr-red)] hover:text-[var(--fr-text)] transition-colors"
               >
                 Rifiuta non essenziali
               </button>
@@ -108,7 +108,7 @@ export default function CookieConsent() {
             type="button"
             onClick={() => decide(false)}
             aria-label="Chiudi e rifiuta i cookie non essenziali"
-            className="shrink-0 p-1.5 text-gray-500 hover:text-white transition-colors"
+            className="shrink-0 p-1.5 text-[var(--fr-text-faint)] hover:text-[var(--fr-text)] transition-colors"
           >
             <X className="w-4 h-4" aria-hidden="true" />
           </button>
