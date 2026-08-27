@@ -1,7 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { BarChart3, Zap, Gamepad2, ArrowRight } from 'lucide-react';
 
 import Navigation from '../components/ferrari/Navigation';
 import HeroSection from '../components/ferrari/HeroSection';
