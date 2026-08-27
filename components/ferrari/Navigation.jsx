@@ -1,159 +1,307 @@
 // components/ferrari/Navigation.jsx
-import { useState } from 'react';
+// Navigazione a 3 pilastri: Dati · Live · Gioca (+ app GridUp).
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useSession, signIn, signOut } from "next-auth/react";
-import { Home as HomeIcon, BarChart3, Gamepad2, LogOut, Trophy, Zap, Info, Newspaper, Flag, Smartphone } from 'lucide-react';
+import { useSession, signIn, signOut } from 'next-auth/react';
+import {
+  BarChart3, Zap, Gamepad2, Info, LogOut, Smartphone,
+  ChevronDown, Menu, X,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
 
-const GRIDUP_URL = 'https://gridup-f1.web.app';
+export const GRIDUP_URL = 'https://gridup-f1.web.app';
+
+/* I tre pilastri del sito. Tutto ciò che è raggiungibile vive qui dentro:
+   niente più pagine orfane non linkate dal menu. */
+const PILLARS = [
+  {
+    id: 'dati',
+    label: 'Dati',
+    icon: BarChart3,
+    items: [
+      { href: '/statistics', label: 'Statistiche',  desc: 'Archivio storico e record' },
+      { href: '/standings',  label: 'Classifiche',  desc: 'Piloti e costruttori' },
+      { href: '/piloti',     label: 'Piloti',       desc: 'Schede e carriere' },
+      { href: '/circuiti',   label: 'Circuiti',     desc: 'Tracciati e statistiche' },
+      { href: '/races',      label: 'Gare',         desc: 'Calendario e risultati' },
+    ],
+  },
+  {
+    id: 'live',
+    label: 'Live',
+    icon: Zap,
+    items: [
+      { href: '/live-timing', label: 'Live Timing', desc: 'Tempi in tempo reale' },
+      { href: '/news',        label: 'News',        desc: 'Ultime dal mondo F1' },
+    ],
+  },
+  {
+    id: 'gioca',
+    label: 'Gioca',
+    icon: Gamepad2,
+    items: [
+      { href: '/fanzone',            label: 'Fan Zone',    desc: 'Tutti i mini-giochi' },
+      { href: '/games/trivia',       label: 'F1 Trivia',   desc: 'Quiz sulla Rossa' },
+      { href: '/games/pitstop',      label: 'Pit Stop',    desc: 'Sfida di riflessi' },
+      { href: '/games/circuit-rush', label: 'Circuit Rush', desc: 'Corsa a ostacoli' },
+    ],
+  },
+];
 
 export default function Navigation() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { data: session } = useSession();
   const pathname = usePathname();
+  const navRef = useRef(null);
+
+  // Chiude i menu quando cambia pagina
+  useEffect(() => { setOpenMenu(null); setMobileOpen(false); }, [pathname]);
+
+  // Chiude con Esc o cliccando fuori
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') { setOpenMenu(null); setMobileOpen(false); } };
+    const onClick = (e) => { if (navRef.current && !navRef.current.contains(e.target)) setOpenMenu(null); };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('mousedown', onClick);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('mousedown', onClick);
+    };
+  }, []);
+
+  const isPillarActive = (p) => p.items.some(i => pathname === i.href || pathname?.startsWith(i.href + '/'));
 
   return (
-    <nav className="bg-[var(--bg-primary)]/90 backdrop-blur-md border-b border-[var(--border-light)] mx-auto fixed w-full top-0 z-[100]" role="navigation" aria-label="Navigazione principale">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+    <nav
+      ref={navRef}
+      className="fixed top-0 w-full z-[100] bg-[var(--fr-bg)]/85 backdrop-blur-xl border-b border-[var(--fr-border)]"
+      role="navigation"
+      aria-label="Navigazione principale"
+    >
+      <div className="max-w-wrap mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-[70px] gap-4">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-[#FFD700] rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(220,0,0,0.4)] group-hover:scale-110 transition-transform overflow-hidden p-1">
+          <Link href="/" className="flex items-center gap-3 group shrink-0">
+            <span className="w-10 h-10 rounded-xl bg-[var(--fr-red)] flex items-center justify-center overflow-hidden shadow-[var(--fr-glow-red)] p-1 transition-transform group-hover:scale-105">
               <img
                 src="/data/images/formula-rossa-logo.png"
                 alt="Formula Rossa — torna alla home"
                 className="w-full h-full object-contain"
               />
-            </div>
-            <span className="font-head text-2xl font-black tracking-wide text-[var(--text-primary)] uppercase whitespace-nowrap group-hover:text-[var(--fr-red)] transition-colors">
-              Formula <span className="text-[var(--ferrari-red)]">Rossa</span>
+            </span>
+            <span className="font-head text-2xl font-black uppercase tracking-wide whitespace-nowrap text-[var(--fr-text)]">
+              Formula <span className="text-[var(--fr-red)]">Rossa</span>
             </span>
           </Link>
 
-          {/* Menu Desktop */}
-          <div className="hidden md:flex items-center space-x-1">
-            <NavLink href="/standings"   icon={Trophy}     label="Standings"   active={pathname === '/standings'} />
-            <NavLink href="/statistics"  icon={BarChart3}  label="Stats"       active={pathname === '/statistics'} />
-            <NavLink href="/fanzone"     icon={Gamepad2}   label="Fan Zone"    active={pathname === '/fanzone'} />
-            <NavLink href="/live-timing" icon={Zap}        label="Live Timing" active={pathname === '/live-timing'} />
-            <NavLink href="/news"        icon={Newspaper}  label="News"        active={pathname?.startsWith('/news')} />
-            <NavLink href="/about"       icon={Info}       label="Chi Siamo"   active={pathname === '/about'} />
+          {/* Menu desktop */}
+          <div className="hidden lg:flex items-center gap-1">
+            {PILLARS.map((p) => {
+              const open = openMenu === p.id;
+              const active = isPillarActive(p);
+              return (
+                <div
+                  key={p.id}
+                  className="relative"
+                  onMouseEnter={() => setOpenMenu(p.id)}
+                  onMouseLeave={() => setOpenMenu(null)}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenMenu(open ? null : p.id)}
+                    aria-expanded={open}
+                    aria-haspopup="true"
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-bold whitespace-nowrap transition-colors
+                      ${active || open
+                        ? 'text-[var(--fr-text)] bg-[var(--fr-surface-2)]'
+                        : 'text-[var(--fr-text-muted)] hover:text-[var(--fr-text)] hover:bg-[var(--fr-surface-2)]'}`}
+                  >
+                    <p.icon className={`w-4 h-4 ${active ? 'text-[var(--fr-red)]' : ''}`} aria-hidden="true" />
+                    {p.label}
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+                  </button>
+
+                  <AnimatePresence>
+                    {open && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 6 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute left-0 top-full pt-2 w-64"
+                      >
+                        <div className="rounded-[var(--radius-md)] border border-[var(--fr-border)] bg-[var(--fr-surface)] shadow-[var(--fr-shadow)] p-2">
+                          {p.items.map((item) => {
+                            const cur = pathname === item.href || pathname?.startsWith(item.href + '/');
+                            return (
+                              <Link
+                                key={item.href}
+                                href={item.href}
+                                aria-current={cur ? 'page' : undefined}
+                                className={`block px-3 py-2.5 rounded-[var(--radius-sm)] transition-colors
+                                  ${cur ? 'bg-[var(--fr-red-soft)]' : 'hover:bg-[var(--fr-surface-2)]'}`}
+                              >
+                                <span className={`block text-[13px] font-bold ${cur ? 'text-[var(--fr-red)]' : 'text-[var(--fr-text)]'}`}>
+                                  {item.label}
+                                </span>
+                                <span className="block text-[11px] text-[var(--fr-text-faint)] leading-tight mt-0.5">
+                                  {item.desc}
+                                </span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+
+            <Link
+              href="/about"
+              aria-current={pathname === '/about' ? 'page' : undefined}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-bold whitespace-nowrap transition-colors
+                ${pathname === '/about'
+                  ? 'text-[var(--fr-text)] bg-[var(--fr-surface-2)]'
+                  : 'text-[var(--fr-text-muted)] hover:text-[var(--fr-text)] hover:bg-[var(--fr-surface-2)]'}`}
+            >
+              <Info className="w-4 h-4" aria-hidden="true" />
+              Chi siamo
+            </Link>
+          </div>
+
+          {/* Azioni destra */}
+          <div className="flex items-center gap-2 shrink-0">
             <a
               href={GRIDUP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-1 relative px-4 py-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest rounded-xl bg-[var(--ferrari-red)]/10 text-[var(--ferrari-red)] border border-[var(--ferrari-red)]/30 hover:bg-[var(--ferrari-red)] hover:text-white transition-all"
               title="GridUp — l'app per il Mondiale F1"
+              className="hidden sm:inline-flex items-center gap-2 bg-[var(--fr-red)] text-white px-4 py-2.5 rounded-xl text-[12px] font-bold whitespace-nowrap shadow-[var(--fr-glow-red)] hover:bg-[var(--fr-red-ink)] hover:-translate-y-0.5 transition-all"
             >
-              <Smartphone className="w-3.5 h-3.5" aria-hidden="true" />
-              App
+              <Smartphone className="w-4 h-4" aria-hidden="true" />
+              App GridUp
             </a>
-            <div className="px-4 py-2">
-              <ThemeToggle />
-            </div>
 
-            <div className="ml-6 pl-6 border-l border-[var(--border-strong)] flex items-center">
+            <div className="hidden sm:block"><ThemeToggle /></div>
+
+            <div className="hidden lg:flex items-center pl-2 ml-1 border-l border-[var(--fr-border)]">
               {session ? (
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className="text-[10px] font-black uppercase text-[var(--ferrari-red)] leading-none">{session.user.name}</p>
-                    <button
-                      onClick={() => signOut()}
-                      className="text-[9px] text-[var(--text-tertiary)] uppercase hover:text-[var(--text-primary)] flex items-center gap-1 ml-auto transition-colors"
-                    >
-                      Logout <LogOut className="w-2.5 h-2.5" aria-hidden="true" />
-                    </button>
-                  </div>
-                  <div className="relative w-10 h-10 rounded-full border-2 border-[var(--ferrari-red)] p-0.5 overflow-hidden shadow-lg shadow-[var(--ferrari-red)]/20">
-                    <img src={session.user.image} alt={`Avatar di ${session.user.name}`} className="w-full h-full rounded-full object-cover" />
-                  </div>
+                <div className="flex items-center gap-2.5">
+                  <img
+                    src={session.user.image}
+                    alt={`Avatar di ${session.user.name}`}
+                    className="w-9 h-9 rounded-full border-2 border-[var(--fr-red)] object-cover"
+                  />
+                  <button
+                    onClick={() => signOut()}
+                    className="text-[11px] font-bold text-[var(--fr-text-muted)] hover:text-[var(--fr-text)] flex items-center gap-1 transition-colors"
+                  >
+                    Esci <LogOut className="w-3 h-3" aria-hidden="true" />
+                  </button>
                 </div>
               ) : (
                 <button
                   onClick={() => signIn('google')}
-                  className="bg-[var(--ferrari-red)] text-[var(--text-primary)] px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all shadow-lg shadow-[var(--ferrari-red)]/20"
+                  className="px-4 py-2.5 rounded-xl text-[12px] font-bold border-2 border-[var(--fr-border-strong)] text-[var(--fr-text)] hover:border-[var(--fr-red)] transition-colors"
                 >
-                  Login
+                  Accedi
                 </button>
               )}
             </div>
-          </div>
 
-          {/* Burger Button (Mobile) */}
-          <div className="md:hidden flex items-center gap-4">
-            {session && (
-              <img src={session.user.image} className="w-8 h-8 rounded-full border border-[var(--ferrari-red)]" alt={`Avatar di ${session.user.name}`} />
-            )}
+            {/* Burger */}
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label={isMenuOpen ? 'Chiudi menu di navigazione' : 'Apri menu di navigazione'}
-              aria-expanded={isMenuOpen}
-              className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-light)]"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label={mobileOpen ? 'Chiudi menu' : 'Apri menu'}
+              aria-expanded={mobileOpen}
+              className="lg:hidden p-2.5 rounded-xl border border-[var(--fr-border)] bg-[var(--fr-surface-2)] text-[var(--fr-text)]"
             >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                {isMenuOpen
-                  ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                }
-              </svg>
+              {mobileOpen
+                ? <X className="w-5 h-5" aria-hidden="true" />
+                : <Menu className="w-5 h-5" aria-hidden="true" />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Menu Mobile */}
+      {/* Menu mobile */}
       <AnimatePresence>
-        {isMenuOpen && (
+        {mobileOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-[var(--bg-secondary)] border-t border-[var(--border-light)]"
+            className="lg:hidden overflow-hidden bg-[var(--fr-surface)] border-t border-[var(--fr-border)]"
           >
-            <div className="px-4 py-6 space-y-2">
-              <MobileLink href="/standings"   label="Standings"   active={pathname === '/standings'}          onClick={() => setIsMenuOpen(false)} />
-              <MobileLink href="/statistics"  label="Statistics"  active={pathname === '/statistics'}         onClick={() => setIsMenuOpen(false)} />
-              <MobileLink href="/fanzone"     label="Fan Zone"    active={pathname === '/fanzone'}            onClick={() => setIsMenuOpen(false)} />
-              <MobileLink href="/live-timing" label="Live Timing" active={pathname === '/live-timing'}        onClick={() => setIsMenuOpen(false)} />
-              <MobileLink href="/news"        label="News"        active={pathname?.startsWith('/news')}      onClick={() => setIsMenuOpen(false)} />
-              <MobileLink href="/about"       label="Chi Siamo"   active={pathname === '/about'}              onClick={() => setIsMenuOpen(false)} />
+            <div className="px-4 py-5 space-y-5 max-h-[calc(100vh-70px)] overflow-y-auto">
+              {PILLARS.map((p) => (
+                <div key={p.id}>
+                  <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--fr-red)] mb-2">
+                    <p.icon className="w-3.5 h-3.5" aria-hidden="true" />
+                    {p.label}
+                  </p>
+                  <div className="grid gap-1">
+                    {p.items.map((item) => {
+                      const cur = pathname === item.href || pathname?.startsWith(item.href + '/');
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setMobileOpen(false)}
+                          aria-current={cur ? 'page' : undefined}
+                          className={`px-3 py-2.5 rounded-[var(--radius-sm)] text-sm font-bold transition-colors
+                            ${cur
+                              ? 'bg-[var(--fr-red-soft)] text-[var(--fr-red)]'
+                              : 'text-[var(--fr-text-muted)] hover:bg-[var(--fr-surface-2)] hover:text-[var(--fr-text)]'}`}
+                        >
+                          {item.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              <Link
+                href="/about"
+                onClick={() => setMobileOpen(false)}
+                className="block px-3 py-2.5 rounded-[var(--radius-sm)] text-sm font-bold text-[var(--fr-text-muted)] hover:bg-[var(--fr-surface-2)] hover:text-[var(--fr-text)]"
+              >
+                Chi siamo
+              </Link>
+
               <a
                 href={GRIDUP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => setIsMenuOpen(false)}
-                className="flex items-center justify-between w-full px-4 py-3 rounded-xl font-black uppercase text-xs tracking-widest bg-[var(--ferrari-red)]/15 border border-[var(--ferrari-red)]/30 text-[var(--ferrari-red)] hover:bg-[var(--ferrari-red)]/25 transition-all"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center gap-2 bg-[var(--fr-red)] text-white px-4 py-3.5 rounded-xl text-sm font-bold"
               >
-                <span className="flex items-center gap-2">
-                  <Smartphone className="w-4 h-4" aria-hidden="true" />
-                  App GridUp
-                </span>
-                <span className="text-[9px] text-[var(--text-tertiary)] normal-case tracking-normal">Apri ↗</span>
+                <Smartphone className="w-4 h-4" aria-hidden="true" />
+                Apri l&apos;app GridUp
               </a>
-              <div className="px-4 py-2">
+
+              <div className="flex items-center justify-between pt-4 border-t border-[var(--fr-border)]">
                 <ThemeToggle />
-              </div>
-  
-              <div className="pt-6 border-t border-[var(--border-light)]">
                 {session ? (
-                  <div className="flex items-center justify-between bg-[var(--bg-card)] p-4 rounded-2xl">
-                    <div className="flex items-center gap-3">
-                      <img src={session.user.image} className="w-10 h-10 rounded-full border border-[var(--ferrari-red)]" alt={`Avatar di ${session.user.name}`} />
-                      <span className="font-bold text-sm uppercase">{session.user.name}</span>
-                    </div>
-                    <button onClick={() => signOut()} aria-label="Logout" className="p-2 bg-[var(--ferrari-red)]/10 text-red-500 rounded-lg">
-                      <LogOut className="w-5 h-5" aria-hidden="true" />
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => signOut()}
+                    className="flex items-center gap-2 text-sm font-bold text-[var(--fr-text-muted)]"
+                  >
+                    Esci <LogOut className="w-4 h-4" aria-hidden="true" />
+                  </button>
                 ) : (
                   <button
                     onClick={() => signIn('google')}
-                    className="w-full bg-[var(--ferrari-red)] text-[var(--text-primary)] py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em]"
+                    className="px-5 py-2.5 rounded-xl text-[12px] font-bold border-2 border-[var(--fr-border-strong)] text-[var(--fr-text)]"
                   >
-                    Login with Google
+                    Accedi
                   </button>
                 )}
               </div>
@@ -162,42 +310,5 @@ export default function Navigation() {
         )}
       </AnimatePresence>
     </nav>
-  );
-}
-
-function NavLink({ href, label, icon: Icon, active }) {
-  return (
-    <Link
-      href={href}
-      aria-current={active ? 'page' : undefined}
-      className={`relative px-3.5 py-2 flex items-center gap-2 whitespace-nowrap text-[11px] font-black uppercase tracking-wider transition-all rounded-xl
-        ${active ? 'text-[var(--text-primary)] bg-[var(--bg-card)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]'}`}
-    >
-      <Icon className={`w-3.5 h-3.5 ${active ? 'text-red-500' : ''}`} aria-hidden="true" />
-      {label}
-      {active && (
-        <motion.div
-          layoutId="nav-active-indicator"
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-red-500 rounded-full"
-        />
-      )}
-    </Link>
-  );
-}
-
-function MobileLink({ href, label, onClick, active }) {
-  return (
-    <Link
-      href={href}
-      aria-current={active ? 'page' : undefined}
-      className={`flex items-center justify-between w-full px-4 py-3 rounded-xl font-black uppercase text-xs tracking-widest transition-all
-        ${active ? 'text-[var(--text-primary)] bg-[var(--ferrari-red)]/15 border border-[var(--ferrari-red)]/30' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--ferrari-red)]/10'}`}
-      onClick={onClick}
-    >
-      <span className="flex items-center gap-2">
-        {label}
-      </span>
-      {active && <div className="w-1.5 h-1.5 rounded-full bg-red-500" aria-hidden="true" />}
-    </Link>
   );
 }
