@@ -21,6 +21,26 @@ export default function Document(props) {
   return (
     <Html lang={locale}>
       <Head>
+        {/* Google Consent Mode v2 — default "denied" finché l'utente non sceglie.
+            Impostato il prima possibile, prima di Analytics/AdSense (caricati in _app). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              var __consentGranted = false;
+              try { __consentGranted = localStorage.getItem('cookieConsent') === 'accepted'; } catch (e) {}
+              gtag('consent', 'default', {
+                ad_storage:         __consentGranted ? 'granted' : 'denied',
+                analytics_storage:  __consentGranted ? 'granted' : 'denied',
+                ad_user_data:       __consentGranted ? 'granted' : 'denied',
+                ad_personalization: __consentGranted ? 'granted' : 'denied',
+                wait_for_update: 500
+              });
+            `,
+          }}
+        />
+
         {/* Solo schema globale qui — tutti i meta SEO vanno in components/SEO.js */}
         <script
           type="application/ld+json"

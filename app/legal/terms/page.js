@@ -2,7 +2,7 @@ import { Scale, Calendar, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default function TermsPage() {
-  const lastUpdate = "18 Febbbraio 2026";
+  const lastUpdate = "27 agosto 2026";
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -83,8 +83,8 @@ export default function TermsPage() {
           <h2 className="text-xl font-bold text-white mb-4">6. Contatti</h2>
           <p className="text-gray-400">
             Per qualsiasi domanda sui termini e condizioni, contattaci a:{" "}
-            <a href="mailto:contatti@formula-rossa.it" className="text-red-600 hover:underline">
-              contatti@formula-rossa.it
+            <a href="mailto:info@formula-rossa.it" className="text-red-600 hover:underline">
+              info@formula-rossa.it
             </a>
           </p>
         </section>

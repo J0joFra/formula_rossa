@@ -28,7 +28,7 @@ export default function Navigation() {
                 className="w-full h-full object-contain"
               />
             </div>
-            <span className="text-xl font-black tracking-tighter text-[var(--text-primary)] uppercase italic group-hover:text-red-500 transition-colors">
+            <span className="font-head text-2xl font-black tracking-wide text-[var(--text-primary)] uppercase whitespace-nowrap group-hover:text-[var(--fr-red)] transition-colors">
               Formula <span className="text-[var(--ferrari-red)]">Rossa</span>
             </span>
           </Link>
@@ -170,7 +170,7 @@ function NavLink({ href, label, icon: Icon, active }) {
     <Link
       href={href}
       aria-current={active ? 'page' : undefined}
-      className={`relative px-4 py-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest transition-all rounded-xl
+      className={`relative px-3.5 py-2 flex items-center gap-2 whitespace-nowrap text-[11px] font-black uppercase tracking-wider transition-all rounded-xl
         ${active ? 'text-[var(--text-primary)] bg-[var(--bg-card)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]'}`}
     >
       <Icon className={`w-3.5 h-3.5 ${active ? 'text-red-500' : ''}`} aria-hidden="true" />

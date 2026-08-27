@@ -1,19 +1,23 @@
+@import '../styles/tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 0, 0, 0;
-  --background-end-rgb: 0, 0, 0;
-}
+/* App Router — usa gli stessi token del Pages Router (styles/tokens.css).
+   Non ridefinire colori qui: la fonte di verità è il design system. */
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  font-family: var(--font-body);
+  background: var(--fr-bg);
+  color: var(--fr-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-head);
+  font-weight: 800;
+  line-height: .98;
+  letter-spacing: .01em;
+  text-wrap: balance;
 }
