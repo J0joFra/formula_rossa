@@ -40,11 +40,19 @@ export default function PrivacyPage() {
             
             <h3 className="text-xl font-semibold text-white mt-4 mb-2">Cookie</h3>
             <p className="text-gray-400">
-              Utilizziamo solo cookie tecnici necessari al funzionamento del sito. Non usiamo cookie di profilazione 
-              o marketing. Per maggiori dettagli, consulta la nostra{" "}
+              Utilizziamo cookie tecnici necessari al funzionamento del sito, cookie analitici
+              (Google Analytics) e cookie di profilazione pubblicitaria (Google AdSense). Per
+              maggiori dettagli ed istruzioni su come gestirli o disabilitarli, consulta la nostra{" "}
               <Link href="/legal/cookies" className="text-red-600 hover:underline">
                 Cookie Policy
               </Link>.
+            </p>
+
+            <h3 className="text-xl font-semibold text-white mt-4 mb-2">Accesso con Google</h3>
+            <p className="text-gray-400">
+              Se scegli di autenticarti tramite il tuo account Google, riceviamo dal profilo il
+              tuo nome, il tuo indirizzo email e l&apos;immagine del profilo, al solo fine di
+              gestire la sessione e le funzionalità riservate agli utenti registrati.
             </p>
 
             <h3 className="text-xl font-semibold text-white mt-4 mb-2">Dati di navigazione</h3>
@@ -60,8 +68,25 @@ export default function PrivacyPage() {
 
             <h3 className="text-xl font-semibold text-white mt-4 mb-2">Dati forniti volontariamente</h3>
             <p className="text-gray-400">
-              Se ci contatti via email all'indirizzo contact@formula-rossa.it, conserveremo la tua email 
+              Se ci contatti via email all'indirizzo info@formula-rossa.it, conserveremo la tua email
               e i dati personali che ci fornisci esclusivamente per rispondere alla tua richiesta.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-white mb-4">Servizi di terze parti</h2>
+            <p className="text-gray-400">
+              Per erogare il servizio ci affidiamo a fornitori che possono trattare dati per nostro
+              conto o come titolari autonomi:
+            </p>
+            <ul className="list-disc pl-6 text-gray-400 mt-2 space-y-1">
+              <li><strong className="text-white">Google</strong> — accesso con account Google, Google Analytics, Google AdSense e Google Fonts</li>
+              <li><strong className="text-white">Supabase</strong> — database delle statistiche F1 (dati sportivi, non personali)</li>
+              <li><strong className="text-white">Google Firebase</strong> — servizi di supporto all'infrastruttura</li>
+              <li><strong className="text-white">Vercel</strong> — hosting e distribuzione del sito</li>
+            </ul>
+            <p className="text-gray-400 mt-2">
+              Ciascun fornitore tratta i dati secondo la propria informativa.
             </p>
           </section>
 
@@ -101,8 +126,10 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">Dove inviamo i tuoi dati</h2>
             <p className="text-gray-400">
-              I dati vengono elaborati all'interno dell'Unione Europea. Il sito è hostato su server situati in Europa.
-              Non vendiamo né condividiamo i tuoi dati con terze parti per scopi di marketing.
+              Alcuni fornitori (ad es. Google, Vercel, Supabase) possono trattare i dati anche al di
+              fuori dell'Unione Europea. In tali casi il trasferimento avviene sulla base di garanzie
+              adeguate previste dal GDPR, come le Clausole Contrattuali Standard approvate dalla
+              Commissione Europea. Non vendiamo i tuoi dati personali.
             </p>
           </section>
 
@@ -127,7 +154,7 @@ export default function PrivacyPage() {
 
           <div className="border-t border-white/5 pt-4 mt-8">
             <p className="text-xs text-gray-500 text-center">
-              Ultimo aggiornamento: 18 Febbraio 2026
+              Ultimo aggiornamento: 27 agosto 2026
             </p>
           </div>
         </div>

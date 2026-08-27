@@ -2,20 +2,32 @@ import { Cookie, Calendar, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default function CookiesPage() {
-  const lastUpdate = "18 febbraio 2026";
-  
+  const lastUpdate = "27 agosto 2026";
+
   const cookies = [
     {
-      name: "cookie_consent",
-      duration: "1 anno",
-      purpose: "Memorizza le tue preferenze sui cookie",
+      name: "NextAuth (sessione)",
+      duration: "Sessione",
+      purpose: "Mantiene l'accesso dell'utente registrato",
       type: "Tecnico"
     },
     {
-      name: "session_id",
-      duration: "Sessione",
-      purpose: "Mantiene la sessione di navigazione",
+      name: "theme (localStorage)",
+      duration: "Persistente",
+      purpose: "Ricorda la preferenza di tema chiaro/scuro",
       type: "Tecnico"
+    },
+    {
+      name: "Google Analytics (_ga, _ga_*)",
+      duration: "Fino a 24 mesi",
+      purpose: "Statistiche di utilizzo aggregate",
+      type: "Analitico"
+    },
+    {
+      name: "Google AdSense",
+      duration: "Variabile",
+      purpose: "Pubblicità personalizzata",
+      type: "Profilazione"
     }
   ];
 
@@ -54,8 +66,9 @@ export default function CookiesPage() {
         <section>
           <h2 className="text-xl font-bold text-white mb-4">Cookie utilizzati</h2>
           <p className="text-gray-400 mb-4">
-            Formula Rossa utilizza solo cookie tecnici necessari al funzionamento del sito. 
-            Non utilizziamo cookie di profilazione o marketing.
+            Formula Rossa utilizza cookie tecnici necessari al funzionamento del sito, cookie
+            analitici (Google Analytics) per statistiche aggregate e cookie di profilazione
+            pubblicitaria (Google AdSense) che contribuiscono a sostenere il progetto.
           </p>
 
           <div className="overflow-x-auto">
@@ -105,6 +118,18 @@ export default function CookiesPage() {
               <strong className="text-white">Edge:</strong> Impostazioni → Cookie e autorizzazioni
             </li>
           </ul>
+          <p className="text-gray-400 mt-4">
+            Per i cookie di Google puoi inoltre gestire le preferenze pubblicitarie dalle{" "}
+            <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" className="text-red-600 hover:underline">
+              Impostazioni annunci Google
+            </a>{" "}e disattivare Google Analytics con il{" "}
+            <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer" className="text-red-600 hover:underline">
+              componente aggiuntivo di opt-out
+            </a>. Consulta anche l&apos;{" "}
+            <a href="https://policies.google.com/technologies/cookies" target="_blank" rel="noopener noreferrer" className="text-red-600 hover:underline">
+              informativa sui cookie di Google
+            </a>.
+          </p>
         </section>
       </div>
     </div>
