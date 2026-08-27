@@ -3,9 +3,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signIn, signOut } from "next-auth/react";
-import { Home as HomeIcon, BarChart3, Gamepad2, LogOut, Trophy, Zap, Info, Newspaper, Flag } from 'lucide-react';
+import { Home as HomeIcon, BarChart3, Gamepad2, LogOut, Trophy, Zap, Info, Newspaper, Flag, Smartphone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
+
+const GRIDUP_URL = 'https://gridup-f1.web.app';
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,6 +41,16 @@ export default function Navigation() {
             <NavLink href="/live-timing" icon={Zap}        label="Live Timing" active={pathname === '/live-timing'} />
             <NavLink href="/news"        icon={Newspaper}  label="News"        active={pathname?.startsWith('/news')} />
             <NavLink href="/about"       icon={Info}       label="Chi Siamo"   active={pathname === '/about'} />
+            <a
+              href={GRIDUP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-1 relative px-4 py-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest rounded-xl bg-[var(--ferrari-red)]/10 text-[var(--ferrari-red)] border border-[var(--ferrari-red)]/30 hover:bg-[var(--ferrari-red)] hover:text-white transition-all"
+              title="GridUp — l'app per il Mondiale F1"
+            >
+              <Smartphone className="w-3.5 h-3.5" aria-hidden="true" />
+              App
+            </a>
             <div className="px-4 py-2">
               <ThemeToggle />
             </div>
@@ -108,6 +120,19 @@ export default function Navigation() {
               <MobileLink href="/live-timing" label="Live Timing" active={pathname === '/live-timing'}        onClick={() => setIsMenuOpen(false)} />
               <MobileLink href="/news"        label="News"        active={pathname?.startsWith('/news')}      onClick={() => setIsMenuOpen(false)} />
               <MobileLink href="/about"       label="Chi Siamo"   active={pathname === '/about'}              onClick={() => setIsMenuOpen(false)} />
+              <a
+                href={GRIDUP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center justify-between w-full px-4 py-3 rounded-xl font-black uppercase text-xs tracking-widest bg-[var(--ferrari-red)]/15 border border-[var(--ferrari-red)]/30 text-[var(--ferrari-red)] hover:bg-[var(--ferrari-red)]/25 transition-all"
+              >
+                <span className="flex items-center gap-2">
+                  <Smartphone className="w-4 h-4" aria-hidden="true" />
+                  App GridUp
+                </span>
+                <span className="text-[9px] text-[var(--text-tertiary)] normal-case tracking-normal">Apri ↗</span>
+              </a>
               <div className="px-4 py-2">
                 <ThemeToggle />
               </div>
@@ -170,6 +195,7 @@ function MobileLink({ href, label, onClick, active }) {
       onClick={onClick}
     >
       <span className="flex items-center gap-2">
+        {label}
       </span>
       {active && <div className="w-1.5 h-1.5 rounded-full bg-red-500" aria-hidden="true" />}
     </Link>
