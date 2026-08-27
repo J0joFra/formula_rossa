@@ -34,7 +34,7 @@ export default function GridUpPromo() {
         <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[var(--bg-tertiary)]/60 backdrop-blur-sm">
           {/* Glow di sfondo */}
           <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-            <div className="absolute -top-24 -right-16 w-96 h-96 rounded-full bg-[#E8002D]/10 blur-3xl" />
+            <div className="absolute -top-24 -right-16 w-96 h-96 rounded-full bg-[var(--fr-red)]/10 blur-3xl" />
             <div className="absolute -bottom-24 -left-16 w-96 h-96 rounded-full bg-[var(--ferrari-yellow)]/5 blur-3xl" />
             <div
               className="absolute inset-0 opacity-[0.04]"
@@ -50,7 +50,7 @@ export default function GridUpPromo() {
 
             {/* ── Testo + CTA ── */}
             <div>
-              <span className="inline-flex items-center gap-2 text-[10px] tracking-[0.3em] uppercase font-bold text-[#E8002D] mb-5">
+              <span className="inline-flex items-center gap-2 text-[10px] tracking-[0.3em] uppercase font-bold text-[var(--fr-red)] mb-5">
                 <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
                 Companion App · GridUp
               </span>
@@ -59,7 +59,7 @@ export default function GridUpPromo() {
                 id="gridup-heading"
                 className="text-3xl md:text-5xl font-black tracking-tight leading-none uppercase mb-4"
               >
-                Scarica <span className="text-[#E8002D]">GridUp</span>
+                Scarica <span className="text-[var(--fr-red)]">GridUp</span>
               </h2>
 
               <p className="text-[var(--text-secondary)] text-sm md:text-base leading-relaxed max-w-md mb-6">
@@ -75,8 +75,8 @@ export default function GridUpPromo() {
                     key={f.title}
                     className="flex items-start gap-3 rounded-xl border border-[var(--border-light)] bg-[var(--bg-secondary)]/40 p-3"
                   >
-                    <span className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center bg-[#E8002D]/10">
-                      <f.icon className="w-4 h-4 text-[#E8002D]" aria-hidden="true" />
+                    <span className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center bg-[var(--fr-red)]/10">
+                      <f.icon className="w-4 h-4 text-[var(--fr-red)]" aria-hidden="true" />
                     </span>
                     <span className="min-w-0">
                       <span className="block text-xs font-black uppercase tracking-wider text-[var(--text-primary)]">
@@ -96,7 +96,7 @@ export default function GridUpPromo() {
                   href={GRIDUP_WEB_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex items-center justify-center gap-2 bg-[#E8002D] text-white px-7 py-3.5 rounded-xl font-black text-[11px] uppercase tracking-[0.14em] transition-all duration-200 hover:bg-[#c40026] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(232,0,45,0.4)]"
+                  className="group inline-flex items-center justify-center gap-2 bg-[var(--fr-red)] text-white px-7 py-3.5 rounded-xl font-black text-[11px] uppercase tracking-[0.14em] transition-all duration-200 hover:bg-[var(--fr-red-ink)] hover:-translate-y-0.5 hover:shadow-[var(--fr-glow-red)]"
                 >
                   <Smartphone className="w-4 h-4" aria-hidden="true" />
                   Apri l&apos;app
@@ -108,7 +108,7 @@ export default function GridUpPromo() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Scarica GridUp su Google Play"
-                  className="inline-flex items-center justify-center gap-2.5 bg-transparent text-[var(--text-primary)] px-6 py-3.5 rounded-xl font-bold border-2 border-[var(--border-strong)] transition-all duration-200 hover:border-[#E8002D] hover:-translate-y-0.5"
+                  className="inline-flex items-center justify-center gap-2.5 bg-transparent text-[var(--text-primary)] px-6 py-3.5 rounded-xl font-bold border-2 border-[var(--border-strong)] transition-all duration-200 hover:border-[var(--fr-red)] hover:-translate-y-0.5"
                 >
                   <Play className="w-4 h-4 fill-current" aria-hidden="true" />
                   <span className="text-left leading-none">
@@ -150,7 +150,7 @@ export default function GridUpPromo() {
                         e.currentTarget.style.display = 'none';
                         e.currentTarget.parentElement.insertAdjacentHTML(
                           'beforeend',
-                          '<span class="text-2xl font-black text-[#E8002D]">GU</span>'
+                          '<span class="text-2xl font-black text-[var(--fr-red)]">GU</span>'
                         );
                       }}
                     />
@@ -169,14 +169,14 @@ export default function GridUpPromo() {
                         key={r.p}
                         className={`flex items-center gap-2 rounded-lg px-2.5 py-2 border ${
                           r.lead
-                            ? 'bg-[#E8002D]/15 border-[#E8002D]/40'
+                            ? 'bg-[var(--fr-red)]/15 border-[var(--fr-red)]/40'
                             : 'bg-white/[0.03] border-white/10'
                         }`}
                       >
                         <span className="text-[10px] font-black text-white/70 w-4">{r.p}</span>
                         <Flag className="w-3 h-3 text-white/40" aria-hidden="true" />
                         <span className="text-[10px] font-bold text-white/80 flex-1 truncate">{r.n}</span>
-                        <span className={`text-[10px] font-black ${r.lead ? 'text-[#E8002D]' : 'text-white/50'}`}>{r.pts}</span>
+                        <span className={`text-[10px] font-black ${r.lead ? 'text-[var(--fr-red)]' : 'text-white/50'}`}>{r.pts}</span>
                       </div>
                     ))}
                   </div>
@@ -184,7 +184,7 @@ export default function GridUpPromo() {
                   {/* Fake "points to secure title" chip */}
                   <div className="mt-5 w-full rounded-xl bg-white/[0.04] border border-white/10 p-3 text-center">
                     <p className="text-[8px] uppercase tracking-widest text-white/40">Punti per il titolo</p>
-                    <p className="text-2xl font-black text-[#E8002D] leading-none mt-1">137</p>
+                    <p className="text-2xl font-black text-[var(--fr-red)] leading-none mt-1">137</p>
                   </div>
                 </div>
               </motion.div>

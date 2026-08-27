@@ -4,7 +4,8 @@ import React from 'react';
 import { 
   Instagram, Twitter, Youtube, Linkedin, Heart, Mail, MessageCircle, 
   Trophy, Gauge, Users, ChevronRight, Award, ExternalLink,
-  Sparkles, Zap, Shield, Terminal, Code, Database, Activity, Info, Cookie
+  Sparkles, Zap, Shield, Database, Activity, Info, Cookie,
+  Newspaper, Gamepad2, Smartphone
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -111,14 +112,15 @@ export default function Footer() {
             <div className="bg-[var(--bg-tertiary)]/30 border border-[var(--border-light)] rounded-xl p-5 lg:p-6 h-full">
               <h4 className="text-xs lg:text-sm font-black uppercase tracking-wider text-[var(--ferrari-red)] mb-4 lg:mb-6 flex items-center gap-2">
                 <Zap className="w-3 h-3 lg:w-4 lg:h-4" aria-hidden="true" />
-                ANALYTICS
+                DATI
               </h4>
               <ul className="space-y-2 lg:space-y-3">
                 {[
-                  { name: 'Vittorie',          href: '/stats/wins',   icon: Award  },
-                  { name: 'Archivio Stagioni', href: '/statistics',   icon: Trophy },
-                  { name: 'Confronto Piloti',  href: '/standings',    icon: Gauge  },
-                  { name: 'Community',         href: '/fanzone',      icon: Users  },
+                  { name: 'Statistiche', href: '/statistics', icon: Trophy },
+                  { name: 'Classifiche', href: '/standings',  icon: Gauge  },
+                  { name: 'Piloti',      href: '/piloti',     icon: Users  },
+                  { name: 'Circuiti',    href: '/circuiti',   icon: Award  },
+                  { name: 'Gare',        href: '/races',      icon: Activity },
                 ].map((link, j) => (
                   <li key={j}>
                     <Link
@@ -143,13 +145,16 @@ export default function Footer() {
             <div className="bg-[var(--bg-tertiary)]/30 border border-[var(--border-light)] rounded-xl p-5 lg:p-6 h-full">
               <h4 className="text-xs lg:text-sm font-black uppercase tracking-wider text-[var(--ferrari-yellow)] mb-4 lg:mb-6 flex items-center gap-2">
                 <Info className="w-3 h-3 lg:w-4 lg:h-4" aria-hidden="true" />
-                INFO
+                LIVE &amp; GIOCA
               </h4>
               <ul className="space-y-2 lg:space-y-3">
                 {[
-                  { name: 'Chi Siamo', href: '/about',                        icon: Users    },
-                  { name: 'Contatti',  href: 'mailto:info@formula-rossa.it',  icon: Mail     },
-                  { name: 'GridUp App', href: 'https://gridup-f1.web.app',    icon: Activity, external: true },
+                  { name: 'Live Timing', href: '/live-timing',                 icon: Zap      },
+                  { name: 'News',        href: '/news',                        icon: Newspaper },
+                  { name: 'Fan Zone',    href: '/fanzone',                     icon: Gamepad2 },
+                  { name: 'Chi Siamo',   href: '/about',                       icon: Users    },
+                  { name: 'Contatti',    href: 'mailto:info@formula-rossa.it', icon: Mail     },
+                  { name: 'App GridUp',  href: 'https://gridup-f1.web.app',    icon: Smartphone, external: true },
                 ].map((link, j) => {
                   const isExternal = link.external || link.href.startsWith('mailto:') || link.href.startsWith('http');
                   const inner = (

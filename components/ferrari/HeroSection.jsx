@@ -1,3 +1,4 @@
+'use client';
 /**
  * components/ferrari/HeroSection.jsx
  * Hero della home: tesi del sito a sinistra, riepilogo dati reali a destra.

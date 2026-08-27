@@ -88,6 +88,11 @@ const nextConfig = {
         destination: 'https://formula-rossa.it/:path*',
         permanent: true,
       },
+      /* Fanta e pronostici ora vivono nell'app GridUp: le vecchie URL non
+         restano orfane. Redirect temporaneo (307) e non permanente, così la
+         scelta resta reversibile senza cache aggressiva nei browser. */
+      { source: '/fantaf1',    destination: 'https://gridup-f1.web.app', permanent: false },
+      { source: '/predictions', destination: 'https://gridup-f1.web.app', permanent: false },
     ];
   },
 

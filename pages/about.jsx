@@ -28,7 +28,7 @@ const STATS = [
   { value: '75+',   label: 'Anni di storia Ferrari', icon: Trophy,   glow: 'shadow-red-600/40',   ring: 'from-red-500 to-red-700',   num: 'text-red-500'    },
   { value: '1000+', label: 'Gare analizzate',         icon: Flag,     glow: 'shadow-yellow-500/30', ring: 'from-yellow-400 to-amber-600', num: 'text-yellow-400' },
   { value: '100+',  label: 'Piloti nel database',     icon: Users,    glow: 'shadow-red-600/40',   ring: 'from-red-500 to-red-700',   num: 'text-red-500'    },
-  { value: '500K+', label: 'Datapoint elaborati',     icon: Database, glow: 'shadow-yellow-500/30', ring: 'from-yellow-400 to-amber-600', num: 'text-yellow-400' },
+  { value: '31',    label: 'Titoli mondiali',      icon: Database, glow: 'shadow-yellow-500/30', ring: 'from-yellow-400 to-amber-600', num: 'text-yellow-400' },
 ];
 
 const VALUES = [
@@ -56,8 +56,8 @@ const FEATURES = [
   {
     icon: Users, title: 'Fan Zone',
     gradient: 'from-red-500 to-rose-700', glow: 'group-hover:shadow-rose-600/20',
-    desc: 'Mini-games, classifiche globali e SF Tokens. La passione Ferrari diventa esperienza interattiva con migliaia di tifosi.',
-    highlights: ['10K+ utenti', 'Mini-games', 'Rewards'],
+    desc: 'Mini-giochi a tema Ferrari e classifiche: la passione per la Rossa diventa un momento di gioco tra un GP e l\'altro.',
+    highlights: ['Mini-giochi', 'Trivia', 'Classifiche'],
     tag: 'Community',
   },
   {
@@ -464,8 +464,8 @@ export default function AboutPage({ heroImages = [] }) {
                         <span key={t} className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-yellow-800/50 text-yellow-400/70 bg-yellow-900/20">{t}</span>
                       ))}
                     </div>
-                    <Link href="/predictions" className="mt-auto flex items-center justify-between px-4 py-3 rounded-xl border border-yellow-800/40 hover:border-yellow-500/60 hover:bg-yellow-500/10 text-yellow-400 hover:text-yellow-300 transition-all duration-200 group/btn">
-                      <span className="text-[10px] font-black uppercase tracking-widest">Vai alle Predizioni</span>
+                    <Link href="/statistics" className="mt-auto flex items-center justify-between px-4 py-3 rounded-xl border border-yellow-800/40 hover:border-yellow-500/60 hover:bg-yellow-500/10 text-yellow-400 hover:text-yellow-300 transition-all duration-200 group/btn">
+                      <span className="text-[10px] font-black uppercase tracking-widest">Vai alle Statistiche</span>
                       <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
                     </Link>
                   </div>
@@ -495,8 +495,8 @@ export default function AboutPage({ heroImages = [] }) {
                     {/* Mini stats inline */}
                     <div className="grid grid-cols-2 gap-2 mb-4">
                       {[
-                        { val: '10K+', lbl: 'Utenti' },
-                        { val: '500K+', lbl: 'Dataset' },
+                        { val: '16', lbl: 'Titoli cost.' },
+                        { val: '15', lbl: 'Titoli piloti' },
                         { val: '1000+', lbl: 'Gare' },
                         { val: '75+', lbl: 'Anni' },
                       ].map(s => (
@@ -511,7 +511,7 @@ export default function AboutPage({ heroImages = [] }) {
                       <span className="text-red-500">Community</span>
                     </h3>
                     <p className="text-zinc-500 text-xs leading-relaxed flex-1">
-                      Interagisci con migliaia di tifosi, guadagna SF Tokens e scala la classifica globale.
+                      Mini-giochi a tema Ferrari per metterti alla prova tra un Gran Premio e l'altro.
                     </p>
                     <Link href="/fanzone" className="mt-4 flex items-center justify-between px-4 py-3 rounded-xl border border-red-800/40 hover:border-red-500/60 hover:bg-red-600/10 text-red-400 hover:text-red-300 transition-all duration-200 group/btn">
                       <span className="text-[10px] font-black uppercase tracking-widest">Inizia a giocare</span>
