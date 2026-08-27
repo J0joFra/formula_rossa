@@ -97,7 +97,10 @@ export default function PrivacyPage() {
             </p>
             <ul className="list-disc pl-6 text-gray-400 mt-2">
               <li>Fornire e migliorare i nostri servizi (legittimo interesse)</li>
+              <li>Gestire l'autenticazione e l'account utente (esecuzione di un servizio richiesto)</li>
               <li>Garantire la sicurezza del sito (legittimo interesse)</li>
+              <li>Statistiche di utilizzo tramite cookie analitici (consenso)</li>
+              <li>Pubblicità tramite cookie di terze parti (consenso)</li>
               <li>Adempiere a obblighi di legge</li>
               <li>Rispondere alle tue richieste di contatto (consenso)</li>
             </ul>
