@@ -1,11 +1,11 @@
 // components/ferrari/Navigation.jsx
-// Navigazione a 3 pilastri: Dati · Live · Gioca (+ app GridUp).
+// Menu: Archivio (tendina) · Classifiche · News · Gioca + app GridUp.
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import {
-  BarChart3, Zap, Gamepad2, Info, LogOut, Smartphone,
+  BarChart3, Trophy, Newspaper, Gamepad2, LogOut, Smartphone,
   ChevronDown, Menu, X,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,56 +13,38 @@ import ThemeToggle from './ThemeToggle';
 
 export const GRIDUP_URL = 'https://gridup-f1.web.app';
 
-/* I tre pilastri del sito. Tutto ciò che è raggiungibile vive qui dentro:
-   niente più pagine orfane non linkate dal menu. */
-const PILLARS = [
-  {
-    id: 'dati',
-    label: 'Dati',
-    icon: BarChart3,
-    items: [
-      { href: '/statistics', label: 'Statistiche',  desc: 'Archivio storico e record' },
-      { href: '/standings',  label: 'Classifiche',  desc: 'Piloti e costruttori' },
-      { href: '/piloti',     label: 'Piloti',       desc: 'Schede e carriere' },
-      { href: '/circuiti',   label: 'Circuiti',     desc: 'Tracciati e statistiche' },
-    ],
-  },
-  {
-    id: 'live',
-    label: 'Live',
-    icon: Zap,
-    items: [
-      { href: '/live-timing', label: 'Live Timing', desc: 'Tempi in tempo reale' },
-      { href: '/news',        label: 'News',        desc: 'Ultime dal mondo F1' },
-    ],
-  },
-  {
-    id: 'gioca',
-    label: 'Gioca',
-    icon: Gamepad2,
-    items: [
-      { href: '/fanzone',            label: 'Fan Zone',    desc: 'Tutti i mini-giochi' },
-      { href: '/games/trivia',       label: 'F1 Trivia',   desc: 'Quiz sulla Rossa' },
-      { href: '/games/pitstop',      label: 'Pit Stop',    desc: 'Sfida di riflessi' },
-      { href: '/games/circuit-rush', label: 'Circuit Rush', desc: 'Corsa a ostacoli' },
-    ],
-  },
+/* Il menu contiene solo pagine che esistono davvero: una voce che porta a una
+   pagina inesistente o a un vicolo cieco è peggio di una voce assente.
+   "Analisi GP" e "Calendario" entreranno qui quando quelle pagine esisteranno. */
+const ARCHIVIO = {
+  label: 'Archivio',
+  icon: BarChart3,
+  items: [
+    { href: '/statistics', label: 'Statistiche', desc: 'Record e dati storici Ferrari' },
+    { href: '/piloti',     label: 'Piloti',      desc: 'Schede e carriere' },
+    { href: '/circuiti',   label: 'Circuiti',    desc: 'Tracciati e statistiche' },
+  ],
+};
+
+/* Voci singole: una pagina, un link. Niente tendine da una voce sola. */
+const LINKS = [
+  { href: '/standings', label: 'Classifiche', icon: Trophy },
+  { href: '/news',      label: 'News',        icon: Newspaper },
+  { href: '/fanzone',   label: 'Gioca',       icon: Gamepad2 },
 ];
 
 export default function Navigation() {
-  const [openMenu, setOpenMenu] = useState(null);
+  const [archivioOpen, setArchivioOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { data: session } = useSession();
   const pathname = usePathname();
   const navRef = useRef(null);
 
-  // Chiude i menu quando cambia pagina
-  useEffect(() => { setOpenMenu(null); setMobileOpen(false); }, [pathname]);
+  useEffect(() => { setArchivioOpen(false); setMobileOpen(false); }, [pathname]);
 
-  // Chiude con Esc o cliccando fuori
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') { setOpenMenu(null); setMobileOpen(false); } };
-    const onClick = (e) => { if (navRef.current && !navRef.current.contains(e.target)) setOpenMenu(null); };
+    const onKey = (e) => { if (e.key === 'Escape') { setArchivioOpen(false); setMobileOpen(false); } };
+    const onClick = (e) => { if (navRef.current && !navRef.current.contains(e.target)) setArchivioOpen(false); };
     document.addEventListener('keydown', onKey);
     document.addEventListener('mousedown', onClick);
     return () => {
@@ -71,7 +53,15 @@ export default function Navigation() {
     };
   }, []);
 
-  const isPillarActive = (p) => p.items.some(i => pathname === i.href || pathname?.startsWith(i.href + '/'));
+  const isActive = (href) => pathname === href || pathname?.startsWith(href + '/');
+  const archivioActive = ARCHIVIO.items.some(i => isActive(i.href));
+
+  const itemCls = (active) =>
+    `flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-bold whitespace-nowrap transition-colors ${
+      active
+        ? 'text-[var(--fr-text)] bg-[var(--fr-surface-2)]'
+        : 'text-[var(--fr-text-muted)] hover:text-[var(--fr-text)] hover:bg-[var(--fr-surface-2)]'
+    }`;
 
   return (
     <nav
@@ -99,82 +89,73 @@ export default function Navigation() {
 
           {/* Menu desktop */}
           <div className="hidden lg:flex items-center gap-1">
-            {PILLARS.map((p) => {
-              const open = openMenu === p.id;
-              const active = isPillarActive(p);
-              return (
-                <div
-                  key={p.id}
-                  className="relative"
-                  onMouseEnter={() => setOpenMenu(p.id)}
-                  onMouseLeave={() => setOpenMenu(null)}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setOpenMenu(open ? null : p.id)}
-                    aria-expanded={open}
-                    aria-haspopup="true"
-                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-bold whitespace-nowrap transition-colors
-                      ${active || open
-                        ? 'text-[var(--fr-text)] bg-[var(--fr-surface-2)]'
-                        : 'text-[var(--fr-text-muted)] hover:text-[var(--fr-text)] hover:bg-[var(--fr-surface-2)]'}`}
-                  >
-                    <p.icon className={`w-4 h-4 ${active ? 'text-[var(--fr-red)]' : ''}`} aria-hidden="true" />
-                    {p.label}
-                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
-                  </button>
-
-                  <AnimatePresence>
-                    {open && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 6 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute left-0 top-full pt-2 w-64"
-                      >
-                        <div className="rounded-[var(--radius-md)] border border-[var(--fr-border)] bg-[var(--fr-surface)] shadow-[var(--fr-shadow)] p-2">
-                          {p.items.map((item) => {
-                            const cur = pathname === item.href || pathname?.startsWith(item.href + '/');
-                            return (
-                              <Link
-                                key={item.href}
-                                href={item.href}
-                                aria-current={cur ? 'page' : undefined}
-                                className={`block px-3 py-2.5 rounded-[var(--radius-sm)] transition-colors
-                                  ${cur ? 'bg-[var(--fr-red-soft)]' : 'hover:bg-[var(--fr-surface-2)]'}`}
-                              >
-                                <span className={`block text-[13px] font-bold ${cur ? 'text-[var(--fr-red)]' : 'text-[var(--fr-text)]'}`}>
-                                  {item.label}
-                                </span>
-                                <span className="block text-[11px] text-[var(--fr-text-faint)] leading-tight mt-0.5">
-                                  {item.desc}
-                                </span>
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-
-            <Link
-              href="/about"
-              aria-current={pathname === '/about' ? 'page' : undefined}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-bold whitespace-nowrap transition-colors
-                ${pathname === '/about'
-                  ? 'text-[var(--fr-text)] bg-[var(--fr-surface-2)]'
-                  : 'text-[var(--fr-text-muted)] hover:text-[var(--fr-text)] hover:bg-[var(--fr-surface-2)]'}`}
+            <div
+              className="relative"
+              onMouseEnter={() => setArchivioOpen(true)}
+              onMouseLeave={() => setArchivioOpen(false)}
             >
-              <Info className="w-4 h-4" aria-hidden="true" />
-              Chi siamo
-            </Link>
+              <button
+                type="button"
+                onClick={() => setArchivioOpen(o => !o)}
+                aria-expanded={archivioOpen}
+                aria-haspopup="true"
+                className={itemCls(archivioActive || archivioOpen)}
+              >
+                <ARCHIVIO.icon className={`w-4 h-4 ${archivioActive ? 'text-[var(--fr-red)]' : ''}`} aria-hidden="true" />
+                {ARCHIVIO.label}
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${archivioOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+              </button>
+
+              <AnimatePresence>
+                {archivioOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 6 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute left-0 top-full pt-2 w-64"
+                  >
+                    <div className="rounded-[var(--radius-md)] border border-[var(--fr-border)] bg-[var(--fr-surface)] shadow-[var(--fr-shadow)] p-2">
+                      {ARCHIVIO.items.map((item) => {
+                        const cur = isActive(item.href);
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            aria-current={cur ? 'page' : undefined}
+                            className={`block px-3 py-2.5 rounded-[var(--radius-sm)] transition-colors ${
+                              cur ? 'bg-[var(--fr-red-soft)]' : 'hover:bg-[var(--fr-surface-2)]'
+                            }`}
+                          >
+                            <span className={`block text-[13px] font-bold ${cur ? 'text-[var(--fr-red)]' : 'text-[var(--fr-text)]'}`}>
+                              {item.label}
+                            </span>
+                            <span className="block text-[11px] text-[var(--fr-text-faint)] leading-tight mt-0.5">
+                              {item.desc}
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {LINKS.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                aria-current={isActive(l.href) ? 'page' : undefined}
+                className={itemCls(isActive(l.href))}
+              >
+                <l.icon className={`w-4 h-4 ${isActive(l.href) ? 'text-[var(--fr-red)]' : ''}`} aria-hidden="true" />
+                {l.label}
+              </Link>
+            ))}
           </div>
 
-          {/* Azioni destra */}
+          {/* Azioni a destra */}
           <div className="flex items-center gap-2 shrink-0">
             <a
               href={GRIDUP_URL}
@@ -214,16 +195,13 @@ export default function Navigation() {
               )}
             </div>
 
-            {/* Burger */}
             <button
-              onClick={() => setMobileOpen(!mobileOpen)}
+              onClick={() => setMobileOpen(o => !o)}
               aria-label={mobileOpen ? 'Chiudi menu' : 'Apri menu'}
               aria-expanded={mobileOpen}
               className="lg:hidden p-2.5 rounded-xl border border-[var(--fr-border)] bg-[var(--fr-surface-2)] text-[var(--fr-text)]"
             >
-              {mobileOpen
-                ? <X className="w-5 h-5" aria-hidden="true" />
-                : <Menu className="w-5 h-5" aria-hidden="true" />}
+              {mobileOpen ? <X className="w-5 h-5" aria-hidden="true" /> : <Menu className="w-5 h-5" aria-hidden="true" />}
             </button>
           </div>
         </div>
@@ -239,41 +217,48 @@ export default function Navigation() {
             className="lg:hidden overflow-hidden bg-[var(--fr-surface)] border-t border-[var(--fr-border)]"
           >
             <div className="px-4 py-5 space-y-5 max-h-[calc(100vh-70px)] overflow-y-auto">
-              {PILLARS.map((p) => (
-                <div key={p.id}>
-                  <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--fr-red)] mb-2">
-                    <p.icon className="w-3.5 h-3.5" aria-hidden="true" />
-                    {p.label}
-                  </p>
-                  <div className="grid gap-1">
-                    {p.items.map((item) => {
-                      const cur = pathname === item.href || pathname?.startsWith(item.href + '/');
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => setMobileOpen(false)}
-                          aria-current={cur ? 'page' : undefined}
-                          className={`px-3 py-2.5 rounded-[var(--radius-sm)] text-sm font-bold transition-colors
-                            ${cur
-                              ? 'bg-[var(--fr-red-soft)] text-[var(--fr-red)]'
-                              : 'text-[var(--fr-text-muted)] hover:bg-[var(--fr-surface-2)] hover:text-[var(--fr-text)]'}`}
-                        >
-                          {item.label}
-                        </Link>
-                      );
-                    })}
-                  </div>
+              <div>
+                <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--fr-red)] mb-2">
+                  <ARCHIVIO.icon className="w-3.5 h-3.5" aria-hidden="true" />
+                  {ARCHIVIO.label}
+                </p>
+                <div className="grid gap-1">
+                  {ARCHIVIO.items.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      aria-current={isActive(item.href) ? 'page' : undefined}
+                      className={`px-3 py-2.5 rounded-[var(--radius-sm)] text-sm font-bold transition-colors ${
+                        isActive(item.href)
+                          ? 'bg-[var(--fr-red-soft)] text-[var(--fr-red)]'
+                          : 'text-[var(--fr-text-muted)] hover:bg-[var(--fr-surface-2)] hover:text-[var(--fr-text)]'
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
                 </div>
-              ))}
+              </div>
 
-              <Link
-                href="/about"
-                onClick={() => setMobileOpen(false)}
-                className="block px-3 py-2.5 rounded-[var(--radius-sm)] text-sm font-bold text-[var(--fr-text-muted)] hover:bg-[var(--fr-surface-2)] hover:text-[var(--fr-text)]"
-              >
-                Chi siamo
-              </Link>
+              <div className="grid gap-1">
+                {LINKS.map((l) => (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setMobileOpen(false)}
+                    aria-current={isActive(l.href) ? 'page' : undefined}
+                    className={`flex items-center gap-2 px-3 py-2.5 rounded-[var(--radius-sm)] text-sm font-bold transition-colors ${
+                      isActive(l.href)
+                        ? 'bg-[var(--fr-red-soft)] text-[var(--fr-red)]'
+                        : 'text-[var(--fr-text-muted)] hover:bg-[var(--fr-surface-2)] hover:text-[var(--fr-text)]'
+                    }`}
+                  >
+                    <l.icon className="w-4 h-4" aria-hidden="true" />
+                    {l.label}
+                  </Link>
+                ))}
+              </div>
 
               <a
                 href={GRIDUP_URL}
@@ -289,10 +274,7 @@ export default function Navigation() {
               <div className="flex items-center justify-between pt-4 border-t border-[var(--fr-border)]">
                 <ThemeToggle />
                 {session ? (
-                  <button
-                    onClick={() => signOut()}
-                    className="flex items-center gap-2 text-sm font-bold text-[var(--fr-text-muted)]"
-                  >
+                  <button onClick={() => signOut()} className="flex items-center gap-2 text-sm font-bold text-[var(--fr-text-muted)]">
                     Esci <LogOut className="w-4 h-4" aria-hidden="true" />
                   </button>
                 ) : (

@@ -112,12 +112,11 @@ export default function Footer() {
             <div className="bg-[var(--bg-tertiary)]/30 border border-[var(--border-light)] rounded-xl p-5 lg:p-6 h-full">
               <h4 className="text-xs lg:text-sm font-black uppercase tracking-wider text-[var(--ferrari-red)] mb-4 lg:mb-6 flex items-center gap-2">
                 <Zap className="w-3 h-3 lg:w-4 lg:h-4" aria-hidden="true" />
-                DATI
+                ARCHIVIO
               </h4>
               <ul className="space-y-2 lg:space-y-3">
                 {[
                   { name: 'Statistiche', href: '/statistics', icon: Trophy },
-                  { name: 'Classifiche', href: '/standings',  icon: Gauge  },
                   { name: 'Piloti',      href: '/piloti',     icon: Users  },
                   { name: 'Circuiti',    href: '/circuiti',   icon: Award  },
                 ].map((link, j) => (
@@ -144,11 +143,11 @@ export default function Footer() {
             <div className="bg-[var(--bg-tertiary)]/30 border border-[var(--border-light)] rounded-xl p-5 lg:p-6 h-full">
               <h4 className="text-xs lg:text-sm font-black uppercase tracking-wider text-[var(--ferrari-yellow)] mb-4 lg:mb-6 flex items-center gap-2">
                 <Info className="w-3 h-3 lg:w-4 lg:h-4" aria-hidden="true" />
-                LIVE &amp; GIOCA
+                STAGIONE
               </h4>
               <ul className="space-y-2 lg:space-y-3">
                 {[
-                  { name: 'Live Timing', href: '/live-timing',                 icon: Zap      },
+                  { name: 'Classifiche', href: '/standings',                   icon: Gauge    },
                   { name: 'News',        href: '/news',                        icon: Newspaper },
                   { name: 'Fan Zone',    href: '/fanzone',                     icon: Gamepad2 },
                   { name: 'Chi Siamo',   href: '/about',                       icon: Users    },
