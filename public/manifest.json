@@ -1,0 +1,21 @@
+{
+  "name": "Formula Rossa — Data Intelligence Ferrari F1",
+  "short_name": "Formula Rossa",
+  "description": "Statistiche, classifiche e archivio storico della Scuderia Ferrari in Formula 1.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "lang": "it",
+  "dir": "ltr",
+  "categories": ["sports"],
+  "background_color": "#04161b",
+  "theme_color": "#E8002D",
+  "icons": [
+    {
+      "src": "/data/images/formula-rossa-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

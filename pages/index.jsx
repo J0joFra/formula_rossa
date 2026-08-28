@@ -19,13 +19,12 @@ const PILLARS = [
     icon: BarChart3,
     title: 'Dati',
     tone: 'red',
-    desc: 'Il cuore del sito. Statistiche storiche, classifiche, piloti, circuiti e archivio gare, con numeri verificabili.',
+    desc: 'Il cuore del sito. Statistiche storiche, classifiche, schede piloti e circuiti, con numeri verificabili.',
     links: [
       { href: '/statistics', label: 'Statistiche' },
       { href: '/standings',  label: 'Classifiche' },
       { href: '/piloti',     label: 'Piloti' },
       { href: '/circuiti',   label: 'Circuiti' },
-      { href: '/races',      label: 'Gare' },
     ],
   },
   {

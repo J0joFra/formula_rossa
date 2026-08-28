@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Navigation from '../components/ferrari/Navigation';
-import Footer from '../components/ferrari/Footer';
-import LoadingSpinner from '../components/ferrari/LoadingSpinner';
+import PageShell, { PageHeader, PageLoading } from '../components/ui/PageShell';
 
 import { createClient } from '@supabase/supabase-js';
 
@@ -172,28 +170,42 @@ export default function StandingsPage() {
   // Filtra le gare in base al toggle
   const displayedCalendar = showSprintRaces ? sprintRaces : calendar;
 
+  const seo = {
+    title: `Classifiche F1 ${selectedSeason}`,
+    description: `Classifica piloti e costruttori della stagione ${selectedSeason} di Formula 1, con il dettaglio dei punti Ferrari.`,
+    path: '/standings',
+  };
+
+  const seasonPicker = (
+    <label className="flex items-center gap-2">
+      <span className="sr-only">Stagione</span>
+      <select
+        value={selectedSeason}
+        onChange={(e) => setSelectedSeason(Number(e.target.value))}
+        className="select"
+      >
+        {availableSeasons.map(s => <option key={s} value={s}>{s}</option>)}
+      </select>
+    </label>
+  );
+
   if (loading) return (
-    <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
-      <LoadingSpinner size="lg" message="Caricamento standings..." />
-    </div>
+    <PageShell seo={seo} wide>
+      <PageHeader eyebrow="Dati · Stagione" title="Classifiche" breadcrumb={[{ label: 'Dati' }, { label: 'Classifiche' }]} />
+      <PageLoading label="Caricamento classifiche…" />
+    </PageShell>
   );
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
-      <Navigation activeSection="stats" />
-      <main className="max-w-7xl mx-auto px-4 pt-32 pb-20">
-        <div className="flex justify-between items-end mb-12 border-b border-red-600/30 pb-6">
-          <h2 className="text-5xl font-black italic uppercase tracking-tighter">
-            Standings <span className="text-[var(--ferrari-red)]">{selectedSeason}</span>
-          </h2>
-          <select
-            value={selectedSeason}
-            onChange={(e) => setSelectedSeason(Number(e.target.value))}
-            className="bg-[var(--bg-tertiary)] border-l-4 border-red-600 px-4 py-2 font-bold outline-none text-[var(--text-primary)] cursor-pointer"
-          >
-            {availableSeasons.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </div>
+    <PageShell seo={seo} wide>
+      <PageHeader
+        eyebrow="Dati · Stagione"
+        title="Classifiche"
+        accent={String(selectedSeason)}
+        subtitle="Piloti e costruttori, aggiornati all'ultimo Gran Premio disputato."
+        breadcrumb={[{ label: 'Dati' }, { label: 'Classifiche' }]}
+        actions={seasonPicker}
+      />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
           {/* Driver Table */}
@@ -355,8 +367,6 @@ export default function StandingsPage() {
             })}
           </div>
         )}
-      </main>
-      <Footer />
-    </div>
+    </PageShell>
   );
 }

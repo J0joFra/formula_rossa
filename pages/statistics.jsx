@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   PieChart, Pie, Cell
 } from 'recharts';
 import {
-  Trophy, Activity, ChevronLeft, ChevronDown,
-  Globe2, Landmark, User
+  Trophy, Activity, ChevronLeft, Globe2, Landmark,
 } from 'lucide-react';
-import Navigation from '../components/ferrari/Navigation';
-import Footer from '../components/ferrari/Footer';
+import PageShell, { PageLoading } from '../components/ui/PageShell';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
+import { countryConfig } from '../lib/f1/circuitFlags';
+import {
+  DarkTooltip, AccordionSection, TrophySVG, WinnerRow,
+} from '../components/statistics/StatsUI';
 
 const supabase = typeof window !== 'undefined'
   ? createClient(
@@ -25,7 +27,6 @@ const supabase = typeof window !== 'undefined'
 ───────────────────────────────────────────────────────────────────────────── */
 const RED  = '#DC0000';
 const GOLD = '#EAB308';
-const COVID_ORANGE = '#F97316'
 
 const POINTS_PERIODS = [
   { 
@@ -62,11 +63,6 @@ const POINTS_PERIODS = [
   }
 ];
 
-const MEDAL = [
-  { color: RED,      label: '1ST' },
-  { color: '#EBEBEB', label: '2ND' },
-  { color: '#D58936', label: '3RD' },
-];
 
 /* ─────────────────────────────────────────────────────────────────────────────
    HELPERS
@@ -79,587 +75,9 @@ const normalizeDriverName = (name) => {
     .replace(/[^\w-]/g, '');
 };
 
-const countryConfig = {
-  'germany':                  { code: 'de', color: '#FFCE00', name: 'GERMANY' },
-  'italy':                    { code: 'it', color: '#008C45', name: 'ITALY' },
-  'united-kingdom':           { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
-  'great-britain':            { code: 'gb', color: '#00247D', name: 'GREAT BRITAIN' },
-  'france':                   { code: 'fr', color: '#0055A4', name: 'FRANCE' },
-  'brazil':                   { code: 'br', color: '#26D701', name: 'BRAZIL' },
-  'spain':                    { code: 'es', color: '#AA151B', name: 'SPAIN' },
-  'united-states-of-america': { code: 'us', color: '#B22234', name: 'USA' },
-  'united-states':            { code: 'us', color: '#B22234', name: 'USA' },
-  'finland':                  { code: 'fi', color: '#003580', name: 'FINLAND' },
-  'austria':                  { code: 'at', color: '#ED2939', name: 'AUSTRIA' },
-  'monaco':                   { code: 'mc', color: '#E20919', name: 'MONACO' },
-  'argentina':                { code: 'ar', color: '#75AADB', name: 'ARGENTINA' },
-  'switzerland':              { code: 'ch', color: '#D52B1E', name: 'SWITZERLAND' },
-  'belgium':                  { code: 'be', color: '#F1BF00', name: 'BELGIUM' },
-  'south-africa':             { code: 'za', color: '#007A4D', name: 'SOUTH AFRICA' },
-  'mexico':                   { code: 'mx', color: '#006847', name: 'MEXICO' },
-  'netherlands':              { code: 'nl', color: '#21468B', name: 'NETHERLANDS' },
-  'hungary':                  { code: 'hu', color: '#436F4D', name: 'HUNGARY' },
-  'portugal':                 { code: 'pt', color: '#006600', name: 'PORTUGAL' },
-  'turkey':                   { code: 'tr', color: '#E30A17', name: 'TURKEY' },
-  'japan':                    { code: 'jp', color: '#BC002D', name: 'JAPAN' },
-  'australia':                { code: 'au', color: '#00008B', name: 'AUSTRALIA' },
-  'canada':                   { code: 'ca', color: '#D80621', name: 'CANADA' },
-  'china':                    { code: 'cn', color: '#DE2910', name: 'CHINA' },
-  'bahrain':                  { code: 'bh', color: '#C8102E', name: 'BAHRAIN' },
-  'saudi-arabia':             { code: 'sa', color: '#006C35', name: 'SAUDI ARABIA' },
-  'azerbaijan':               { code: 'az', color: '#00B5E2', name: 'AZERBAIJAN' },
-  'singapore':                { code: 'sg', color: '#ED2939', name: 'SINGAPORE' },
-  'qatar':                    { code: 'qa', color: '#8D1B3D', name: 'QATAR' },
-  'abu-dhabi':                { code: 'ae', color: '#00732F', name: 'UAE' },
-  'united-arab-emirates':     { code: 'ae', color: '#00732F', name: 'UAE' },
-  'malaysia':                 { code: 'my', color: '#006233', name: 'MALAYSIA' },
-  'korea':                    { code: 'kr', color: '#CD2E3A', name: 'KOREA' },
-  'india':                    { code: 'in', color: '#FF9933', name: 'INDIA' },
-  'russia':                   { code: 'ru', color: '#D52B1E', name: 'RUSSIA' },
-  'morocco':                  { code: 'ma', color: '#C1272D', name: 'MOROCCO' },
-  'unknown':                  { code: 'un', color: '#333333', name: 'UNKNOWN' },
-};
-
-const circuitToCountry = {
-  'monza': 'it', 'autodromo_nazionale_di_monza': 'it', 'milan': 'it', 'imola': 'it', 'enzo_e_dino_ferrari': 'it',
-  'mugello': 'it', 'bologna': 'it', 'pescara': 'it', 'silverstone': 'gb', 'silverstone_circuit': 'gb',
-  'northamptonshire': 'gb', 'brands_hatch': 'gb', 'kent': 'gb', 'donington': 'gb', 'aintree': 'gb',
-  'liverpool': 'gb', 'spa': 'be', 'spa_francorchamps': 'be', 'stavelot': 'be', 'zolder': 'be',
-  'heusden_zolder': 'be', 'nivelles': 'be', 'brussels': 'be', 'zandvoort': 'nl', 'circuit_zandvoort': 'nl',
-  'catalunya': 'es', 'barcelona': 'es', 'montmelo': 'es', 'jerez': 'es', 'valencia': 'es',
-  'valencia_street_circuit': 'es', 'pedralbes': 'es', 'montjuic': 'es', 'madrid': 'es', 'madring': 'es', 'jarama': 'es',
-  'hungaroring': 'hu', 'budapest': 'hu', 'mogyorod': 'hu', 'red_bull_ring': 'at', 'spielberg': 'at',
-  'zeltweg': 'at', 'oesterreichring': 'at', 'styria': 'at', 'magny_cours': 'fr', 'nevers': 'fr',
-  'paul_ricard': 'fr', 'le_castellet': 'fr', 'ricard': 'fr', 'reims': 'fr', 'dijon': 'fr',
-  'dijon_prenois': 'fr', 'rouen': 'fr', 'essarts': 'fr', 'charade': 'fr', 'clermont_ferrand': 'fr',
-  'lemans': 'fr', 'nurburgring': 'de', 'nurburg': 'de', 'hockenheimring': 'de', 'hockenheim': 'de',
-  'avus': 'de', 'berlin': 'de', 'estoril': 'pt', 'cascais': 'pt', 'portimao': 'pt',
-  'algarve': 'pt', 'boavista': 'pt', 'oporto': 'pt', 'monsanto': 'pt', 'lisbon': 'pt',
-  'bremgarten': 'ch', 'bern': 'ch', 'anderstorp': 'se', 'scandinavian_raceway': 'se', 'monaco': 'mc',
-  'monte_carlo': 'mc', 'circuit_de_monaco': 'mc', 'bakú': 'az', 'baku': 'az', 'azerbaijan': 'az',
-  'americas': 'us', 'cota': 'us', 'austin': 'us', 'circuit_of_the_americas': 'us', 'miami': 'us',
-  'miami_international_autodrome': 'us', 'vegas': 'us', 'las_vegas': 'us', 'las_vegas_strip': 'us', 'caesars_palace': 'us',
-  'indianapolis': 'us', 'indianapolis_motor_speedway': 'us', 'watkins_glen': 'us', 'long_beach': 'us', 'phoenix': 'us',
-  'detroit': 'us', 'dallas': 'us', 'sebring': 'us', 'riverside': 'us', 'villeneuve': 'ca',
-  'montreal': 'ca', 'circuit_gilles_villeneuve': 'ca', 'mosport': 'ca', 'bowmanville': 'ca', 'tremblant': 'ca',
-  'st_jovite': 'ca', 'interlagos': 'br', 'sao_paulo': 'br', 'são_paulo': 'br', 'jose_carlos_pace': 'br',
-  'jacarepagua': 'br', 'rio_de_janeiro': 'br', 'rodriguez': 'mx', 'hermanos_rodriguez': 'mx', 'mexico_city': 'mx',
-  'galvez': 'ar', 'buenos_aires': 'ar', 'oscar_galvez': 'ar',
-  'juan_y_oscar_galvez': 'ar', 'juan_y_ignacio_cobos': 'ar', 'carlos_pace': 'br', 'juan_y_ignacio_cobos': 'ar',
-  'suzuka': 'jp', 'suzuka_circuit': 'jp', 'mie': 'jp', 'fuji': 'jp', 'fuji_speedway': 'jp',
-  'oyama': 'jp', 'okayama': 'jp', 'ti_circuit': 'jp', 'shanghai': 'cn', 'shanghai_international_circuit': 'cn',
-  'marina_bay': 'sg', 'singapore': 'sg', 'sepang': 'my', 'kuala_lumpur': 'my', 'yeongam': 'kr',
-  'korea_international_circuit': 'kr', 'buddh': 'in', 'greater_noida': 'in', 'bahrain': 'bh', 'sakhir': 'bh',
-  'manama': 'bh', 'bahrain_international_circuit': 'bh', 'losail': 'qa', 'lusail': 'qa', 'lusail_international_circuit': 'qa',
-  'jeddah': 'sa', 'jeddah_corniche_circuit': 'sa', 'yas_marina': 'ae', 'abu_dhabi': 'ae', 'yas_marina_circuit': 'ae',
-  'istanbul': 'tr', 'istanbul_park': 'tr', 'sochi': 'ru', 'sochi_autodrom': 'ru', 'kyalami': 'za',
-  'midrand': 'za', 'george': 'za', 'prince_george': 'za', 'adelaide': 'au', 'albert_park': 'au',
-  'melbourne': 'au', 'ain_diab': 'ma', 'casablanca': 'ma',
-  'albert_park': 'au', 'marina_bay': 'sg', 'yas_marina': 'ae', 'paul_ricard': 'fr', 'watkins_glen': 'us',
-  'long_beach': 'us', 'las_vegas': 'us', 'jose_carlos_pace': 'br', 'hermanos_rodriguez': 'mx', 'mexico_city': 'mx',
-  'red_bull_ring': 'at', 'silverstone_circuit': 'gb', 'spa_francorchamps': 'be', 'circuit_de_monaco': 'mc', 'fuji_speedway': 'jp'
-};
-
-const getFlagCode = (circuitName) => {
-  if (!circuitName) return '';
-  
-  const n = circuitName.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim();
-  
-  const country = circuitToCountry[n];
-  if (country) return countryConfig[country]?.code || '';
-  
-  const l = circuitName.toLowerCase();
-  
-  if (l.includes('monza') || l.includes('imola') || l.includes('mugello') || l.includes('italian') || l.includes('pescara') || l.includes('bologna') ||
-      l.includes('enna') || l.includes('pergusa') || l.includes('vallelunga') || l.includes('Italy') ||
-      l.includes('misano') || l.includes('santamonica')) return 'it';
-  if (l.includes('silverstone') || l.includes('brands') || l.includes('british') || l.includes('britain') ||
-      l.includes('donington') || l.includes('aintree') || l.includes('goodwood') || l.includes('united kingdom') ||
-      l.includes('crystal palace') || l.includes('mallory park') || l.includes('snetterton') ||
-      l.includes('oulton park') || l.includes('thurston') || l.includes('liverpool') ||
-      l.includes('northamptonshire') || l.includes('kent')) return 'gb';
-  if (l.includes('spa') || l.includes('belgian') || l.includes('francorchamps') ||
-      l.includes('zolder') || l.includes('nivelles') || l.includes('stavelot') ||
-      l.includes('brussels') || l.includes('heusden')) return 'be';
-  if (l.includes('barcelona') || l.includes('catalun') || l.includes('spanish') ||
-      l.includes('jerez') || l.includes('valencia') || l.includes('pedralbes') ||
-      l.includes('montjuic') || l.includes('madrid') || l.includes('jarama') ||
-      l.includes('madring') || l.includes('guadalope') || l.includes('lasarte') ||
-      l.includes('sitges')) return 'es';
-  if (l.includes('paul ricard') || l.includes('magny') || l.includes('french') ||
-      l.includes('france') || l.includes('le castellet') || l.includes('ricard') ||
-      l.includes('reims') || l.includes('dijon') || l.includes('prenois') ||
-      l.includes('rouen') || l.includes('les essarts') || l.includes('charade') ||
-      l.includes('clermont ferrand') || l.includes('lemans') || l.includes('bugatti') ||
-      l.includes('albi') || l.includes('lens') || l.includes('strasbourg') ||
-      l.includes('montlhery') || l.includes('pau') || l.includes('bois')) return 'fr';
-  if (l.includes('nurburg') || l.includes('hockenheim') || l.includes('german') ||
-      l.includes('avus') || l.includes('berlin') || l.includes('norisring') ||
-      l.includes('grenzlandring') || l.includes('sachsenring') || l.includes('solitude')) return 'de';
-  if (l.includes('estoril') || l.includes('portimao') || l.includes('portuguese') ||
-      l.includes('algarve') || l.includes('boavista') || l.includes('oporto') ||
-      l.includes('monsanto') || l.includes('lisbon')) return 'pt';
-  if (l.includes('bremgarten') || l.includes('bern') || l.includes('swiss') || l.includes('dijon')) return 'ch';
-  if (l.includes('anderstorp') || l.includes('scandinavian') || l.includes('swedish') || l.includes('karlskoga')) return 'se';
-  if (l.includes('monaco') || l.includes('monte carlo') || l.includes('circuit de monaco')) return 'mc';
-  if (l.includes('baku') || l.includes('azerbaijan') || l.includes('bakú')) return 'az';
-  if (l.includes('americas') || l.includes('cota') || l.includes('austin') || 
-      l.includes('miami') || l.includes('vegas') || l.includes('las vegas') ||
-      l.includes('united states') || l.includes('indianapolis') || l.includes('watkins glen') ||
-      l.includes('long beach') || l.includes('phoenix') || l.includes('detroit') ||
-      l.includes('dallas') || l.includes('sebring') || l.includes('riverside') ||
-      l.includes('caesars palace') || l.includes('fair park') || l.includes('tampa') ||
-      l.includes('laguna seca') || l.includes('sonoma') || l.includes('road america')) return 'us';
-  if (l.includes('villeneuve') || l.includes('montreal') || l.includes('canadian') ||
-      l.includes('mosport') || l.includes('bowmanville') || l.includes('tremblant') ||
-      l.includes('st jovite')) return 'ca';
-  if (l.includes('interlagos') || l.includes('brazilian') || l.includes('sao paulo') ||
-      l.includes('jose carlos pace') || l.includes('jacarepagua') || l.includes('rio de janeiro') ||
-      l.includes('galeão') || l.includes('carlos pace')) return 'br';
-  if (l.includes('rodriguez') || l.includes('hermanos') || l.includes('mexico') ||
-      l.includes('mexican') || l.includes('mexico city') || l.includes('avandaro')) return 'mx';
-  if (l.includes('galvez') || l.includes('buenos aires') || l.includes('argentine') ||
-      l.includes('oscar galvez') || l.includes('juan y oscar') || l.includes('cobos')) return 'ar';
-  if (l.includes('suzuka') || l.includes('japanese') || l.includes('fuji') ||
-      l.includes('okayama') || l.includes('ti circuit') || l.includes('aida') ||
-      l.includes('mine')) return 'jp';
-  if (l.includes('shanghai') || l.includes('chinese') || l.includes('china') ||
-      l.includes('zhuhai') || l.includes('beijing')) return 'cn';
-  if (l.includes('marina bay') || l.includes('singapore')) return 'sg';
-  if (l.includes('sepang') || l.includes('malaysian') || l.includes('kuala lumpur') ||
-      l.includes('johor')) return 'my';
-  if (l.includes('yeongam') || l.includes('korea') || l.includes('korean')) return 'kr';
-  if (l.includes('buddh') || l.includes('greater noida') || l.includes('indian')) return 'in';
-  if (l.includes('sochi') || l.includes('russian') || l.includes('moscow')) return 'ru';
-  if (l.includes('bahrain') || l.includes('sakhir') || l.includes('manama')) return 'bh';
-  if (l.includes('lusail') || l.includes('qatar') || l.includes('losail')) return 'qa';
-  if (l.includes('jeddah') || l.includes('saudi') || l.includes('arabia')) return 'sa';
-  if (l.includes('yas') || l.includes('abu dhabi') || l.includes('marina')) return 'ae';
-  if (l.includes('istanbul') || l.includes('turkish') || l.includes('turkey')) return 'tr';
-  if (l.includes('kyalami') || l.includes('south african') || l.includes('prince george') ||
-      l.includes('midrand') || l.includes('east london')) return 'za';
-  if (l.includes('ain diab') || l.includes('ain-diab') || l.includes('moroccan') ||
-      l.includes('casablanca') || l.includes('ain-diab')) return 'ma';
-  if (l.includes('red bull ring') || l.includes('austrian') || l.includes('spielberg') ||
-      l.includes('zeltweg') || l.includes('oesterreichring') || l.includes('styria')) return 'at';
-  if (l.includes('hungaroring') || l.includes('hungarian') || l.includes('budapest') ||
-      l.includes('mogyorod')) return 'hu';
-  if (l.includes('zandvoort') || l.includes('dutch') || l.includes('netherlands')) return 'nl';
-  if (l.includes('albert park') || l.includes('melbourne') || l.includes('australian') || l.includes('adelaide')) return 'au';
-  if (l.includes('finnish') || l.includes('helsinki') || l.includes('elaintarha')) return 'fi';
-  if (l.includes('ardmore') || l.includes('new zealand') || l.includes('pukekohe')) return 'nz';
-  if (l.includes('indonesian') || l.includes('jakarta') || l.includes('mandalika')) return 'id';
-  if (l.includes('monza') || l.includes('imola') || l.includes('mugello') || 
-    l.includes('italian') || l.includes('italy') || l.includes('italia') || 
-    l.includes('pescara') || l.includes('bologna') || l.includes('enna') || 
-    l.includes('pergusa') || l.includes('vallelunga') || l.includes('misano') || 
-    l.includes('santamonica') || l.includes('san marino') || l.includes('toscana') ||
-    l.includes('tuscan')) return 'it';
-
-if (l.includes('silverstone') || l.includes('brands') || l.includes('british') || 
-    l.includes('britain') || l.includes('great britain') || l.includes('united kingdom') || 
-    l.includes('england') || l.includes('english') || l.includes('uk') || 
-    l.includes('donington') || l.includes('aintree') || l.includes('goodwood') || 
-    l.includes('crystal palace') || l.includes('mallory park') || l.includes('snetterton') ||
-    l.includes('oulton park') || l.includes('thurston') || l.includes('liverpool') ||
-    l.includes('northamptonshire') || l.includes('kent') || l.includes('londra') ||
-    l.includes('london')) return 'gb';
-
-if (l.includes('spa') || l.includes('belgian') || l.includes('belgium') || 
-    l.includes('belgique') || l.includes('belgie') || l.includes('francorchamps') ||
-    l.includes('zolder') || l.includes('nivelles') || l.includes('stavelot') ||
-    l.includes('brussels') || l.includes('bruxelles') || l.includes('heusden')) return 'be';
-
-if (l.includes('barcelona') || l.includes('catalun') || l.includes('catalonia') || 
-    l.includes('spanish') || l.includes('spain') || l.includes('españa') || 
-    l.includes('espanha') || l.includes('jerez') || l.includes('valencia') || 
-    l.includes('pedralbes') || l.includes('montjuic') || l.includes('madrid') || 
-    l.includes('jarama') || l.includes('madring') || l.includes('guadalope') || 
-    l.includes('lasarte') || l.includes('sitges')) return 'es';
-
-if (l.includes('paul ricard') || l.includes('magny') || l.includes('french') ||
-    l.includes('france') || l.includes('francia') || l.includes('le castellet') || 
-    l.includes('ricard') || l.includes('reims') || l.includes('dijon') || 
-    l.includes('prenois') || l.includes('rouen') || l.includes('les essarts') || 
-    l.includes('charade') || l.includes('clermont ferrand') || l.includes('lemans') || 
-    l.includes('bugatti') || l.includes('albi') || l.includes('lens') || 
-    l.includes('strasbourg') || l.includes('montlhery') || l.includes('pau') || 
-    l.includes('bois') || l.includes('paris') || l.includes('francese')) return 'fr';
-
-if (l.includes('nurburg') || l.includes('nürburg') || l.includes('hockenheim') || 
-    l.includes('german') || l.includes('germany') || l.includes('deutschland') || 
-    l.includes('deutsche') || l.includes('avus') || l.includes('berlin') || 
-    l.includes('norisring') || l.includes('grenzlandring') || l.includes('sachsenring') || 
-    l.includes('solitude') || l.includes('tedesca')) return 'de';
-
-if (l.includes('estoril') || l.includes('portimao') || l.includes('portuguese') ||
-    l.includes('portugal') || l.includes('portogallo') || l.includes('algarve') || 
-    l.includes('boavista') || l.includes('oporto') || l.includes('porto') ||
-    l.includes('monsanto') || l.includes('lisbon') || l.includes('lisbona')) return 'pt';
-
-if (l.includes('bremgarten') || l.includes('bern') || l.includes('berne') || 
-    l.includes('swiss') || l.includes('switzerland') || l.includes('suisse') || 
-    l.includes('schweiz') || l.includes('svizzera') || l.includes('elvetica')) return 'ch';
-
-if (l.includes('anderstorp') || l.includes('scandinavian') || l.includes('swedish') || 
-    l.includes('sweden') || l.includes('svezia') || l.includes('karlskoga') ||
-    l.includes('svedese')) return 'se';
-
-if (l.includes('monaco') || l.includes('monte carlo') || l.includes('circuit de monaco') ||
-    l.includes('monegasco')) return 'mc';
-
-if (l.includes('baku') || l.includes('azerbaijan') || l.includes('bakú') || 
-    l.includes('azeri') || l.includes('azero')) return 'az';
-
-if (l.includes('americas') || l.includes('cota') || l.includes('austin') || l.includes('united-states-of-america') ||
-     l.includes('united-states') || l.includes('u.s.a.') || l.includes('united states of america') || 
-    l.includes('miami') || l.includes('vegas') || l.includes('las vegas') ||
-    l.includes('united states') || l.includes('usa') || l.includes('u.s.a.') ||
-    l.includes('america') || l.includes('american') || l.includes('indianapolis') || 
-    l.includes('watkins glen') || l.includes('long beach') || l.includes('phoenix') || 
-    l.includes('detroit') || l.includes('dallas') || l.includes('sebring') || 
-    l.includes('riverside') || l.includes('caesars palace') || l.includes('fair park') || 
-    l.includes('tampa') || l.includes('laguna seca') || l.includes('sonoma') || 
-    l.includes('road america') || l.includes('california') || l.includes('texas')) return 'us';
-
-if (l.includes('villeneuve') || l.includes('montreal') || l.includes('canadian') ||
-    l.includes('canada') || l.includes('quebec') || l.includes('mosport') || 
-    l.includes('bowmanville') || l.includes('tremblant') || l.includes('st jovite') ||
-    l.includes('canadese')) return 'ca';
-
-if (l.includes('interlagos') || l.includes('brazilian') || l.includes('brazil') || 
-    l.includes('brasile') || l.includes('brasil') || l.includes('sao paulo') ||
-    l.includes('são paulo') || l.includes('jose carlos pace') || l.includes('jacarepagua') || 
-    l.includes('rio de janeiro') || l.includes('galeão') || l.includes('carlos pace') ||
-    l.includes('brasiliana')) return 'br';
-
-if (l.includes('rodriguez') || l.includes('hermanos') || l.includes('mexico') ||
-    l.includes('mexican') || l.includes('messico') || l.includes('mexico city') || 
-    l.includes('città del messico') || l.includes('avandaro')) return 'mx';
-
-if (l.includes('galvez') || l.includes('buenos aires') || l.includes('argentine') ||
-    l.includes('argentina') || l.includes('oscar galvez') || l.includes('juan y oscar') || 
-    l.includes('cobos') || l.includes('argentino')) return 'ar';
-
-if (l.includes('suzuka') || l.includes('japanese') || l.includes('japan') || 
-    l.includes('giappone') || l.includes('nippon') || l.includes('fuji') ||
-    l.includes('okayama') || l.includes('ti circuit') || l.includes('aida') ||
-    l.includes('mine') || l.includes('giapponese')) return 'jp';
-
-if (l.includes('shanghai') || l.includes('chinese') || l.includes('china') ||
-    l.includes('cina') || l.includes('zhuhai') || l.includes('beijing') ||
-    l.includes('pechino') || l.includes('cinese')) return 'cn';
-
-if (l.includes('marina bay') || l.includes('singapore') || l.includes('singapor') ||
-    l.includes('singapor')) return 'sg';
-
-if (l.includes('sepang') || l.includes('malaysian') || l.includes('malaysia') || 
-    l.includes('malesia') || l.includes('kuala lumpur') || l.includes('johor') ||
-    l.includes('malese')) return 'my';
-
-if (l.includes('yeongam') || l.includes('korea') || l.includes('korean') || 
-    l.includes('corea') || l.includes('sud corea') || l.includes('coreano')) return 'kr';
-
-if (l.includes('buddh') || l.includes('greater noida') || l.includes('indian') ||
-    l.includes('india') || l.includes('indiano')) return 'in';
-
-if (l.includes('sochi') || l.includes('russian') || l.includes('russia') || 
-    l.includes('moscow') || l.includes('mosca') || l.includes('russo')) return 'ru';
-
-if (l.includes('bahrain') || l.includes('sakhir') || l.includes('manama') || 
-    l.includes('bahrein') || l.includes('bahraini')) return 'bh';
-
-if (l.includes('lusail') || l.includes('qatar') || l.includes('losail') || 
-    l.includes('catari') || l.includes('qatari')) return 'qa';
-
-if (l.includes('jeddah') || l.includes('saudi') || l.includes('arabia') || 
-    l.includes('arabia saudita') || l.includes('saudita')) return 'sa';
-
-if (l.includes('yas') || l.includes('abu dhabi') || l.includes('marina') ||
-    l.includes('emirates') || l.includes('emirati') || l.includes('dubai') ||
-    l.includes('uae') || l.includes('emiratina')) return 'ae';
-
-if (l.includes('istanbul') || l.includes('turkish') || l.includes('turkey') || 
-    l.includes('turchia') || l.includes('turco')) return 'tr';
-
-if (l.includes('kyalami') || l.includes('south african') || l.includes('south africa') || 
-    l.includes('sudafrica') || l.includes('prince george') || l.includes('midrand') || 
-    l.includes('east london') || l.includes('sudafricano')) return 'za';
-
-if (l.includes('ain diab') || l.includes('ain-diab') || l.includes('moroccan') ||
-    l.includes('morocco') || l.includes('marocco') || l.includes('casablanca') || 
-    l.includes('marocchino')) return 'ma';
-
-if (l.includes('red bull ring') || l.includes('austrian') || l.includes('austria') || 
-    l.includes('spielberg') || l.includes('zeltweg') || l.includes('oesterreichring') || 
-    l.includes('österreichring') || l.includes('styria') || l.includes('stiria') ||
-    l.includes('austriaco')) return 'at';
-
-if (l.includes('hungaroring') || l.includes('hungarian') || l.includes('hungary') || 
-    l.includes('ungheria') || l.includes('budapest') || l.includes('mogyorod') ||
-    l.includes('ungherese')) return 'hu';
-
-if (l.includes('zandvoort') || l.includes('dutch') || l.includes('netherlands') || 
-    l.includes('olanda') || l.includes('paesi bassi') || l.includes('nederland') ||
-    l.includes('olandese')) return 'nl';
-
-if (l.includes('albert park') || l.includes('melbourne') || l.includes('australian') || 
-    l.includes('australia') || l.includes('adelaide') || l.includes('aussie') ||
-    l.includes('australiano')) return 'au';
-
-if (l.includes('finnish') || l.includes('finland') || l.includes('finlandia') || 
-    l.includes('helsinki') || l.includes('elaintarha') || l.includes('finlandese')) return 'fi';
-
-if (l.includes('ardmore') || l.includes('new zealand') || l.includes('nuova zelanda') || 
-    l.includes('pukekohe') || l.includes('neozelandese')) return 'nz';
-
-if (l.includes('indonesian') || l.includes('indonesia') || l.includes('jakarta') || 
-    l.includes('mandalika') || l.includes('indonesiano')) return 'id';
-  
-  return '';
-};
-
-const getCountryColor = (circuitName) => {
-  const code = getFlagCode(circuitName);
-  if (!code) return RED;
-  return Object.values(countryConfig).find(v => v.code === code)?.color || RED;
-};
-
-const getCountryName = (code) => {
-  if (!code) return '';
-  return Object.values(countryConfig).find(v => v.code === code)?.name || code.toUpperCase();
-};
 
 /* ─────────────────────────────────────────────────────────────────────────────
    DARK TOOLTIP
-───────────────────────────────────────────────────────────────────────────── */
-function DarkTooltip({ active, payload, label, accentColor, extra }) {
-  if (!active || !payload?.length) return null;
-  const color = accentColor || payload[0]?.color || RED;
-  return (
-    <div className="rounded-xl px-4 py-3 min-w-[160px]"
-      style={{ background: '#0d0d0d', border: `1px solid ${color}40`, boxShadow: `0 16px 48px rgba(0,0,0,0.9), 0 0 20px ${color}15` }}>
-      {label && <p className="text-[10px] uppercase tracking-widest text-white-600 font-black mb-2">{label}</p>}
-      {extra && <div className="mb-2">{extra}</div>}
-      {payload.map((p, i) => (
-        <p key={i} className="font-black text-xl" style={{ color }}>
-          {typeof p.value === 'number' ? p.value.toLocaleString('it-IT') : p.value}
-          {p.name && <span className="text-white-600 text-[10px] ml-2 font-black uppercase">{p.name}</span>}
-        </p>
-      ))}
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   ACCORDION SECTION
-───────────────────────────────────────────────────────────────────────────── */
-function AccordionSection({ id, title, subtitle, icon: Icon, children, isOpen, onToggle, accent = 'red' }) {
-  const color = accent === 'gold' ? GOLD : RED;
-  return (
-    <div 
-      className={`rounded-2xl overflow-hidden transition-all duration-300 group ${
-        !isOpen ? 'hover:border-red-600/30' : ''
-      }`}
-      style={{
-        background: 'rgba(6,6,6,0.95)',
-        border: `1px solid ${isOpen ? color : 'rgb(248, 238, 238)'}`, 
-        boxShadow: isOpen ? `0 0 60px ${color}08` : 'none',
-        transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
-      }}
-    >
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between px-6 md:px-8 py-5 md:py-6 text-left group"
-        aria-expanded={isOpen}
-        aria-controls={`section-${id}`}
-      >
-        <div className="flex items-center gap-4 md:gap-5">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110"
-            style={{ background: color + '15', border: `1px solid ${color}30` }}>
-            <Icon className="w-4.5 h-4.5" style={{ color }} aria-hidden="true" />
-          </div>
-          <div>
-            <h3 className="text-base md:text-lg font-black uppercase tracking-tight leading-none mb-0.5 transition-colors"
-              style={{ color: isOpen ? 'white' : 'rgba(255,255,255,0.7)' }}>
-              {title}
-            </h3>
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] transition-colors"
-              style={{ color: isOpen ? color : 'rgba(255,255,255,0.2)' }}>
-              {subtitle}
-            </p>
-          </div>
-        </div>
-        <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.3 }}>
-          <ChevronDown className="w-5 h-5" style={{ color: isOpen ? color : 'rgba(255,255,255,0.2)' }} aria-hidden="true" />
-        </motion.div>
-      </button>
-
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.div
-            id={`section-${id}`}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.45, ease: [0.04, 0.62, 0.23, 0.98] }}
-          >
-            <div className="px-4 md:px-8 pb-8 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-              {children}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   TROPHY SVG
-───────────────────────────────────────────────────────────────────────────── */
-function TrophySVG({ size = 16, color = GOLD, opacity = 1 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill={color} style={{ opacity }} aria-hidden="true">
-      <path d="M3 1h10v3a5 5 0 0 1-4 4.9V11h2v2H5v-2h2V8.9A5 5 0 0 1 3 4V1zm1 1v2a4 4 0 0 0 8 0V2H4zM1 2h2v2.5A5.02 5.02 0 0 1 1 3V2zm12 0h2v1a5.02 5.02 0 0 1-2 1.5V2z" />
-    </svg>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   WINNER ROW
-───────────────────────────────────────────────────────────────────────────── */
-function WinnerRow({ driver, index, max }) {
-  const pct    = max > 0 ? (driver.count / max) * 100 : 0;
-  const isTop3 = index < 3;
-  const accent = isTop3 ? MEDAL[index].color : 'rgba(255,255,255,0.18)';
-  const label  = isTop3 ? MEDAL[index].label : null;
-
-  const multiplier   = Math.floor(driver.count / 10);
-  const remainder    = driver.count % 10;
-  const trophyColor  = isTop3 ? accent : GOLD;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: -16 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.35, delay: index * 0.045 }}
-      className="group relative flex items-start gap-4 md:gap-5 py-5 px-1 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] transition-colors"
-    >
-      <div className="absolute left-0 top-3 bottom-3 w-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ background: accent }} aria-hidden="true" />
-
-      <div className="shrink-0 w-9 text-right select-none pt-1">
-        {label
-          ? <span className="text-[10px] font-black tracking-widest" style={{ color: accent }}>{label}</span>
-          : <span className="text-xl font-black tabular-nums" style={{ color: 'rgba(255,255,255,0.1)' }}>{index + 1}</span>
-        }
-      </div>
-
-      <div className="relative shrink-0 w-11 h-11 md:w-13 md:h-13 rounded-xl overflow-hidden transition-transform duration-300 group-hover:scale-105 mt-0.5"
-        style={{ border: `1.5px solid ${isTop3 ? accent : 'rgba(255,255,255,0.1)'}` }}>
-        <img
-          src={`/data/ferrari-drivers/${normalizeDriverName(driver.name)}.jpg`}
-          alt={`Foto di ${driver.name}`}
-          className="w-full h-full object-cover"
-          onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'flex'; }}
-        />
-        <div className="absolute inset-0 bg-white-900 items-center justify-center" style={{ display: 'none' }} aria-hidden="true">
-          <User className="w-4 h-4 text-white-700" />
-        </div>
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-2 mb-2 flex-wrap">
-          <span className="text-sm font-black uppercase tracking-tight truncate transition-colors group-hover:text-red-400"
-            style={{ color: isTop3 ? accent : 'white' }}>
-            {driver.name}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 mb-2.5 flex-wrap" aria-label={`${driver.count} vittorie`}>
-          {multiplier >= 1 ? (
-            <>
-              <div className="flex items-center gap-0.5">
-                {[...Array(10)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.045 + i * 0.03 + 0.15 }}
-                  >
-                    <TrophySVG size={15} color={trophyColor} />
-                  </motion.div>
-                ))}
-              </div>
-              <motion.span
-                initial={{ opacity: 0, scale: 0.7 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.045 + 0.45 }}
-                className="text-xs font-black italic"
-                style={{ color: trophyColor }}
-              >
-                ×{multiplier}
-              </motion.span>
-              {remainder > 0 && (
-                <div className="flex items-center gap-0.5 opacity-50">
-                  {[...Array(remainder)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 0.5, y: 0 }}
-                      transition={{ delay: index * 0.045 + i * 0.03 + 0.5 }}
-                    >
-                      <TrophySVG size={12} color={trophyColor} />
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="flex items-center gap-0.5">
-              {[...Array(driver.count)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.045 + i * 0.04 + 0.15 }}
-                >
-                  <TrophySVG size={15} color={trophyColor} />
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="h-px w-full rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${pct}%` }}
-            transition={{ duration: 0.9, delay: index * 0.045 + 0.2, ease: 'easeOut' }}
-            className="h-full rounded-full"
-            style={{ background: `linear-gradient(to right, ${accent}, ${accent}60)` }}
-          />
-        </div>
-      </div>
-
-      <div className="shrink-0 text-right min-w-[3rem] pt-0.5">
-        <span className="text-2xl md:text-3xl font-black tabular-nums transition-colors"
-          style={{ color: isTop3 ? accent : 'rgba(255,255,255,0.55)' }}>
-          {driver.count}
-        </span>
-        <p className="text-[9px] text-white-700 uppercase tracking-widest">vitt.</p>
-      </div>
-    </motion.div>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   PAGE
 ───────────────────────────────────────────────────────────────────────────── */
 export default function StatisticsPage() {
   const [loading,        setLoading]        = useState(true);
@@ -751,26 +169,21 @@ export default function StatisticsPage() {
   const toggle = (id) => setOpenSection(openSection === id ? null : id);
 
   if (loading) return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4">
-      <div className="flex gap-1.5" aria-label="Caricamento dati">
-        {[0,1,2,3,4].map(i => (
-          <motion.div key={i} className="w-1 rounded-full"
-            style={{ background: RED }}
-            animate={{ height: ['12px','32px','12px'] }}
-            transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.12 }}
-          />
-        ))}
-      </div>
-      <p className="text-white-600 text-[11px] tracking-[0.4em] uppercase font-black">Accessing Ferrari Mainframe</p>
-    </div>
+    <PageShell><PageLoading label="Caricamento archivio Ferrari…" /></PageShell>
   );
 
   const maxWins = pilotWins[0]?.count ?? 1;
 
-  return (
-    <div className="min-h-screen bg-black text-white selection:bg-red-600/30">
+  const seo = {
+    title: 'Statistiche Ferrari in Formula 1',
+    description: "Archivio storico della Scuderia Ferrari: vittorie, pole position, podi e record dal 1950 a oggi.",
+    path: '/statistics',
+  };
 
-      <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
+  return (
+    <PageShell seo={seo}>
+
+      <div className="fixed inset-0 pointer-events-none -z-10" aria-hidden="true">
         <div className="absolute inset-0 opacity-[0.025]"
           style={{ backgroundImage: 'linear-gradient(to right,#DC0000 1px,transparent 1px),linear-gradient(to bottom,#DC0000 1px,transparent 1px)', backgroundSize: '48px 48px' }}
         />
@@ -779,14 +192,11 @@ export default function StatisticsPage() {
         />
       </div>
 
-      <Navigation />
-
-      <main className="relative z-10 max-w-5xl mx-auto pt-28 md:pt-36 px-4 pb-24">
 
         <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className="mb-10">
-          <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.25em] text-white-600 hover:text-white transition-colors group">
+          <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.25em] text-[var(--fr-text-faint)] hover:text-white transition-colors group">
             <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" aria-hidden="true" />
-            Back to HQ
+            Torna alla home
           </Link>
         </motion.div>
 
@@ -803,7 +213,7 @@ export default function StatisticsPage() {
           <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none mb-4">
             Data <span style={{ color: RED }}>Vault</span>
           </h1>
-          <p className="text-white-500 text-sm max-w-md leading-relaxed">
+          <p className="text-[var(--fr-text-muted)] text-sm max-w-md leading-relaxed">
             75 anni di telemetria, vittorie e record storici. Ogni numero racconta una leggenda della Rossa.
           </p>
 
@@ -815,7 +225,7 @@ export default function StatisticsPage() {
               { label: 'Pole positions',        value: poleStats.reduce((a,d) => a+d.count, 0).toLocaleString('it-IT') },
             ].map(s => (
               <div key={s.label}>
-                <p className="text-[10px] uppercase tracking-widest text-white-600 mb-0.5">{s.label}</p>
+                <p className="text-[10px] uppercase tracking-widest text-[var(--fr-text-faint)] mb-0.5">{s.label}</p>
                 <p className="text-2xl font-black tabular-nums" style={{ color: RED }}>{s.value}</p>
               </div>
             ))}
@@ -832,8 +242,8 @@ export default function StatisticsPage() {
             <div className="flex items-center gap-4 md:gap-5 px-1 pt-4 pb-2">
               <div className="w-9 shrink-0" />
               <div className="w-10 md:w-12 shrink-0" />
-              <div className="flex-1 text-[10px] font-black uppercase tracking-widest text-white-700">Pilota</div>
-              <div className="w-14 text-[10px] font-black uppercase tracking-widest text-white-700 text-right shrink-0">Totale</div>
+              <div className="flex-1 text-[10px] font-black uppercase tracking-widest text-[var(--fr-text-faint)]">Pilota</div>
+              <div className="w-14 text-[10px] font-black uppercase tracking-widest text-[var(--fr-text-faint)] text-right shrink-0">Totale</div>
             </div>
             <div>
               {pilotWins.map((driver, i) => (
@@ -864,7 +274,7 @@ export default function StatisticsPage() {
                           {period.name}
                         </span>
                       </div>
-                      <p className="text-[9px] text-white-500 font-mono mt-1 leading-tight">
+                      <p className="text-[9px] text-[var(--fr-text-muted)] font-mono mt-1 leading-tight">
                         {period.description}
                       </p>
                     </div>
@@ -921,7 +331,7 @@ export default function StatisticsPage() {
                                     <p className="text-[9px] font-black text-orange-500 uppercase leading-tight mb-0.5">
                                       ⚠️ Emergenza Sanitaria
                                     </p>
-                                    <p className="text-[8px] text-white-400 leading-tight">
+                                    <p className="text-[8px] text-[var(--fr-text-muted)] leading-tight">
                                       Campionato interrotto e ridotto per la pandemia di COVID-19.
                                     </p>
                                   </div>
@@ -930,11 +340,11 @@ export default function StatisticsPage() {
                                   <span className="text-[10px] font-black" style={{ color: period?.color || RED }}>
                                     {period?.name || 'Anni'}
                                   </span>
-                                  <span className="text-[8px] text-white-400 font-mono">
+                                  <span className="text-[8px] text-[var(--fr-text-muted)] font-mono">
                                     {period?.description || ''}
                                   </span>
                                 </div>
-                                <p className="text-[10px] text-white-500">
+                                <p className="text-[10px] text-[var(--fr-text-muted)]">
                                   {data.points} punti totali
                                 </p>
                               </div>
@@ -972,7 +382,7 @@ export default function StatisticsPage() {
                 </ResponsiveContainer>
               </div>
 
-              <p className="text-[12px] text-white-600 text-center mt-4 italic border-t border-white/[0.04] pt-3">
+              <p className="text-[12px] text-[var(--fr-text-faint)] text-center mt-4 italic border-t border-white/[0.04] pt-3">
                 ⚡ I punti riflettono i diversi sistemi di punteggio: 1950-59 (8 pt vittoria), 1960-90 (9 pt), 
                 1991-2009 (10 pt), 2010-oggi (25 pt + sprint)
               </p>
@@ -1002,7 +412,7 @@ export default function StatisticsPage() {
                               p.flag
                                 ? <div className="flex items-center gap-2">
                                     <img src={`https://flagcdn.com/w40/${p.flag}.png`} className="w-5 h-3.5 object-cover rounded-sm" alt={p.name} />
-                                    <span className="text-[10px] font-black uppercase tracking-wider text-white-400">{p.name}</span>
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-[var(--fr-text-muted)]">{p.name}</span>
                                   </div>
                                 : null
                             }
@@ -1025,11 +435,11 @@ export default function StatisticsPage() {
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl group hover:bg-white/[0.04] transition-colors"
                     style={{ border: '1px solid rgba(255,255,255,0.5)' }}
                   >
-                    <div className="w-7 h-4.5 rounded-sm overflow-hidden shrink-0 border border-white/10">
+                    <div className="w-7 h-5 rounded-sm overflow-hidden shrink-0 border border-white/10">
                       <img src={`https://flagcdn.com/w80/${n.flag}.png`} alt={n.name} className="w-full h-full object-cover" onError={e => { e.currentTarget.style.display = 'none'; }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-black uppercase tracking-tight text-white-500 group-hover:text-white transition-colors truncate">{n.name}</p>
+                      <p className="text-[10px] font-black uppercase tracking-tight text-[var(--fr-text-muted)] group-hover:text-white transition-colors truncate">{n.name}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <div className="flex-1 h-px rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
                           <motion.div
@@ -1293,12 +703,9 @@ export default function StatisticsPage() {
 
         </motion.div>
 
-        <p className="text-center text-white-800 text-[11px] mt-8 tracking-wider">
+        <p className="text-center text-[var(--fr-text-dim)] text-[11px] mt-8 tracking-wider">
           Scuderia Ferrari F1 · 1950–{new Date().getFullYear()} · Dati aggiornati
         </p>
-      </main>
-
-      <Footer />
-    </div>
+    </PageShell>
   );
 }

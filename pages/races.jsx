@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Navigation from '../components/ferrari/Navigation';
-import Footer from '../components/ferrari/Footer';
+import PageShell, { PageLoading, PageError } from '../components/ui/PageShell';
 import Link from 'next/link';
 
 import { createClient } from '@supabase/supabase-js';
@@ -95,7 +94,11 @@ export default function RaceDetailsPage() {
   const [activeTab, setActiveTab] = useState('race');
 
   useEffect(() => {
-    if (!id) return;
+    // router.query è vuoto al primo render: senza attendere isReady non si
+    // distingue "id assente" da "id non ancora disponibile", e la pagina
+    // restava in caricamento per sempre.
+    if (!router.isReady) return;
+    if (!id) { setLoading(false); return; }
     async function loadData() {
       try {
         
@@ -161,10 +164,24 @@ export default function RaceDetailsPage() {
       setLoading(false);
     }
     loadData();
-  }, [id]);
+  }, [router.isReady, id]);
 
-  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-red-600 font-black tracking-widest uppercase">Loading...</div>;
-  if (!raceInfo) return <div className="min-h-screen bg-black text-white p-20 text-center font-bold uppercase tracking-widest">Race Not Found</div>;
+  if (loading) return (
+    <PageShell wide><PageLoading label="Caricamento gara…" /></PageShell>
+  );
+  if (!raceInfo) return (
+    <PageShell wide>
+      <PageError
+        title={id ? 'Gara non trovata' : 'Nessuna gara selezionata'}
+        message={id
+          ? 'Il Gran Premio richiesto non esiste o non è ancora disponibile in archivio.'
+          : 'Questa pagina mostra il dettaglio di un singolo Gran Premio. Scegline uno dal calendario.'}
+      />
+      <p className="text-center">
+        <Link href="/standings" className="btn btn-outline">Vai al calendario</Link>
+      </p>
+    </PageShell>
+  );
 
   const visibleResults = showFullDrivers ? raceResults : raceResults.slice(0, 10);
   const flagCode = getFlagCodeFromCircuit(circuitInfo?.id);
@@ -181,12 +198,16 @@ export default function RaceDetailsPage() {
 
   const isFerrari = (constructorId) => constructors[constructorId]?.name?.toLowerCase().includes('ferrari') || false;
 
+  const seo = {
+    title: `${circuitInfo?.name || 'Gran Premio'} ${raceInfo.year}`,
+    description: `Risultati, griglia e dati del Gran Premio ${raceInfo.year}, round ${raceInfo.round}.`,
+    path: '/races',
+  };
+
   return (
-    <div className="min-h-screen bg-black text-white font-sans">
-      <Navigation activeSection="calendar" />
-      <main className="max-w-7xl mx-auto px-4 pt-32 pb-20">
-        <Link href="/standings" className="text-zinc-500 font-bold uppercase text-[10px] mb-8 inline-block hover:text-red-600 transition-colors tracking-widest">
-          ← Back to Standings
+    <PageShell seo={seo} wide>
+        <Link href="/standings" className="text-[var(--fr-text-faint)] font-bold uppercase text-[10px] mb-8 inline-block hover:text-[var(--fr-red)] transition-colors tracking-widest">
+          ← Torna alle classifiche
         </Link>
 
         <header className="mb-12">
@@ -396,8 +417,6 @@ export default function RaceDetailsPage() {
             </table>
           </section>
         </div>
-      </main>
-      <Footer />
-    </div>
+    </PageShell>
   );
 }

@@ -325,7 +325,7 @@ export default function StatDetail() {
               className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: cfg.colorMuted, border: `1px solid ${cfg.color}40` }}
             >
-              <Icon className="w-4.5 h-4.5" style={{ color: cfg.color }} aria-hidden="true" />
+              <Icon className="w-4 h-4" style={{ color: cfg.color }} aria-hidden="true" />
             </div>
             <span className="text-[10px] tracking-[0.4em] uppercase font-black" style={{ color: cfg.color }}>
               Scuderia Ferrari — {cfg.subtitle}

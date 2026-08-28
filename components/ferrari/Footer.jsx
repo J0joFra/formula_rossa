@@ -120,7 +120,6 @@ export default function Footer() {
                   { name: 'Classifiche', href: '/standings',  icon: Gauge  },
                   { name: 'Piloti',      href: '/piloti',     icon: Users  },
                   { name: 'Circuiti',    href: '/circuiti',   icon: Award  },
-                  { name: 'Gare',        href: '/races',      icon: Activity },
                 ].map((link, j) => (
                   <li key={j}>
                     <Link

@@ -290,6 +290,23 @@ input:focus, select:focus, textarea:focus {
 @keyframes scan { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }
 .animate-scan { animation: scan 4s linear infinite; }
 
+/* Usate dalle pagine Piloti. Vivevano in un <style> dentro la pagina che
+   forzava anche `html, body { background:#080808 !important }`: quell'override
+   sporcava il tema chiaro di tutto il sito, quindi il blocco è stato rimosso e
+   i keyframes ancora utili sono stati spostati qui. */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+@keyframes ringpulse {
+  0%, 100% { opacity: .5; transform: scale(1); }
+  50%      { opacity: 1;  transform: scale(1.05); }
+}
+
 /* ── NAV MOBILE ───────────────────────────────────────────────────────────── */
 .nav-mobile { display: none; }
 @media (max-width: 767px) {
