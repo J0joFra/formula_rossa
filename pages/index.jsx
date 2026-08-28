@@ -32,9 +32,10 @@ const PILLARS = [
     icon: Trophy,
     title: 'Stagione',
     tone: 'teal',
-    desc: 'Il campionato in corso: classifiche piloti e costruttori aggiornate, e le notizie dal mondo Ferrari e Formula 1.',
+    desc: 'Il campionato in corso: classifiche aggiornate, l\u2019analisi di ogni Gran Premio e le notizie dal mondo Ferrari.',
     links: [
       { href: '/standings', label: 'Classifiche' },
+      { href: '/gp',        label: 'Analisi GP' },
       { href: '/news',      label: 'News' },
     ],
   },

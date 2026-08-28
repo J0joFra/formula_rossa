@@ -1,5 +1,5 @@
 // components/ferrari/Navigation.jsx
-// Menu: Archivio (tendina) · Classifiche · News · Gioca + app GridUp.
+// Menu: Archivio ▾ · Stagione ▾ · News · Gioca + app GridUp.
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -14,8 +14,7 @@ import ThemeToggle from './ThemeToggle';
 export const GRIDUP_URL = 'https://gridup-f1.web.app';
 
 /* Il menu contiene solo pagine che esistono davvero: una voce che porta a una
-   pagina inesistente o a un vicolo cieco è peggio di una voce assente.
-   "Analisi GP" e "Calendario" entreranno qui quando quelle pagine esisteranno. */
+   pagina inesistente o a un vicolo cieco è peggio di una voce assente. */
 const ARCHIVIO = {
   label: 'Archivio',
   icon: BarChart3,
@@ -26,25 +25,35 @@ const ARCHIVIO = {
   ],
 };
 
+const STAGIONE = {
+  label: 'Stagione',
+  icon: Trophy,
+  items: [
+    { href: '/standings', label: 'Classifiche', desc: 'Piloti e costruttori' },
+    { href: '/gp',        label: 'Analisi GP',  desc: 'Ogni gara nel dettaglio' },
+  ],
+};
+
+const MENU = [ARCHIVIO, STAGIONE];
+
 /* Voci singole: una pagina, un link. Niente tendine da una voce sola. */
 const LINKS = [
-  { href: '/standings', label: 'Classifiche', icon: Trophy },
-  { href: '/news',      label: 'News',        icon: Newspaper },
-  { href: '/fanzone',   label: 'Gioca',       icon: Gamepad2 },
+  { href: '/news',    label: 'News',  icon: Newspaper },
+  { href: '/fanzone', label: 'Gioca', icon: Gamepad2 },
 ];
 
 export default function Navigation() {
-  const [archivioOpen, setArchivioOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { data: session } = useSession();
   const pathname = usePathname();
   const navRef = useRef(null);
 
-  useEffect(() => { setArchivioOpen(false); setMobileOpen(false); }, [pathname]);
+  useEffect(() => { setOpenMenu(null); setMobileOpen(false); }, [pathname]);
 
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') { setArchivioOpen(false); setMobileOpen(false); } };
-    const onClick = (e) => { if (navRef.current && !navRef.current.contains(e.target)) setArchivioOpen(false); };
+    const onKey = (e) => { if (e.key === 'Escape') { setOpenMenu(null); setMobileOpen(false); } };
+    const onClick = (e) => { if (navRef.current && !navRef.current.contains(e.target)) setOpenMenu(null); };
     document.addEventListener('keydown', onKey);
     document.addEventListener('mousedown', onClick);
     return () => {
@@ -54,7 +63,7 @@ export default function Navigation() {
   }, []);
 
   const isActive = (href) => pathname === href || pathname?.startsWith(href + '/');
-  const archivioActive = ARCHIVIO.items.some(i => isActive(i.href));
+  const groupActive = (g) => g.items.some(i => isActive(i.href));
 
   const itemCls = (active) =>
     `flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-bold whitespace-nowrap transition-colors ${
@@ -89,58 +98,65 @@ export default function Navigation() {
 
           {/* Menu desktop */}
           <div className="hidden lg:flex items-center gap-1">
-            <div
-              className="relative"
-              onMouseEnter={() => setArchivioOpen(true)}
-              onMouseLeave={() => setArchivioOpen(false)}
-            >
-              <button
-                type="button"
-                onClick={() => setArchivioOpen(o => !o)}
-                aria-expanded={archivioOpen}
-                aria-haspopup="true"
-                className={itemCls(archivioActive || archivioOpen)}
-              >
-                <ARCHIVIO.icon className={`w-4 h-4 ${archivioActive ? 'text-[var(--fr-red)]' : ''}`} aria-hidden="true" />
-                {ARCHIVIO.label}
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${archivioOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
-              </button>
-
-              <AnimatePresence>
-                {archivioOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 6 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute left-0 top-full pt-2 w-64"
+            {MENU.map((group) => {
+              const open = openMenu === group.label;
+              const active = groupActive(group);
+              return (
+                <div
+                  key={group.label}
+                  className="relative"
+                  onMouseEnter={() => setOpenMenu(group.label)}
+                  onMouseLeave={() => setOpenMenu(null)}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenMenu(open ? null : group.label)}
+                    aria-expanded={open}
+                    aria-haspopup="true"
+                    className={itemCls(active || open)}
                   >
-                    <div className="rounded-[var(--radius-md)] border border-[var(--fr-border)] bg-[var(--fr-surface)] shadow-[var(--fr-shadow)] p-2">
-                      {ARCHIVIO.items.map((item) => {
-                        const cur = isActive(item.href);
-                        return (
-                          <Link
-                            key={item.href}
-                            href={item.href}
-                            aria-current={cur ? 'page' : undefined}
-                            className={`block px-3 py-2.5 rounded-[var(--radius-sm)] transition-colors ${
-                              cur ? 'bg-[var(--fr-red-soft)]' : 'hover:bg-[var(--fr-surface-2)]'
-                            }`}
-                          >
-                            <span className={`block text-[13px] font-bold ${cur ? 'text-[var(--fr-red)]' : 'text-[var(--fr-text)]'}`}>
-                              {item.label}
-                            </span>
-                            <span className="block text-[11px] text-[var(--fr-text-faint)] leading-tight mt-0.5">
-                              {item.desc}
-                            </span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                    <group.icon className={`w-4 h-4 ${active ? 'text-[var(--fr-red)]' : ''}`} aria-hidden="true" />
+                    {group.label}
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+                  </button>
+
+                  <AnimatePresence>
+                    {open && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 6 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute left-0 top-full pt-2 w-64"
+                      >
+                        <div className="rounded-[var(--radius-md)] border border-[var(--fr-border)] bg-[var(--fr-surface)] shadow-[var(--fr-shadow)] p-2">
+                          {group.items.map((item) => {
+                            const cur = isActive(item.href);
+                            return (
+                              <Link
+                                key={item.href}
+                                href={item.href}
+                                aria-current={cur ? 'page' : undefined}
+                                className={`block px-3 py-2.5 rounded-[var(--radius-sm)] transition-colors ${
+                                  cur ? 'bg-[var(--fr-red-soft)]' : 'hover:bg-[var(--fr-surface-2)]'
+                                }`}
+                              >
+                                <span className={`block text-[13px] font-bold ${cur ? 'text-[var(--fr-red)]' : 'text-[var(--fr-text)]'}`}>
+                                  {item.label}
+                                </span>
+                                <span className="block text-[11px] text-[var(--fr-text-faint)] leading-tight mt-0.5">
+                                  {item.desc}
+                                </span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
 
             {LINKS.map((l) => (
               <Link
@@ -217,29 +233,31 @@ export default function Navigation() {
             className="lg:hidden overflow-hidden bg-[var(--fr-surface)] border-t border-[var(--fr-border)]"
           >
             <div className="px-4 py-5 space-y-5 max-h-[calc(100vh-70px)] overflow-y-auto">
-              <div>
-                <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--fr-red)] mb-2">
-                  <ARCHIVIO.icon className="w-3.5 h-3.5" aria-hidden="true" />
-                  {ARCHIVIO.label}
-                </p>
-                <div className="grid gap-1">
-                  {ARCHIVIO.items.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMobileOpen(false)}
-                      aria-current={isActive(item.href) ? 'page' : undefined}
-                      className={`px-3 py-2.5 rounded-[var(--radius-sm)] text-sm font-bold transition-colors ${
-                        isActive(item.href)
-                          ? 'bg-[var(--fr-red-soft)] text-[var(--fr-red)]'
-                          : 'text-[var(--fr-text-muted)] hover:bg-[var(--fr-surface-2)] hover:text-[var(--fr-text)]'
-                      }`}
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
+              {MENU.map((group) => (
+                <div key={group.label}>
+                  <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--fr-red)] mb-2">
+                    <group.icon className="w-3.5 h-3.5" aria-hidden="true" />
+                    {group.label}
+                  </p>
+                  <div className="grid gap-1">
+                    {group.items.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        aria-current={isActive(item.href) ? 'page' : undefined}
+                        className={`px-3 py-2.5 rounded-[var(--radius-sm)] text-sm font-bold transition-colors ${
+                          isActive(item.href)
+                            ? 'bg-[var(--fr-red-soft)] text-[var(--fr-red)]'
+                            : 'text-[var(--fr-text-muted)] hover:bg-[var(--fr-surface-2)] hover:text-[var(--fr-text)]'
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ))}
 
               <div className="grid gap-1">
                 {LINKS.map((l) => (
