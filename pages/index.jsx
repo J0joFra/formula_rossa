@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { BarChart3, Zap, Gamepad2 } from 'lucide-react';
+import { BarChart3, Trophy, Gamepad2 } from 'lucide-react';
 
 import Navigation from '../components/ferrari/Navigation';
 import HeroSection from '../components/ferrari/HeroSection';
@@ -15,28 +15,27 @@ import SEO from '../components/seo';
 const PILLARS = [
   {
     n: '01',
-    id: 'dati',
+    id: 'archivio',
     icon: BarChart3,
-    title: 'Dati',
+    title: 'Archivio',
     tone: 'red',
-    desc: 'Il cuore del sito. Statistiche storiche, classifiche, schede piloti e circuiti, con numeri verificabili.',
+    desc: 'Il cuore del sito: 75 anni di Ferrari in Formula 1. Record, statistiche, schede piloti e circuiti, con numeri verificabili.',
     links: [
       { href: '/statistics', label: 'Statistiche' },
-      { href: '/standings',  label: 'Classifiche' },
       { href: '/piloti',     label: 'Piloti' },
       { href: '/circuiti',   label: 'Circuiti' },
     ],
   },
   {
     n: '02',
-    id: 'live',
-    icon: Zap,
-    title: 'Live',
+    id: 'stagione',
+    icon: Trophy,
+    title: 'Stagione',
     tone: 'teal',
-    desc: 'Cosa succede ora in pista: tempi in tempo reale durante le sessioni e le notizie dal mondo Ferrari e Formula 1.',
+    desc: 'Il campionato in corso: classifiche piloti e costruttori aggiornate, e le notizie dal mondo Ferrari e Formula 1.',
     links: [
-      { href: '/live-timing', label: 'Live Timing' },
-      { href: '/news',        label: 'News' },
+      { href: '/standings', label: 'Classifiche' },
+      { href: '/news',      label: 'News' },
     ],
   },
   {
@@ -45,7 +44,7 @@ const PILLARS = [
     icon: Gamepad2,
     title: 'Gioca',
     tone: 'gold',
-    desc: 'Un angolo leggero: mini-giochi a tema Ferrari per mettere alla prova la tua conoscenza tra un GP e l’altro.',
+    desc: 'Un angolo leggero: mini-giochi a tema Ferrari per mettere alla prova la tua conoscenza tra un GP e l\u2019altro.',
     links: [
       { href: '/fanzone',            label: 'Fan Zone' },
       { href: '/games/trivia',       label: 'Trivia' },
@@ -204,8 +203,8 @@ export default function Home() {
               <span className="fr-eyebrow">La piattaforma</span>
               <h2 className="uppercase mt-3">Tre modi per vivere la Rossa</h2>
               <p className="text-[var(--fr-text-muted)] mt-2.5 max-w-[56ch]">
-                I dati al centro, il live sempre a portata e un angolo per giocare.
-                Il fanta e il calcolatore del Mondiale vivono nell&apos;app GridUp.
+                L&apos;archivio storico al centro, la stagione in corso sempre aggiornata
+                e un angolo per giocare. Il calcolatore del Mondiale vive nell&apos;app GridUp.
               </p>
             </header>
 

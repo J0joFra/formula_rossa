@@ -93,6 +93,12 @@ const nextConfig = {
          scelta resta reversibile senza cache aggressiva nei browser. */
       { source: '/fantaf1',    destination: 'https://gridup-f1.web.app', permanent: false },
       { source: '/predictions', destination: 'https://gridup-f1.web.app', permanent: false },
+      /* Il live timing in tempo reale richiederebbe il tier a pagamento di
+         OpenF1, ed è una commodity già coperta meglio dall'app ufficiale F1.
+         La pagina resta nel repo: i suoi grafici (components/livetiming/)
+         lavorano su dati di sessione, gratuiti dopo la gara, e saranno la base
+         delle pagine "Analisi GP". Redirect temporaneo, non permanente. */
+      { source: '/live-timing', destination: '/standings', permanent: false },
     ];
   },
 
