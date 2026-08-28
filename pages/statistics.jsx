@@ -8,8 +8,7 @@ import {
   Trophy, Activity, ChevronLeft, ChevronDown,
   Globe2, Landmark, User
 } from 'lucide-react';
-import Navigation from '../components/ferrari/Navigation';
-import Footer from '../components/ferrari/Footer';
+import PageShell, { PageLoading } from '../components/ui/PageShell';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 
@@ -444,12 +443,12 @@ function DarkTooltip({ active, payload, label, accentColor, extra }) {
   return (
     <div className="rounded-xl px-4 py-3 min-w-[160px]"
       style={{ background: '#0d0d0d', border: `1px solid ${color}40`, boxShadow: `0 16px 48px rgba(0,0,0,0.9), 0 0 20px ${color}15` }}>
-      {label && <p className="text-[10px] uppercase tracking-widest text-white-600 font-black mb-2">{label}</p>}
+      {label && <p className="text-[10px] uppercase tracking-widest text-[var(--fr-text-faint)] font-black mb-2">{label}</p>}
       {extra && <div className="mb-2">{extra}</div>}
       {payload.map((p, i) => (
         <p key={i} className="font-black text-xl" style={{ color }}>
           {typeof p.value === 'number' ? p.value.toLocaleString('it-IT') : p.value}
-          {p.name && <span className="text-white-600 text-[10px] ml-2 font-black uppercase">{p.name}</span>}
+          {p.name && <span className="text-[var(--fr-text-faint)] text-[10px] ml-2 font-black uppercase">{p.name}</span>}
         </p>
       ))}
     </div>
@@ -467,8 +466,8 @@ function AccordionSection({ id, title, subtitle, icon: Icon, children, isOpen, o
         !isOpen ? 'hover:border-red-600/30' : ''
       }`}
       style={{
-        background: 'rgba(6,6,6,0.95)',
-        border: `1px solid ${isOpen ? color : 'rgb(248, 238, 238)'}`, 
+        background: 'var(--fr-surface)',
+        border: `1px solid ${isOpen ? color : 'var(--fr-border)'}`,
         boxShadow: isOpen ? `0 0 60px ${color}08` : 'none',
         transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
       }}
@@ -482,21 +481,21 @@ function AccordionSection({ id, title, subtitle, icon: Icon, children, isOpen, o
         <div className="flex items-center gap-4 md:gap-5">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110"
             style={{ background: color + '15', border: `1px solid ${color}30` }}>
-            <Icon className="w-4.5 h-4.5" style={{ color }} aria-hidden="true" />
+            <Icon className="w-4 h-4" style={{ color }} aria-hidden="true" />
           </div>
           <div>
             <h3 className="text-base md:text-lg font-black uppercase tracking-tight leading-none mb-0.5 transition-colors"
-              style={{ color: isOpen ? 'white' : 'rgba(255,255,255,0.7)' }}>
+              style={{ color: isOpen ? 'var(--fr-text)' : 'var(--fr-text-muted)' }}>
               {title}
             </h3>
             <p className="text-[10px] font-black uppercase tracking-[0.25em] transition-colors"
-              style={{ color: isOpen ? color : 'rgba(255,255,255,0.2)' }}>
+              style={{ color: isOpen ? color : 'var(--fr-text-faint)' }}>
               {subtitle}
             </p>
           </div>
         </div>
         <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.3 }}>
-          <ChevronDown className="w-5 h-5" style={{ color: isOpen ? color : 'rgba(255,255,255,0.2)' }} aria-hidden="true" />
+          <ChevronDown className="w-5 h-5" style={{ color: isOpen ? color : 'var(--fr-text-faint)' }} aria-hidden="true" />
         </motion.div>
       </button>
 
@@ -509,7 +508,7 @@ function AccordionSection({ id, title, subtitle, icon: Icon, children, isOpen, o
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.45, ease: [0.04, 0.62, 0.23, 0.98] }}
           >
-            <div className="px-4 md:px-8 pb-8 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+            <div className="px-4 md:px-8 pb-8 pt-3" style={{ borderTop: '1px solid var(--fr-border)' }}>
               {children}
             </div>
           </motion.div>
@@ -568,8 +567,8 @@ function WinnerRow({ driver, index, max }) {
           className="w-full h-full object-cover"
           onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'flex'; }}
         />
-        <div className="absolute inset-0 bg-white-900 items-center justify-center" style={{ display: 'none' }} aria-hidden="true">
-          <User className="w-4 h-4 text-white-700" />
+        <div className="absolute inset-0 bg-[var(--fr-surface)] items-center justify-center" style={{ display: 'none' }} aria-hidden="true">
+          <User className="w-4 h-4 text-[var(--fr-text-faint)]" />
         </div>
       </div>
 
@@ -652,7 +651,7 @@ function WinnerRow({ driver, index, max }) {
           style={{ color: isTop3 ? accent : 'rgba(255,255,255,0.55)' }}>
           {driver.count}
         </span>
-        <p className="text-[9px] text-white-700 uppercase tracking-widest">vitt.</p>
+        <p className="text-[9px] text-[var(--fr-text-faint)] uppercase tracking-widest">vitt.</p>
       </div>
     </motion.div>
   );
@@ -751,26 +750,21 @@ export default function StatisticsPage() {
   const toggle = (id) => setOpenSection(openSection === id ? null : id);
 
   if (loading) return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4">
-      <div className="flex gap-1.5" aria-label="Caricamento dati">
-        {[0,1,2,3,4].map(i => (
-          <motion.div key={i} className="w-1 rounded-full"
-            style={{ background: RED }}
-            animate={{ height: ['12px','32px','12px'] }}
-            transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.12 }}
-          />
-        ))}
-      </div>
-      <p className="text-white-600 text-[11px] tracking-[0.4em] uppercase font-black">Accessing Ferrari Mainframe</p>
-    </div>
+    <PageShell><PageLoading label="Caricamento archivio Ferrari…" /></PageShell>
   );
 
   const maxWins = pilotWins[0]?.count ?? 1;
 
-  return (
-    <div className="min-h-screen bg-black text-white selection:bg-red-600/30">
+  const seo = {
+    title: 'Statistiche Ferrari in Formula 1',
+    description: "Archivio storico della Scuderia Ferrari: vittorie, pole position, podi e record dal 1950 a oggi.",
+    path: '/statistics',
+  };
 
-      <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
+  return (
+    <PageShell seo={seo}>
+
+      <div className="fixed inset-0 pointer-events-none -z-10" aria-hidden="true">
         <div className="absolute inset-0 opacity-[0.025]"
           style={{ backgroundImage: 'linear-gradient(to right,#DC0000 1px,transparent 1px),linear-gradient(to bottom,#DC0000 1px,transparent 1px)', backgroundSize: '48px 48px' }}
         />
@@ -779,14 +773,11 @@ export default function StatisticsPage() {
         />
       </div>
 
-      <Navigation />
-
-      <main className="relative z-10 max-w-5xl mx-auto pt-28 md:pt-36 px-4 pb-24">
 
         <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className="mb-10">
-          <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.25em] text-white-600 hover:text-white transition-colors group">
+          <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.25em] text-[var(--fr-text-faint)] hover:text-white transition-colors group">
             <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" aria-hidden="true" />
-            Back to HQ
+            Torna alla home
           </Link>
         </motion.div>
 
@@ -803,7 +794,7 @@ export default function StatisticsPage() {
           <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none mb-4">
             Data <span style={{ color: RED }}>Vault</span>
           </h1>
-          <p className="text-white-500 text-sm max-w-md leading-relaxed">
+          <p className="text-[var(--fr-text-muted)] text-sm max-w-md leading-relaxed">
             75 anni di telemetria, vittorie e record storici. Ogni numero racconta una leggenda della Rossa.
           </p>
 
@@ -815,7 +806,7 @@ export default function StatisticsPage() {
               { label: 'Pole positions',        value: poleStats.reduce((a,d) => a+d.count, 0).toLocaleString('it-IT') },
             ].map(s => (
               <div key={s.label}>
-                <p className="text-[10px] uppercase tracking-widest text-white-600 mb-0.5">{s.label}</p>
+                <p className="text-[10px] uppercase tracking-widest text-[var(--fr-text-faint)] mb-0.5">{s.label}</p>
                 <p className="text-2xl font-black tabular-nums" style={{ color: RED }}>{s.value}</p>
               </div>
             ))}
@@ -832,8 +823,8 @@ export default function StatisticsPage() {
             <div className="flex items-center gap-4 md:gap-5 px-1 pt-4 pb-2">
               <div className="w-9 shrink-0" />
               <div className="w-10 md:w-12 shrink-0" />
-              <div className="flex-1 text-[10px] font-black uppercase tracking-widest text-white-700">Pilota</div>
-              <div className="w-14 text-[10px] font-black uppercase tracking-widest text-white-700 text-right shrink-0">Totale</div>
+              <div className="flex-1 text-[10px] font-black uppercase tracking-widest text-[var(--fr-text-faint)]">Pilota</div>
+              <div className="w-14 text-[10px] font-black uppercase tracking-widest text-[var(--fr-text-faint)] text-right shrink-0">Totale</div>
             </div>
             <div>
               {pilotWins.map((driver, i) => (
@@ -864,7 +855,7 @@ export default function StatisticsPage() {
                           {period.name}
                         </span>
                       </div>
-                      <p className="text-[9px] text-white-500 font-mono mt-1 leading-tight">
+                      <p className="text-[9px] text-[var(--fr-text-muted)] font-mono mt-1 leading-tight">
                         {period.description}
                       </p>
                     </div>
@@ -921,7 +912,7 @@ export default function StatisticsPage() {
                                     <p className="text-[9px] font-black text-orange-500 uppercase leading-tight mb-0.5">
                                       ⚠️ Emergenza Sanitaria
                                     </p>
-                                    <p className="text-[8px] text-white-400 leading-tight">
+                                    <p className="text-[8px] text-[var(--fr-text-muted)] leading-tight">
                                       Campionato interrotto e ridotto per la pandemia di COVID-19.
                                     </p>
                                   </div>
@@ -930,11 +921,11 @@ export default function StatisticsPage() {
                                   <span className="text-[10px] font-black" style={{ color: period?.color || RED }}>
                                     {period?.name || 'Anni'}
                                   </span>
-                                  <span className="text-[8px] text-white-400 font-mono">
+                                  <span className="text-[8px] text-[var(--fr-text-muted)] font-mono">
                                     {period?.description || ''}
                                   </span>
                                 </div>
-                                <p className="text-[10px] text-white-500">
+                                <p className="text-[10px] text-[var(--fr-text-muted)]">
                                   {data.points} punti totali
                                 </p>
                               </div>
@@ -972,7 +963,7 @@ export default function StatisticsPage() {
                 </ResponsiveContainer>
               </div>
 
-              <p className="text-[12px] text-white-600 text-center mt-4 italic border-t border-white/[0.04] pt-3">
+              <p className="text-[12px] text-[var(--fr-text-faint)] text-center mt-4 italic border-t border-white/[0.04] pt-3">
                 ⚡ I punti riflettono i diversi sistemi di punteggio: 1950-59 (8 pt vittoria), 1960-90 (9 pt), 
                 1991-2009 (10 pt), 2010-oggi (25 pt + sprint)
               </p>
@@ -1002,7 +993,7 @@ export default function StatisticsPage() {
                               p.flag
                                 ? <div className="flex items-center gap-2">
                                     <img src={`https://flagcdn.com/w40/${p.flag}.png`} className="w-5 h-3.5 object-cover rounded-sm" alt={p.name} />
-                                    <span className="text-[10px] font-black uppercase tracking-wider text-white-400">{p.name}</span>
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-[var(--fr-text-muted)]">{p.name}</span>
                                   </div>
                                 : null
                             }
@@ -1025,11 +1016,11 @@ export default function StatisticsPage() {
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl group hover:bg-white/[0.04] transition-colors"
                     style={{ border: '1px solid rgba(255,255,255,0.5)' }}
                   >
-                    <div className="w-7 h-4.5 rounded-sm overflow-hidden shrink-0 border border-white/10">
+                    <div className="w-7 h-5 rounded-sm overflow-hidden shrink-0 border border-white/10">
                       <img src={`https://flagcdn.com/w80/${n.flag}.png`} alt={n.name} className="w-full h-full object-cover" onError={e => { e.currentTarget.style.display = 'none'; }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-black uppercase tracking-tight text-white-500 group-hover:text-white transition-colors truncate">{n.name}</p>
+                      <p className="text-[10px] font-black uppercase tracking-tight text-[var(--fr-text-muted)] group-hover:text-white transition-colors truncate">{n.name}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <div className="flex-1 h-px rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
                           <motion.div
@@ -1293,12 +1284,9 @@ export default function StatisticsPage() {
 
         </motion.div>
 
-        <p className="text-center text-white-800 text-[11px] mt-8 tracking-wider">
+        <p className="text-center text-[var(--fr-text-dim)] text-[11px] mt-8 tracking-wider">
           Scuderia Ferrari F1 · 1950–{new Date().getFullYear()} · Dati aggiornati
         </p>
-      </main>
-
-      <Footer />
-    </div>
+    </PageShell>
   );
 }

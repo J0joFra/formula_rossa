@@ -1,68 +1,15 @@
 // pages/piloti/index.jsx
-import Head from 'next/head';
 import Link from 'next/link';
 import { useState, useMemo, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import Navigation from '../../components/ferrari/Navigation';
-import Footer from '../../components/ferrari/Footer';
+import PageShell from '../../components/ui/PageShell';
+import { getFlagCode } from '../../lib/flags';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-const FLAG_MAP = {
-      'australia': 'au', 'austria': 'at', 'azerbaijan': 'az', 'bahrain': 'bh',
-    'belgium': 'be', 'brazil': 'br', 'canada': 'ca', 'china': 'cn',
-    'france': 'fr', 'germany': 'de', 'hungary': 'hu', 'italy': 'it',
-    'japan': 'jp', 'mexico': 'mx', 'monaco': 'mc', 'netherlands': 'nl',
-    'portugal': 'pt', 'qatar': 'qa', 'saudi-arabia': 'sa', 'singapore': 'sg',
-    'spain': 'es', 'united-arab-emirates': 'ae', 'united-kingdom': 'gb',
-    'united-states': 'us', 'miami': 'us', 'las-vegas': 'us',
-    'albania': 'al', 'andorra': 'ad', 'armenia': 'am', 'belarus': 'by', 'bosnia-and-herzegovina': 'ba',
-    'bulgaria': 'bg', 'croatia': 'hr', 'cyprus': 'cy', 'czech-republic': 'cz', 'denmark': 'dk',
-    'estonia': 'ee', 'finland': 'fi', 'georgia': 'ge', 'greece': 'gr', 'iceland': 'is',
-    'ireland': 'ie', 'latvia': 'lv', 'liechtenstein': 'li', 'lithuania': 'lt', 'luxembourg': 'lu',
-    'malta': 'mt', 'moldova': 'md', 'montenegro': 'me', 'north-macedonia': 'mk', 'norway': 'no',
-    'poland': 'pl', 'romania': 'ro', 'russia': 'ru', 'san-marino': 'sm', 'serbia': 'rs',
-    'slovakia': 'sk', 'slovenia': 'si', 'sweden': 'se', 'switzerland': 'ch', 'turkey': 'tr',
-    'ukraine': 'ua', 'vatican-city': 'va',
-    'afghanistan': 'af', 'bangladesh': 'bd', 'bhutan': 'bt', 'brunei': 'bn', 'cambodia': 'kh',
-    'india': 'in', 'indonesia': 'id', 'iran': 'ir', 'iraq': 'iq', 'israel': 'il',
-    'jordan': 'jo', 'kazakhstan': 'kz', 'kuwait': 'kw', 'kyrgyzstan': 'kg', 'laos': 'la',
-    'lebanon': 'lb', 'malaysia': 'my', 'maldives': 'mv', 'mongolia': 'mn', 'myanmar': 'mm',
-    'nepal': 'np', 'north-korea': 'kp', 'oman': 'om', 'pakistan': 'pk', 'palestine': 'ps',
-    'philippines': 'ph', 'south-korea': 'kr', 'sri-lanka': 'lk', 'syria': 'sy', 'taiwan': 'tw',
-    'tajikistan': 'tj', 'thailand': 'th', 'timor-leste': 'tl', 'turkmenistan': 'tm', 'uzbekistan': 'uz',
-    'vietnam': 'vn', 'yemen': 'ye',
-    'antigua-and-barbuda': 'ag', 'argentina': 'ar', 'bahamas': 'bs', 'barbados': 'bb', 'belize': 'bz',
-    'bolivia': 'bo', 'chile': 'cl', 'colombia': 'co', 'costa-rica': 'cr', 'cuba': 'cu',
-    'dominica': 'dm', 'dominican-republic': 'do', 'ecuador': 'ec', 'el-salvador': 'sv', 'grenada': 'gd',
-    'guatemala': 'gt', 'guyana': 'gy', 'haiti': 'ht', 'honduras': 'hn', 'jamaica': 'jm',
-    'nicaragua': 'ni', 'panama': 'pa', 'paraguay': 'py', 'peru': 'pe', 'saint-kitts-and-nevis': 'kn',
-    'saint-lucia': 'lc', 'saint-vincent-and-the-grenadines': 'vc', 'suriname': 'sr', 'trinidad-and-tobago': 'tt', 'uruguay': 'uy',
-    'venezuela': 've',
-    'algeria': 'dz', 'angola': 'ao', 'benin': 'bj', 'botswana': 'bw', 'burkina-faso': 'bf',
-    'burundi': 'bi', 'cabo-verde': 'cv', 'cameroon': 'cm', 'central-african-republic': 'cf', 'chad': 'td',
-    'comoros': 'km', 'congo-brazzaville': 'cg', 'congo-kinshasa': 'cd', 'cote-divoire': 'ci', 'djibouti': 'dj',
-    'egypt': 'eg', 'equatorial-guinea': 'gq', 'eritrea': 'er', 'eswatini': 'sz', 'ethiopia': 'et',
-    'gabon': 'ga', 'gambia': 'gm', 'ghana': 'gh', 'guinea': 'gn', 'guinea-bissau': 'gw',
-    'kenya': 'ke', 'lesotho': 'ls', 'liberia': 'lr', 'libya': 'ly', 'madagascar': 'mg',
-    'malawi': 'mw', 'mali': 'ml', 'mauritania': 'mr', 'mauritius': 'mu', 'morocco': 'ma',
-    'mozambique': 'mz', 'namibia': 'na', 'niger': 'ne', 'nigeria': 'ng', 'rwanda': 'rw',
-    'sao-tome-and-principe': 'st', 'senegal': 'sn', 'seychelles': 'sc', 'sierra-leone': 'sl', 'somalia': 'so',
-    'south-africa': 'za', 'south-sudan': 'ss', 'sudan': 'sd', 'tanzania': 'tz', 'togo': 'tg',
-    'tunisia': 'tn', 'uganda': 'ug', 'zambia': 'zm', 'zimbabwe': 'zw',
-    'fiji': 'fj', 'kiribati': 'ki', 'marshall-islands': 'mh', 'micronesia': 'fm', 'nauru': 'nr',
-    'new-zealand': 'nz', 'palau': 'pw', 'papua-new-guinea': 'pg', 'samoa': 'ws', 'solomon-islands': 'sb',
-    'tonga': 'to', 'tuvalu': 'tv', 'vanuatu': 'vu',
-    'united states of america': 'us',
-    'morocco': 'ma', 'sweden': 'se', 'argentina': 'ar', 'india': 'in', 'mexico': 'mx', 'turkey': 'tr', 'hungary': 'hu', 'china': 'cn', 
-    'malaysia': 'my', 'singapore': 'sg', 'qatar': 'qa', 'russia': 'ru', 'switzerland': 'ch', 'azerbaijan': 'az', 'south africa': 'za',
-    'united-states-of-america': 'us', 'south-korea': 'kr', 'saudi-arabia': 'sa', 'united-arab-emirates': 'ae',
-    'united states of america': 'us', 'south korea': 'kr', 'saudi arabia': 'sa', 'united arab emirates': 'ae'
-};
-function getFlagCode(id='') { return FLAG_MAP[id?.toLowerCase().replace(/\s+/g,'-')] || null; }
 
 function calcAge(dob, dod) {
   if (!dob) return null;
@@ -103,22 +50,22 @@ function DriverAvatar({ firstName, lastName, number, size = 64, championships = 
     <div style={{
       width: size, height: size, borderRadius: '50%', flexShrink: 0,
       background: isChamp
-        ? 'linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #b91c1c 100%)'
+        ? 'linear-gradient(135deg, #7f1d1d 0%, var(--fr-red) 50%, #b91c1c 100%)'
         : 'linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)',
-      border: isChamp ? '2px solid rgba(220,38,38,0.6)' : '1px solid rgba(255,255,255,0.08)',
+      border: isChamp ? '2px solid rgba(220,38,38,0.6)' : '1px solid var(--fr-border)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       position: 'relative',
       boxShadow: isChamp ? '0 0 16px rgba(220,38,38,0.25)' : 'none',
     }}>
       <span style={{
         fontSize: size * 0.3, fontWeight: '900', fontFamily: 'monospace',
-        color: isChamp ? '#fff' : 'rgba(255,255,255,0.5)',
+        color: isChamp ? 'var(--fr-text)' : 'var(--fr-text-faint)',
         letterSpacing: '-1px',
       }}>{initials || '?'}</span>
       {number && (
         <span style={{
           position: 'absolute', bottom: '-4px', right: '-4px',
-          background: '#dc2626', color: '#fff',
+          background: 'var(--fr-red)', color: 'var(--fr-text)',
           fontSize: size * 0.18, fontWeight: '800', fontFamily: 'monospace',
           padding: '1px 4px', borderRadius: '3px',
           border: '1px solid rgba(0,0,0,0.4)',
@@ -192,57 +139,47 @@ export default function PilotiIndex() {
   }, [drivers, search, eraFilter, sortBy, champOnly]);
  
   // Stats globali
-  const stats = useMemo(() => ({
-    total:   drivers.length,
-    champs:  drivers.filter(d=>d.total_championship_wins>0).length,
-    maxWins: Math.max(...drivers.map(d=>d.total_race_wins||0)),
-    maxWinner: drivers.reduce((acc,d) => (d.total_race_wins||0)>(acc.total_race_wins||0) ? d : acc, {}),
-  }), [drivers]);
+  const stats = useMemo(() => {
+    // Math.max(...[]) restituisce -Infinity: con la lista vuota (dati non ancora
+    // caricati o query a vuoto) finiva a schermo come "-Infinity".
+    const maxWinner = drivers.reduce(
+      (acc, d) => (d.total_race_wins || 0) > (acc?.total_race_wins || 0) ? d : acc,
+      null,
+    );
+    return {
+      total:   drivers.length,
+      champs:  drivers.filter(d => d.total_championship_wins > 0).length,
+      maxWins: maxWinner?.total_race_wins ?? 0,
+      maxWinner,
+    };
+  }, [drivers]);
  
+  const seo = {
+    title: 'Piloti di Formula 1',
+    description: 'Tutti i piloti di Formula 1: vittorie, pole position, campionati e statistiche complete.',
+    path: '/piloti',
+  };
+
   return (
-    <>
-      <Head>
-        <title>Piloti F1 — Formula Rossa</title>
-        <meta name="description" content="Tutti i piloti di Formula 1: vittorie, pole position, campionati e statistiche complete." />
-        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Serif+4:wght@400;700&display=swap" rel="stylesheet"/>
-        <style>{`
-          @keyframes fadeUp  { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-          @keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:.3} }
-          @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
-          * { box-sizing: border-box; }
-          html, body { background: #080808 !important; color: #ffffff !important; }
-          ::-webkit-scrollbar{width:4px}
-          ::-webkit-scrollbar-track{background:#080808}
-          ::-webkit-scrollbar-thumb{background:#dc2626;border-radius:2px}
-        `}</style>
-      </Head>
- 
-      <div style={{ minHeight:'100vh', background:'#080808', color:'#fff' }}>
-        <Navigation />
- 
-        <main style={{
-          maxWidth:'1200px', margin:'0 auto',
-          padding:'88px 24px 96px',
-          opacity: mounted ? 1 : 0,
-          transition: 'opacity .5s ease',
-        }}>
+    <PageShell seo={seo} wide>
+        <div style={{ opacity: mounted ? 1 : 0, transition: 'opacity .5s ease' }}>
  
           {/* ── HERO HEADER ── */}
           <header style={{ marginBottom:'48px', animation:'fadeUp .6s ease both' }}>
             <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'14px' }}>
-              <span style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#dc2626', animation:'pulse 2s infinite' }}/>
-              <span style={{ fontSize:'10px', color:'#dc2626', fontFamily:'monospace', fontWeight:'800', letterSpacing:'2.5px' }}>
+              <span style={{ width:'6px', height:'6px', borderRadius:'50%', background:'var(--fr-red)', animation:'pulse 2s infinite' }}/>
+              <span style={{ fontSize:'10px', color:'var(--fr-red)', fontFamily:'monospace', fontWeight:'800', letterSpacing:'2.5px' }}>
                 F1 DRIVERS DATABASE · {loading ? '…' : drivers.length} PILOTI
               </span>
             </div>
             <h1 style={{
-              margin:0, fontFamily:"'Bebas Neue',Georgia,serif",
+              margin:0, fontFamily:'var(--font-head)',
               fontSize:'clamp(52px,8vw,96px)', fontWeight:'400',
               letterSpacing:'4px', lineHeight:1,
             }}>
-              I PILOTI <span style={{ color:'#dc2626' }}>DELLA STORIA</span>
+              I PILOTI <span style={{ color:'var(--fr-red)' }}>DELLA STORIA</span>
             </h1>
-            <p style={{ margin:'14px 0 0', fontSize:'12px', fontFamily:'monospace', color:'rgba(255,255,255,.25)', letterSpacing:'1px' }}>
+            <p style={{ margin:'14px 0 0', fontSize:'12px', fontFamily:'monospace', color:'var(--fr-text-dim)', letterSpacing:'1px' }}>
               Vittorie, pole position, campionati e ogni record del Mondiale F1
             </p>
  
@@ -251,7 +188,7 @@ export default function PilotiIndex() {
               <div style={{
                 display:'flex', gap:'32px', flexWrap:'wrap',
                 marginTop:'28px', paddingTop:'24px',
-                borderTop:'1px solid rgba(255,255,255,.06)',
+                borderTop:'1px solid var(--fr-border)',
               }}>
                 {[
                   { label:'Campioni del mondo', value: stats.champs },
@@ -260,10 +197,10 @@ export default function PilotiIndex() {
                 ].map(s=>(
                   <div key={s.label}>
                     <div style={{ display:'flex', alignItems:'baseline', gap:'6px' }}>
-                      <span style={{ fontSize:'26px', fontWeight:'900', fontFamily:'monospace', color:'#fff' }}>{s.value}</span>
-                      {s.sub && <span style={{ fontSize:'11px', color:'rgba(255,255,255,.3)', fontFamily:'monospace' }}>{s.sub}</span>}
+                      <span style={{ fontSize:'26px', fontWeight:'900', fontFamily:'monospace', color:'var(--fr-text)' }}>{s.value}</span>
+                      {s.sub && <span style={{ fontSize:'11px', color:'var(--fr-text-dim)', fontFamily:'monospace' }}>{s.sub}</span>}
                     </div>
-                    <div style={{ fontSize:'9px', color:'rgba(255,255,255,.3)', fontFamily:'monospace', letterSpacing:'1px', textTransform:'uppercase', marginTop:'2px' }}>{s.label}</div>
+                    <div style={{ fontSize:'9px', color:'var(--fr-text-dim)', fontFamily:'monospace', letterSpacing:'1px', textTransform:'uppercase', marginTop:'2px' }}>{s.label}</div>
                   </div>
                 ))}
               </div>
@@ -279,23 +216,23 @@ export default function PilotiIndex() {
             }}>
               {/* Search */}
               <div style={{ position:'relative', flex:'1', minWidth:'220px' }}>
-                <span style={{ position:'absolute', left:'14px', top:'50%', transform:'translateY(-50%)', fontSize:'13px', color:'rgba(255,255,255,.25)', pointerEvents:'none' }}>🔍</span>
+                <span style={{ position:'absolute', left:'14px', top:'50%', transform:'translateY(-50%)', fontSize:'13px', color:'var(--fr-text-dim)', pointerEvents:'none' }}>🔍</span>
                 <input
                   value={search} onChange={e=>setSearch(e.target.value)}
                   placeholder="Cerca pilota, nazionalità, numero…"
                   style={{
-                    width:'100%', background:'rgba(255,255,255,.04)',
-                    border:'1px solid rgba(255,255,255,.08)', borderRadius:'4px',
+                    width:'100%', background:'var(--fr-overlay)',
+                    border:'1px solid var(--fr-border)', borderRadius:'4px',
                     padding:'10px 36px', fontSize:'12px', fontFamily:'monospace',
-                    color:'#fff', outline:'none', transition:'border-color .2s',
+                    color:'var(--fr-text)', outline:'none', transition:'border-color .2s',
                   }}
                   onFocus={e=>e.target.style.borderColor='rgba(220,38,38,.5)'}
-                  onBlur={e=>e.target.style.borderColor='rgba(255,255,255,.08)'}
+                  onBlur={e=>e.target.style.borderColor='var(--fr-border)'}
                 />
                 {search && (
                   <button onClick={()=>setSearch('')} style={{
                     position:'absolute', right:'12px', top:'50%', transform:'translateY(-50%)',
-                    background:'none', border:'none', color:'rgba(255,255,255,.3)', cursor:'pointer', fontSize:'16px',
+                    background:'none', border:'none', color:'var(--fr-text-dim)', cursor:'pointer', fontSize:'16px',
                   }}>×</button>
                 )}
               </div>
@@ -305,9 +242,9 @@ export default function PilotiIndex() {
                 padding:'9px 16px', borderRadius:'4px', cursor:'pointer',
                 fontSize:'9px', fontFamily:'monospace', fontWeight:'800',
                 letterSpacing:'1.5px', textTransform:'uppercase',
-                border: champOnly ? '1px solid #fbbf24' : '1px solid rgba(255,255,255,.08)',
-                background: champOnly ? 'rgba(251,191,36,.12)' : 'rgba(255,255,255,.03)',
-                color: champOnly ? '#fbbf24' : 'rgba(255,255,255,.4)',
+                border: champOnly ? '1px solid #fbbf24' : '1px solid var(--fr-border)',
+                background: champOnly ? 'rgba(251,191,36,.12)' : 'var(--fr-overlay)',
+                color: champOnly ? '#fbbf24' : 'var(--fr-text-faint)',
                 transition:'all .2s',
                 display:'flex', alignItems:'center', gap:'6px',
               }}>
@@ -317,16 +254,16 @@ export default function PilotiIndex() {
               {/* Era pills */}
               <div style={{ display:'flex', flexWrap:'wrap', gap:'6px' }}>
                 {eras.map(e => {
-                  const meta = e==='all' ? {color:'#dc2626'} : ERA_META[e];
+                  const meta = e==='all' ? {color:'var(--fr-red)'} : ERA_META[e];
                   const active = eraFilter===e;
                   return (
                     <button key={e} onClick={()=>setEraFilter(e)} style={{
                       padding:'7px 12px', borderRadius:'3px', cursor:'pointer',
                       fontSize:'9px', fontFamily:'monospace', fontWeight:'800',
                       letterSpacing:'1px', textTransform:'uppercase',
-                      border: active ? `1px solid ${meta?.color}` : '1px solid rgba(255,255,255,.08)',
-                      background: active ? `${meta?.color}18` : 'rgba(255,255,255,.03)',
-                      color: active ? meta?.color : 'rgba(255,255,255,.4)',
+                      border: active ? `1px solid ${meta?.color}` : '1px solid var(--fr-border)',
+                      background: active ? `${meta?.color}18` : 'var(--fr-overlay)',
+                      color: active ? meta?.color : 'var(--fr-text-faint)',
                       transition:'all .2s',
                     }}>{e==='all' ? `Tutti` : e}</button>
                   );
@@ -335,9 +272,9 @@ export default function PilotiIndex() {
  
               {/* Sort */}
               <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{
-                background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)',
+                background:'var(--fr-overlay)', border:'1px solid var(--fr-border)',
                 borderRadius:'4px', padding:'9px 14px', fontSize:'11px',
-                fontFamily:'monospace', color:'rgba(255,255,255,.6)', outline:'none', cursor:'pointer',
+                fontFamily:'monospace', color:'var(--fr-text-faint)', outline:'none', cursor:'pointer',
               }}>
                 <option value="wins">Per vittorie</option>
                 <option value="champs">Per campionati</option>
@@ -363,13 +300,13 @@ export default function PilotiIndex() {
               {Array.from({length:12}).map((_,i)=>(
                 <div key={i} style={{
                   height:'72px', borderRadius:'4px',
-                  border:'1px solid rgba(255,255,255,.05)',
+                  border:'1px solid var(--fr-overlay)',
                   background:'#0d0d0d',
                   overflow:'hidden', position:'relative',
                 }}>
                   <div style={{
                     position:'absolute', inset:0,
-                    background:'linear-gradient(90deg,transparent,rgba(255,255,255,.04),transparent)',
+                    background:'linear-gradient(90deg,transparent,var(--fr-overlay),transparent)',
                     animation:'shimmer 1.5s infinite',
                   }}/>
                 </div>
@@ -379,7 +316,7 @@ export default function PilotiIndex() {
  
           {/* ── EMPTY ── */}
           {!loading && filtered.length===0 && !error && (
-            <div style={{ textAlign:'center', padding:'80px 0', color:'rgba(255,255,255,.2)', fontFamily:'monospace' }}>
+            <div style={{ textAlign:'center', padding:'80px 0', color:'var(--fr-text-dim)', fontFamily:'monospace' }}>
               <div style={{ fontSize:'36px', marginBottom:'16px' }}>🏎</div>
               <p style={{ fontSize:'12px', letterSpacing:'2px', textTransform:'uppercase' }}>Nessun pilota trovato</p>
             </div>
@@ -396,9 +333,9 @@ export default function PilotiIndex() {
                 display:'grid',
                 gridTemplateColumns:'32px 1fr 60px 60px 60px 60px 60px',
                 gap:'12px', padding:'8px 16px',
-                fontSize:'8px', color:'rgba(255,255,255,.55)',
+                fontSize:'8px', color:'var(--fr-text-faint)',
                 fontFamily:'monospace', letterSpacing:'1.5px', textTransform:'uppercase',
-                borderBottom:'1px solid rgba(255,255,255,.08)',
+                borderBottom:'1px solid var(--fr-border)',
                 background:'#0f0f0f',
                 borderRadius:'4px 4px 0 0',
               }}>
@@ -419,17 +356,15 @@ export default function PilotiIndex() {
           {!loading && filtered.length>0 && (
             <p style={{
               marginTop:'32px', textAlign:'center',
-              fontSize:'10px', color:'rgba(255,255,255,.15)',
+              fontSize:'10px', color:'var(--fr-border-strong)',
               fontFamily:'monospace', letterSpacing:'2px',
             }}>
               {filtered.length} / {drivers.length} PILOTI
             </p>
           )}
  
-        </main>
-        <Footer />
-      </div>
-    </>
+        </div>
+    </PageShell>
   );
 }
  
@@ -464,11 +399,11 @@ function DriverRow({ driver: d, rank, sortBy }) {
           gap:'12px', alignItems:'center',
           padding:'12px 16px', borderRadius:'4px',
           border: hovered
-            ? `1px solid ${isChamp ? 'rgba(220,38,38,.35)' : 'rgba(255,255,255,.1)'}`
-            : '1px solid rgba(255,255,255,.04)',
+            ? `1px solid ${isChamp ? 'rgba(220,38,38,.35)' : 'var(--fr-border)'}`
+            : '1px solid var(--fr-overlay)',
           background: hovered
             ? (isChamp ? '#0f0303' : '#0f0f0f')
-            : '#0a0a0a',
+            : 'var(--fr-surface)',
           cursor:'pointer', transition:'all .18s ease',
           position:'relative',
         }}
@@ -476,7 +411,7 @@ function DriverRow({ driver: d, rank, sortBy }) {
         {/* Rank */}
         <div style={{
           fontSize:'11px', fontFamily:'monospace', fontWeight:'800',
-          color: rank <= 3 ? '#dc2626' : 'rgba(255,255,255,.18)',
+          color: rank <= 3 ? 'var(--fr-red)' : 'var(--fr-border-strong)',
           textAlign:'center',
         }}>{rank <= 3 ? ['①','②','③'][rank-1] : rank}</div>
  
@@ -491,7 +426,7 @@ function DriverRow({ driver: d, rank, sortBy }) {
           <div style={{ minWidth:0 }}>
             <div style={{ display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap' }}>
               <span style={{
-                fontSize:'14px', fontWeight:'800', color: hovered ? '#fff' : 'rgba(255,255,255,.9)',
+                fontSize:'14px', fontWeight:'800', color: hovered ? 'var(--fr-text)' : 'var(--fr-text-muted)',
                 fontFamily:"'Source Serif 4',Georgia,serif",
                 transition:'color .18s',
                 whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis',
@@ -500,7 +435,7 @@ function DriverRow({ driver: d, rank, sortBy }) {
                 <span style={{
                   fontSize:'8px', fontFamily:'monospace', fontWeight:'800',
                   padding:'2px 6px', borderRadius:'2px',
-                  background:'rgba(220,38,38,.15)', color:'#dc2626',
+                  background:'rgba(220,38,38,.15)', color:'var(--fr-red)',
                   border:'1px solid rgba(220,38,38,.3)', letterSpacing:'1px',
                   whiteSpace:'nowrap',
                 }}>
@@ -508,7 +443,7 @@ function DriverRow({ driver: d, rank, sortBy }) {
                 </span>
               )}
               {isDead && (
-                <span style={{ fontSize:'8px', color:'rgba(255,255,255,.2)', fontFamily:'monospace' }}>†</span>
+                <span style={{ fontSize:'8px', color:'var(--fr-text-dim)', fontFamily:'monospace' }}>†</span>
               )}
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:'8px', marginTop:'2px' }}>
@@ -516,7 +451,7 @@ function DriverRow({ driver: d, rank, sortBy }) {
                 <img src={`https://flagcdn.com/w20/${flag}.png`} alt={d.nationality_country_id}
                   style={{ width:'16px', height:'10px', objectFit:'cover', borderRadius:'1px', opacity:.7 }}/>
               )}
-              <span style={{ fontSize:'10px', color:'rgba(255,255,255,.28)', fontFamily:'monospace' }}>
+              <span style={{ fontSize:'10px', color:'var(--fr-text-dim)', fontFamily:'monospace' }}>
                 {d.nationality_country_id?.replace(/-/g,' ')}
                 {age && <span style={{ marginLeft:'8px' }}>{isDead ? `† età ${age}` : `${age} anni`}</span>}
               </span>
@@ -542,8 +477,8 @@ function DriverRow({ driver: d, rank, sortBy }) {
             <span style={{
               fontSize:'14px', fontFamily:'monospace', fontWeight:'800',
               color: sortBy===key
-                ? (val > 0 ? '#dc2626' : 'rgba(255,255,255,.2)')
-                : (val > 0 ? 'rgba(255,255,255,.75)' : 'rgba(255,255,255,.15)'),
+                ? (val > 0 ? 'var(--fr-red)' : 'var(--fr-text-dim)')
+                : (val > 0 ? 'var(--fr-text-muted)' : 'var(--fr-border-strong)'),
               transition:'color .18s',
             }}>
               {val ?? '—'}
@@ -554,7 +489,7 @@ function DriverRow({ driver: d, rank, sortBy }) {
         {/* Hover right arrow */}
         <div style={{
           position:'absolute', right:'14px', top:'50%', transform:'translateY(-50%)',
-          fontSize:'12px', color:'#dc2626',
+          fontSize:'12px', color:'var(--fr-red)',
           opacity: hovered ? 1 : 0, transition:'opacity .18s',
           pointerEvents:'none',
         }}>→</div>

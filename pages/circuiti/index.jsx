@@ -1,9 +1,8 @@
-import Head from 'next/head';
 import Link from 'next/link';
 import { useState, useMemo, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import Navigation from '../../components/ferrari/Navigation';
-import Footer from '../../components/ferrari/Footer';
+import PageShell, { PageHeader, PageLoading, PageError } from '../../components/ui/PageShell';
+import { getFlagCode } from '../../lib/flags';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -12,60 +11,6 @@ const supabase = createClient(
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function getFlagCode(countryId = '') {
-  const map = {
-    'australia': 'au', 'austria': 'at', 'azerbaijan': 'az', 'bahrain': 'bh',
-    'belgium': 'be', 'brazil': 'br', 'canada': 'ca', 'china': 'cn',
-    'france': 'fr', 'germany': 'de', 'hungary': 'hu', 'italy': 'it',
-    'japan': 'jp', 'mexico': 'mx', 'monaco': 'mc', 'netherlands': 'nl',
-    'portugal': 'pt', 'qatar': 'qa', 'saudi-arabia': 'sa', 'singapore': 'sg',
-    'spain': 'es', 'united-arab-emirates': 'ae', 'united-kingdom': 'gb',
-    'united-states': 'us', 'miami': 'us', 'las-vegas': 'us',
-    'albania': 'al', 'andorra': 'ad', 'armenia': 'am', 'belarus': 'by', 'bosnia-and-herzegovina': 'ba',
-    'bulgaria': 'bg', 'croatia': 'hr', 'cyprus': 'cy', 'czech-republic': 'cz', 'denmark': 'dk',
-    'estonia': 'ee', 'finland': 'fi', 'georgia': 'ge', 'greece': 'gr', 'iceland': 'is',
-    'ireland': 'ie', 'latvia': 'lv', 'liechtenstein': 'li', 'lithuania': 'lt', 'luxembourg': 'lu',
-    'malta': 'mt', 'moldova': 'md', 'montenegro': 'me', 'north-macedonia': 'mk', 'norway': 'no',
-    'poland': 'pl', 'romania': 'ro', 'russia': 'ru', 'san-marino': 'sm', 'serbia': 'rs',
-    'slovakia': 'sk', 'slovenia': 'si', 'sweden': 'se', 'switzerland': 'ch', 'turkey': 'tr',
-    'ukraine': 'ua', 'vatican-city': 'va',
-    'afghanistan': 'af', 'bangladesh': 'bd', 'bhutan': 'bt', 'brunei': 'bn', 'cambodia': 'kh',
-    'india': 'in', 'indonesia': 'id', 'iran': 'ir', 'iraq': 'iq', 'israel': 'il',
-    'jordan': 'jo', 'kazakhstan': 'kz', 'kuwait': 'kw', 'kyrgyzstan': 'kg', 'laos': 'la',
-    'lebanon': 'lb', 'malaysia': 'my', 'maldives': 'mv', 'mongolia': 'mn', 'myanmar': 'mm',
-    'nepal': 'np', 'north-korea': 'kp', 'oman': 'om', 'pakistan': 'pk', 'palestine': 'ps',
-    'philippines': 'ph', 'south-korea': 'kr', 'sri-lanka': 'lk', 'syria': 'sy', 'taiwan': 'tw',
-    'tajikistan': 'tj', 'thailand': 'th', 'timor-leste': 'tl', 'turkmenistan': 'tm', 'uzbekistan': 'uz',
-    'vietnam': 'vn', 'yemen': 'ye',
-    'antigua-and-barbuda': 'ag', 'argentina': 'ar', 'bahamas': 'bs', 'barbados': 'bb', 'belize': 'bz',
-    'bolivia': 'bo', 'chile': 'cl', 'colombia': 'co', 'costa-rica': 'cr', 'cuba': 'cu',
-    'dominica': 'dm', 'dominican-republic': 'do', 'ecuador': 'ec', 'el-salvador': 'sv', 'grenada': 'gd',
-    'guatemala': 'gt', 'guyana': 'gy', 'haiti': 'ht', 'honduras': 'hn', 'jamaica': 'jm',
-    'nicaragua': 'ni', 'panama': 'pa', 'paraguay': 'py', 'peru': 'pe', 'saint-kitts-and-nevis': 'kn',
-    'saint-lucia': 'lc', 'saint-vincent-and-the-grenadines': 'vc', 'suriname': 'sr', 'trinidad-and-tobago': 'tt', 'uruguay': 'uy',
-    'venezuela': 've',
-    'algeria': 'dz', 'angola': 'ao', 'benin': 'bj', 'botswana': 'bw', 'burkina-faso': 'bf',
-    'burundi': 'bi', 'cabo-verde': 'cv', 'cameroon': 'cm', 'central-african-republic': 'cf', 'chad': 'td',
-    'comoros': 'km', 'congo-brazzaville': 'cg', 'congo-kinshasa': 'cd', 'cote-divoire': 'ci', 'djibouti': 'dj',
-    'egypt': 'eg', 'equatorial-guinea': 'gq', 'eritrea': 'er', 'eswatini': 'sz', 'ethiopia': 'et',
-    'gabon': 'ga', 'gambia': 'gm', 'ghana': 'gh', 'guinea': 'gn', 'guinea-bissau': 'gw',
-    'kenya': 'ke', 'lesotho': 'ls', 'liberia': 'lr', 'libya': 'ly', 'madagascar': 'mg',
-    'malawi': 'mw', 'mali': 'ml', 'mauritania': 'mr', 'mauritius': 'mu', 'morocco': 'ma',
-    'mozambique': 'mz', 'namibia': 'na', 'niger': 'ne', 'nigeria': 'ng', 'rwanda': 'rw',
-    'sao-tome-and-principe': 'st', 'senegal': 'sn', 'seychelles': 'sc', 'sierra-leone': 'sl', 'somalia': 'so',
-    'south-africa': 'za', 'south-sudan': 'ss', 'sudan': 'sd', 'tanzania': 'tz', 'togo': 'tg',
-    'tunisia': 'tn', 'uganda': 'ug', 'zambia': 'zm', 'zimbabwe': 'zw',
-    'fiji': 'fj', 'kiribati': 'ki', 'marshall-islands': 'mh', 'micronesia': 'fm', 'nauru': 'nr',
-    'new-zealand': 'nz', 'palau': 'pw', 'papua-new-guinea': 'pg', 'samoa': 'ws', 'solomon-islands': 'sb',
-    'tonga': 'to', 'tuvalu': 'tv', 'vanuatu': 'vu',
-    'united states of america': 'us',
-    'morocco': 'ma', 'sweden': 'se', 'argentina': 'ar', 'india': 'in', 'mexico': 'mx', 'turkey': 'tr', 'hungary': 'hu', 'china': 'cn', 
-    'malaysia': 'my', 'singapore': 'sg', 'qatar': 'qa', 'russia': 'ru', 'switzerland': 'ch', 'azerbaijan': 'az', 'south africa': 'za',
-    'united-states-of-america': 'us', 'south-korea': 'kr', 'saudi-arabia': 'sa', 'united-arab-emirates': 'ae',
-    'united states of america': 'us', 'south korea': 'kr', 'saudi arabia': 'sa', 'united arab emirates': 'ae'
-  };
-  return map[countryId.toLowerCase().replace(/\s+/g, '-')] || null;
-}
 
 // Calcolato lato client perché non esiste colonna "region" su Supabase
 function getRegion(countryId = '') {
@@ -131,38 +76,27 @@ export default function CircuitiIndex() {
     return list;
   }, [circuits, search, region, sortBy]);
 
+  const seo = {
+    title: 'Circuiti di Formula 1',
+    description: 'Tutti i circuiti di Formula 1: lunghezza, numero di curve, senso di marcia e gare disputate.',
+    path: '/circuiti',
+  };
+
   return (
-    <>
-      <Head>
-        <title>Circuiti F1 — Telemetry Explorer</title>
-        <meta name="description" content="Tutti i circuiti di Formula 1: lunghezza, curve, DRS zone, record sul giro e storia." />
-      </Head>
-      <div className="min-h-screen bg-zinc-950 text-white">
-        <Navigation />
-        <main className="max-w-7xl mx-auto px-4 pt-24 pb-20">
+    <PageShell seo={seo} wide>
+      <PageHeader
+        eyebrow="Circuiti · Calendario mondiale"
+        title="I circuiti"
+        accent="del mondo"
+        subtitle={loading ? 'Caricamento dei dati…' : `${circuits.length} piste con dati tecnici, record e storia.`}
+        breadcrumb={[{ label: 'Dati' }, { label: 'Circuiti' }]}
+      />
 
-          {/* Header */}
-          <div className="mb-10">
-            <div className="flex items-center gap-2 text-[10px] text-red-600 font-mono tracking-[0.2em] mb-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-600 inline-block" />
-              CIRCUITI · F1 WORLD CALENDAR
-            </div>
-            <h1 className="text-5xl font-black tracking-tighter">
-              I CIRCUITI <span className="text-red-600">DEL MONDO</span>
-            </h1>
-            <p className="text-white/40 font-mono text-sm mt-2 tracking-widest uppercase">
-              {loading ? 'Caricamento…' : `${circuits.length} piste · Dati tecnici, record e storia`}
-            </p>
-          </div>
+      {error && <PageError message={`Errore nel caricamento: ${error}`} />}
 
-          {/* Error */}
-          {error && (
-            <div className="mb-6 p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 font-mono text-sm">
-              Errore nel caricamento: {error}
-            </div>
-          )}
+      {loading && <PageLoading label="Caricamento circuiti…" />}
 
-          {/* Controls */}
+      {/* Controls */}
           {!loading && (
             <div className="flex flex-wrap gap-3 mb-8 items-center">
               <div className="relative flex-1 min-w-48">
@@ -225,10 +159,7 @@ export default function CircuitiIndex() {
             </div>
           )}
 
-        </main>
-        <Footer />
-      </div>
-    </>
+    </PageShell>
   );
 }
 
