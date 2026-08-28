@@ -21,13 +21,13 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
         <meta name="theme-color" content="#E8002D" />
         <meta name="msapplication-TileColor" content="#E8002D" />
 
-        {/* PWA manifest (crea /public/manifest.json se vuoi installabilità) */}
+        {/* PWA manifest */}
         <link rel="manifest" href="/manifest.json" />
 
-        {/* Favicon */}
+        {/* Favicon — /favicon.svg e /apple-touch-icon.png non esistevano e
+            producevano un 404 a ogni caricamento di pagina. */}
         <link rel="icon"             href="/favicon.ico" />
-        <link rel="icon"             href="/favicon.svg"    type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" href="/data/images/formula-rossa-logo.png" />
 
         {/* Font del design system — Barlow Condensed (titoli), DM Sans (testo),
             JetBrains Mono (numeri). Preconnect prima del CSS per velocizzare. */}

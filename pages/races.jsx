@@ -94,7 +94,11 @@ export default function RaceDetailsPage() {
   const [activeTab, setActiveTab] = useState('race');
 
   useEffect(() => {
-    if (!id) return;
+    // router.query è vuoto al primo render: senza attendere isReady non si
+    // distingue "id assente" da "id non ancora disponibile", e la pagina
+    // restava in caricamento per sempre.
+    if (!router.isReady) return;
+    if (!id) { setLoading(false); return; }
     async function loadData() {
       try {
         
@@ -160,7 +164,7 @@ export default function RaceDetailsPage() {
       setLoading(false);
     }
     loadData();
-  }, [id]);
+  }, [router.isReady, id]);
 
   if (loading) return (
     <PageShell wide><PageLoading label="Caricamento gara…" /></PageShell>
@@ -168,9 +172,14 @@ export default function RaceDetailsPage() {
   if (!raceInfo) return (
     <PageShell wide>
       <PageError
-        title="Gara non trovata"
-        message="Il Gran Premio richiesto non esiste o non è ancora disponibile in archivio."
+        title={id ? 'Gara non trovata' : 'Nessuna gara selezionata'}
+        message={id
+          ? 'Il Gran Premio richiesto non esiste o non è ancora disponibile in archivio.'
+          : 'Questa pagina mostra il dettaglio di un singolo Gran Premio. Scegline uno dal calendario.'}
       />
+      <p className="text-center">
+        <Link href="/standings" className="btn btn-outline">Vai al calendario</Link>
+      </p>
     </PageShell>
   );
 

@@ -25,7 +25,6 @@ const PILLARS = [
       { href: '/standings',  label: 'Classifiche',  desc: 'Piloti e costruttori' },
       { href: '/piloti',     label: 'Piloti',       desc: 'Schede e carriere' },
       { href: '/circuiti',   label: 'Circuiti',     desc: 'Tracciati e statistiche' },
-      { href: '/races',      label: 'Gare',         desc: 'Calendario e risultati' },
     ],
   },
   {
