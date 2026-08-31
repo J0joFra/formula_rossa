@@ -99,6 +99,11 @@ const nextConfig = {
          lavorano su dati di sessione, gratuiti dopo la gara, e saranno la base
          delle pagine "Analisi GP". Redirect temporaneo, non permanente. */
       { source: '/live-timing', destination: '/standings', permanent: false },
+      /* /races?id=123 mostrava lo stesso Gran Premio di /gp/[anno]/[round], con
+         una URL che non dice quale gara sia. Ora l'analisi vive in un posto
+         solo: le vecchie URL, non essendoci modo di risalire ad anno e round
+         senza interrogare il database, atterrano sull'elenco dei GP. */
+      { source: '/races', destination: '/gp', permanent: false },
     ];
   },
 

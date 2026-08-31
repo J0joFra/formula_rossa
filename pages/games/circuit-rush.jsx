@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, AlertTriangle, RefreshCw, Gauge, Heart, Zap, Battery } from 'lucide-react';
-import Navigation from '../../components/ferrari/Navigation';
-import Footer from '../../components/ferrari/Footer';
+import { AlertTriangle, RefreshCw, Gauge, Heart, Zap, Battery } from 'lucide-react';
+import GameShell from '../../components/ui/GameShell';
 import { useSession } from "next-auth/react";
 import { addTokens, getTokens, initUser } from '../../lib/tokens';
 
@@ -286,21 +285,21 @@ export default function CircuitRush() {
     return () => cancelAnimationFrame(gameLoopRef.current);
   }, [gameState, updateGame]);
 
-  return (
-    <div className="min-h-screen bg-black text-white font-sans overflow-hidden select-none touch-none">
-      <Navigation />
+  const seo = {
+    title: 'Circuit Rush — schiva i detriti in pista',
+    description: 'Mini-gioco arcade a tema Ferrari: sfreccia in pista, schiva i detriti e raccogli energia per guadagnare SF Token.',
+    path: '/games/circuit-rush',
+  };
 
-      <main className="pt-24 pb-12 px-4 flex flex-col items-center">
+  return (
+    <GameShell seo={seo} title="Circuit Rush" className="select-none touch-none">
+      <div className="flex flex-col items-center">
 
         {/* HUD SUPERIORE */}
-        <div className="max-w-[400px] w-full mb-4 flex justify-between items-center px-1">
-          <button onClick={() => router.push('/fanzone')} className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors">
-            <ChevronLeft className="w-5 h-5" />
-            <span className="text-xs font-bold uppercase tracking-widest font-mono">Back</span>
-          </button>
-          <div className="flex items-center gap-3 bg-zinc-900 px-4 py-1.5 rounded-full border border-white/5">
-            <Gauge className="w-4 h-4 text-red-500" />
-            <span className="font-mono font-bold text-xs text-red-500">{(speedRef.current * 18).toFixed(0)} KM/H</span>
+        <div className="max-w-[400px] w-full mb-4 flex justify-end items-center px-1">
+          <div className="flex items-center gap-3 bg-[var(--fr-surface-2)] px-4 py-1.5 rounded-full">
+            <Gauge className="w-4 h-4 text-[var(--fr-red)]" aria-hidden="true" />
+            <span className="tabular font-bold text-xs text-[var(--fr-red)]">{(speedRef.current * 18).toFixed(0)} KM/H</span>
           </div>
         </div>
 
@@ -440,10 +439,10 @@ export default function CircuitRush() {
                 </p>
 
                 <div className="flex flex-col w-full gap-3">
-                  <button onClick={startGame} className="w-full py-4 bg-white text-black rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-zinc-100 transition-all active:scale-95">
+                  <button onClick={startGame} className="w-full py-4 bg-[var(--fr-red)] text-white rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:brightness-110 transition-all active:scale-95">
                     <RefreshCw className="w-5 h-5" /> Riprova
                   </button>
-                  <button onClick={() => router.push('/fanzone')} className="w-full py-3 bg-zinc-800 text-zinc-400 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-zinc-700 transition-all">
+                  <button onClick={() => router.push('/fanzone')} className="w-full py-3 bg-[var(--fr-surface-2)] text-[var(--fr-text-muted)] rounded-2xl font-black uppercase tracking-widest text-xs hover:brightness-110 transition-all">
                     Esci
                   </button>
                 </div>
@@ -466,7 +465,7 @@ export default function CircuitRush() {
                 {[...Array(MAX_LIVES)].map((_, i) => (
                   <Heart
                     key={i}
-                    className={`w-4 h-4 transition-all ${i < lives ? 'text-red-500 fill-red-500' : 'text-zinc-700'}`}
+                    className={`w-4 h-4 transition-all ${i < lives ? 'text-red-500 fill-red-500' : 'text-[var(--fr-text-dim)]'}`}
                   />
                 ))}
               </div>
@@ -540,11 +539,10 @@ export default function CircuitRush() {
           )}
         </div>
 
-        <p className="mt-5 text-zinc-700 text-[10px] uppercase font-bold tracking-widest md:hidden">
+        <p className="mt-5 text-[10px] uppercase font-bold tracking-widest text-[var(--fr-text-faint)] md:hidden">
           ← Tocca sinistra/destra per sterzare →
         </p>
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </GameShell>
   );
 }

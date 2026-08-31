@@ -290,7 +290,7 @@ export default function StandingsPage() {
               return (
                 <Link
                   key={race.id}
-                  href={`/races?id=${race.id}`}
+                  href={`/gp/${selectedSeason}/${race.round}`}
                   className={`relative group rounded-sm overflow-hidden transition-all
                     ${isSuspended
                       ? 'bg-zinc-900/60 border border-zinc-700/50 cursor-default pointer-events-none grayscale opacity-60'

@@ -1,15 +1,21 @@
 import { useRouter } from 'next/router';
 import { useState, useEffect, useRef } from 'react';
-import Navigation from '../../components/ferrari/Navigation';
-import Footer from '../../components/ferrari/Footer';
+import Link from 'next/link';
+import GameShell from '../../components/ui/GameShell';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Trophy, CheckCircle, XCircle, Timer, Zap,
   ChevronRight, RefreshCw, Loader2, AlertTriangle,
-  Flame, Star, ChevronLeft
+  Flame, Star
 } from 'lucide-react';
 import { useSession } from "next-auth/react";
 import { addTokens, getTokens, initUser } from '../../lib/tokens';
+
+const SEO_TRIVIA = {
+  title: 'F1 Trivia — quiz sulla storia della Ferrari',
+  description: 'Quiz a tempo sulla storia della Scuderia Ferrari in Formula 1: piloti, titoli, circuiti e record.',
+  path: '/games/trivia',
+};
 
 // ─── DIFFICOLTÀ ───────────────────────────────────────────────────────────────
 const DIFF_CONFIG = {
@@ -21,12 +27,12 @@ const DIFF_CONFIG = {
 // ─── LOADING ──────────────────────────────────────────────────────────────────
 function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-[#080808] text-white flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-6" />
-        <p className="text-red-600 font-black tracking-[0.3em] uppercase text-sm">Caricamento domande...</p>
+    <GameShell seo={SEO_TRIVIA} title="F1 Trivia">
+      <div className="flex flex-col items-center justify-center py-28 gap-5" role="status" aria-live="polite">
+        <div className="w-14 h-14 border-4 border-[var(--fr-red)] border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+        <p className="text-sm text-[var(--fr-text-muted)]">Caricamento domande…</p>
       </div>
-    </div>
+    </GameShell>
   );
 }
 
@@ -164,29 +170,21 @@ export default function F1TriviaQuiz() {
 
   if (loading) return <LoadingScreen />;
   if (questions.length === 0) return (
-    <div className="min-h-screen bg-[#080808] text-white">
-      <Navigation />
-      <main className="max-w-2xl mx-auto pt-32 px-4 text-center">
-        <p className="text-zinc-400 mb-6">Domande non disponibili.</p>
-        <button onClick={() => router.push('/fanzone')} className="bg-red-600 px-8 py-4 rounded-2xl font-black uppercase">Torna alla Fan Zone</button>
-      </main>
-    </div>
+    <GameShell seo={SEO_TRIVIA} title="F1 Trivia">
+      <div className="empty-state">
+        <AlertTriangle className="empty-state-icon" aria-hidden="true" />
+        <h2 className="empty-state-title">Domande non disponibili</h2>
+        <p className="empty-state-description">
+          Non siamo riusciti a caricare le domande. Riprova fra poco.
+        </p>
+        <Link href="/fanzone" className="btn btn-outline mt-5">Torna alla Fan Zone</Link>
+      </div>
+    </GameShell>
   );
 
   return (
-    <div className="min-h-screen bg-[#080808] text-white font-sans">
-      <Navigation />
-
-      <main className="max-w-3xl mx-auto pt-28 px-4 pb-20">
-
-        {/* BACK */}
-        <div className="mb-8">
-          <button onClick={() => router.push('/fanzone')} className="flex items-center gap-2 text-zinc-600 hover:text-white transition-colors group">
-            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Fan Zone</span>
-          </button>
-        </div>
-
+    <GameShell seo={SEO_TRIVIA} title="F1 Trivia" tokens={session ? userTokens : null}>
+      <div className="max-w-3xl mx-auto">
         <AnimatePresence mode="wait">
 
           {/* ══════════════ INTRO ══════════════ */}
@@ -196,9 +194,9 @@ export default function F1TriviaQuiz() {
               {/* Header */}
               <div className="text-center mb-12">
                 <p className="text-red-600 text-[10px] font-black uppercase tracking-[0.5em] mb-3">Scuderia Ferrari</p>
-                <h1 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter leading-none mb-4">
+                <h2 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter leading-none mb-4">
                   F1<br /><span className="text-red-600">Trivia</span>
-                </h1>
+                </h2>
                 <p className="text-zinc-500 text-sm max-w-md mx-auto leading-relaxed">
                   15 secondi per rispondere. Rispondi veloce per il bonus velocità. Sbaglia e perdi lo streak.
                 </p>
@@ -249,7 +247,7 @@ export default function F1TriviaQuiz() {
                     <div key={i} className={`h-1.5 rounded-full transition-all ${
                       i < current ? 'bg-red-600 w-6' :
                       i === current ? 'bg-white w-8' :
-                      'bg-zinc-800 w-4'
+                      'bg-[var(--fr-surface-2)] w-4'
                     }`} />
                   ))}
                 </div>
@@ -272,7 +270,7 @@ export default function F1TriviaQuiz() {
               </div>
 
               {/* Timer bar */}
-              <div className="relative h-2 bg-zinc-800 rounded-full mb-8 overflow-hidden">
+              <div className="relative h-2 bg-[var(--fr-surface-2)] rounded-full mb-8 overflow-hidden">
                 <motion.div
                   className="absolute left-0 top-0 h-full rounded-full"
                   style={{ backgroundColor: timerColor }}
@@ -302,11 +300,11 @@ export default function F1TriviaQuiz() {
                 {q.options.map((opt, i) => {
                   const isCorrect = i === q.correct;
                   const isSelected = i === selected;
-                  let cls = 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-600 hover:bg-zinc-900';
+                  let cls = 'bg-[var(--fr-surface)] border-[var(--fr-border)] hover:border-[var(--fr-border-strong)]';
                   if (selected !== null) {
                     if (isCorrect) cls = 'bg-green-900/30 border-green-500';
                     else if (isSelected) cls = 'bg-red-900/30 border-red-500';
-                    else cls = 'bg-zinc-900/30 border-zinc-800 opacity-50';
+                    else cls = 'bg-[var(--fr-surface)] border-[var(--fr-border)] opacity-50';
                   }
 
                   return (
@@ -320,10 +318,10 @@ export default function F1TriviaQuiz() {
                     >
                       <div className="flex items-center gap-4">
                         <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0 transition-all ${
-                          selected === null ? 'bg-zinc-800 text-zinc-400' :
+                          selected === null ? 'bg-[var(--fr-surface-2)] text-[var(--fr-text-muted)]' :
                           isCorrect ? 'bg-green-600 text-white' :
                           isSelected ? 'bg-red-600 text-white' :
-                          'bg-zinc-800 text-zinc-600'
+                          'bg-[var(--fr-surface-2)] text-[var(--fr-text-faint)]'
                         }`}>
                           {String.fromCharCode(65 + i)}
                         </div>
@@ -465,8 +463,7 @@ export default function F1TriviaQuiz() {
           )}
 
         </AnimatePresence>
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </GameShell>
   );
 }
