@@ -14,10 +14,18 @@ import { useRouter } from 'next/router';
 import { Trophy, TrendingUp, Smartphone, ArrowUpRight } from 'lucide-react';
 import PageShell, { PageHeader, PageLoading, PageError, Panel, StatTile } from '../../../components/ui/PageShell';
 import { GridToRaceChart } from '../../../components/livetiming/Charts';
-import { getRace, getRaceResults, getNames, ferrariSummary } from '../../../lib/f1/gp';
+import {
+  getRace, getRaceResults, getQualifying, getSprint, getNames, ferrariSummary,
+} from '../../../lib/f1/gp';
 import { getFlagCode } from '../../../lib/flags';
 
 const GRIDUP_URL = 'https://gridup-f1.web.app';
+
+const SESSION_LABEL = {
+  gara:       "Ordine d'arrivo",
+  qualifiche: 'Qualifiche',
+  sprint:     'Sprint',
+};
 
 function formatDate(iso) {
   if (!iso) return null;
@@ -40,13 +48,172 @@ function Delta({ grid, pos }) {
   );
 }
 
+/* La Ferrari va evidenziata in ogni tabella: è il motivo per cui si è qui. */
+const isFerrari = (constructorId) => constructorId === 'ferrari';
+const rowCls    = (c) => (isFerrari(c) ? 'bg-[var(--fr-red-soft)]' : undefined);
+const driverCls = (c) => (isFerrari(c) ? 'text-[var(--fr-text)] font-semibold' : undefined);
+
+/** Celle pilota + scuderia, identiche nelle tre sessioni. */
+function Chi({ row, names }) {
+  return (
+    <>
+      <td className={driverCls(row.constructorId)}>
+        {names.drivers[row.driverId] || row.driverId}
+      </td>
+      <td>{names.constructors[row.constructorId] || row.constructorId}</td>
+    </>
+  );
+}
+
+function RaceTable({ results, names }) {
+  return (
+    <div className="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Pos</th>
+            <th scope="col">Pilota</th>
+            <th scope="col">Scuderia</th>
+            <th scope="col">Griglia</th>
+            <th scope="col">Δ</th>
+            <th scope="col">Punti</th>
+          </tr>
+        </thead>
+        <tbody>
+          {results.map(r => (
+            <tr key={r.driverId} className={rowCls(r.constructorId)}>
+              <td className="tabular font-bold">{r.positionText ?? '—'}</td>
+              <Chi row={r} names={names} />
+              <td className="tabular">{r.gridPositionNumber ?? '—'}</td>
+              <td className="tabular"><Delta grid={r.gridPositionNumber} pos={r.positionNumber} /></td>
+              <td className="tabular">{r.points || 0}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/**
+ * Le colonne Q1/Q2/Q3 esistono solo dal 2006 in poi: prima c'era un tempo
+ * unico. Mostrarle sempre significherebbe stampare due colonne vuote su
+ * buona parte dell'archivio, quindi la tabella cambia forma con l'epoca.
+ */
+function QualiTable({ quali, names }) {
+  const { rows, hasSegments } = quali;
+  return (
+    <div className="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Pos</th>
+            <th scope="col">Pilota</th>
+            <th scope="col">Scuderia</th>
+            {hasSegments ? (
+              <>
+                <th scope="col">Q1</th>
+                <th scope="col">Q2</th>
+                <th scope="col">Q3</th>
+              </>
+            ) : (
+              <th scope="col">Tempo</th>
+            )}
+            <th scope="col">Distacco</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(r => (
+            <tr key={r.driverId} className={rowCls(r.constructorId)}>
+              <td className="tabular font-bold">{r.positionText ?? '—'}</td>
+              <Chi row={r} names={names} />
+              {hasSegments ? (
+                <>
+                  <td className="tabular">{r.q1 || '—'}</td>
+                  <td className="tabular">{r.q2 || '—'}</td>
+                  <td className="tabular">{r.q3 || '—'}</td>
+                </>
+              ) : (
+                <td className="tabular">{r.best || '—'}</td>
+              )}
+              <td className="tabular text-[var(--fr-text-faint)]">{r.gap || '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function SprintTable({ sprint, names }) {
+  return (
+    <div className="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Pos</th>
+            <th scope="col">Pilota</th>
+            <th scope="col">Scuderia</th>
+            <th scope="col">Griglia</th>
+            <th scope="col">Δ</th>
+            <th scope="col">Distacco</th>
+            <th scope="col">Punti</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sprint.map(r => (
+            <tr key={r.driverId} className={rowCls(r.constructorId)}>
+              <td className="tabular font-bold">{r.positionText ?? '—'}</td>
+              <Chi row={r} names={names} />
+              <td className="tabular">{r.gridPositionNumber ?? '—'}</td>
+              <td className="tabular"><Delta grid={r.gridPositionNumber} pos={r.positionNumber} /></td>
+              <td className="tabular text-[var(--fr-text-faint)]">{r.gap || '—'}</td>
+              <td className="tabular">{r.points || 0}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** Selettore di sessione. Compare solo se c'è più di una sessione da mostrare. */
+function SessionTabs({ tabs, active, onChange }) {
+  return (
+    <div role="tablist" aria-label="Sessioni del weekend" className="flex gap-1">
+      {tabs.map(t => {
+        const on = t.key === active;
+        return (
+          <button
+            key={t.key}
+            role="tab"
+            type="button"
+            aria-selected={on}
+            onClick={() => onChange(t.key)}
+            className={`px-3 py-1.5 rounded-[9px] text-xs font-bold uppercase tracking-wider transition-colors ${
+              on
+                ? 'bg-[var(--fr-red)] text-white'
+                : 'bg-[var(--fr-surface-2)] text-[var(--fr-text-muted)] hover:text-[var(--fr-text)]'
+            }`}
+          >
+            {t.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function GpDetail() {
   const router = useRouter();
   const { year, round } = router.query;
 
   const [race, setRace] = useState(null);
   const [results, setResults] = useState([]);
+  const [quali, setQuali] = useState(null);
+  const [sprint, setSprint] = useState([]);
   const [names, setNames] = useState({ drivers: {}, constructors: {} });
+  const [tab, setTab] = useState('gara');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -64,10 +231,20 @@ export default function GpDetail() {
         if (!alive) return;
         setRace(r);
         if (r) {
-          const res = await getRaceResults(r.id);
+          // Le tre sessioni si leggono in parallelo: sono indipendenti fra loro.
+          const [res, q, sp] = await Promise.all([
+            getRaceResults(r.id),
+            getQualifying(r.id),
+            getSprint(r.id),
+          ]);
           if (!alive) return;
           setResults(res);
-          setNames(await getNames(res));
+          setQuali(q);
+          setSprint(sp);
+          setTab('gara');
+          // Un nome solo per tutte le sessioni: in qualifica può comparire chi
+          // non si è qualificato e quindi manca dall'ordine d'arrivo.
+          setNames(await getNames([...res, ...(q?.rows || []), ...sp]));
         }
         setError(null);
       } catch (e) {
@@ -108,6 +285,16 @@ export default function GpDetail() {
   const ferrari = ferrariSummary(results);
   const podium = results.filter(r => r.positionNumber && r.positionNumber <= 3);
   const hasResults = results.length > 0;
+
+  const tabs = [
+    { key: 'gara',       label: 'Gara' },
+    quali?.rows?.length && { key: 'qualifiche', label: 'Qualifiche' },
+    sprint.length       && { key: 'sprint',     label: 'Sprint' },
+  ].filter(Boolean);
+
+  // Passando da un GP con sprint a uno senza, la scheda selezionata resterebbe
+  // puntata su una sessione che qui non esiste: si ripiega sulla gara.
+  const activeTab = tabs.some(t => t.key === tab) ? tab : 'gara';
 
   const seo = {
     title: `${title} ${race.year} — risultati e analisi`,
@@ -201,39 +388,24 @@ export default function GpDetail() {
             </div>
           </Panel>
 
-          {/* Ordine d'arrivo */}
-          <Panel title="Ordine d'arrivo">
-            <div className="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Pos</th>
-                    <th scope="col">Pilota</th>
-                    <th scope="col">Scuderia</th>
-                    <th scope="col">Griglia</th>
-                    <th scope="col">Δ</th>
-                    <th scope="col">Punti</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.map(r => {
-                    const isFerrari = r.constructorId === 'ferrari';
-                    return (
-                      <tr key={r.driverId} className={isFerrari ? 'bg-[var(--fr-red-soft)]' : undefined}>
-                        <td className="tabular font-bold">{r.positionText ?? '—'}</td>
-                        <td className={isFerrari ? 'text-[var(--fr-text)] font-semibold' : undefined}>
-                          {names.drivers[r.driverId] || r.driverId}
-                        </td>
-                        <td>{names.constructors[r.constructorId] || r.constructorId}</td>
-                        <td className="tabular">{r.gridPositionNumber ?? '—'}</td>
-                        <td className="tabular"><Delta grid={r.gridPositionNumber} pos={r.positionNumber} /></td>
-                        <td className="tabular">{r.points || 0}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+          {/* Le sessioni del weekend. Qualifiche e sprint compaiono solo dove
+              esistono: per 640 gare su 1.171 l'archivio non ha qualifiche, e la
+              sprint riguarda 29 gare in tutto. */}
+          <Panel
+            title={SESSION_LABEL[activeTab]}
+            actions={tabs.length > 1 ? (
+              <SessionTabs tabs={tabs} active={activeTab} onChange={setTab} />
+            ) : null}
+          >
+            {activeTab === 'gara'       && <RaceTable results={results} names={names} />}
+            {activeTab === 'qualifiche' && <QualiTable quali={quali} names={names} />}
+            {activeTab === 'sprint'     && <SprintTable sprint={sprint} names={names} />}
+
+            {activeTab === 'qualifiche' && quali.label && (
+              <p className="px-4 pb-4 text-xs text-[var(--fr-text-faint)]">
+                In archivio per questa gara c&apos;è solo la {quali.label.toLowerCase()} di qualifica.
+              </p>
+            )}
           </Panel>
 
           {/* Rimando all'app nel momento giusto: qui l'utente sta guardando
