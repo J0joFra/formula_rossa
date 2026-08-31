@@ -13,6 +13,7 @@ Uso:
   python f1_aggregator.py --mode qualifiche       # articolo qualifiche
   python f1_aggregator.py --mode post-gara        # articolo post-gara
   python f1_aggregator.py --mode recap --gp Monaco
+  python f1_aggregator.py --purge-only            # solo pulizia archivio (>30 giorni)
 """
 
 import sys, os
@@ -26,7 +27,7 @@ import groq
 import firebase_admin
 from firebase_admin import credentials, firestore
 import json, hashlib, re, time, logging, argparse, schedule
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -47,7 +48,10 @@ RSS_FEEDS = [
 ]
 
 MAX_ITEMS_PER_FEED   = 3
-ITEMS_PER_DIGEST     = 5
+ITEMS_PER_DIGEST     = 8      # più fonti = articolo più ricco e meno dipendente da una sola testata
+MIN_WORDS            = 650    # sotto questa soglia l'articolo non vale la pubblicazione
+TARGET_WORDS         = 900
+RETENTION_DAYS       = 30     # dopo quanti giorni un articolo viene cancellato da Firestore
 RUN_EVERY_HOURS      = 4
 FIRESTORE_COLLECTION = "news"
 FIREBASE_CREDENTIALS = os.getenv("FIREBASE_CREDENTIALS", "firebase-credentials.json")
@@ -221,11 +225,26 @@ def fetch_feed(feed: dict, max_days_old: int = 1) -> list:
     return articles
 
 def fetch_all_news(seen: set, max_days_old: int = 1) -> list:
-    all_articles = []
+    # Un articolo per fonte a giro, invece di prendere in ordine: prima si
+    # esaurivano i primi feed dell'elenco e le altre testate non entravano mai
+    # nel digest, che così raccontava il fatto da un punto di vista solo.
+    per_feed = []
     for feed in RSS_FEEDS:
-        for art in fetch_feed(feed, max_days_old):
-            if article_id(art["url"]) not in seen:
-                all_articles.append(art)
+        fresche = [a for a in fetch_feed(feed, max_days_old)
+                   if article_id(a["url"]) not in seen]
+        if fresche:
+            per_feed.append(fresche)
+
+    all_articles = []
+    while per_feed and len(all_articles) < ITEMS_PER_DIGEST:
+        for lista in list(per_feed):
+            if not lista:
+                per_feed.remove(lista)
+                continue
+            all_articles.append(lista.pop(0))
+            if len(all_articles) >= ITEMS_PER_DIGEST:
+                break
+
     result = all_articles[:ITEMS_PER_DIGEST]
     log.info(f"Notizie nuove da elaborare: {len(result)} (ultimi {max_days_old} giorni)")
     
@@ -277,6 +296,11 @@ def clean_json_string(text: str) -> str:
 
     return fix_newlines_in_strings(text)
 
+def count_words(html: str) -> int:
+    """Parole del testo, tolti i tag: è la misura su cui si giudica se l'articolo regge."""
+    testo = re.sub(r"<[^>]+>", " ", html or "")
+    return len([w for w in testo.split() if w.strip()])
+
 # ─── VALIDAZIONE PILOTI FERRARI ────────────────────────────────────────────────
 
 def validate_and_fix_ferrari_drivers(html_content: str, title: str) -> tuple:
@@ -312,9 +336,18 @@ def generate_digest(articles: list, mode: str = "normale", gp_name: str = "") ->
     mode_cfg  = RACE_WEEKEND_MODES.get(mode, {})
     mode_tags  = mode_cfg.get("tags", ["F1", "Ferrari", "news"])
 
+    # Il testo esteso veniva scaricato da fetch_full_article_text() e poi buttato
+    # via: nel prompt finiva solo il riassunto da 600 caratteri. Il modello aveva
+    # quindi pochissimo materiale, ed è la ragione principale degli articoli corti.
     news_block = ""
     for i, art in enumerate(articles, 1):
-        news_block += f"\nNOTIZIA {i} ({art['date']}):\nTitolo: {art['title']}\nURL: {art['url']}\nRiassunto: {art['summary']}\n---"
+        corpo = art.get("full_text") or art.get("summary") or ""
+        news_block += (
+            f"\n### FONTE {i} — {art['source']} ({art['date']})\n"
+            f"Titolo: {art['title']}\n"
+            f"URL: {art['url']}\n"
+            f"Testo: {corpo}\n"
+        )
 
     sources_html = " &nbsp;|&nbsp; ".join(
         f'<a href="{art["url"]}" target="_blank" rel="noopener">{art["source"]}</a>'
@@ -325,52 +358,137 @@ def generate_digest(articles: list, mode: str = "normale", gp_name: str = "") ->
     today = datetime.now().strftime("%d %B %Y")
     ferrari_context = get_ferrari_current_context()
 
-    prompt = f"""Sei un giornalista sportivo esperto di Formula 1 che scrive per formula-rossa.it.
+    # Il taglio editoriale della modalità era configurato in RACE_WEEKEND_MODES ma
+    # non arrivava mai al modello: generate_digest leggeva da lì solo i tag. Anche
+    # gp_name veniva accettato come parametro e mai usato.
+    focus      = mode_cfg.get("focus", "le notizie Ferrari e Formula 1 di giornata")
+    title_hint = mode_cfg.get("title_hint", "")
+    gp_riga    = f"\nGran Premio di riferimento: {gp_name}." if gp_name else ""
+    titolo_riga = f"\nTaglio del titolo, da adattare: {title_hint}" if title_hint else ""
 
-Oggi è {today}.
+    prompt = f"""Sei un giornalista sportivo esperto di Formula 1 che scrive per formula-rossa.it,
+un sito italiano indipendente dedicato alla Scuderia Ferrari.
+
+Oggi è {today}.{gp_riga}
 
 {ferrari_context}
 
-NOTIZIE DEL GIORNO (SOLO DATI AGGIORNATI):
+FONTI DI OGGI — è l'unico materiale su cui puoi basarti:
 {news_block}
 
-⚠️ REGOLE:
-- I piloti Ferrari sono SOLO Charles Leclerc e Lewis Hamilton
-- NON menzionare Sainz come pilota Ferrari
-- Usa "oggi" per contestualizzare
+## COSA SCRIVERE
+Un articolo in italiano di **{TARGET_WORDS} parole circa, mai meno di {MIN_WORDS}**, che tiene
+insieme le fonti qui sopra in un unico pezzo ragionato. Taglio: {focus}.{titolo_riga}
 
-Rispondi SOLO con JSON valido:
-{{"title": "titolo", "slug": "titolo-kebab-case-{datetime.now().strftime('%d-%m-%Y')}", "html_content": "HTML", "excerpt": "riassunto", "tags": {json.dumps(mode_tags)}}}"""
+Struttura obbligatoria del campo html_content:
+1. Un paragrafo di apertura che dice subito il fatto principale e perché conta.
+2. Da tre a cinque sezioni, ognuna aperta da un `<h2>` con un titolo che sia
+   informativo e non generico (no "Introduzione", no "Conclusione").
+3. Ogni sezione ha almeno due paragrafi `<p>` distesi. Niente elenchi puntati al
+   posto della prosa: usa `<ul>` solo se stai davvero elencando dati.
+4. Una chiusura che guarda avanti: cosa succede adesso, cosa aspettarsi.
 
-    log.info(f"Generazione articolo — modalità: {mode}")
+Usa solo questi tag: `<h2>`, `<p>`, `<strong>`, `<em>`, `<ul>`, `<li>`, `<blockquote>`.
+Niente `<html>`, `<body>`, `<h1>` o attributi di stile.
 
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        max_tokens=4000,
-        temperature=0.7,
-        messages=[
-            {"role": "system", "content": "Sei un giornalista F1. Stagione 2026: Ferrari ha Leclerc e Hamilton. Sainz non è più in Ferrari. Rispondi SOLO con JSON valido."},
-            {"role": "user", "content": prompt}
-        ]
+## ACCURATEZZA — la parte che conta di più
+- Scrivi **solo** fatti che compaiono nelle fonti qui sopra. Se un dato non c'è,
+  non lo inventi e non lo stimi: lo ometti.
+- **Mai inventare** tempi sul giro, distacchi, posizioni, punti in classifica,
+  numeri di giri o dichiarazioni. Una virgolettatura si usa solo se il virgolettato
+  è testualmente nelle fonti.
+- Se le fonti si contraddicono o una notizia è data come indiscrezione, dillo e
+  attribuiscila ("secondo quanto riporta X"), invece di presentarla come certa.
+- Non fingere di aver visto la sessione: stai sintetizzando ciò che riportano
+  le testate, non facendo cronaca in diretta.
+- Distingui sempre ciò che è già accaduto da ciò che è previsto.
+- I piloti Ferrari sono soltanto Charles Leclerc e Lewis Hamilton. Carlos Sainz
+  non corre per la Ferrari: se una fonte lo dà in Ferrari, è un errore della fonte.
+
+## CAMPI DA RESTITUIRE
+- `title`: 8-14 parole, specifico, senza clickbait e senza punto finale.
+- `slug`: minuscolo, parole separate da trattini, che finisce con {datetime.now().strftime('%d-%m-%Y')}.
+- `html_content`: l'articolo completo secondo la struttura sopra.
+- `excerpt`: due frasi, 30-45 parole, che dicono il contenuto dell'articolo senza ripetere il titolo.
+- `tags`: {json.dumps(mode_tags)}
+
+Rispondi **solo** con l'oggetto JSON, senza testo prima o dopo:
+{{"title": "...", "slug": "...", "html_content": "...", "excerpt": "...", "tags": {json.dumps(mode_tags)}}}"""
+
+    log.info(f"Generazione articolo — modalità: {mode}, {len(articles)} fonti")
+
+    system_msg = (
+        "Sei un giornalista di Formula 1 che scrive in italiano per un sito ferrarista. "
+        "Scrivi pezzi distesi e argomentati, non riassunti. "
+        "Non inventi mai dati, tempi, risultati o dichiarazioni: usi solo ciò che è nelle fonti. "
+        "Stagione 2026: i piloti Ferrari sono Leclerc e Hamilton. "
+        "Rispondi esclusivamente con un oggetto JSON valido."
     )
 
-    raw = response.choices[0].message.content.strip()
-    raw = clean_json_string(raw)
+    messages = [
+        {"role": "system", "content": system_msg},
+        {"role": "user",   "content": prompt},
+    ]
 
-    try:
-        result = json.loads(raw)
-        fixed_content, fixed_title = validate_and_fix_ferrari_drivers(
-            result.get("html_content", ""), 
-            result.get("title", "")
-        )
-        result["html_content"] = fixed_content + footer_html
-        result["title"] = fixed_title
-        
-        if mode in RACE_WEEKEND_MODES:
-            result["tags"] = list(set(result.get("tags", []) + mode_cfg.get("tags", [])))
-    except json.JSONDecodeError as e:
-        log.error(f"Errore JSON: {e}")
+    # Due tentativi: se il primo articolo esce sotto la soglia, si richiede
+    # l'allungamento invece di pubblicare un pezzo di quattro paragrafi.
+    result = None
+    for tentativo in (1, 2):
+        try:
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                max_tokens=6000,
+                temperature=0.7,
+                messages=messages,
+            )
+        except Exception as e:
+            log.error(f"Groq non ha risposto: {e}")
+            return None
+
+        raw = clean_json_string(response.choices[0].message.content.strip())
+
+        try:
+            candidato = json.loads(raw)
+        except json.JSONDecodeError as e:
+            log.error(f"Errore JSON (tentativo {tentativo}): {e}")
+            if tentativo == 2:
+                return None
+            messages = messages[:2]
+            continue
+
+        parole = count_words(candidato.get("html_content", ""))
+        log.info(f"Tentativo {tentativo}: {parole} parole")
+
+        if parole >= MIN_WORDS or tentativo == 2:
+            result = candidato
+            if parole < MIN_WORDS:
+                log.warning(f"Articolo comunque corto ({parole} parole, minimo {MIN_WORDS}): non pubblicato.")
+                return None
+            break
+
+        messages = messages[:2] + [
+            {"role": "assistant", "content": raw},
+            {"role": "user", "content": (
+                f"L'articolo è di {parole} parole: troppo corto. Riscrivilo per intero portandolo "
+                f"a circa {TARGET_WORDS} parole, sviluppando ogni sezione con più contesto tratto "
+                f"dalle fonti — senza aggiungere fatti che nelle fonti non ci sono e senza "
+                f"allungare ripetendo quello che hai già scritto. Rispondi solo con il JSON."
+            )},
+        ]
+
+    if result is None:
         return None
+
+    fixed_content, fixed_title = validate_and_fix_ferrari_drivers(
+        result.get("html_content", ""),
+        result.get("title", ""),
+    )
+    result["html_content"] = fixed_content + footer_html
+    result["title"] = fixed_title
+    result["word_count"] = count_words(fixed_content)
+
+    if mode in RACE_WEEKEND_MODES:
+        result["tags"] = list(set(result.get("tags", []) + mode_cfg.get("tags", [])))
 
     return result
 
@@ -390,8 +508,10 @@ def publish_to_firestore(article: dict, db, mode: str = "normale") -> bool:
             "category":     "news",
             "published_at": now,
             "created_at":   now,
+            "expires_at":   now + timedelta(days=RETENTION_DAYS),
             "status":       "published",
             "type":         mode if mode in RACE_WEEKEND_MODES else "digest",
+            "word_count":   article.get("word_count", 0),
         }
         db.collection(FIRESTORE_COLLECTION).document(article["slug"]).set(doc)
         log.info(f"Pubblicato: {article['slug']}")
@@ -400,6 +520,49 @@ def publish_to_firestore(article: dict, db, mode: str = "normale") -> bool:
         log.error(f"Errore Firestore: {e}")
         return False
 
+# ─── PULIZIA ARCHIVIO ──────────────────────────────────────────────────────────
+
+def purge_old_articles(db, days: int = RETENTION_DAYS) -> int:
+    """
+    Cancella da Firestore gli articoli più vecchi di `days` giorni.
+
+    Sono digest di attualità: dopo un mese non li legge più nessuno, restano
+    indicizzati e continuano a occupare letture. Si cancellano a monte invece di
+    nasconderli lato sito, così il database non cresce all'infinito.
+    """
+    limite = datetime.now(timezone.utc) - timedelta(days=days)
+    coll = db.collection(FIRESTORE_COLLECTION)
+    try:
+        # Le versioni recenti della libreria vogliono FieldFilter; la forma
+        # posizionale funziona ancora ma è deprecata e prima o poi sparirà.
+        try:
+            from google.cloud.firestore_v1.base_query import FieldFilter
+            domanda = coll.where(filter=FieldFilter("published_at", "<", limite))
+        except ImportError:
+            domanda = coll.where("published_at", "<", limite)
+        vecchi = domanda.stream()
+    except Exception as e:
+        log.error(f"Pulizia archivio non riuscita: {e}")
+        return 0
+
+    # Firestore accetta al massimo 500 operazioni per batch.
+    eliminati, batch, nel_batch = 0, db.batch(), 0
+    for doc in vecchi:
+        batch.delete(doc.reference)
+        eliminati += 1
+        nel_batch += 1
+        if nel_batch == 500:
+            batch.commit()
+            batch, nel_batch = db.batch(), 0
+    if nel_batch:
+        batch.commit()
+
+    if eliminati:
+        log.info(f"Archivio: {eliminati} articoli più vecchi di {days} giorni eliminati.")
+    else:
+        log.info(f"Archivio: nessun articolo più vecchio di {days} giorni.")
+    return eliminati
+
 # ─── CICLO PRINCIPALE ──────────────────────────────────────────────────────────
 
 def run(mode: str = "normale", gp_name: str = ""):
@@ -407,6 +570,9 @@ def run(mode: str = "normale", gp_name: str = ""):
     log.info(f"F1 Aggregator Bot — formula-rossa.it (SOLO NOTIZIE RECENTI) [{mode.upper()}]")
     log.info(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
     log.info("=" * 55)
+
+    db = init_firebase()
+    purge_old_articles(db)
 
     seen = load_seen()
     articles = fetch_all_news(seen, max_days_old=1)  # ← solo oggi e ieri
@@ -420,7 +586,6 @@ def run(mode: str = "normale", gp_name: str = ""):
         log.warning("Generazione fallita.")
         return
 
-    db = init_firebase()
     success = publish_to_firestore(digest, db, mode=mode)
 
     if success:
@@ -434,11 +599,15 @@ def run(mode: str = "normale", gp_name: str = ""):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--daemon", action="store_true")
+    parser.add_argument("--purge-only", action="store_true",
+                        help="Cancella soltanto gli articoli scaduti, senza pubblicare nulla.")
     parser.add_argument("--mode", default=os.getenv("F1_MODE", "normale"))
     parser.add_argument("--gp", default=os.getenv("GP_NAME", ""))
     args = parser.parse_args()
 
-    if args.daemon:
+    if args.purge_only:
+        purge_old_articles(init_firebase())
+    elif args.daemon:
         log.info(f"Daemon attivo ogni {RUN_EVERY_HOURS}h | modalità: {args.mode}")
         run(mode=args.mode, gp_name=args.gp)
         schedule.every(RUN_EVERY_HOURS).hours.do(run, mode=args.mode, gp_name=args.gp)
