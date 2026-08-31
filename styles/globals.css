@@ -440,3 +440,78 @@ input:focus, select:focus, textarea:focus {
 .to-zinc-950     { --tw-gradient-to: var(--fr-bg) var(--tw-gradient-to-position) !important; }
 .to-zinc-900,
 .to-gray-900     { --tw-gradient-to: var(--fr-surface) var(--tw-gradient-to-position) !important; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CORPO DEGLI ARTICOLI
+
+   Il contenuto delle news arriva come HTML da Firestore, quindi non può portarsi
+   dietro classi: la tipografia si applica ai tag. Prima queste regole vivevano in
+   un <style> dentro pages/news/[slug].js con i colori scritti a mano, e in tema
+   chiaro restavano bianche su bianco.
+   ────────────────────────────────────────────────────────────────────────────*/
+
+.article-body {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--fr-text-muted);
+  max-width: 68ch;
+}
+
+.article-body > * + * { margin-top: 1.25em; }
+
+.article-body h2 {
+  font-family: var(--font-head);
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .01em;
+  color: var(--fr-text);
+  margin-top: 2.25em;
+  padding-top: 1.1em;
+  border-top: 1px solid var(--fr-border);
+}
+
+.article-body h3 {
+  font-family: var(--font-head);
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--fr-text);
+  margin-top: 1.8em;
+}
+
+.article-body strong { color: var(--fr-text); font-weight: 600; }
+.article-body em     { color: var(--fr-text); }
+
+.article-body a {
+  color: var(--fr-red);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.article-body a:hover { text-decoration-thickness: 2px; }
+
+.article-body ul,
+.article-body ol { padding-left: 1.3em; }
+.article-body ul { list-style: disc; }
+.article-body ol { list-style: decimal; }
+.article-body li { margin-top: .5em; }
+
+.article-body blockquote {
+  border-left: 3px solid var(--fr-red);
+  padding: .25em 0 .25em 1.15em;
+  color: var(--fr-text);
+  font-size: 1.125rem;
+}
+
+.article-body hr {
+  border: 0;
+  border-top: 1px solid var(--fr-border);
+  margin-top: 2.5em;
+}
+
+/* Il bot chiude ogni articolo con la riga delle fonti: va letta come nota, non
+   come corpo del testo. */
+.article-body hr + p {
+  font-size: .8125rem;
+  color: var(--fr-text-faint);
+}

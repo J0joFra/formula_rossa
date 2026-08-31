@@ -1,0 +1,35 @@
+name: Pulizia archivio news
+
+# Gli articoli scadono dopo 30 giorni, ma il publisher gira solo nei weekend di
+# gara: fra un Gran Premio e l'altro, e soprattutto durante la pausa estiva,
+# nessuno passerebbe a cancellarli. Questo workflow fa solo quello, ogni giorno.
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    name: "Cancella gli articoli più vecchi di 30 giorni"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4.2.2
+
+      - name: Setup Python
+        uses: actions/setup-python@v5.6.0
+        with:
+          python-version: "3.11"
+
+      - name: Installa dipendenze
+        run: pip install feedparser groq firebase-admin python-dotenv schedule
+
+      - name: Elimina gli articoli scaduti
+        env:
+          FIREBASE_CREDENTIALS_JSON: ${{ secrets.FIREBASE_CREDENTIALS_JSON }}
+          FIREBASE_CREDENTIALS: F1bot/firebase-credentials.json
+        run: |
+          echo "$FIREBASE_CREDENTIALS_JSON" > F1bot/firebase-credentials.json
+          python F1bot/f1_aggregator.py --purge-only
