@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Coins, Trophy, Zap } from 'lucide-react';
-import Navigation from '../../components/ferrari/Navigation';
-import Footer from '../../components/ferrari/Footer';
+import { Coins, Trophy, Zap } from 'lucide-react';
+import GameShell from '../../components/ui/GameShell';
 import { useSession } from "next-auth/react";
 import { addTokens, getTokens, initUser } from '../../lib/tokens';
 
@@ -13,7 +12,7 @@ const RATINGS = [
   { max: 0.2,  label: 'OTTIMO',     emoji: '🔥', color: 'text-orange-400', glow: 'shadow-orange-400/40', points: 500,  bg: 'from-orange-900/40 to-black', border: 'border-orange-500/30' },
   { max: 0.5,  label: 'BUONO',      emoji: '✅', color: 'text-green-400',  glow: 'shadow-green-400/40',  points: 200,  bg: 'from-green-900/40 to-black',  border: 'border-green-500/30'  },
   { max: 1.0,  label: 'ACCETTABILE',emoji: '⏱️', color: 'text-blue-400',  glow: 'shadow-blue-400/40',   points: 50,   bg: 'from-blue-900/40 to-black',   border: 'border-blue-500/30'   },
-  { max: Infinity, label: 'TROPPO LENTO', emoji: '💨', color: 'text-zinc-400', glow: '', points: 0, bg: 'from-zinc-900/40 to-black', border: 'border-zinc-700/30' },
+  { max: Infinity, label: 'TROPPO LENTO', emoji: '💨', color: 'text-zinc-400', glow: '', points: 0, bg: 'from-zinc-900/40 to-black', border: 'border-[var(--fr-border)]' },
 ];
 
 function getRating(diff) {
@@ -204,28 +203,22 @@ export default function PitStopGame() {
     result: '🔄 RIPROVA',
   }[gameState];
 
+  const seo = {
+    title: 'Pit Stop Challenge — riflessi al semaforo',
+    description: 'Mini-gioco di riflessi a tema Ferrari: ferma il cronometro appena si spengono i semafori, come ai box.',
+    path: '/games/pitstop',
+  };
+
   return (
-    <div className="min-h-screen bg-[#080808] text-white font-sans flex flex-col">
-      <Navigation />
-
-      <main className="flex-grow flex flex-col items-center justify-center px-4 pt-24 pb-12">
-
-        {/* BACK */}
-        <div className="max-w-md w-full mb-6">
-          <button onClick={() => router.push('/fanzone')} className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors group">
-            <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-xs font-bold uppercase tracking-widest font-mono">Fan Zone</span>
-          </button>
-        </div>
-
-        <div className="max-w-md w-full">
+    <GameShell seo={seo} title="Pit Stop Challenge" tokens={session ? totalTokens : null}>
+      <div className="max-w-md mx-auto">
 
           {/* TITOLO */}
           <div className="text-center mb-8">
             <p className="text-red-600 text-[10px] font-black uppercase tracking-[0.4em] mb-2">Scuderia Ferrari</p>
-            <h1 className="text-5xl font-black italic uppercase tracking-tighter leading-none">
+            <h2 className="text-5xl font-black italic uppercase tracking-tighter leading-none">
               Pit Stop<br /><span className="text-red-600">Challenge</span>
-            </h1>
+            </h2>
             <p className="text-zinc-600 text-xs uppercase tracking-widest mt-3">Ferma il cronometro al momento esatto</p>
           </div>
 
@@ -341,7 +334,7 @@ export default function PitStopGame() {
                       <p className="text-[9px] text-yellow-500/60 uppercase font-bold tracking-widest mt-1">Accreditati</p>
                     </motion.div>
                   ) : (
-                    <div className="bg-zinc-800/40 rounded-3xl p-4 mb-4">
+                    <div className="bg-[var(--fr-surface-2)] rounded-3xl p-4 mb-4">
                       <p className="text-zinc-500 text-sm">Nessun token — riprova ad avvicinarti al target!</p>
                     </div>
                   )}
@@ -364,9 +357,9 @@ export default function PitStopGame() {
                 ${gameState === 'idle'
                   ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/30'
                   : gameState === 'running'
-                  ? 'bg-white hover:bg-zinc-100 text-black shadow-white/10'
+                  ? 'bg-[var(--fr-red)] hover:brightness-110 text-white shadow-[var(--fr-red)]/20'
                   : gameState === 'countdown'
-                  ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
+                  ? 'bg-[var(--fr-surface-2)] text-[var(--fr-text-faint)] cursor-not-allowed'
                   : 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/20'
                 }`}
             >
@@ -397,15 +390,7 @@ export default function PitStopGame() {
             ))}
           </div>
 
-          {/* Bilancio se loggato */}
-          {session && (
-            <p className="text-center text-zinc-700 text-[10px] font-black uppercase tracking-widest mt-5">
-              Wallet: <span className="text-yellow-500">{totalTokens.toLocaleString()} SFT</span>
-            </p>
-          )}
-        </div>
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </GameShell>
   );
 }

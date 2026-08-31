@@ -1,306 +1,323 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Gamepad2, Coins, Zap, ChevronLeft,
-  Timer, Flame, Radio, Award, Target,
-} from 'lucide-react';
-import Navigation from '../components/ferrari/Navigation';
-import Footer from '../components/ferrari/Footer';
-import Link from 'next/link';
-import { useSession } from "next-auth/react";
-import { getTokens, initUser, claimDailyBonus, hasDailyClaimed, getLeaderboard } from '../lib/tokens';
+'use client';
+/**
+ * pages/fanzone.jsx
+ * L'angolo leggero del sito: i mini-giochi e i punti che si guadagnano.
+ *
+ * Gli SF Token erano una valuta senza scopo: si accumulavano e basta. Il
+ * codice per la classifica esisteva già (lib/tokens.getLeaderboard e la riga
+ * qui sotto) ma non era mai stato messo in pagina, quindi ogni visita faceva
+ * la lettura su Firestore e ne buttava via il risultato. Ora la classifica si
+ * vede, e i token diventano un punteggio confrontabile invece di un numero fine
+ * a se stesso.
+ */
 
-const LIVE_NEWS = [
-  "🏎️  SF-25 conquista la pole position a Barcellona",
-  "🔧  Test aerodinamici completati: +0.4s al giro rispetto all'anno scorso",
-  "🏆  Leclerc: «Questa macchina è un missile»",
-  "📍  Prossima gara: Gran Premio d'Australia — 16 Marzo",
-  "⚡  Aggiornamento ERS confermato per il GP di Cina",
-  "🎖️  Ferrari in testa al Campionato Costruttori dopo 3 gare",
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { useSession, signIn } from 'next-auth/react';
+import {
+  Gamepad2, Coins, Zap, Timer, Flame, Award, Trophy,
+} from 'lucide-react';
+import PageShell, { PageHeader, Panel } from '../components/ui/PageShell';
+import {
+  getTokens, initUser, claimDailyBonus, hasDailyClaimed, getLeaderboard,
+} from '../lib/tokens';
+
+const DAILY_BONUS = 75;
+
+/* I premi sono letti dalle formule dei giochi, non scritti a occhio: le
+   etichette di prima ("+50", "+150", "+30") non corrispondevano a nulla —
+   il Pit Stop arriva a 100, e la Trivia parte da 30 invece di fermarcisi. */
+const GIOCHI = [
+  {
+    href: '/games/pitstop',
+    title: 'Pit Stop',
+    icon: Timer,
+    reward: 'fino a 100 SFT',
+    desc: 'Riflessi al semaforo: fermare il cronometro al momento giusto, come ai box. Uno stop perfetto vale il massimo.',
+  },
+  {
+    href: '/games/circuit-rush',
+    title: 'Circuit Rush',
+    icon: Zap,
+    reward: 'cresce con la distanza',
+    desc: 'Sfreccia in pista e schiva i detriti. Non c’è un tetto: più resisti, più SFT porti a casa.',
+  },
+  {
+    href: '/games/trivia',
+    title: 'Trivia',
+    icon: Award,
+    reward: 'da 30 SFT in su',
+    desc: 'Domande sulla storia della Scuderia. Qui contano gli anni passati a guardare le gare.',
+  },
 ];
+
+/** Tempo che manca alla mezzanotte, quando il bonus torna disponibile. */
+function useCountdownMezzanotte() {
+  const [t, setT] = useState('');
+  useEffect(() => {
+    const aggiorna = () => {
+      const mezzanotte = new Date();
+      mezzanotte.setHours(24, 0, 0, 0);
+      const diff = mezzanotte - new Date();
+      const due = (n) => String(n).padStart(2, '0');
+      setT(`${due(Math.floor(diff / 3600000))}:${due(Math.floor((diff % 3600000) / 60000))}:${due(Math.floor((diff % 60000) / 1000))}`);
+    };
+    aggiorna();
+    const id = setInterval(aggiorna, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return t;
+}
+
+function GameCard({ gioco, index }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: .4, delay: index * .07 }}
+    >
+      <Link
+        href={gioco.href}
+        className="group flex flex-col h-full p-6 rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)] hover:border-[var(--fr-red)]/40 hover:-translate-y-1 transition-all"
+      >
+        <span
+          className="w-12 h-12 rounded-[14px] grid place-items-center mb-4 bg-[var(--fr-red-soft)] text-[var(--fr-red)]"
+          aria-hidden="true"
+        >
+          <gioco.icon className="w-6 h-6" />
+        </span>
+
+        <h3 className="uppercase text-lg mb-2">{gioco.title}</h3>
+        <p className="text-sm text-[var(--fr-text-muted)] mb-5">{gioco.desc}</p>
+
+        <span className="mt-auto inline-flex items-center gap-1.5 self-start px-3 py-1.5 rounded-[9px] bg-[var(--fr-surface-2)] text-xs font-bold">
+          <Coins className="w-3.5 h-3.5 text-[var(--fr-gold)]" aria-hidden="true" />
+          <span className="text-[var(--fr-gold)]">{gioco.reward}</span>
+        </span>
+      </Link>
+    </motion.div>
+  );
+}
+
+function ClassificaRiga({ player, posizione, isTu }) {
+  const medaglia = ['🥇', '🥈', '🥉'][posizione - 1];
+  return (
+    <tr className={isTu ? 'bg-[var(--fr-red-soft)]' : undefined}>
+      <td className="tabular font-bold w-14">
+        {medaglia ? <span aria-label={`${posizione}° posto`}>{medaglia}</span> : posizione}
+      </td>
+      <td className={isTu ? 'text-[var(--fr-text)] font-semibold' : undefined}>
+        {player.name || player.email?.split('@')[0] || 'Anonimo'}
+        {isTu && (
+          <span className="ml-2 text-[10px] font-bold uppercase tracking-widest text-[var(--fr-red)]">tu</span>
+        )}
+      </td>
+      <td className="tabular text-right">{(player.tokens ?? 0).toLocaleString('it-IT')}</td>
+    </tr>
+  );
+}
 
 export default function FanZonePage() {
   const { data: session } = useSession();
   const [tokens, setTokens] = useState(0);
-  const [tickerIndex, setTickerIndex] = useState(0);
   const [dailyClaimed, setDailyClaimed] = useState(false);
-  const [dailyCountdown, setDailyCountdown] = useState('');
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [leaderboardLoading, setLeaderboardLoading] = useState(true);
-  const [userRank, setUserRank] = useState(null);
+  const [classifica, setClassifica] = useState([]);
+  const [classificaLoading, setClassificaLoading] = useState(true);
+  const countdown = useCountdownMezzanotte();
 
-  // Inizializza utente e carica token da Firestore
   useEffect(() => {
     if (!session) return;
-    const init = async () => {
-      await initUser(session);
-      const [t, claimed] = await Promise.all([
-        getTokens(session),
-        hasDailyClaimed(session), // ← controlla Firestore, non solo stato locale
-      ]);
-      setTokens(t);
-      setDailyClaimed(claimed);
-    };
-    init();
+    let alive = true;
+    (async () => {
+      try {
+        await initUser(session);
+        const [t, claimed] = await Promise.all([
+          getTokens(session),
+          hasDailyClaimed(session),
+        ]);
+        if (!alive) return;
+        setTokens(t);
+        setDailyClaimed(claimed);
+      } catch (e) {
+        console.error('Fan Zone — profilo:', e);
+      }
+    })();
+    return () => { alive = false; };
   }, [session]);
 
-  // Carica leaderboard da Firestore
   useEffect(() => {
-    const load = async () => {
-      setLeaderboardLoading(true);
+    let alive = true;
+    (async () => {
       try {
         const data = await getLeaderboard(10);
-        setLeaderboard(data);
-        if (session?.user?.email) {
-          const idx = data.findIndex(p => p.email === session.user.email);
-          setUserRank(idx !== -1 ? idx + 1 : null);
-        }
+        if (alive) setClassifica(data);
       } catch (e) {
-        console.error('Errore leaderboard:', e);
+        console.error('Fan Zone — classifica:', e);
       } finally {
-        setLeaderboardLoading(false);
+        if (alive) setClassificaLoading(false);
       }
-    };
-    load();
-  }, [session]);
-
-  // Ticker news
-  useEffect(() => {
-    const interval = setInterval(() => setTickerIndex(i => (i + 1) % LIVE_NEWS.length), 4000);
-    return () => clearInterval(interval);
+    })();
+    return () => { alive = false; };
   }, []);
 
-  // Countdown mezzanotte
-  useEffect(() => {
-    const update = () => {
-      const now = new Date();
-      const midnight = new Date();
-      midnight.setHours(24, 0, 0, 0);
-      const diff = midnight - now;
-      const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
-      const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-      const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-      setDailyCountdown(`${h}:${m}:${s}`);
-    };
-    update();
-    const id = setInterval(update, 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  const claimDaily = async () => {
+  const riscattaBonus = async () => {
     if (dailyClaimed || !session) return;
-    const success = await claimDailyBonus(session, 75); // ← salva data su Firestore
-    if (success) {
-      setTokens(t => t + 75);
+    if (await claimDailyBonus(session, DAILY_BONUS)) {
+      setTokens(t => t + DAILY_BONUS);
       setDailyClaimed(true);
     }
   };
 
+  const mieiPunti = session?.user?.email
+    ? classifica.findIndex(p => p.email === session.user.email) + 1
+    : 0;
+
+  const seo = {
+    title: 'Fan Zone — mini-giochi Ferrari',
+    description: 'Tre mini-giochi a tema Ferrari: riflessi al pit stop, corsa in pista e domande sulla storia della Scuderia. Guadagna SF Token e scala la classifica.',
+    path: '/fanzone',
+  };
+
   return (
-    <div className="min-h-screen bg-[#080808] text-white font-sans overflow-x-hidden">
-      <Navigation activeSection="fanzone" />
+    <PageShell seo={seo}>
+      <PageHeader
+        eyebrow="Gioca"
+        title="Fan"
+        accent="Zone"
+        subtitle="Tre mini-giochi a tema Ferrari per riempire l'attesa fra un Gran Premio e l'altro. Ogni partita vale SF Token, e i token decidono la classifica."
+        breadcrumb={[{ label: 'Gioca' }]}
+        actions={session ? (
+          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-[var(--radius-md)] border border-[var(--fr-border)] bg-[var(--fr-surface)]">
+            <Coins className="w-4 h-4 text-[var(--fr-gold)]" aria-hidden="true" />
+            <span className="tabular font-bold">{tokens.toLocaleString('it-IT')}</span>
+            <span className="text-xs font-semibold text-[var(--fr-text-faint)]">SFT</span>
+          </span>
+        ) : (
+          <button type="button" onClick={() => signIn('google')} className="btn btn-outline">
+            Accedi per salvare i punti
+          </button>
+        )}
+      />
 
-      {/* LIVE TICKER — navbar è h-16 (64px), ticker subito sotto */}
-      <div className="fixed top-16 left-0 right-0 z-40 bg-red-600 h-7 flex items-center overflow-hidden">
-        <div className="flex items-center gap-2 px-3 shrink-0 bg-black/40 h-full">
-          <Radio className="w-3 h-3 animate-pulse" />
-          <span className="text-[9px] font-black uppercase tracking-widest">LIVE</span>
-        </div>
-        <div className="flex-1 overflow-hidden relative h-full">
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={tickerIndex}
-              initial={{ y: 16, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -16, opacity: 0 }}
-              transition={{ duration: 0.35 }}
-              className="absolute inset-0 flex items-center px-4 text-[11px] font-bold tracking-wide whitespace-nowrap"
-            >
-              {LIVE_NEWS[tickerIndex]}
-            </motion.p>
-          </AnimatePresence>
-        </div>
-      </div>
+      <div className="grid gap-6">
 
-      {/* pt = navbar (64px) + ticker (28px) + gap (16px) = 108px */}
-      <main className="max-w-7xl mx-auto px-4 pt-[108px] pb-24">
-
-        {/* TOP BAR */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
-          <Link href="/" className="group inline-flex items-center gap-2 text-zinc-600 hover:text-red-500 transition-all">
-            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-[10px] font-black uppercase tracking-widest italic">Torna alla Home</span>
-          </Link>
-          {session && (
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-full border border-white/10">
-              <span className="text-[10px] font-black uppercase text-zinc-400">Status: <span className="text-green-500">Online</span></span>
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            </motion.div>
-          )}
-        </div>
-
-        {/* HEADER + TOKEN BALANCE */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20 items-center">
-          <div className="lg:col-span-2">
-            {session ? (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-6 mb-4">
-                <img src={session.user.image} className="w-16 h-16 rounded-2xl border-2 border-red-600 shadow-xl" alt="profile" />
-                <div>
-                  <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-none">
-                    Ciao, <span className="text-red-600">{session.user.name.split(' ')[0]}</span>
-                  </h1>
-                  <p className="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.3em] mt-2">Maranello Gaming Division</p>
-                </div>
-              </motion.div>
-            ) : (
-              <div>
-                <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-none mb-4">
-                  Fan <span className="text-red-600">Zone</span>
-                </h1>
-                <p className="text-red-500 font-black uppercase text-[10px] tracking-widest bg-red-600/10 inline-block px-3 py-1 rounded">
-                  Effettua il login per salvare i progressi
-                </p>
-              </div>
-            )}
-          </div>
-
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-            className="bg-gradient-to-br from-zinc-900 to-black border border-yellow-500/30 p-8 rounded-[32px] shadow-2xl flex items-center gap-6 relative overflow-hidden group"
-          >
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:rotate-12 transition-transform duration-700">
-              <Coins className="w-24 h-24 text-yellow-500" />
-            </div>
-            <div className="w-16 h-16 bg-yellow-500 rounded-2xl flex items-center justify-center shadow-lg shadow-yellow-500/20 relative z-10 shrink-0">
-              <Coins className="text-black w-8 h-8" />
-            </div>
-            <div className="relative z-10">
-              <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Bilancio Attuale</p>
-              <p className="text-4xl font-black text-white tabular-nums">
-                {tokens.toLocaleString()} <span className="text-xs text-yellow-500 uppercase font-mono">SFT</span>
+        {/* Bonus giornaliero */}
+        <Panel title="Bonus giornaliero" icon={Flame}>
+          <div className="p-6 flex flex-wrap items-center justify-between gap-6">
+            <div className="min-w-0">
+              <p className="font-head text-xl font-black uppercase text-[var(--fr-text)]">
+                +{DAILY_BONUS} SFT, una volta al giorno
+              </p>
+              <p className="text-sm text-[var(--fr-text-muted)] mt-1 max-w-[52ch]">
+                {session
+                  ? 'Si ricarica a mezzanotte. Nessuna partita richiesta: basta passare di qui.'
+                  : 'Serve l’accesso: i token vanno salvati da qualche parte per poter essere confrontati.'}
               </p>
             </div>
-          </motion.div>
-        </div>
 
-        {/* DAILY CHALLENGE */}
-        <section className="mb-24">
-          <SectionHeader icon={<Target className="text-orange-500 w-7 h-7" />} label="Daily Challenge" />
-          <motion.div
-            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            className="relative overflow-hidden rounded-[40px] border border-orange-500/20 bg-gradient-to-r from-zinc-900 via-black to-zinc-900 p-10 flex flex-col md:flex-row items-center gap-8"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-600/5 to-red-600/5 pointer-events-none" />
-            <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-2xl shadow-orange-500/20 shrink-0 relative z-10">
-              <Flame className="w-12 h-12 text-white" />
-            </div>
-            <div className="flex-1 relative z-10 text-center md:text-left">
-              <p className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-2">Sfida del Giorno</p>
-              <h3 className="text-2xl md:text-3xl font-black uppercase italic mb-2">Gioca 3 partite oggi</h3>
-              <p className="text-zinc-500 text-sm">Completa 3 partite in qualsiasi gioco per sbloccare il bonus giornaliero.</p>
-            </div>
-            <div className="relative z-10 flex flex-col items-center gap-3">
+            <div className="flex items-center gap-5 shrink-0">
               <div className="text-center">
-                <p className="text-[9px] text-zinc-600 uppercase tracking-widest font-bold mb-1">{dailyClaimed ? "Torna domani tra" : "Si resetta tra"}</p>
-                <p className="text-2xl font-black font-mono text-orange-400 tabular-nums">{dailyCountdown}</p>
+                <p className="tabular text-2xl font-bold text-[var(--fr-text)]">{countdown}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--fr-text-faint)] mt-1">
+                  {dailyClaimed ? 'Torna fra' : 'Si azzera fra'}
+                </p>
               </div>
               <button
-                onClick={claimDaily}
-                disabled={dailyClaimed || !session}
-                className={`px-8 py-4 font-black uppercase text-[10px] tracking-widest rounded-2xl transition-all shadow-lg ${
-                  dailyClaimed || !session
-                    ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-orange-500 to-red-600 text-white hover:scale-105 shadow-orange-500/20 hover:shadow-orange-500/40'
-                }`}
+                type="button"
+                onClick={session ? riscattaBonus : () => signIn('google')}
+                disabled={!!session && dailyClaimed}
+                className={session && dailyClaimed ? 'btn btn-outline' : 'btn btn-primary'}
               >
-                {!session ? 'Login richiesto' : dailyClaimed ? '✓ Già riscattato oggi' : 'Riscatta +75 SFT'}
+                {!session ? 'Accedi' : dailyClaimed ? 'Già riscattato' : `Riscatta +${DAILY_BONUS}`}
               </button>
             </div>
-          </motion.div>
-        </section>
+          </div>
+        </Panel>
 
-        {/* PLAY & EARN */}
-        <section className="mb-24">
-          <SectionHeader icon={<Gamepad2 className="text-red-600 w-7 h-7" />} label="Play & Earn" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <GameCard title="Pit Stop Challenge" reward="50" icon={Timer} color="from-red-600 to-red-800" desc="Testa i tuoi riflessi al semaforo. Sii veloce come i meccanici al box." link="/games/pitstop" />
-            <GameCard title="Circuit Rush" reward="150" icon={Zap} color="from-blue-500 to-blue-800" desc="Sfreccia in pista e schiva i detriti. Più corri veloce, più SFT guadagni." link="/games/circuit-rush" featured />
-            <GameCard title="F1 Trivia" reward="30" icon={Award} color="from-yellow-500 to-yellow-700" desc="Dimostra di conoscere ogni bullone della storia della Scuderia Ferrari." link="/games/trivia" />
+        {/* I giochi */}
+        <section>
+          <h2 className="flex items-center gap-2 text-base font-black uppercase tracking-wide mb-4">
+            <Gamepad2 className="w-4 h-4 text-[var(--fr-red)]" aria-hidden="true" />
+            I giochi
+          </h2>
+          <div className="grid md:grid-cols-3 gap-5">
+            {GIOCHI.map((g, i) => <GameCard key={g.href} gioco={g} index={i} />)}
           </div>
         </section>
-      </main>
-      <Footer />
-    </div>
-  );
-}
 
-function SectionHeader({ icon, label }) {
-  return (
-    <div className="flex items-center gap-3 mb-8">
-      {icon}
-      <h3 className="text-2xl font-black uppercase italic tracking-tight">{label}</h3>
-      <div className="flex-1 h-px bg-white/5 ml-2" />
-    </div>
-  );
-}
+        {/* Classifica — è ciò che rende i token qualcosa di più di un numero */}
+        <Panel title="Classifica" icon={Trophy}>
+          {classificaLoading && (
+            <div className="p-6 grid gap-2" aria-label="Caricamento classifica" role="status">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span key={i} className="skeleton block h-9 rounded-lg" />
+              ))}
+            </div>
+          )}
 
-function GameCard({ title, reward, icon: Icon, color, desc, link, featured }) {
-  return (
-    <Link href={link}>
-      <motion.div
-        whileHover={{ y: -4 }}
-        className={`relative flex flex-col items-center p-10 rounded-[40px] cursor-pointer overflow-hidden h-full transition-all
-          ${featured
-            ? 'border border-blue-500/30 bg-gradient-to-b from-blue-950/40 to-black shadow-xl shadow-blue-500/5'
-            : 'border border-white/5 bg-zinc-900/20 hover:bg-zinc-900/40'}`}
-      >
-        {featured && (
-          <div className="absolute top-4 right-4 bg-blue-500 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
-            Popular
+          {!classificaLoading && classifica.length === 0 && (
+            <div className="empty-state">
+              <Trophy className="empty-state-icon" aria-hidden="true" />
+              <p className="empty-state-title">Nessuno in classifica</p>
+              <p className="empty-state-description">
+                Non ha ancora giocato nessuno. La prima partita vale il primo posto.
+              </p>
+            </div>
+          )}
+
+          {!classificaLoading && classifica.length > 0 && (
+            <>
+              <div className="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Pos</th>
+                      <th scope="col">Giocatore</th>
+                      <th scope="col" className="text-right">SFT</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {classifica.map((p, i) => (
+                      <ClassificaRiga
+                        key={p.email ?? i}
+                        player={p}
+                        posizione={i + 1}
+                        isTu={!!session && p.email === session.user.email}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {session && (
+                <p className="px-5 py-4 border-t border-[var(--fr-border)] text-sm text-[var(--fr-text-muted)]">
+                  {mieiPunti > 0
+                    ? <>Sei <strong className="text-[var(--fr-text)]">{mieiPunti}°</strong> con {tokens.toLocaleString('it-IT')} SFT.</>
+                    : <>Non sei ancora fra i primi dieci: hai {tokens.toLocaleString('it-IT')} SFT.</>}
+                </p>
+              )}
+            </>
+          )}
+        </Panel>
+
+        {/* Onestà su cosa sono i token, invece di lasciarlo intuire */}
+        <Panel title="Cosa sono gli SF Token">
+          <div className="p-6 text-sm text-[var(--fr-text-muted)] space-y-3">
+            <p>
+              Sono un punteggio, non una valuta: si guadagnano giocando e servono a
+              stabilire la classifica qui sopra. Non si comprano, non si scambiano e
+              non danno accesso a nulla — l&apos;unica cosa che fanno è dire chi ha
+              giocato di più e meglio.
+            </p>
+            <p>
+              Per salvarli serve l&apos;accesso con Google: senza, si può giocare
+              lo stesso, ma il punteggio resta solo sullo schermo.
+            </p>
           </div>
-        )}
-        <div className={`w-20 h-20 bg-gradient-to-br ${color} rounded-3xl flex items-center justify-center mb-8 shadow-xl`}>
-          <Icon className="w-10 h-10 text-white" />
-        </div>
-        <h4 className="text-xl font-black uppercase italic mb-3 text-center">{title}</h4>
-        <p className="text-zinc-500 text-sm mb-8 text-center leading-relaxed">{desc}</p>
-        <div className="mt-auto flex items-center gap-2 px-5 py-2 bg-white/5 rounded-full border border-white/10">
-          <Coins className="w-3 h-3 text-yellow-500" />
-          <span className="text-yellow-500 font-black text-[10px] uppercase tracking-widest">+{reward} SFT</span>
-        </div>
-      </motion.div>
-    </Link>
-  );
-}
-
-function LeaderboardRow({ player, index, isYou }) {
-  const badges = ['🏆', '🥈', '🥉'];
-  const rankColors = ['text-yellow-400', 'text-zinc-300', 'text-amber-600'];
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.05 }}
-      className={`flex items-center gap-4 px-5 py-4 border-b border-white/5 last:border-0 transition-all
-        ${isYou ? 'bg-yellow-500/10' : 'hover:bg-white/[0.02]'}`}
-    >
-      <span className={`text-sm font-black w-6 text-center ${rankColors[index] ?? 'text-zinc-600'}`}>
-        {index < 3 ? badges[index] : `#${player.rank}`}
-      </span>
-      {player.avatar
-        ? <img src={player.avatar} className="w-8 h-8 rounded-full border border-white/10" alt={player.name} />
-        : <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-black text-zinc-500">{player.name?.[0]?.toUpperCase()}</div>
-      }
-      <span className="flex-1 text-sm font-bold text-zinc-300 truncate">
-        {player.name ?? player.email?.split('@')[0]}
-        {isYou && <span className="ml-2 text-[9px] text-yellow-500 font-black uppercase tracking-widest">tu</span>}
-      </span>
-      <div className="flex items-center gap-1">
-        <Coins className="w-3 h-3 text-yellow-500" />
-        <span className="text-[11px] font-black text-yellow-400 tabular-nums">{player.tokens.toLocaleString()}</span>
+        </Panel>
       </div>
-    </motion.div>
+    </PageShell>
   );
 }
