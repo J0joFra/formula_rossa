@@ -1,292 +1,217 @@
-'use client'; 
+'use client';
+/**
+ * components/ferrari/Footer.jsx
+ * Piede di pagina.
+ *
+ * Prima erano quattro colonne dentro altrettanti riquadri, ognuna con la riga
+ * link riscritta da capo (icona propria + chevron che compariva al passaggio del
+ * mouse), su uno sfondo con tre aloni sfocati, una griglia telemetrica e cinque
+ * barrette che pulsavano. Molta grafica per quello che un piede di pagina deve
+ * fare: dire dove si va.
+ *
+ * Le sezioni ora ricalcano il menu, così il footer è una seconda via per gli
+ * stessi posti invece di un elenco parallelo con criteri suoi — dove infatti
+ * "Fan Zone" e "Contatti" stavano sotto "Stagione", e le Analisi GP mancavano
+ * del tutto.
+ */
 
 import React from 'react';
-import { 
-  Instagram, Twitter, Youtube, Linkedin, Heart, Mail, MessageCircle, 
-  Trophy, Gauge, Users, ChevronRight, Award, ExternalLink,
-  Sparkles, Zap, Shield, Database, Activity, Info, Cookie,
-  Newspaper, Gamepad2, Smartphone
-} from 'lucide-react';
 import Link from 'next/link';
+import {
+  Instagram, Twitter, Youtube, Linkedin, MessageCircle, Heart,
+} from 'lucide-react';
+
+const SEZIONI = [
+  {
+    titolo: 'Archivio',
+    voci: [
+      { label: 'Statistiche', href: '/statistics' },
+      { label: 'Piloti',      href: '/piloti' },
+      { label: 'Circuiti',    href: '/circuiti' },
+    ],
+  },
+  {
+    titolo: 'Stagione',
+    voci: [
+      { label: 'Classifiche', href: '/standings' },
+      { label: 'Analisi GP',  href: '/gp' },
+      { label: 'News',        href: '/news' },
+    ],
+  },
+  {
+    titolo: 'Progetto',
+    voci: [
+      { label: 'Fan Zone',   href: '/fanzone' },
+      { label: 'Chi siamo',  href: '/about' },
+      { label: 'Contatti',   href: 'mailto:info@formula-rossa.it' },
+      { label: 'App GridUp', href: 'https://gridup-f1.web.app' },
+    ],
+  },
+];
+
+const LEGALI = [
+  { label: 'Privacy',  href: '/legal/privacy' },
+  { label: 'Cookie',   href: '/legal/cookies' },
+  { label: 'Termini',  href: '/legal/terms' },
+];
+
+const SOCIAL = [
+  { icon: Linkedin,      href: 'https://www.linkedin.com/company/formula-rossa/',       label: 'Formula Rossa su LinkedIn' },
+  { icon: Youtube,       href: 'https://www.youtube.com/@jofrancalanci',                label: 'Formula Rossa su YouTube' },
+  { icon: Instagram,     href: 'https://www.instagram.com/formularossa.it',             label: 'Formula Rossa su Instagram' },
+  { icon: MessageCircle, href: 'https://whatsapp.com/channel/0029Vb7EagL6WaKvnD5Slm30', label: 'Formula Rossa su WhatsApp' },
+  { icon: Twitter,       href: 'https://www.x.com/jofrancalanci',                       label: 'Formula Rossa su X' },
+];
+
+const CLS_LINK =
+  'text-sm text-[var(--fr-text-muted)] hover:text-[var(--fr-red)] transition-colors';
+
+/** Un link solo, interno o esterno: prima questa riga era riscritta quattro volte. */
+function FooterLink({ href, label, className = CLS_LINK }) {
+  const esterno = href.startsWith('http') || href.startsWith('mailto:');
+  if (!esterno) return <Link href={href} className={className}>{label}</Link>;
+  return (
+    <a
+      href={href}
+      className={className}
+      {...(href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+    >
+      {label}
+    </a>
+  );
+}
 
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
+  const anno = new Date().getFullYear();
+  // 1950 è la prima stagione, quindi va contata: dal 1950 al 2026 sono 77 stagioni.
+  const stagioni = anno - 1950 + 1;
 
+  /* `relative z-10` sul footer: in _app.jsx c'è uno sfondo ambientale
+     `fixed inset-0` con tre aloni sfocati. Senza sollevare il footer, quegli
+     aloni gli passano sopra e lo colorano di rosa. */
   return (
-    <footer className="relative bg-gradient-to-b from-[var(--bg-primary)] via-zinc-900 to-black border-t border-[var(--ferrari-red)]/20 overflow-hidden">
-      
-      {/* Sfondo dinamico — inline styles rimossi, ora classi Tailwind */}
-      <div className="absolute inset-0" aria-hidden="true">
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[var(--ferrari-red)]/5 rounded-full blur-3xl" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--ferrari-yellow)]/5 rounded-full blur-3xl" />
-        {/* Griglia telemetrica — unico inline style rimasto: pattern SVG non esprimibile in Tailwind */}
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage:
-              'linear-gradient(to right,#DC0000 1px,transparent 1px),linear-gradient(to bottom,#DC0000 1px,transparent 1px)',
-            backgroundSize: '40px 40px',
-          }}
-        />
-      </div>
+    <footer className="relative z-10 border-t border-[var(--fr-border)] bg-[var(--fr-surface)]">
+      <div className="max-w-wrap mx-auto px-4 sm:px-6 lg:px-8 py-14">
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
 
-        {/* Main Footer Content */}
-        <div className="grid lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-12 mb-12 lg:mb-16">
+          {/* ── Marchio ── */}
+          <div>
+            <Link href="/" className="inline-flex items-center gap-3 group">
+              <img
+                src="/data/images/formula-rossa-logo.png"
+                alt=""
+                width={44}
+                height={44}
+                className="w-11 h-11 rounded-[13px] object-contain bg-[var(--fr-surface-2)] p-1"
+              />
+              <span>
+                <span className="block font-head text-xl font-black tracking-tight text-[var(--fr-text)]">
+                  FORMULA<span className="text-[var(--fr-red)]">ROSSA</span>
+                </span>
+                <span className="block text-[10px] uppercase tracking-[0.18em] text-[var(--fr-text-faint)]">
+                  Data Intelligence
+                </span>
+              </span>
+            </Link>
 
-          {/* ── Brand Section ── */}
-          <div className="lg:col-span-4 space-y-6">
-            {/* Logo */}
-            <div className="flex items-center gap-4">
-              <div className="relative w-14 h-14 lg:w-16 lg:h-16 flex-shrink-0">
-                <div className="absolute inset-0 rounded-2xl border border-dashed border-[var(--ferrari-red)]/30" aria-hidden="true" />
-                <div className="absolute inset-1 bg-gradient-to-br from-[var(--ferrari-yellow)] to-orange-500 rounded-xl shadow-2xl shadow-[var(--ferrari-yellow)]/30 overflow-hidden flex items-center justify-center">
-                  <div className="absolute inset-0 bg-[var(--bg-primary)]/10" aria-hidden="true" />
-                  {/* FIX: era <imgage> (typo) → ora <img> corretto con alt */}
-                  <img
-                    src="/data/images/formula-rossa-logo.png"
-                    alt="Formula Rossa logo"
-                    className="relative z-10 w-full h-full object-contain p-1"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      e.currentTarget.parentElement.insertAdjacentHTML(
-                        'beforeend',
-                        '<span class="relative z-10 text-2xl font-black text-black">FR</span>'
-                      );
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="min-w-0">
-                <h3 className="text-xl lg:text-2xl font-black text-[var(--text-primary)] tracking-tighter truncate">
-                  FORMULA<span className="text-[var(--ferrari-red)]">ROSSA</span>
-                </h3>
-                <p className="text-[10px] lg:text-xs text-[var(--ferrari-red)]/60 tracking-wider">DATA INTELLIGENCE</p>
-              </div>
-            </div>
+            <p className="text-sm text-[var(--fr-text-muted)] mt-5 max-w-[42ch]">
+              Piattaforma indipendente dedicata alle statistiche e alla storia della
+              Scuderia Ferrari in Formula 1.
+            </p>
 
-            {/* Description */}
-            <div className="bg-[var(--bg-tertiary)]/50 backdrop-blur-sm border border-[var(--border-light)] rounded-xl p-5 lg:p-6">
-              <p className="text-[var(--text-secondary)] text-xs lg:text-sm leading-relaxed">
-                Piattaforma indipendente di data intelligence dedicata all'analisi 
-                statistica e alla storia della Scuderia Ferrari in Formula 1.
-              </p>
-              <div className="mt-4 flex flex-wrap items-center gap-4 text-[10px] lg:text-xs">
-                <span className="text-[var(--text-tertiary)]">{currentYear - 1950} anni di dati</span>
-                <span className="w-1 h-1 rounded-full bg-gray-700" aria-hidden="true" />
-                <span className="text-[var(--text-tertiary)]">100+ piloti</span>
-                <span className="w-1 h-1 rounded-full bg-gray-700" aria-hidden="true" />
-                <span className="text-[var(--text-tertiary)]">1000+ gare</span>
-              </div>
-            </div>
+            {/* Due numeri verificabili, non slogan: le stagioni si calcolano, le gare
+                sono quelle in archivio (1.171 a oggi, arrotondate per difetto così
+                la cifra resta vera anche quando il calendario cresce). */}
+            <p className="text-xs text-[var(--fr-text-faint)] mt-3">
+              {stagioni} stagioni · oltre 1.100 gran premi in archivio
+            </p>
 
-            {/* Social */}
-            <div className="flex flex-wrap gap-2 lg:gap-3 pt-2">
-              {[
-                { icon: Linkedin,       href: 'https://www.linkedin.com/company/formula-rossa/', label: 'Formula Rossa su LinkedIn' },
-                { icon: Youtube,        href: 'https://www.youtube.com/@jofrancalanci',           label: 'Formula Rossa su YouTube' },
-                { icon: Instagram,      href: 'https://www.instagram.com/formularossa.it',        label: 'Formula Rossa su Instagram' },
-                { icon: MessageCircle,  href: 'https://whatsapp.com/channel/0029Vb7EagL6WaKvnD5Slm30', label: 'Formula Rossa su WhatsApp' },
-                { icon: Twitter,        href: 'https://www.x.com/jofrancalanci',                  label: 'Formula Rossa su X (Twitter)' },
-              ].map((social, i) => (
+            <div className="flex flex-wrap gap-2 mt-6">
+              {SOCIAL.map((s) => (
                 <a
-                  key={i}
-                  href={social.href}
+                  key={s.href}
+                  href={s.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={social.label}
-                  title={social.label}
-                  className="w-9 h-9 lg:w-10 lg:h-10 bg-[var(--bg-tertiary)]/80 border border-[var(--border-light)] rounded-xl 
-                    flex items-center justify-center hover:bg-[var(--ferrari-red)] hover:border-[var(--ferrari-red)] 
-                    transition-all duration-300 group"
+                  aria-label={s.label}
+                  title={s.label}
+                  className="w-9 h-9 rounded-[11px] grid place-items-center bg-[var(--fr-surface-2)] text-[var(--fr-text-muted)] hover:bg-[var(--fr-red)] hover:text-white transition-colors"
                 >
-                  <social.icon className="w-4 h-4 lg:w-5 lg:h-5 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" aria-hidden="true" />
+                  <s.icon className="w-4 h-4" aria-hidden="true" />
                 </a>
               ))}
             </div>
           </div>
 
-          {/* ── Analytics ── */}
-          <div className="lg:col-span-3">
-            <div className="bg-[var(--bg-tertiary)]/30 border border-[var(--border-light)] rounded-xl p-5 lg:p-6 h-full">
-              <h4 className="text-xs lg:text-sm font-black uppercase tracking-wider text-[var(--ferrari-red)] mb-4 lg:mb-6 flex items-center gap-2">
-                <Zap className="w-3 h-3 lg:w-4 lg:h-4" aria-hidden="true" />
-                ARCHIVIO
-              </h4>
-              <ul className="space-y-2 lg:space-y-3">
-                {[
-                  { name: 'Statistiche', href: '/statistics', icon: Trophy },
-                  { name: 'Piloti',      href: '/piloti',     icon: Users  },
-                  { name: 'Circuiti',    href: '/circuiti',   icon: Award  },
-                ].map((link, j) => (
-                  <li key={j}>
-                    <Link
-                      href={link.href}
-                      className="group flex items-center justify-between text-xs lg:text-sm text-[var(--text-secondary)] 
-                        hover:text-[var(--ferrari-red)] transition-colors p-1.5 lg:p-2 rounded-lg hover:bg-[var(--ferrari-red)]/5"
-                    >
-                      <div className="flex items-center gap-2 lg:gap-3">
-                        <link.icon className="w-3 h-3 lg:w-4 lg:h-4 text-[var(--text-tertiary)] group-hover:text-[var(--ferrari-red)] flex-shrink-0" aria-hidden="true" />
-                        <span className="truncate">{link.name}</span>
-                      </div>
-                      <ChevronRight className="w-2.5 h-2.5 lg:w-3 lg:h-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" aria-hidden="true" />
-                    </Link>
+          {/* ── Le tre sezioni, nello stesso ordine del menu ── */}
+          {SEZIONI.map((sezione) => (
+            <nav key={sezione.titolo} aria-label={sezione.titolo}>
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--fr-text-faint)] mb-4">
+                {sezione.titolo}
+              </h2>
+              <ul className="space-y-2.5">
+                {sezione.voci.map((v) => (
+                  <li key={v.href}>
+                    <FooterLink href={v.href} label={v.label} />
                   </li>
                 ))}
               </ul>
-            </div>
-          </div>
-
-          {/* ── Info ── */}
-          <div className="lg:col-span-2">
-            <div className="bg-[var(--bg-tertiary)]/30 border border-[var(--border-light)] rounded-xl p-5 lg:p-6 h-full">
-              <h4 className="text-xs lg:text-sm font-black uppercase tracking-wider text-[var(--ferrari-yellow)] mb-4 lg:mb-6 flex items-center gap-2">
-                <Info className="w-3 h-3 lg:w-4 lg:h-4" aria-hidden="true" />
-                STAGIONE
-              </h4>
-              <ul className="space-y-2 lg:space-y-3">
-                {[
-                  { name: 'Classifiche', href: '/standings',                   icon: Gauge    },
-                  { name: 'News',        href: '/news',                        icon: Newspaper },
-                  { name: 'Fan Zone',    href: '/fanzone',                     icon: Gamepad2 },
-                  { name: 'Chi Siamo',   href: '/about',                       icon: Users    },
-                  { name: 'Contatti',    href: 'mailto:info@formula-rossa.it', icon: Mail     },
-                  { name: 'App GridUp',  href: 'https://gridup-f1.web.app',    icon: Smartphone, external: true },
-                ].map((link, j) => {
-                  const isExternal = link.external || link.href.startsWith('mailto:') || link.href.startsWith('http');
-                  const inner = (
-                    <>
-                      <div className="flex items-center gap-2 lg:gap-3">
-                        <link.icon className="w-3 h-3 lg:w-4 lg:h-4 text-[var(--text-tertiary)] group-hover:text-[var(--ferrari-red)] flex-shrink-0" aria-hidden="true" />
-                        <span className="truncate">{link.name}</span>
-                      </div>
-                      <ChevronRight className="w-2.5 h-2.5 lg:w-3 lg:h-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" aria-hidden="true" />
-                    </>
-                  );
-                  const cls = "group flex items-center justify-between text-xs lg:text-sm text-[var(--text-secondary)] hover:text-[var(--ferrari-red)] transition-colors p-1.5 lg:p-2 rounded-lg hover:bg-[var(--ferrari-red)]/5";
-                  return (
-                    <li key={j}>
-                      {isExternal ? (
-                        <a
-                          href={link.href}
-                          className={cls}
-                          {...(link.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                        >
-                          {inner}
-                        </a>
-                      ) : (
-                        <Link href={link.href} className={cls}>
-                          {inner}
-                        </Link>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          </div>
-
-          {/* ── Legal ── */}
-          <div className="lg:col-span-3">
-            <div className="bg-[var(--bg-tertiary)]/30 border border-[var(--border-light)] rounded-xl p-5 lg:p-6 h-full">
-              <h4 className="text-xs lg:text-sm font-black uppercase tracking-wider text-[var(--text-tertiary)] mb-4 lg:mb-6 flex items-center gap-2">
-                <Shield className="w-3 h-3 lg:w-4 lg:h-4" aria-hidden="true" />
-                LEGAL
-              </h4>
-              <ul className="space-y-2 lg:space-y-3">
-                {[
-                  { name: 'Privacy Policy',       href: '/legal/privacy', icon: Shield },
-                  { name: 'Cookie Policy',         href: '/legal/cookies', icon: Shield },
-                  { name: 'Termini e Condizioni',  href: '/legal/terms',   icon: Shield },
-                ].map((link, j) => (
-                  <li key={j}>
-                    <Link
-                      href={link.href}
-                      className="group flex items-center justify-between text-xs lg:text-sm text-[var(--text-secondary)] 
-                        hover:text-[var(--ferrari-red)] transition-colors p-1.5 lg:p-2 rounded-lg hover:bg-[var(--ferrari-red)]/5"
-                    >
-                      <div className="flex items-center gap-2 lg:gap-3">
-                        <link.icon className="w-3 h-3 lg:w-4 lg:h-4 text-[var(--text-tertiary)] group-hover:text-[var(--ferrari-red)] flex-shrink-0" aria-hidden="true" />
-                        <span className="truncate">{link.name}</span>
-                      </div>
-                      <ChevronRight className="w-2.5 h-2.5 lg:w-3 lg:h-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" aria-hidden="true" />
-                    </Link>
-                  </li>
-                ))}
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (typeof window !== 'undefined') window.dispatchEvent(new Event('open-cookie-settings'));
-                    }}
-                    className="group flex items-center justify-between w-full text-left text-xs lg:text-sm text-[var(--text-secondary)]
-                      hover:text-[var(--ferrari-red)] transition-colors p-1.5 lg:p-2 rounded-lg hover:bg-[var(--ferrari-red)]/5"
-                  >
-                    <div className="flex items-center gap-2 lg:gap-3">
-                      <Cookie className="w-3 h-3 lg:w-4 lg:h-4 text-[var(--text-tertiary)] group-hover:text-[var(--ferrari-red)] flex-shrink-0" aria-hidden="true" />
-                      <span className="truncate">Preferenze cookie</span>
-                    </div>
-                    <ChevronRight className="w-2.5 h-2.5 lg:w-3 lg:h-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" aria-hidden="true" />
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </div>
+            </nav>
+          ))}
         </div>
 
-        {/* Disclaimer */}
-        <div className="mb-6 lg:mb-8">
-          <div className="bg-[var(--bg-tertiary)]/50 border border-[var(--border-light)] rounded-xl p-4 lg:p-6">
-            <p className="text-[10px] md:text-[11px] text-[var(--text-tertiary)] leading-relaxed text-center">
-              <span className="text-[var(--ferrari-red)] font-bold">DISCLAIMER:</span> Formula Rossa è un progetto indipendente 
-              creato da appassionati e non è affiliato, sponsorizzato o approvato da Ferrari S.p.A. o Scuderia Ferrari. 
-              Tutti i marchi, nomi di piloti e loghi citati appartengono ai rispettivi proprietari.
-            </p>
-          </div>
-        </div>
-
-        {/* SEO text — visibile ai crawler, non invasivo visivamente */}
-        <p className="sr-only">
-          Formula Rossa è la piattaforma italiana dedicata alle statistiche e all'analisi dati della Scuderia Ferrari 
-          in Formula 1. Esplora oltre {new Date().getFullYear() - 1950} anni di storia Ferrari, confronta i piloti, 
-          consulta l'archivio stagioni e scopri i dati tecnici delle monoposto dal 1950 ad oggi.
+        {/* ── Disclaimer ── */}
+        <p className="mt-12 pt-8 border-t border-[var(--fr-border)] text-xs text-[var(--fr-text-faint)] leading-relaxed max-w-[92ch]">
+          <strong className="text-[var(--fr-text-muted)] font-semibold">Disclaimer.</strong>{' '}
+          Formula Rossa è un progetto indipendente creato da appassionati e non è
+          affiliato, sponsorizzato o approvato da Ferrari S.p.A. o da Scuderia Ferrari.
+          Tutti i marchi, i nomi dei piloti e i loghi citati appartengono ai rispettivi
+          proprietari.
         </p>
 
-        {/* Copyright */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 lg:pt-8 border-t border-[var(--border-light)]">
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 text-[10px] lg:text-xs text-[var(--text-tertiary)]">
-            <span>Made with</span>
-            <Heart className="w-2.5 h-2.5 lg:w-3 lg:h-3 text-[var(--ferrari-red)] fill-red-600" aria-hidden="true" />
-            <span>by</span>
+        {/* Testo per i motori di ricerca: non aggiunge rumore alla pagina. */}
+        <p className="sr-only">
+          Formula Rossa è la piattaforma italiana dedicata alle statistiche e all&apos;analisi
+          dati della Scuderia Ferrari in Formula 1: {stagioni} stagioni di storia, schede
+          piloti e circuiti, classifiche aggiornate e analisi di ogni Gran Premio.
+        </p>
+
+        {/* ── Riga di chiusura: le voci legali stavano in una colonna tutta loro,
+               qui occupano una riga e liberano spazio nella griglia. ── */}
+        <div className="mt-8 pt-6 border-t border-[var(--fr-border)] flex flex-col-reverse gap-5 md:flex-row md:items-center md:justify-between">
+
+          <p className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--fr-text-faint)]">
+            <span>© {anno} Formula Rossa · fatto con</span>
+            <Heart className="w-3 h-3 text-[var(--fr-red)] fill-current" aria-hidden="true" />
+            <span>da</span>
             <a
               href="https://github.com/J0joFra"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[var(--text-primary)] hover:text-[var(--ferrari-red)] transition-colors"
+              className="text-[var(--fr-text-muted)] hover:text-[var(--fr-red)] transition-colors"
             >
               Joaquim Francalanci
             </a>
-          </div>
+          </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-2 lg:gap-4 text-[10px] lg:text-xs text-[var(--text-tertiary)]">
-            <span>© {currentYear}</span>
-            <span className="text-[var(--text-muted)] hidden sm:inline" aria-hidden="true">|</span>
-            <span className="text-[var(--ferrari-red)]/60">FORMULA ROSSA</span>
-            <span className="text-[var(--text-muted)] hidden sm:inline" aria-hidden="true">|</span>
-            <span>All rights reserved</span>
-          </div>
-
-          {/* Mini grafico decorativo */}
-          <div className="flex gap-1" aria-hidden="true">
-            {[1,2,3,4,5].map((i) => (
-              <div
-                key={i}
-                className="w-0.5 h-3 lg:w-1 lg:h-4 bg-[var(--ferrari-red)]/30 rounded-full animate-pulse"
-                style={{ animationDelay: `${i * 0.2}s` }}
+          <nav aria-label="Note legali" className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            {LEGALI.map((l) => (
+              <FooterLink
+                key={l.href}
+                href={l.href}
+                label={l.label}
+                className="text-xs text-[var(--fr-text-faint)] hover:text-[var(--fr-red)] transition-colors"
               />
             ))}
-          </div>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event('open-cookie-settings'))}
+              className="text-xs text-[var(--fr-text-faint)] hover:text-[var(--fr-red)] transition-colors"
+            >
+              Preferenze cookie
+            </button>
+          </nav>
         </div>
       </div>
     </footer>
