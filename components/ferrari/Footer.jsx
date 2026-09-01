@@ -20,39 +20,40 @@ import Link from 'next/link';
 import {
   Instagram, Twitter, Youtube, Linkedin, MessageCircle, Heart,
 } from 'lucide-react';
+import { useI18n } from '../../lib/i18n';
 
 const SEZIONI = [
   {
-    titolo: 'Archivio',
+    titolo: 'nav_archive',
     voci: [
-      { label: 'Statistiche', href: '/statistics' },
-      { label: 'Piloti',      href: '/piloti' },
-      { label: 'Circuiti',    href: '/circuiti' },
+      { key: 'nav_stats',    href: '/statistics' },
+      { key: 'nav_drivers',  href: '/piloti' },
+      { key: 'nav_circuits', href: '/circuiti' },
     ],
   },
   {
-    titolo: 'Stagione',
+    titolo: 'nav_season',
     voci: [
-      { label: 'Classifiche', href: '/standings' },
-      { label: 'Analisi GP',  href: '/gp' },
-      { label: 'News',        href: '/news' },
+      { key: 'nav_standings', href: '/standings' },
+      { key: 'nav_gp',        href: '/gp' },
+      { key: 'nav_news',      href: '/news' },
     ],
   },
   {
-    titolo: 'Progetto',
+    titolo: 'ft_project',
     voci: [
-      { label: 'Fan Zone',   href: '/fanzone' },
-      { label: 'Chi siamo',  href: '/about' },
-      { label: 'Contatti',   href: 'mailto:info@formula-rossa.it' },
-      { label: 'App GridUp', href: 'https://gridup-f1.web.app' },
+      { key: 'ft_fanzone', href: '/fanzone' },
+      { key: 'ft_about',   href: '/about' },
+      { key: 'ft_contact', href: 'mailto:info@formula-rossa.it' },
+      { key: 'nav_app',    href: 'https://gridup-f1.web.app' },
     ],
   },
 ];
 
 const LEGALI = [
-  { label: 'Privacy',  href: '/legal/privacy' },
-  { label: 'Cookie',   href: '/legal/cookies' },
-  { label: 'Termini',  href: '/legal/terms' },
+  { key: 'ft_privacy', href: '/legal/privacy' },
+  { key: 'ft_cookies', href: '/legal/cookies' },
+  { key: 'ft_terms',   href: '/legal/terms' },
 ];
 
 const SOCIAL = [
@@ -82,6 +83,7 @@ function FooterLink({ href, label, className = CLS_LINK }) {
 }
 
 export default function Footer() {
+  const { t } = useI18n();
   const anno = new Date().getFullYear();
   // 1950 è la prima stagione, quindi va contata: dal 1950 al 2026 sono 77 stagioni.
   const stagioni = anno - 1950 + 1;
@@ -110,21 +112,20 @@ export default function Footer() {
                   FORMULA<span className="text-[var(--fr-red)]">ROSSA</span>
                 </span>
                 <span className="block text-[10px] uppercase tracking-[0.18em] text-[var(--fr-text-faint)]">
-                  Data Intelligence
+                  {t('ft_tagline')}
                 </span>
               </span>
             </Link>
 
             <p className="text-sm text-[var(--fr-text-muted)] mt-5 max-w-[42ch]">
-              Piattaforma indipendente dedicata alle statistiche e alla storia della
-              Scuderia Ferrari in Formula 1.
+              {t('ft_description')}
             </p>
 
             {/* Due numeri verificabili, non slogan: le stagioni si calcolano, le gare
                 sono quelle in archivio (1.171 a oggi, arrotondate per difetto così
                 la cifra resta vera anche quando il calendario cresce). */}
             <p className="text-xs text-[var(--fr-text-faint)] mt-3">
-              {stagioni} stagioni · oltre 1.100 gran premi in archivio
+              {t('ft_counts', { seasons: stagioni })}
             </p>
 
             <div className="flex flex-wrap gap-2 mt-6">
@@ -146,14 +147,14 @@ export default function Footer() {
 
           {/* ── Le tre sezioni, nello stesso ordine del menu ── */}
           {SEZIONI.map((sezione) => (
-            <nav key={sezione.titolo} aria-label={sezione.titolo}>
+            <nav key={sezione.titolo} aria-label={t(sezione.titolo)}>
               <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--fr-text-faint)] mb-4">
-                {sezione.titolo}
+                {t(sezione.titolo)}
               </h2>
               <ul className="space-y-2.5">
                 {sezione.voci.map((v) => (
                   <li key={v.href}>
-                    <FooterLink href={v.href} label={v.label} />
+                    <FooterLink href={v.href} label={t(v.key)} />
                   </li>
                 ))}
               </ul>
@@ -163,11 +164,8 @@ export default function Footer() {
 
         {/* ── Disclaimer ── */}
         <p className="mt-12 pt-8 border-t border-[var(--fr-border)] text-xs text-[var(--fr-text-faint)] leading-relaxed max-w-[92ch]">
-          <strong className="text-[var(--fr-text-muted)] font-semibold">Disclaimer.</strong>{' '}
-          Formula Rossa è un progetto indipendente creato da appassionati e non è
-          affiliato, sponsorizzato o approvato da Ferrari S.p.A. o da Scuderia Ferrari.
-          Tutti i marchi, i nomi dei piloti e i loghi citati appartengono ai rispettivi
-          proprietari.
+          <strong className="text-[var(--fr-text-muted)] font-semibold">{t('ft_disclaimerLabel')}</strong>{' '}
+          {t('ft_disclaimer')}
         </p>
 
         {/* Testo per i motori di ricerca: non aggiunge rumore alla pagina. */}
@@ -182,9 +180,9 @@ export default function Footer() {
         <div className="mt-8 pt-6 border-t border-[var(--fr-border)] flex flex-col-reverse gap-5 md:flex-row md:items-center md:justify-between">
 
           <p className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--fr-text-faint)]">
-            <span>© {anno} Formula Rossa · fatto con</span>
+            <span>{t('ft_madeBy', { year: anno })}</span>
             <Heart className="w-3 h-3 text-[var(--fr-red)] fill-current" aria-hidden="true" />
-            <span>da</span>
+            <span>{t('ft_by')}</span>
             <a
               href="https://github.com/J0joFra"
               target="_blank"
@@ -195,12 +193,12 @@ export default function Footer() {
             </a>
           </p>
 
-          <nav aria-label="Note legali" className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <nav aria-label={t('ft_legal')} className="flex flex-wrap items-center gap-x-4 gap-y-2">
             {LEGALI.map((l) => (
               <FooterLink
                 key={l.href}
                 href={l.href}
-                label={l.label}
+                label={t(l.key)}
                 className="text-xs text-[var(--fr-text-faint)] hover:text-[var(--fr-red)] transition-colors"
               />
             ))}
@@ -209,7 +207,7 @@ export default function Footer() {
               onClick={() => window.dispatchEvent(new Event('open-cookie-settings'))}
               className="text-xs text-[var(--fr-text-faint)] hover:text-[var(--fr-red)] transition-colors"
             >
-              Preferenze cookie
+              {t('ft_cookiePrefs')}
             </button>
           </nav>
         </div>

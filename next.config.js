@@ -3,10 +3,12 @@ const nextConfig = {
   reactStrictMode: true,
 
   /* ── Internazionalizzazione ── */
-  i18n: {
-    locales: ['it', 'en'],
-    defaultLocale: 'it',
-  },
+  /* Niente i18n di Next: dichiarava un locale 'en' per cui non esiste una sola
+     pagina tradotta. Con il rilevamento automatico attivo, un browser in
+     inglese veniva spedito su /en/... e riceveva le stesse pagine italiane
+     sotto una seconda URL — contenuto duplicato per i motori di ricerca e
+     nessun vantaggio per chi legge. La lingua ora si cambia lato client, come
+     nell'app GridUp: vedi lib/i18n.jsx. */
 
   /* ── Ottimizzazione immagini ── */
   images: {
