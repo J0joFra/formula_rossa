@@ -1,9 +1,8 @@
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
-import Navigation from '../../components/ferrari/Navigation';
-import Footer from '../../components/ferrari/Footer';
+import PageShell, { PageHeader, PageLoading, PageError, Panel, StatTile } from '../../components/ui/PageShell';
 import { motion } from 'framer-motion';
-import { User, Trophy, Timer, Zap, Star, Award, Gauge, ChevronLeft } from 'lucide-react';
+import { User, Trophy, Timer, Zap, Star, Award, Gauge } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 
@@ -75,9 +74,9 @@ const CONFIG = {
 
 /* ─── Medal colors ──────────────────────────────────────────────────────── */
 const MEDAL = [
-  { ring: '#DC0000', glow: 'rgba(220,0,0,0.4)',     label: '1ST' },
-  { ring: '#C0C0C0', glow: 'rgba(192,192,192,0.3)', label: '2ND' },
-  { ring: '#CD7F32', glow: 'rgba(205,127,50,0.3)',  label: '3RD' },
+  { ring: '#DC0000', glow: 'rgba(220,0,0,0.4)',     label: '1°' },
+  { ring: '#C0C0C0', glow: 'rgba(192,192,192,0.3)', label: '2°' },
+  { ring: '#CD7F32', glow: 'rgba(205,127,50,0.3)',  label: '3°' },
 ];
 
 /* ─── Driver row ────────────────────────────────────────────────────────── */
@@ -93,7 +92,7 @@ function DriverRow({ driver, index, max, cfg }) {
       initial={{ opacity: 0, x: -24 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4, delay: index * 0.04, ease: 'easeOut' }}
-      className="group relative flex items-center gap-4 md:gap-6 px-5 md:px-8 py-5 border-b border-white/5 last:border-0 hover:bg-white/[0.03] transition-colors duration-200"
+      className="group relative flex items-center gap-4 md:gap-6 px-5 md:px-8 py-5 border-b border-[var(--fr-border)] last:border-0 hover:bg-[var(--fr-surface-2)] transition-colors duration-200"
     >
       <motion.div
         className="absolute left-0 top-0 bottom-0 w-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -108,7 +107,7 @@ function DriverRow({ driver, index, max, cfg }) {
           </span>
         ) : (
           <span className="text-2xl md:text-3xl font-black tabular-nums"
-            style={{ color: 'rgba(255,255,255,0.1)' }}>
+            style={{ color: 'var(--fr-text-dim)' }}>
             {index + 1}
           </span>
         )}
@@ -118,7 +117,7 @@ function DriverRow({ driver, index, max, cfg }) {
       <div
         className="relative shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-xl overflow-hidden transition-transform duration-300 group-hover:scale-105"
         style={{
-          border: `2px solid ${medal ? medal.ring : 'rgba(255,255,255,0.08)'}`,
+          border: `2px solid ${medal ? medal.ring : 'var(--fr-border)'}`,
           boxShadow: medal ? `0 0 16px ${medal.glow}` : 'none',
         }}
       >
@@ -132,11 +131,11 @@ function DriverRow({ driver, index, max, cfg }) {
           }}
         />
         <div
-          className="absolute inset-0 items-center justify-center bg-zinc-800"
+          className="absolute inset-0 items-center justify-center bg-[var(--fr-surface-2)]"
           style={{ display: 'none' }}
           aria-hidden="true"
         >
-          <User className="w-5 h-5 text-zinc-600" />
+          <User className="w-5 h-5 text-[var(--fr-text-faint)]" />
         </div>
       </div>
 
@@ -145,18 +144,18 @@ function DriverRow({ driver, index, max, cfg }) {
         <div className="flex items-baseline gap-3 mb-2 flex-wrap">
           <span
             className="text-base md:text-lg font-black uppercase tracking-tight group-hover:text-red-400 transition-colors truncate"
-            style={{ color: medal ? medal.ring : 'white' }}
+            style={{ color: medal ? medal.ring : 'var(--fr-text)' }}
           >
             {driver.name}
           </span>
-          <span className="text-[10px] text-zinc-600 font-mono shrink-0">
+          <span className="text-[10px] text-[var(--fr-text-faint)] font-mono shrink-0">
             {driver.first_year}
             {driver.last_year && driver.last_year !== driver.first_year ? ` – ${driver.last_year}` : ''}
           </span>
         </div>
 
         {/* Progress bar */}
-        <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+        <div className="h-1 w-full bg-[var(--fr-surface-2)] rounded-full overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${pct}%` }}
@@ -171,7 +170,7 @@ function DriverRow({ driver, index, max, cfg }) {
       <div className="shrink-0 text-right">
         <span
           className="text-3xl md:text-4xl font-black tabular-nums"
-          style={{ color: medal ? medal.ring : 'white' }}
+          style={{ color: medal ? medal.ring : 'var(--fr-text)' }}
         >
           {displayValue}
         </span>
@@ -232,174 +231,107 @@ export default function StatDetail() {
   /* ── 404 per tipo non riconosciuto ── */
   if (!loading && !cfg) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4">
-        <p className="text-zinc-400 text-lg font-black uppercase tracking-widest">Categoria non trovata</p>
-        <Link href="/statistics" className="text-red-500 underline text-sm">← Torna alle statistiche</Link>
-      </div>
+      <PageShell>
+        <PageHeader
+          eyebrow="Archivio"
+          title="Classifica"
+          breadcrumb={[{ label: 'Archivio' }, { label: 'Statistiche', href: '/statistics' }]}
+        />
+        <PageError
+          title="Classifica non trovata"
+          message={`Le classifiche disponibili sono: ${Object.keys(CONFIG).join(', ')}.`}
+        />
+        <p className="text-center">
+          <Link href="/statistics" className="btn btn-outline">Torna alle statistiche</Link>
+        </p>
+      </PageShell>
     );
   }
 
   /* ── Loading ── */
   if (loading || !cfg) {
-    return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4">
-        <div className="flex gap-1.5" aria-label="Caricamento">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <motion.div
-              key={i}
-              className="w-1 rounded-full bg-red-600"
-              animate={{ height: ['12px', '32px', '12px'] }}
-              transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.12 }}
-            />
-          ))}
-        </div>
-        <p className="text-zinc-600 text-[11px] tracking-[0.4em] uppercase font-black">
-          Loading Ferrari History
-        </p>
-      </div>
-    );
+    return <PageShell><PageLoading label="Caricamento classifica…" /></PageShell>;
   }
 
   const Icon = cfg.icon;
   const max = data[0]?.count ?? 1;
 
+  const seo = {
+    title: `${cfg.title} Ferrari — classifica per pilota`,
+    description: cfg.description,
+    path: `/stats/${type}`,
+  };
+
   return (
-    <div className="min-h-screen bg-black text-white">
-
-      {/* Background */}
-      <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: 'linear-gradient(to right,#DC0000 1px,transparent 1px),linear-gradient(to bottom,#DC0000 1px,transparent 1px)',
-            backgroundSize: '48px 48px',
-          }}
-        />
-        <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full blur-[120px] opacity-10"
-          style={{ background: cfg.color }}
-        />
-      </div>
-
-      <Navigation />
-
-      <main className="relative z-10 max-w-5xl mx-auto pt-28 md:pt-36 px-4 pb-24">
-
-        {/* Back */}
-        <motion.div
-          initial={{ opacity: 0, x: -12 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mb-10"
-        >
-          <Link
-            href="/statistics"
-            className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.25em] text-zinc-600 hover:text-white transition-colors"
+    <PageShell seo={seo}>
+      <PageHeader
+        eyebrow="Archivio · Statistiche"
+        title={cfg.title}
+        subtitle={cfg.description}
+        breadcrumb={[
+          { label: 'Archivio' },
+          { label: 'Statistiche', href: '/statistics' },
+          { label: cfg.title },
+        ]}
+        actions={
+          <span
+            className="w-11 h-11 rounded-[13px] grid place-items-center"
+            style={{ background: cfg.colorMuted, color: cfg.color }}
+            aria-hidden="true"
           >
-            <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
-            Hall of Fame
-          </Link>
-        </motion.div>
+            <Icon className="w-5 h-5" />
+          </span>
+        }
+      />
 
-        {/* Error banner */}
-        {loadError && (
-          <div className="mb-8 px-5 py-4 rounded-xl border border-red-500/30 bg-red-500/10">
-            <p className="text-red-400 text-xs font-black uppercase tracking-widest">
-              Errore caricamento dati — {loadError}
-            </p>
-            <p className="text-zinc-500 text-xs mt-1">
-              Assicurati di aver creato la view <code className="text-red-400">driver_ferrari_stats</code> su Supabase.
-            </p>
+      {/* Il messaggio di prima diceva a chi legge di creare una vista su
+          Supabase: un'istruzione per chi sviluppa, mostrata a chi visita. */}
+      {loadError && (
+        <PageError message="Non riusciamo a raggiungere l’archivio dati. Riprova fra poco." />
+      )}
+
+      {!loadError && data.length === 0 && (
+        <div className="empty-state">
+          <Trophy className="empty-state-icon" aria-hidden="true" />
+          <p className="empty-state-title">Nessun dato</p>
+          <p className="empty-state-description">
+            Per questa classifica non risultano piloti in archivio.
+          </p>
+        </div>
+      )}
+
+      {!loadError && data.length > 0 && (
+        <div className="grid gap-6">
+          <div className="grid grid-cols-3 rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)] divide-x divide-[var(--fr-border)]">
+            <StatTile value={data.length} label="Piloti in classifica" />
+            <StatTile
+              accent
+              value={cfg.isSum ? Math.floor(max).toLocaleString('it-IT') : max}
+              label="Record assoluto"
+            />
+            <StatTile value={data[0]?.name ?? '—'} label="Detenuto da" />
           </div>
-        )}
 
-        {/* Header */}
-        <motion.header
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-14"
-        >
-          <div className="flex items-center gap-3 mb-5">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: cfg.colorMuted, border: `1px solid ${cfg.color}40` }}
-            >
-              <Icon className="w-4 h-4" style={{ color: cfg.color }} aria-hidden="true" />
+          <Panel title={`Classifica ${cfg.title.toLowerCase()}`}>
+            <div className="flex items-center gap-4 md:gap-6 px-5 md:px-8 py-4 border-b border-[var(--fr-border)] text-[10px] uppercase tracking-widest font-bold text-[var(--fr-text-faint)]">
+              <div className="w-10 md:w-14" />
+              <div className="w-12 md:w-14 shrink-0" />
+              <div className="flex-1">Pilota</div>
+              <div className="hidden md:block">Progressione</div>
+              <div className="text-right shrink-0 w-20 md:w-24">Totale</div>
             </div>
-            <span className="text-[10px] tracking-[0.4em] uppercase font-black" style={{ color: cfg.color }}>
-              Scuderia Ferrari — {cfg.subtitle}
-            </span>
-          </div>
 
-          <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none mb-6">
-            {cfg.title}
-          </h1>
+            {data.map((driver, i) => (
+              <DriverRow key={driver.id} driver={driver} index={i} max={max} cfg={cfg} />
+            ))}
+          </Panel>
 
-          <div
-            className="max-w-2xl pl-5 py-3 rounded-r-xl"
-            style={{ borderLeft: `3px solid ${cfg.color}`, background: cfg.colorMuted }}
-          >
-            <p className="text-zinc-300 text-sm md:text-base leading-relaxed italic">
-              {cfg.description}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-6 mt-8">
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-zinc-600 mb-0.5">Piloti in classifica</p>
-              <p className="text-2xl font-black tabular-nums">{data.length}</p>
-            </div>
-            <div className="w-px self-stretch" style={{ background: 'rgba(255,255,255,0.06)' }} aria-hidden="true" />
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-zinc-600 mb-0.5">Record assoluto</p>
-              <p className="text-2xl font-black tabular-nums" style={{ color: cfg.color }}>
-                {cfg.isSum ? Math.floor(max).toLocaleString('it-IT') : max}
-              </p>
-            </div>
-            <div className="w-px self-stretch" style={{ background: 'rgba(255,255,255,0.06)' }} aria-hidden="true" />
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-zinc-600 mb-0.5">Record di</p>
-              <p className="text-sm font-black uppercase tracking-tight">{data[0]?.name ?? '—'}</p>
-            </div>
-          </div>
-        </motion.header>
-
-        {/* Leaderboard */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
-          className="rounded-2xl overflow-hidden"
-          style={{
-            background: 'rgba(10,10,10,0.8)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            backdropFilter: 'blur(12px)',
-            boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
-          }}
-        >
-          <div
-            className="flex items-center gap-4 md:gap-6 px-5 md:px-8 py-4 border-b"
-            style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}
-          >
-            <div className="w-10 md:w-14" />
-            <div className="w-12 md:w-14 shrink-0" />
-            <div className="flex-1 text-[10px] uppercase tracking-widest font-black text-zinc-600">Pilota</div>
-            <div className="hidden md:block text-[10px] uppercase tracking-widest font-black text-zinc-600">Progressione</div>
-            <div className="text-[10px] uppercase tracking-widest font-black text-zinc-600 text-right shrink-0 w-20 md:w-24">Totale</div>
-          </div>
-
-          {data.map((driver, i) => (
-            <DriverRow key={driver.id} driver={driver} index={i} max={max} cfg={cfg} />
-          ))}
-        </motion.div>
-
-        <p className="text-center text-zinc-700 text-[11px] mt-8 tracking-wider">
-          Dati aggiornati · Scuderia Ferrari F1 1950 – {new Date().getFullYear()}
-        </p>
-      </main>
-
-      <Footer />
-    </div>
+          <p className="text-xs text-[var(--fr-text-faint)]">
+            Archivio storico F1DB, dal 1950 al {new Date().getFullYear()}. Sono elencati i
+            primi 50 piloti con almeno un risultato in questa classifica.
+          </p>
+        </div>
+      )}
+    </PageShell>
   );
 }

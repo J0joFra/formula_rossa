@@ -5,9 +5,9 @@ import {
   PieChart, Pie, Cell
 } from 'recharts';
 import {
-  Trophy, Activity, ChevronLeft, Globe2, Landmark,
+  Trophy, Activity, ChevronRight, Globe2, Landmark,
 } from 'lucide-react';
-import PageShell, { PageLoading } from '../components/ui/PageShell';
+import PageShell, { PageHeader, PageLoading, StatTile } from '../components/ui/PageShell';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { countryConfig } from '../lib/f1/circuitFlags';
@@ -64,21 +64,23 @@ const POINTS_PERIODS = [
 ];
 
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   HELPERS
-───────────────────────────────────────────────────────────────────────────── */
-const normalizeDriverName = (name) => {
-  if (!name) return '';
-  return name.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/[^\w-]/g, '');
-};
+/* Le sezioni qui sotto mostrano solo le prime righe di ogni classifica: il
+   resto vive in /stats/[tipo], che finora non era raggiungibile da nessuna
+   parte del sito. Questo è il ponte. */
+function ClassificaCompleta({ href, children }) {
+  return (
+    <div className="mt-6 pt-4 border-t border-[var(--fr-border)]">
+      <Link
+        href={href}
+        className="group inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--fr-red)] hover:gap-3 transition-all"
+      >
+        {children}
+        <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
+      </Link>
+    </div>
+  );
+}
 
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   DARK TOOLTIP
-───────────────────────────────────────────────────────────────────────────── */
 export default function StatisticsPage() {
   const [loading,        setLoading]        = useState(true);
   const [pilotWins,      setPilotWins]      = useState([]);
@@ -173,6 +175,8 @@ export default function StatisticsPage() {
   );
 
   const maxWins = pilotWins[0]?.count ?? 1;
+  // Il 1950 è la prima stagione e va contato, come nel footer.
+  const stagioni = new Date().getFullYear() - 1950 + 1;
 
   const seo = {
     title: 'Statistiche Ferrari in Formula 1',
@@ -183,54 +187,22 @@ export default function StatisticsPage() {
   return (
     <PageShell seo={seo}>
 
-      <div className="fixed inset-0 pointer-events-none -z-10" aria-hidden="true">
-        <div className="absolute inset-0 opacity-[0.025]"
-          style={{ backgroundImage: 'linear-gradient(to right,#DC0000 1px,transparent 1px),linear-gradient(to bottom,#DC0000 1px,transparent 1px)', backgroundSize: '48px 48px' }}
-        />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[280px] rounded-full blur-[120px] opacity-[0.06]"
-          style={{ background: RED }}
-        />
+      <PageHeader
+        eyebrow="Archivio"
+        title="Statistiche"
+        subtitle={`Le classifiche storiche della Scuderia dal 1950: chi ha vinto di più, dove, e come sono cambiati i numeri stagione dopo stagione. ${stagioni} stagioni di risultati di gara.`}
+        breadcrumb={[{ label: 'Archivio' }, { label: 'Statistiche' }]}
+      />
+
+      {/* Quattro numeri di sintesi. Le vittorie e le pole sono somme di quello
+          che le classifiche qui sotto mostrano riga per riga, quindi restano
+          coerenti con la pagina invece di essere scritte a mano. */}
+      <div className="grid grid-cols-2 md:grid-cols-4 rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)] divide-x divide-y md:divide-y-0 divide-[var(--fr-border)] mb-8">
+        <StatTile accent value={pilotWins.reduce((a, d) => a + d.count, 0).toLocaleString('it-IT')} label="Vittorie" />
+        <StatTile value={pilotWins.length} label="Piloti vincitori" />
+        <StatTile value={champSeasons.length} label="Titoli costruttori" />
+        <StatTile value={poleStats.reduce((a, d) => a + d.count, 0).toLocaleString('it-IT')} label="Pole position" />
       </div>
-
-
-        <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className="mb-10">
-          <Link href="/" className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.25em] text-[var(--fr-text-faint)] hover:text-white transition-colors group">
-            <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" aria-hidden="true" />
-            Torna alla home
-          </Link>
-        </motion.div>
-
-        <motion.header
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-          className="mb-14 pl-6 relative"
-        >
-          <div className="absolute left-0 top-1 bottom-1 w-0.5 rounded-full"
-            style={{ background: `linear-gradient(to bottom, ${RED}, transparent)` }} aria-hidden="true" />
-
-          <p className="text-[10px] tracking-[0.45em] uppercase font-black mb-3" style={{ color: RED }}>
-            Scuderia Ferrari · Intelligence & Performance
-          </p>
-          <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none mb-4">
-            Data <span style={{ color: RED }}>Vault</span>
-          </h1>
-          <p className="text-[var(--fr-text-muted)] text-sm max-w-md leading-relaxed">
-            75 anni di telemetria, vittorie e record storici. Ogni numero racconta una leggenda della Rossa.
-          </p>
-
-          <div className="flex flex-wrap gap-8 mt-8 pt-8 border-t border-white/[0.06]">
-            {[
-              { label: 'Vittorie totali',      value: pilotWins.reduce((a,d) => a+d.count, 0).toLocaleString('it-IT') },
-              { label: 'Piloti vincitori',      value: pilotWins.length },
-              { label: 'Titoli costruttori',    value: champSeasons.length },
-              { label: 'Pole positions',        value: poleStats.reduce((a,d) => a+d.count, 0).toLocaleString('it-IT') },
-            ].map(s => (
-              <div key={s.label}>
-                <p className="text-[10px] uppercase tracking-widest text-[var(--fr-text-faint)] mb-0.5">{s.label}</p>
-                <p className="text-2xl font-black tabular-nums" style={{ color: RED }}>{s.value}</p>
-              </div>
-            ))}
-          </div>
-        </motion.header>
 
         <motion.div
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }}
@@ -238,7 +210,7 @@ export default function StatisticsPage() {
         >
 
           {/* WINNERS CIRCLE */}
-          <AccordionSection id="winners" title="Winners Circle" subtitle="Classifica vittorie per pilota" icon={Trophy} isOpen={openSection==='winners'} onToggle={()=>toggle('winners')} accent="gold">
+          <AccordionSection id="winners" title="Vittorie per pilota" subtitle="Chi ha vinto di più con la Ferrari" icon={Trophy} isOpen={openSection==='winners'} onToggle={()=>toggle('winners')} accent="gold">
             <div className="flex items-center gap-4 md:gap-5 px-1 pt-4 pb-2">
               <div className="w-9 shrink-0" />
               <div className="w-10 md:w-12 shrink-0" />
@@ -250,10 +222,11 @@ export default function StatisticsPage() {
                 <WinnerRow key={driver.id} driver={driver} index={i} max={maxWins} />
               ))}
             </div>
+            <ClassificaCompleta href="/stats/wins">Tutte le vittorie, pilota per pilota</ClassificaCompleta>
           </AccordionSection>
 
           {/* PERFORMANCE TIMELINE */}
-          <AccordionSection id="timeline" title="Performance Timeline" subtitle="Evoluzione punti costruttori annuali" icon={Activity} isOpen={openSection==='timeline'} onToggle={()=>toggle('timeline')} accent="red">
+          <AccordionSection id="timeline" title="Punti stagione per stagione" subtitle="Come cambiano i numeri al cambiare del punteggio" icon={Activity} isOpen={openSection==='timeline'} onToggle={()=>toggle('timeline')} accent="red">
             <div className="mt-6">
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
@@ -293,18 +266,18 @@ export default function StatisticsPage() {
                         </linearGradient>
                       ))}
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--fr-border)" vertical={false} />
                     <XAxis 
                       dataKey="year" 
-                      stroke="rgba(255,255,255,0.08)" 
-                      tick={{ fill: '#555', fontSize: 11, fontWeight: 900 }} 
+                      stroke="var(--fr-border)" 
+                      tick={{ fill: 'var(--fr-text-faint)', fontSize: 11, fontWeight: 900 }} 
                       axisLine={false} 
                       tickLine={false} 
                       tickMargin={12}
                     />
                     <YAxis 
-                      stroke="rgba(255,255,255,0.08)" 
-                      tick={{ fill: '#555', fontSize: 11, fontWeight: 900 }} 
+                      stroke="var(--fr-border)" 
+                      tick={{ fill: 'var(--fr-text-faint)', fontSize: 11, fontWeight: 900 }} 
                       axisLine={false} 
                       tickLine={false} 
                     />
@@ -325,7 +298,7 @@ export default function StatisticsPage() {
                             // Se è il 2020 usa l'arancione, altrimenti il colore del periodo
                             accentColor={isCovidYear ? '#F97316' : (period?.color || RED)}
                             extra={
-                              <div className="flex flex-col gap-1 mt-1 pt-1 border-t border-white/10">
+                              <div className="flex flex-col gap-1 mt-1 pt-1 border-t border-[var(--fr-border)]">
                                 {isCovidYear && (
                                   <div className="mb-2 px-2 py-1.5 rounded bg-orange-500/10 border border-orange-500/30">
                                     <p className="text-[9px] font-black text-orange-500 uppercase leading-tight mb-0.5">
@@ -382,7 +355,7 @@ export default function StatisticsPage() {
                 </ResponsiveContainer>
               </div>
 
-              <p className="text-[12px] text-[var(--fr-text-faint)] text-center mt-4 italic border-t border-white/[0.04] pt-3">
+              <p className="text-[12px] text-[var(--fr-text-faint)] text-center mt-4 italic border-t border-[var(--fr-border)] pt-3">
                 ⚡ I punti riflettono i diversi sistemi di punteggio: 1950-59 (8 pt vittoria), 1960-90 (9 pt), 
                 1991-2009 (10 pt), 2010-oggi (25 pt + sprint)
               </p>
@@ -390,7 +363,7 @@ export default function StatisticsPage() {
           </AccordionSection>
 
           {/* GLOBAL DNA */}
-          <AccordionSection id="dna" title="Global DNA" subtitle="Distribuzione geografica dei piloti" icon={Globe2} isOpen={openSection==='dna'} onToggle={()=>toggle('dna')} accent="red">
+          <AccordionSection id="dna" title="Da dove vengono i piloti" subtitle="Nazionalità di chi ha corso per la Rossa" icon={Globe2} isOpen={openSection==='dna'} onToggle={()=>toggle('dna')} accent="red">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-6 items-center">
 
               <div className="relative h-[320px]">
@@ -432,16 +405,16 @@ export default function StatisticsPage() {
                 {nationalities.map((n, i) => (
                   <motion.div key={n.id}
                     initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl group hover:bg-white/[0.04] transition-colors"
-                    style={{ border: '1px solid rgba(255,255,255,0.5)' }}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl group hover:bg-[var(--fr-surface-2)] transition-colors"
+                    style={{ border: '1px solid var(--fr-border)' }}
                   >
-                    <div className="w-7 h-5 rounded-sm overflow-hidden shrink-0 border border-white/10">
+                    <div className="w-7 h-5 rounded-sm overflow-hidden shrink-0 border border-[var(--fr-border)]">
                       <img src={`https://flagcdn.com/w80/${n.flag}.png`} alt={n.name} className="w-full h-full object-cover" onError={e => { e.currentTarget.style.display = 'none'; }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-black uppercase tracking-tight text-[var(--fr-text-muted)] group-hover:text-white transition-colors truncate">{n.name}</p>
+                      <p className="text-[10px] font-black uppercase tracking-tight text-[var(--fr-text-muted)] group-hover:text-[var(--fr-text)] transition-colors truncate">{n.name}</p>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <div className="flex-1 h-px rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                        <div className="flex-1 h-px rounded-full overflow-hidden" style={{ background: 'var(--fr-surface-2)' }}>
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${(n.value / nationalities[0]?.value || 1) * 100}%` }}
@@ -460,16 +433,16 @@ export default function StatisticsPage() {
           </AccordionSection>
 
           {/* FORTRESS MARANELLO — Grand Prix wins */}
-          <AccordionSection id="circuits" title="Fortress Maranello" subtitle="Grand Prix con più vittorie Ferrari" icon={Landmark} isOpen={openSection==='circuits'} onToggle={()=>toggle('circuits')} accent="gold">
+          <AccordionSection id="circuits" title="I Gran Premi della Ferrari" subtitle="Dove la Rossa ha vinto più spesso" icon={Landmark} isOpen={openSection==='circuits'} onToggle={()=>toggle('circuits')} accent="gold">
             <div className="mt-6 space-y-6">
 
               {/* GP chips */}
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 {grandPrix.length > 0 ? grandPrix.map(g => (
                   <div key={g.name}
-                    className="flex items-center gap-3 bg-zinc-900/40 border border-white/5 p-3 rounded-2xl group hover:border-yellow-500/30 transition-all"
+                    className="flex items-center gap-3 bg-[var(--fr-surface-2)] border border-[var(--fr-border)] p-3 rounded-2xl group hover:border-yellow-500/30 transition-all"
                   >
-                    <div className="relative w-8 h-6 overflow-hidden rounded-sm shadow-sm shrink-0 border border-white/10">
+                    <div className="relative w-8 h-6 overflow-hidden rounded-sm shadow-sm shrink-0 border border-[var(--fr-border)]">
                       {g.flag && (
                         <img src={`https://flagcdn.com/w80/${g.flag}.png`} alt={g.name}
                           className="w-full h-full object-cover"
@@ -477,21 +450,21 @@ export default function StatisticsPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-black uppercase text-white truncate group-hover:text-yellow-400 transition-colors">
+                      <p className="text-[10px] font-black uppercase text-[var(--fr-text)] truncate group-hover:text-yellow-400 transition-colors">
                         {g.name.replace(' Grand Prix','').replace(' GP','')}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
-                        <div className="h-1 w-12 rounded-full bg-zinc-800 overflow-hidden">
+                        <div className="h-1 w-12 rounded-full bg-[var(--fr-surface-2)] overflow-hidden">
                           <div className="h-full rounded-full transition-all"
                             style={{ width: `${(g.wins / (grandPrix[0]?.wins || 1)) * 100}%`, background: g.color || GOLD }} />
                         </div>
                         <span className="text-[10px] font-black" style={{ color: GOLD }}>{g.wins}</span>
-                        <span className="text-[9px] text-white/30 font-bold">/{g.total}</span>
+                        <span className="text-[9px] text-[var(--fr-text-faint)] font-bold">/{g.total}</span>
                       </div>
                     </div>
                   </div>
                 )) : (
-                  <div className="col-span-5 text-center py-8 text-white/30 text-xs">Nessun dato</div>
+                  <div className="col-span-5 text-center py-8 text-[var(--fr-text-faint)] text-xs">Nessun dato</div>
                 )}
               </div>
 
@@ -500,14 +473,14 @@ export default function StatisticsPage() {
                 {grandPrix.length > 0 && (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={grandPrix} layout="vertical" margin={{ left: 8, right: 64, top: 4, bottom: 4 }}>
-                      <XAxis type="number" stroke="rgba(255,255,255,0.08)"
-                        tick={{ fill: '#555', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
+                      <XAxis type="number" stroke="var(--fr-border)"
+                        tick={{ fill: 'var(--fr-text-faint)', fontSize: 11, fontWeight: 900 }} axisLine={false} tickLine={false} />
                       <YAxis dataKey="name" type="category" width={140}
-                        stroke="rgba(255,255,255,0.08)"
-                        tick={{ fill: '#ccc', fontSize: 10, fontWeight: 900 }}
+                        stroke="var(--fr-border)"
+                        tick={{ fill: 'var(--fr-text-muted)', fontSize: 10, fontWeight: 900 }}
                         tickFormatter={v => v.replace(' Grand Prix','').replace(' GP','').toUpperCase()}
                         axisLine={false} tickLine={false} />
-                      <Tooltip cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+                      <Tooltip cursor={{ fill: 'var(--fr-overlay)' }}
                         content={({ active, payload }) => {
                           if (!active || !payload?.length) return null;
                           const g = payload[0].payload;
@@ -517,10 +490,10 @@ export default function StatisticsPage() {
                               accentColor={g.color || GOLD}
                               extra={
                                 <div className="flex items-center gap-3 mb-1">
-                                  {g.flag && <img src={`https://flagcdn.com/w40/${g.flag}.png`} className="w-5 h-3.5 object-cover rounded-sm border border-white/10" alt="" />}
+                                  {g.flag && <img src={`https://flagcdn.com/w40/${g.flag}.png`} className="w-5 h-3.5 object-cover rounded-sm border border-[var(--fr-border)]" alt="" />}
                                   <div>
-                                    <p className="text-[10px] font-black uppercase text-white/60">{g.name}</p>
-                                    <p className="text-[9px] text-white/40">{g.winRate}% win rate · {g.total} gare totali</p>
+                                    <p className="text-[10px] font-black uppercase text-[var(--fr-text-muted)]">{g.name}</p>
+                                    <p className="text-[9px] text-[var(--fr-text-faint)]">{g.winRate}% win rate · {g.total} gare totali</p>
                                   </div>
                                 </div>
                               }
@@ -542,11 +515,11 @@ export default function StatisticsPage() {
           </AccordionSection>
 
           {/* SEASON BY SEASON — riepilogo stagioni recenti */}
-          <AccordionSection id="seasons" title="Season Rewind" subtitle="Prestazioni Ferrari per stagione (ultime 20)" icon={Activity} isOpen={openSection==='seasons'} onToggle={()=>toggle('seasons')} accent="red">
+          <AccordionSection id="seasons" title="Le ultime venti stagioni" subtitle="Punti, vittorie e piazzamenti anno per anno" icon={Activity} isOpen={openSection==='seasons'} onToggle={()=>toggle('seasons')} accent="red">
             <div className="mt-6 overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="text-[10px] font-black uppercase tracking-widest text-white/30 border-b border-white/5">
+                  <tr className="text-[10px] font-black uppercase tracking-widest text-[var(--fr-text-faint)] border-b border-[var(--fr-border)]">
                     <th className="py-2 pr-4">Anno</th>
                     <th className="py-2 pr-4 text-right">Pos.</th>
                     <th className="py-2 pr-4 text-right">Vittorie</th>
@@ -561,7 +534,7 @@ export default function StatisticsPage() {
                     const isChamp = champSeasons.some(c => c.year === s.year);
                     return (
                       <tr key={s.year}
-                        className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors group"
+                        className="border-b border-[var(--fr-border)] hover:bg-[var(--fr-surface-2)] transition-colors group"
                       >
                         <td className="py-3 pr-4">
                           <div className="flex items-center gap-2">
@@ -570,15 +543,15 @@ export default function StatisticsPage() {
                           </div>
                         </td>
                         <td className="py-3 pr-4 text-right">
-                          <span className={`font-black text-sm ${s.championship_position === 1 ? 'text-yellow-400' : s.championship_position <= 3 ? 'text-orange-400' : 'text-white/50'}`}>
+                          <span className={`font-black text-sm ${s.championship_position === 1 ? 'text-yellow-400' : s.championship_position <= 3 ? 'text-orange-400' : 'text-[var(--fr-text-faint)]'}`}>
                             {s.championship_position ?? '—'}°
                           </span>
                         </td>
-                        <td className="py-3 pr-4 text-right font-black" style={{ color: s.wins > 0 ? RED : 'rgba(255,255,255,0.2)' }}>{s.wins ?? 0}</td>
-                        <td className="py-3 pr-4 text-right font-bold text-white/60">{s.podiums ?? 0}</td>
-                        <td className="py-3 pr-4 text-right font-bold text-white/40">{s.poles ?? 0}</td>
-                        <td className="py-3 pr-4 text-right font-bold text-white/40">{s.fastest_laps ?? 0}</td>
-                        <td className="py-3 text-right font-black text-white/70">{s.points?.toLocaleString('it-IT') ?? 0}</td>
+                        <td className="py-3 pr-4 text-right font-black" style={{ color: s.wins > 0 ? RED : 'var(--fr-text-dim)' }}>{s.wins ?? 0}</td>
+                        <td className="py-3 pr-4 text-right font-bold text-[var(--fr-text-muted)]">{s.podiums ?? 0}</td>
+                        <td className="py-3 pr-4 text-right font-bold text-[var(--fr-text-faint)]">{s.poles ?? 0}</td>
+                        <td className="py-3 pr-4 text-right font-bold text-[var(--fr-text-faint)]">{s.fastest_laps ?? 0}</td>
+                        <td className="py-3 text-right font-black text-[var(--fr-text-muted)]">{s.points?.toLocaleString('it-IT') ?? 0}</td>
                       </tr>
                     );
                   })}
@@ -588,7 +561,7 @@ export default function StatisticsPage() {
           </AccordionSection>
 
           {/* CHAMPIONSHIP SEASONS */}
-          <AccordionSection id="championships" title="Titoli Costruttori" subtitle="Stagioni campione Ferrari" icon={Trophy} isOpen={openSection==='championships'} onToggle={()=>toggle('championships')} accent="gold">
+          <AccordionSection id="championships" title="Titoli costruttori" subtitle="Le stagioni chiuse da campione" icon={Trophy} isOpen={openSection==='championships'} onToggle={()=>toggle('championships')} accent="gold">
             <div className="mt-6">
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                 {champSeasons.map((s) => (
@@ -596,30 +569,30 @@ export default function StatisticsPage() {
                     className="flex flex-col items-center justify-center p-4 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 hover:bg-yellow-500/10 transition-colors"
                   >
                     <span className="text-2xl font-black" style={{ color: GOLD }}>{s.year}</span>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-white/40 mt-1">{s.points} pts</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-[var(--fr-text-faint)] mt-1">{s.points} pts</span>
                   </div>
                 ))}
               </div>
-              {champSeasons.length === 0 && <p className="text-white/30 text-xs text-center py-8">Nessun dato disponibile</p>}
+              {champSeasons.length === 0 && <p className="text-[var(--fr-text-faint)] text-xs text-center py-8">Nessun dato disponibile</p>}
             </div>
           </AccordionSection>
 
           {/* POLE POSITIONS */}
-          <AccordionSection id="poles" title="Pole Masters" subtitle="Pole positions per pilota Ferrari" icon={Activity} isOpen={openSection==='poles'} onToggle={()=>toggle('poles')} accent="red">
+          <AccordionSection id="poles" title="Pole position per pilota" subtitle="Il miglior tempo in qualifica" icon={Activity} isOpen={openSection==='poles'} onToggle={()=>toggle('poles')} accent="red">
             <div className="mt-6 space-y-3">
               {poleStats.map((d, i) => {
                 const pct = poleStats[0]?.count ? (d.count / poleStats[0].count) * 100 : 0;
                 return (
                   <div key={d.id} className="flex items-center gap-4 group">
                     <span className="text-[10px] font-black w-5 text-right shrink-0"
-                      style={{ color: i === 0 ? RED : 'rgba(255,255,255,0.2)' }}>{i+1}</span>
+                      style={{ color: i === 0 ? RED : 'var(--fr-text-dim)' }}>{i+1}</span>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-black uppercase tracking-tight group-hover:text-red-400 transition-colors"
-                          style={{ color: i === 0 ? RED : 'white' }}>{d.name}</span>
-                        <span className="text-sm font-black tabular-nums" style={{ color: i === 0 ? RED : 'rgba(255,255,255,0.6)' }}>{d.count}</span>
+                          style={{ color: i === 0 ? RED : 'var(--fr-text)' }}>{d.name}</span>
+                        <span className="text-sm font-black tabular-nums" style={{ color: i === 0 ? RED : 'var(--fr-text-muted)' }}>{d.count}</span>
                       </div>
-                      <div className="h-1 rounded-full bg-white/5 overflow-hidden">
+                      <div className="h-1 rounded-full bg-[var(--fr-surface-2)] overflow-hidden">
                         <motion.div className="h-full rounded-full"
                           initial={{ width: 0 }}
                           animate={{ width: `${pct}%` }}
@@ -631,24 +604,25 @@ export default function StatisticsPage() {
                 );
               })}
             </div>
+            <ClassificaCompleta href="/stats/poles">Tutte le pole position</ClassificaCompleta>
           </AccordionSection>
 
           {/* FASTEST LAPS */}
-          <AccordionSection id="fastestlaps" title="Speed Icons" subtitle="Giri veloci per pilota Ferrari" icon={Activity} isOpen={openSection==='fastestlaps'} onToggle={()=>toggle('fastestlaps')} accent="red">
+          <AccordionSection id="fastestlaps" title="Giri veloci per pilota" subtitle="Il giro più rapido in gara" icon={Activity} isOpen={openSection==='fastestlaps'} onToggle={()=>toggle('fastestlaps')} accent="red">
             <div className="mt-6 space-y-3">
               {fastestLaps.map((d, i) => {
                 const pct = fastestLaps[0]?.count ? (d.count / fastestLaps[0].count) * 100 : 0;
                 return (
                   <div key={d.id} className="flex items-center gap-4 group">
                     <span className="text-[10px] font-black w-5 text-right shrink-0"
-                      style={{ color: i === 0 ? GOLD : 'rgba(255,255,255,0.2)' }}>{i+1}</span>
+                      style={{ color: i === 0 ? GOLD : 'var(--fr-text-dim)' }}>{i+1}</span>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-black uppercase tracking-tight group-hover:text-yellow-400 transition-colors"
                           style={{ color: i === 0 ? GOLD : 'white' }}>{d.name}</span>
-                        <span className="text-sm font-black tabular-nums" style={{ color: i === 0 ? GOLD : 'rgba(255,255,255,0.6)' }}>{d.count}</span>
+                        <span className="text-sm font-black tabular-nums" style={{ color: i === 0 ? GOLD : 'var(--fr-text-muted)' }}>{d.count}</span>
                       </div>
-                      <div className="h-1 rounded-full bg-white/5 overflow-hidden">
+                      <div className="h-1 rounded-full bg-[var(--fr-surface-2)] overflow-hidden">
                         <motion.div className="h-full rounded-full"
                           initial={{ width: 0 }}
                           animate={{ width: `${pct}%` }}
@@ -660,16 +634,17 @@ export default function StatisticsPage() {
                 );
               })}
             </div>
+            <ClassificaCompleta href="/stats/fastest-laps">Tutti i giri veloci</ClassificaCompleta>
           </AccordionSection>
 
           {/* PODIUM BREAKDOWN */}
-          <AccordionSection id="podiums" title="Podio Club" subtitle="Distribuzione 1°/2°/3° per pilota Ferrari" icon={Trophy} isOpen={openSection==='podiums'} onToggle={()=>toggle('podiums')} accent="gold">
+          <AccordionSection id="podiums" title="Podi per pilota" subtitle="Come si distribuiscono primo, secondo e terzo posto" icon={Trophy} isOpen={openSection==='podiums'} onToggle={()=>toggle('podiums')} accent="gold">
             <div className="mt-6 space-y-4">
               {podiumDrivers.map((d, i) => (
                 <div key={d.id} className="group">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-black uppercase tracking-tight group-hover:text-red-400 transition-colors">{d.name}</span>
-                    <span className="text-sm font-black tabular-nums text-white/60">{d.total} podi</span>
+                    <span className="text-sm font-black tabular-nums text-[var(--fr-text-muted)]">{d.total} podi</span>
                   </div>
                   <div className="flex h-2 rounded-full overflow-hidden gap-px">
                     {d.wins > 0 && (
@@ -699,6 +674,7 @@ export default function StatisticsPage() {
                 </div>
               ))}
             </div>
+            <ClassificaCompleta href="/stats/podiums">Tutti i podi, pilota per pilota</ClassificaCompleta>
           </AccordionSection>
 
         </motion.div>
