@@ -15,6 +15,22 @@ import { ChevronDown, User } from 'lucide-react';
 const RED  = '#DC0000';
 const GOLD = '#EAB308';
 
+/**
+ * Dal nome del pilota al nome del file della foto.
+ *
+ * Viveva in pages/statistics.jsx ed è rimasta lì quando WinnerRow è stata
+ * estratta qui: la funzione risultava quindi non definita a runtime e l'intera
+ * pagina /statistics si fermava su "Application error". La build non se ne
+ * accorge, perché è un riferimento risolto solo mentre la riga viene disegnata.
+ */
+const normalizeDriverName = (name) => {
+  if (!name) return '';
+  return name.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]/g, '');
+};
+
 const MEDAL = [
 
   { color: RED,      label: '1ST' },
