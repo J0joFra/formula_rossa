@@ -15,6 +15,7 @@ import { ChevronRight, Loader2, AlertCircle } from 'lucide-react';
 import Navigation from '../ferrari/Navigation';
 import Footer from '../ferrari/Footer';
 import SEO from '../seo';
+import { useI18n } from '../../lib/i18n';
 
 /** Intestazione di pagina: occhiello, titolo, sottotitolo e briciole di pane. */
 export function PageHeader({ eyebrow, title, accent, subtitle, breadcrumb, actions }) {
@@ -51,29 +52,35 @@ export function PageHeader({ eyebrow, title, accent, subtitle, breadcrumb, actio
 }
 
 /** Stato di caricamento coerente su tutte le pagine. */
-export function PageLoading({ label = 'Caricamento dati…' }) {
+/* Le tre stringhe di stato erano scritte in italiano come valori di default
+   dei parametri, quindi restavano in italiano su tutto il sito anche cambiando
+   lingua. Il default ora è la chiave tradotta; chi passa un `label` proprio
+   continua a vincere. */
+export function PageLoading({ label }) {
+  const { t } = useI18n();
   return (
     <div className="flex flex-col items-center justify-center py-28 gap-4" role="status" aria-live="polite">
       <Loader2 className="w-7 h-7 text-[var(--fr-red)] animate-spin" aria-hidden="true" />
-      <p className="text-sm text-[var(--fr-text-muted)]">{label}</p>
+      <p className="text-sm text-[var(--fr-text-muted)]">{label || t('loading')}</p>
     </div>
   );
 }
 
 /** Stato di errore: dice cosa è andato storto e come riprovare. */
-export function PageError({ title = 'Dati non disponibili', message, onRetry }) {
+export function PageError({ title, message, onRetry }) {
+  const { t } = useI18n();
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-4 text-center" role="alert">
       <span className="w-12 h-12 rounded-2xl grid place-items-center bg-[var(--fr-red-soft)]">
         <AlertCircle className="w-6 h-6 text-[var(--fr-red)]" aria-hidden="true" />
       </span>
       <div>
-        <p className="font-head text-2xl font-black uppercase">{title}</p>
+        <p className="font-head text-2xl font-black uppercase">{title || t('err_title')}</p>
         {message && <p className="text-sm text-[var(--fr-text-muted)] mt-1.5 max-w-[46ch]">{message}</p>}
       </div>
       {onRetry && (
         <button type="button" onClick={onRetry} className="btn btn-outline mt-1">
-          Riprova
+          {t('retry')}
         </button>
       )}
     </div>

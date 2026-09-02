@@ -12,19 +12,23 @@ import {
   Smartphone, Trophy, Calculator, TrendingUp, Users,
   ArrowUpRight, Play, Sparkles, Flag,
 } from 'lucide-react';
+import { useI18n } from '../../lib/i18n';
 
 const GRIDUP_WEB_URL = 'https://gridup-f1.web.app';
 const GRIDUP_PLAY_URL = 'https://play.google.com/store/apps/details?id=com.gridup.app';
 const GRIDUP_ICON_URL = 'https://gridup-f1.web.app/icons/icon-512.png';
 
+/* Solo icona e chiavi: i testi erano scritti in italiano dentro l'array,
+   quindi restavano in italiano anche col sito in un'altra lingua. */
 const FEATURES = [
-  { icon: Calculator, title: 'Calcolatore titolo', desc: 'I punti che servono per essere sicuri del Mondiale.' },
-  { icon: TrendingUp, title: 'Scenari live',        desc: 'Chi può ancora vincere e con quale margine.' },
-  { icon: Trophy,     title: 'Classifiche',         desc: 'Piloti e costruttori sempre aggiornati.' },
-  { icon: Users,      title: 'Confronti',           desc: 'Metti a paragone i piloti gara dopo gara.' },
+  { icon: Calculator, title: 'gu_f1t', desc: 'gu_f1d' },
+  { icon: TrendingUp, title: 'gu_f2t', desc: 'gu_f2d' },
+  { icon: Trophy,     title: 'gu_f3t', desc: 'gu_f3d' },
+  { icon: Users,      title: 'gu_f4t', desc: 'gu_f4d' },
 ];
 
 export default function GridUpPromo() {
+  const { t } = useI18n();
   return (
     <section
       aria-labelledby="gridup-heading"
@@ -52,20 +56,18 @@ export default function GridUpPromo() {
             <div>
               <span className="inline-flex items-center gap-2 text-[10px] tracking-[0.3em] uppercase font-bold text-[var(--fr-red)] mb-5">
                 <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
-                Companion App · GridUp
+                {t('gu_eyebrow')}
               </span>
 
               <h2
                 id="gridup-heading"
                 className="text-3xl md:text-5xl font-black tracking-tight leading-none uppercase mb-4"
               >
-                Scarica <span className="text-[var(--fr-red)]">GridUp</span>
+                {t('gu_titleA')} <span className="text-[var(--fr-red)]">{t('gu_titleB')}</span>
               </h2>
 
               <p className="text-[var(--text-secondary)] text-sm md:text-base leading-relaxed max-w-md mb-6">
-                Tutto sul Mondiale di Formula 1 in tasca: calcola i punti necessari
-                per vincere il campionato, esplora gli scenari in tempo reale e
-                consulta le classifiche di piloti e costruttori — sempre aggiornati.
+                {t('gu_lead')}
               </p>
 
               {/* Features */}
@@ -80,10 +82,10 @@ export default function GridUpPromo() {
                     </span>
                     <span className="min-w-0">
                       <span className="block text-xs font-black uppercase tracking-wider text-[var(--text-primary)]">
-                        {f.title}
+                        {t(f.title)}
                       </span>
                       <span className="block text-[11px] text-[var(--text-tertiary)] leading-snug mt-0.5">
-                        {f.desc}
+                        {t(f.desc)}
                       </span>
                     </span>
                   </li>
@@ -99,7 +101,7 @@ export default function GridUpPromo() {
                   className="group inline-flex items-center justify-center gap-2 bg-[var(--fr-red)] text-white px-7 py-3.5 rounded-xl font-black text-[11px] uppercase tracking-[0.14em] transition-all duration-200 hover:bg-[var(--fr-red-ink)] hover:-translate-y-0.5 hover:shadow-[var(--fr-glow-red)]"
                 >
                   <Smartphone className="w-4 h-4" aria-hidden="true" />
-                  Apri l&apos;app
+                  {t('gu_open')}
                   <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
                 </a>
 
@@ -107,19 +109,19 @@ export default function GridUpPromo() {
                   href={GRIDUP_PLAY_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Scarica GridUp su Google Play"
+                  aria-label={t('gu_playAria')}
                   className="inline-flex items-center justify-center gap-2.5 bg-transparent text-[var(--text-primary)] px-6 py-3.5 rounded-xl font-bold border-2 border-[var(--border-strong)] transition-all duration-200 hover:border-[var(--fr-red)] hover:-translate-y-0.5"
                 >
                   <Play className="w-4 h-4 fill-current" aria-hidden="true" />
                   <span className="text-left leading-none">
-                    <span className="block text-[8px] uppercase tracking-widest text-[var(--text-tertiary)]">Scarica su</span>
+                    <span className="block text-[8px] uppercase tracking-widest text-[var(--text-tertiary)]">{t('gu_getOn')}</span>
                     <span className="block text-sm font-black">Google Play</span>
                   </span>
                 </a>
               </div>
 
               <p className="mt-4 text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
-                Gratis · Android &amp; Web · Nessuna registrazione richiesta
+                {t('gu_terms')}
               </p>
             </div>
 
@@ -141,7 +143,7 @@ export default function GridUpPromo() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={GRIDUP_ICON_URL}
-                      alt="Icona dell'app GridUp"
+                      alt={t('gu_iconAlt')}
                       width={80}
                       height={80}
                       className="w-full h-full object-contain"
@@ -155,15 +157,15 @@ export default function GridUpPromo() {
                       }}
                     />
                   </div>
-                  <p className="font-black text-white text-lg tracking-widest">GridUp</p>
-                  <p className="text-[9px] text-white/50 uppercase tracking-[0.2em] mb-5">F1 Title Calculator</p>
+                  <p className="font-black text-fixed-white text-lg tracking-widest">GridUp</p>
+                  <p className="text-[9px] text-white/50 uppercase tracking-[0.2em] mb-5">{t('gu_subtitle')}</p>
 
                   {/* Fake standings rows */}
                   <div className="w-full space-y-2">
                     {[
-                      { p: '1', n: 'Leader', pts: '—', lead: true },
-                      { p: '2', n: 'Rivale', pts: '−18' },
-                      { p: '3', n: 'Rivale', pts: '−44' },
+                      { p: '1', n: t('gu_leader'), pts: '—', lead: true },
+                      { p: '2', n: t('gu_rival'), pts: '−18' },
+                      { p: '3', n: t('gu_rival'), pts: '−44' },
                     ].map((r) => (
                       <div
                         key={r.p}
@@ -183,7 +185,7 @@ export default function GridUpPromo() {
 
                   {/* Fake "points to secure title" chip */}
                   <div className="mt-5 w-full rounded-xl bg-white/[0.04] border border-white/10 p-3 text-center">
-                    <p className="text-[8px] uppercase tracking-widest text-white/40">Punti per il titolo</p>
+                    <p className="text-[8px] uppercase tracking-widest text-white/40">{t('gu_toTitle')}</p>
                     <p className="text-2xl font-black text-[var(--fr-red)] leading-none mt-1">137</p>
                   </div>
                 </div>
