@@ -4,14 +4,7 @@ import PageShell, { PageHeader, PageLoading, PageError, Panel, StatTile } from '
 import { motion } from 'framer-motion';
 import { User, Trophy, Timer, Zap, Star, Award, Gauge } from 'lucide-react';
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = typeof window !== 'undefined'
-  ? createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    )
-  : null;
+import { supabase } from '../../lib/supabaseClient';
 
 /* ─── Config — ora solo metadati, niente query ──────────────────────────── */
 const CONFIG = {

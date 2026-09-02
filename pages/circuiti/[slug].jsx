@@ -2,18 +2,12 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../../lib/supabaseClient';
 import Navigation from '../../components/ferrari/Navigation';
 import Footer from '../../components/ferrari/Footer';
 import { getFlagCode } from '../../lib/flags';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
 
 // ── Main component ────────────────────────────────────────────────────────────
 

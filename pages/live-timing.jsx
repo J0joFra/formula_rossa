@@ -10,20 +10,13 @@ import {
   getWeather, getMeetings, getSessionsForMeeting, getLatestSession,
   getAllDriversSectors, getRacePositions, getAllLaps, openf1Fetch,
 } from '../lib/openf1';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabaseClient';
 import { CIRCUIT_COUNTRY } from '../lib/f1/circuitCountry';
 import { useOutsideClose, Dropdown, StatCard, LapSelector } from '../components/livetiming/Controls';
 import {
   TelemetryChart, SectorTable, RacePositionsChart,
   GridToRaceChart, QualiProgressionChart, QualifyingToRaceProgression,
 } from '../components/livetiming/Charts';
-
-const supabase = typeof window !== 'undefined'
-  ? createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    )
-  : null;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -795,8 +788,6 @@ const fetchAll = async () => {
               )}
             </div>
           )}
-
-
 
           {!isFetching && !error && !telemetry.length && !driverLaps.length && canFetch && (
             <div className="mt-2 flex items-center justify-center gap-3 py-10 rounded-2xl border border-white/6"

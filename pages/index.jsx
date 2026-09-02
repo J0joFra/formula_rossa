@@ -182,7 +182,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--fr-bg)] text-[var(--fr-text)]">
+    <div className="min-h-screen text-[var(--fr-text)]">
       <SEO
         title="Statistiche e Analisi Dati Ferrari F1"
         description="Formula Rossa è la piattaforma italiana per i tifosi della Scuderia Ferrari: statistiche F1, dati storici e classifiche sempre aggiornate."

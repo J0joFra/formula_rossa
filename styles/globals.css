@@ -194,7 +194,18 @@ td {
 .btn:active { transform: scale(.98); }
 
 /* ── FORM ─────────────────────────────────────────────────────────────────── */
-a, button, [role="button"], input, select, textarea, label { min-height: var(--touch-min); }
+/* Il minimo di 44px per il dito vale per i controlli, non per i link.
+   Prima l'elenco cominciava con `a`, e ogni ancora del sito si portava dietro
+   `min-height: 44px`. Su un link inline la regola non fa nulla; dentro un
+   contenitore flex, però, l'ancora diventa un elemento flex — quindi di tipo
+   blocco — e i 44px si applicano davvero: il testo si incolla in cima alla sua
+   scatola e finisce fuori asse rispetto a quello che gli sta accanto. È il
+   motivo per cui in fondo al footer "Joaquim Francalanci" e le voci legali
+   stavano più in alto del resto della riga, e per cui le icone social erano
+   36px larghe e 44 alte.
+   I link che sono un bersaglio a sé (bottoni, voci di menu, icone) si dànno
+   già la loro area con padding o con classi di dimensione. */
+button, [role="button"], input, select, textarea, label { min-height: var(--touch-min); }
 button, [role="button"] { cursor: pointer; touch-action: manipulation; }
 
 input, select, textarea {

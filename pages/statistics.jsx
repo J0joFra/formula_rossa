@@ -9,18 +9,11 @@ import {
 } from 'lucide-react';
 import PageShell, { PageHeader, PageLoading, StatTile } from '../components/ui/PageShell';
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabaseClient';
 import { countryConfig } from '../lib/f1/circuitFlags';
 import {
   DarkTooltip, AccordionSection, TrophySVG, WinnerRow,
 } from '../components/statistics/StatsUI';
-
-const supabase = typeof window !== 'undefined'
-  ? createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    )
-  : null;
 
 /* ─────────────────────────────────────────────────────────────────────────────
    CONSTANTS
@@ -62,7 +55,6 @@ const POINTS_PERIODS = [
     icon: '⚡'
   }
 ];
-
 
 /* Le sezioni qui sotto mostrano solo le prime righe di ogni classifica: il
    resto vive in /stats/[tipo], che finora non era raggiungibile da nessuna

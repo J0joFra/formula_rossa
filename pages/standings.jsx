@@ -2,14 +2,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PageShell, { PageHeader, PageLoading } from '../components/ui/PageShell';
 
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = typeof window !== 'undefined'
-  ? createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    )
-  : null;
+import { supabase } from '../lib/supabaseClient';
 
 const nationalityToCountryCode = {
   'Monegasque': 'mc', 'British': 'gb', 'Italian': 'it', 'French': 'fr',

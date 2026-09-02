@@ -350,14 +350,69 @@ export const TEAM_COLORS = {
   'default':'#888888',
 };
 
-export function getGainColor(gain) {
-  if (gain > 0) return '#22c55e';
-  if (gain < 0) return '#ef4444';
-  return '#71717a';
+// ── Grid→Race inner chart ──
+/**
+ * Dalla griglia all'arrivo.
+ *
+ * Nato dentro il Live Timing, che è una pagina nera: i colori erano scritti a
+ * mano su quel fondo (`text-white/35`, `#3f3f46`, riquadri su `rgba(0,0,0,.35)`).
+ * Riusato nella scheda GP, che segue il tema del sito, quei valori diventavano
+ * bianco su bianco — i filtri sembravano vuoti e le intestazioni delle due
+ * colonne sparivano nel grigio.
+ *
+ * Ora i colori arrivano dai token del tema. Il Live Timing, che resta nero a
+ * prescindere dal tema scelto, passa `dark` e si porta dietro la sua tavolozza.
+ */
+const PALETTE_DARK = {
+  '--gtr-text':    '#fafafa',
+  '--gtr-muted':   'rgba(255,255,255,0.62)',
+  '--gtr-faint':   'rgba(255,255,255,0.38)',
+  '--gtr-dim':     'rgba(255,255,255,0.16)',
+  '--gtr-surface': 'rgba(255,255,255,0.05)',
+  '--gtr-well':    'rgba(0,0,0,0.35)',
+  '--gtr-band':    'rgba(255,255,255,0.03)',
+  '--gtr-border':  'rgba(255,255,255,0.10)',
+  '--gtr-up':      '#22c55e',
+  '--gtr-down':    '#ef4444',
+  '--gtr-flat':    'rgba(255,255,255,0.45)',
+  '--gtr-tip-bg':  '#0d0d0d',
+};
+
+const PALETTE_SITE = {
+  '--gtr-text':    'var(--fr-text)',
+  '--gtr-muted':   'var(--fr-text-muted)',
+  '--gtr-faint':   'var(--fr-text-faint)',
+  '--gtr-dim':     'var(--fr-text-dim)',
+  '--gtr-surface': 'var(--fr-surface-2)',
+  '--gtr-well':    'var(--fr-surface-3)',
+  '--gtr-band':    'var(--fr-overlay)',
+  '--gtr-border':  'var(--fr-border)',
+  '--gtr-up':      'var(--fr-success)',
+  '--gtr-down':    'var(--fr-danger)',
+  '--gtr-flat':    'var(--fr-text-faint)',
+  '--gtr-tip-bg':  'var(--fr-surface)',
+};
+
+/**
+ * Sigla di tre lettere del pilota.
+ *
+ * Prima si prendeva l'ultimo pezzo dell'id, che per i suffissi dà la sigla
+ * sbagliata: `carlos-sainz-jr` diventava "JR" e `nyck-de-vries` "VRI". Il
+ * cognome è tutto ciò che sta fra il nome e l'eventuale suffisso.
+ */
+const SUFFISSI = new Set(['jr', 'sr', 'ii', 'iii']);
+
+function siglaPilota(driverId, nomeCompleto) {
+  if (nomeCompleto) {
+    const cognome = nomeCompleto.trim().split(/\s+/).slice(1).join('') || nomeCompleto;
+    if (cognome.length >= 3) return cognome.toUpperCase().slice(0, 3);
+  }
+  const parti = (driverId || '').split('-').filter(p => !SUFFISSI.has(p));
+  const cognome = parti.slice(1).join('') || parti[0] || '';
+  return cognome.toUpperCase().slice(0, 3) || '???';
 }
 
-// ── Grid→Race inner chart ──
-export function GridToRaceChart({ raceResults, year, grandPrix }) {
+export function GridToRaceChart({ raceResults, year, grandPrix, driverNames, dark = false }) {
   const [highlight, setHighlight] = React.useState(null);
   const [filter, setFilter]       = React.useState('all');
 
@@ -367,10 +422,10 @@ export function GridToRaceChart({ raceResults, year, grandPrix }) {
       .filter(r => r.gridPositionNumber && r.positionNumber)
       .map(r => {
         const gain = (r.gridPositionNumber || 0) - (r.positionNumber || 0);
-        const parts = (r.driverId || '').split('-');
-        const code  = parts[parts.length - 1].toUpperCase().substring(0, 3);
         return {
-          id: r.driverId, code,
+          id: r.driverId,
+          code: siglaPilota(r.driverId, driverNames?.[r.driverId]),
+          name: driverNames?.[r.driverId] || null,
           constructorId: r.constructorId || 'default',
           color: TEAM_COLORS[r.constructorId] || TEAM_COLORS.default,
           gridPos: r.gridPositionNumber,
@@ -380,7 +435,7 @@ export function GridToRaceChart({ raceResults, year, grandPrix }) {
           points: r.points || 0,
         };
       });
-  }, [raceResults]);
+  }, [raceResults, driverNames]);
 
   const filtered = React.useMemo(() =>
     filter === 'all' ? drivers : drivers.filter(d => d.gainCategory === filter),
@@ -399,9 +454,14 @@ export function GridToRaceChart({ raceResults, year, grandPrix }) {
     };
   }, [drivers]);
 
+  const vars = dark ? PALETTE_DARK : PALETTE_SITE;
+
   if (!drivers.length) return (
-    <div className="flex items-center justify-center h-32 text-white/35 font-mono text-sm tracking-widest uppercase">
-      No race results available
+    <div
+      style={vars}
+      className="flex items-center justify-center h-32 text-sm text-[var(--gtr-faint)]"
+    >
+      Nessun dato di griglia per questa gara.
     </div>
   );
 
@@ -412,50 +472,60 @@ export function GridToRaceChart({ raceResults, year, grandPrix }) {
   byGrid.forEach((d,i) => { gridY[d.id] = 54 + i * ROW_H; });
   byRace.forEach((d,i) => { raceY[d.id] = 54 + i * ROW_H; });
 
+  /* Il colore di guadagno/perdita segue il tema come tutto il resto: prima
+     `getGainColor` restituiva due verdi e rossi fissi, illeggibili sul chiaro. */
+  const gainColor = (g) =>
+    g > 0 ? 'var(--gtr-up)' : g < 0 ? 'var(--gtr-down)' : 'var(--gtr-flat)';
+
   const FILTERS = [
-    {key:'all',    label:`ALL · ${drivers.length}`,    ac:'bg-white/10 text-white border-white/25'},
-    {key:'gained', label:`▲ GAINED · ${stats.gained}`, ac:'bg-green-500/15 text-green-400 border-green-500/40'},
-    {key:'lost',   label:`▼ LOST · ${stats.lost}`,     ac:'bg-red-500/15 text-red-400 border-red-500/40'},
-    {key:'same',   label:`● SAME · ${stats.same}`,     ac:'bg-zinc-700/60 text-white/80 border-zinc-600/40'},
+    { key:'all',    label:`Tutti · ${drivers.length}`,     on:'border-[var(--gtr-border)] bg-[var(--gtr-surface)] text-[var(--gtr-text)]' },
+    { key:'gained', label:`▲ Guadagnate · ${stats.gained}`, on:'border-[var(--gtr-up)] bg-[var(--gtr-up)]/10 text-[var(--gtr-up)]' },
+    { key:'lost',   label:`▼ Perse · ${stats.lost}`,        on:'border-[var(--gtr-down)] bg-[var(--gtr-down)]/10 text-[var(--gtr-down)]' },
+    { key:'same',   label:`● Invariate · ${stats.same}`,    on:'border-[var(--gtr-border)] bg-[var(--gtr-surface)] text-[var(--gtr-muted)]' },
+  ];
+
+  const TILES = [
+    { label:'Guadagnate', value:`+${stats.gained}`, color:'var(--gtr-up)' },
+    { label:'Perse',      value:stats.lost,          color:'var(--gtr-down)' },
+    { label:'Miglior rimonta', value: stats.maxD?.gain > 0 ? `${stats.maxD.code} +${stats.maxD.gain}` : '—', color:'var(--gtr-up)' },
+    { label:'Peggior calo',    value: stats.minD?.gain < 0 ? `${stats.minD.code} ${stats.minD.gain}` : '—', color:'var(--gtr-down)' },
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap gap-2">
-        {FILTERS.map(({key,label,ac}) => (
-          <button key={key} onClick={() => setFilter(key)}
-            className={`px-3.5 py-2 rounded-xl text-[11px] font-mono tracking-widest border transition-all duration-200 ${
-              filter === key ? ac : 'bg-white/5 text-white/35 border-white/8 hover:text-white/80 hover:bg-white/8'
+    <div className="space-y-6" style={vars}>
+      <div role="group" aria-label="Filtra i piloti" className="flex flex-wrap gap-2">
+        {FILTERS.map(({key,label,on}) => (
+          <button key={key} type="button" onClick={() => setFilter(key)}
+            aria-pressed={filter === key}
+            className={`px-3.5 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider border transition-colors ${
+              filter === key
+                ? on
+                : 'border-[var(--gtr-border)] text-[var(--gtr-muted)] hover:text-[var(--gtr-text)] hover:bg-[var(--gtr-surface)]'
             }`}>{label}</button>
         ))}
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          {label:'GAINED',     value:`+${stats.gained}`, color:'#22c55e', bg:'rgba(34,197,94,0.08)',  border:'rgba(34,197,94,0.2)'},
-          {label:'LOST',       value:stats.lost,          color:'#ef4444', bg:'rgba(239,68,68,0.08)', border:'rgba(239,68,68,0.2)'},
-          {label:'BEST GAIN',  value: stats.maxD?.code ? `${stats.maxD.code}  +${stats.maxD.gain}` : '—',
-            color: stats.maxD?.color || '#22c55e', bg:'rgba(255,255,255,0.03)', border:'rgba(255,255,255,0.08)'},
-          {label:'WORST DROP', value: stats.minD?.code ? `${stats.minD.code}  ${stats.minD.gain}` : '—',
-            color:'#ef4444', bg:'rgba(255,255,255,0.03)', border:'rgba(255,255,255,0.08)'},
-        ].map(({label,value,color,bg,border}) => (
-          <div key={label} className="rounded-xl px-4 py-3" style={{background:bg,border:`1px solid ${border}`}}>
-            <div className="text-[9px] text-white/35 font-mono tracking-[0.25em] uppercase mb-1">{label}</div>
-            <div className="text-2xl font-black font-mono leading-none" style={{color}}>{value}</div>
+        {TILES.map(({label,value,color}) => (
+          <div key={label} className="rounded-xl px-4 py-3 bg-[var(--gtr-surface)] border border-[var(--gtr-border)]">
+            <div className="text-[10px] text-[var(--gtr-muted)] tracking-[0.14em] uppercase mb-1">{label}</div>
+            <div className="text-2xl font-black tabular-nums leading-none" style={{color}}>{value}</div>
           </div>
         ))}
       </div>
 
-      <div className="overflow-x-auto rounded-xl" style={{background:'rgba(0,0,0,0.35)',border:'1px solid rgba(255,255,255,0.05)'}}>
-        <svg width="100%" viewBox={`0 0 ${SVG_W} ${SVG_H}`} style={{minWidth:500,display:'block'}}>
-          <rect x={0}     y={0} width={LX+30}           height={SVG_H} fill="rgba(255,255,255,0.012)" />
-          <rect x={RX-30} y={0} width={SVG_W-(RX-30)}   height={SVG_H} fill="rgba(255,255,255,0.012)" />
-          <text x={LX/2+15}        y={28} textAnchor="middle" fill="#3f3f46" fontSize={10} fontFamily="monospace" letterSpacing="6">GRIGLIA PARTENZA</text>
-          <text x={(SVG_W+RX)/2-15} y={28} textAnchor="middle" fill="#3f3f46" fontSize={10} fontFamily="monospace" letterSpacing="6">ARRIVO GARA</text>
-          <line x1={LX} y1={36} x2={LX} y2={SVG_H-8} stroke="rgba(255,255,255,0.12)" strokeWidth={1} strokeDasharray="3 6"/>
-          <line x1={RX} y1={36} x2={RX} y2={SVG_H-8} stroke="rgba(255,255,255,0.12)" strokeWidth={1} strokeDasharray="3 6"/>
+      <div className="overflow-x-auto rounded-xl bg-[var(--gtr-well)] border border-[var(--gtr-border)]">
+        <svg width="100%" viewBox={`0 0 ${SVG_W} ${SVG_H}`} style={{minWidth:500,display:'block'}}
+          role="img"
+          aria-label={`Posizioni dalla griglia all'arrivo${grandPrix ? `: ${grandPrix}` : ''}${year ? ` ${year}` : ''}`}>
+          <rect x={0}     y={0} width={LX+30}         height={SVG_H} fill="var(--gtr-band)" />
+          <rect x={RX-30} y={0} width={SVG_W-(RX-30)} height={SVG_H} fill="var(--gtr-band)" />
+          <text x={LX/2+15}         y={28} textAnchor="middle" fill="var(--gtr-muted)" fontSize={11} fontWeight={700} letterSpacing="4">GRIGLIA</text>
+          <text x={(SVG_W+RX)/2-15} y={28} textAnchor="middle" fill="var(--gtr-muted)" fontSize={11} fontWeight={700} letterSpacing="4">ARRIVO</text>
+          <line x1={LX} y1={36} x2={LX} y2={SVG_H-8} stroke="var(--gtr-dim)" strokeWidth={1} strokeDasharray="3 6"/>
+          <line x1={RX} y1={36} x2={RX} y2={SVG_H-8} stroke="var(--gtr-dim)" strokeWidth={1} strokeDasharray="3 6"/>
           {byGrid.map((d,i) => i%2===0 && (
-            <rect key={`z-${d.id}`} x={LX+1} y={gridY[d.id]-ROW_H/2} width={RX-LX-2} height={ROW_H} fill="rgba(255,255,255,0.014)"/>
+            <rect key={`z-${d.id}`} x={LX+1} y={gridY[d.id]-ROW_H/2} width={RX-LX-2} height={ROW_H} fill="var(--gtr-band)"/>
           ))}
           {[false,true].map(hlPass =>
             filtered.map(d => {
@@ -464,7 +534,7 @@ export function GridToRaceChart({ raceResults, year, grandPrix }) {
               const isHL=highlight===d.id;
               if(hlPass!==isHL) return null;
               const dimmed=highlight&&!isHL;
-              const opacity=dimmed?0.08:1, sw=isHL?9:7;
+              const opacity=dimmed?0.12:1, sw=isHL?9:7;
               const cx1=LX+(RX-LX)*0.35, cx2=LX+(RX-LX)*0.65;
               const path=`M ${LX} ${y1} C ${cx1} ${y1}, ${cx2} ${y2}, ${RX} ${y2}`;
               return (
@@ -484,19 +554,25 @@ export function GridToRaceChart({ raceResults, year, grandPrix }) {
             const y=gridY[d.id],isHL=highlight===d.id,dim=highlight&&!isHL;
             return (
               <g key={`L-${d.id}`} onMouseEnter={()=>setHighlight(d.id)} onMouseLeave={()=>setHighlight(null)} style={{cursor:'pointer'}}>
+                <title>{`${d.name || d.code} — partito P${d.gridPos}, arrivato P${d.racePos}`}</title>
                 {isHL&&<rect x={6} y={y-14} width={LX-16} height={28} rx={5} fill={d.color} fillOpacity={0.12}/>}
-                <text x={36} y={y+5} textAnchor="middle" fontSize={dim?9:isHL?11:10} fontWeight={700} fontFamily="monospace" fill={dim?'#2a2a2a':isHL?d.color:'#4b4b4b'}>P{d.gridPos}</text>
-                <text x={LX-14} y={y+5} textAnchor="end" fontSize={dim?11:isHL?15:13} fontWeight={isHL?900:700} fontFamily="monospace" fill={dim?'#252525':isHL?'#ffffff':'#fffefe'}>{d.code}</text>
+                <text x={36} y={y+5} textAnchor="middle" fontSize={isHL?11:10} fontWeight={700}
+                  fill={isHL?d.color:'var(--gtr-faint)'} opacity={dim?0.45:1}>P{d.gridPos}</text>
+                <text x={LX-14} y={y+5} textAnchor="end" fontSize={isHL?15:13} fontWeight={isHL?900:700}
+                  fill="var(--gtr-text)" opacity={dim?0.35:1}>{d.code}</text>
               </g>
             );
           })}
           {byRace.map(d => {
-            const y=raceY[d.id],isHL=highlight===d.id,dim=highlight&&!isHL,gc=getGainColor(d.gain);
+            const y=raceY[d.id],isHL=highlight===d.id,dim=highlight&&!isHL;
             return (
               <g key={`R-${d.id}`} onMouseEnter={()=>setHighlight(d.id)} onMouseLeave={()=>setHighlight(null)} style={{cursor:'pointer'}}>
+                <title>{`${d.name || d.code} — partito P${d.gridPos}, arrivato P${d.racePos}`}</title>
                 {isHL&&<rect x={RX+16} y={y-14} width={SVG_W-RX-22} height={28} rx={5} fill={d.color} fillOpacity={0.12}/>}
-                <text x={RX+16} y={y+5} textAnchor="start" fontSize={dim?11:isHL?15:13} fontWeight={isHL?900:700} fontFamily="monospace" fill={dim?'#252525':isHL?'#ffffff':'#fffefe'}>{d.code}</text>
-                <text x={SVG_W-10} y={y+5} textAnchor="end" fontSize={dim?9:isHL?11:10} fontWeight={700} fontFamily="monospace" fill={dim?'#2a2a2a':isHL?gc:'#4b4b4b'}>
+                <text x={RX+16} y={y+5} textAnchor="start" fontSize={isHL?15:13} fontWeight={isHL?900:700}
+                  fill="var(--gtr-text)" opacity={dim?0.35:1}>{d.code}</text>
+                <text x={SVG_W-10} y={y+5} textAnchor="end" fontSize={isHL?11:10} fontWeight={700}
+                  fill={isHL?gainColor(d.gain):'var(--gtr-faint)'} opacity={dim?0.45:1}>
                   {isHL&&d.gain!==0?(d.gain>0?`▲+${d.gain}`:`▼${d.gain}`):`P${d.racePos}`}
                 </text>
               </g>
@@ -506,32 +582,31 @@ export function GridToRaceChart({ raceResults, year, grandPrix }) {
             const d=filtered.find(x=>x.id===highlight);
             if(!d) return null;
             const gy=gridY[d.id]??0,ry=raceY[d.id]??0;
-            const midY=Math.min(Math.max((gy+ry)/2,55),SVG_H-75),midX=(LX+RX)/2,gc=getGainColor(d.gain),tw=168;
+            const midY=Math.min(Math.max((gy+ry)/2,55),SVG_H-75),midX=(LX+RX)/2,tw=200;
             return (
-              <g>
-                <rect x={midX-tw/2+3} y={midY-42+3} width={tw} height={78} rx={10} fill="rgba(0,0,0,0.6)"/>
-                <rect x={midX-tw/2} y={midY-42} width={tw} height={78} rx={10} fill="#0d0d0d" stroke={d.color} strokeWidth={1.5} strokeOpacity={0.7}/>
+              <g pointerEvents="none">
+                <rect x={midX-tw/2} y={midY-42} width={tw} height={78} rx={10}
+                  fill="var(--gtr-tip-bg)" stroke={d.color} strokeWidth={1.5} strokeOpacity={0.8}/>
                 <rect x={midX-tw/2} y={midY-42} width={4} height={78} rx={3} fill={d.color}/>
                 <circle cx={midX-tw/2+20} cy={midY-18} r={4} fill={d.color}/>
-                <text x={midX-tw/2+32} y={midY-14} textAnchor="start" fill="#ffffff" fontSize={16} fontWeight={900} fontFamily="monospace">{d.code}</text>
-                <text x={midX-tw/2+12} y={midY+2} textAnchor="start" fill="#6b7280" fontSize={9.5} fontFamily="monospace" letterSpacing={1}>GRID P{d.gridPos}  →  RACE P{d.racePos}</text>
-                <text x={midX} y={midY+22} textAnchor="middle" fill={gc} fontSize={14} fontWeight={900} fontFamily="monospace">
-                  {d.gain>0?`▲ +${d.gain} POSITIONS`:d.gain<0?`▼ ${d.gain} POSITIONS`:'● NO CHANGE'}
+                <text x={midX-tw/2+32} y={midY-14} textAnchor="start" fill="var(--gtr-text)" fontSize={15} fontWeight={900}>{d.code}</text>
+                <text x={midX-tw/2+12} y={midY+2} textAnchor="start" fill="var(--gtr-muted)" fontSize={10}>
+                  Griglia P{d.gridPos} → Arrivo P{d.racePos}
                 </text>
-                {d.points>0&&<text x={midX} y={midY+36} textAnchor="middle" fill="#3f3f46" fontSize={9} fontFamily="monospace">{d.points} PTS</text>}
+                <text x={midX} y={midY+22} textAnchor="middle" fill={gainColor(d.gain)} fontSize={13} fontWeight={900}>
+                  {d.gain>0?`▲ +${d.gain} posizioni`:d.gain<0?`▼ ${d.gain} posizioni`:'● nessun cambio'}
+                </text>
+                {d.points>0&&<text x={midX} y={midY+34} textAnchor="middle" fill="var(--gtr-faint)" fontSize={9}>{d.points} punti</text>}
               </g>
             );
           })()}
         </svg>
       </div>
 
-      <div className="flex flex-wrap items-center gap-6 pt-5 border-t border-white/5">
-        <span className="text-[9px] text-white/25 font-mono tracking-[0.3em] uppercase">Legend</span>
-        <span className="flex items-center gap-2 text-[11px] text-white/50 font-mono">
-          <span className="inline-block w-8 h-0.5 rounded" style={{background:'linear-gradient(90deg,#888,#888)'}}/> Team color (tutti i piloti)
-        </span>
-        <span className="ml-auto text-[10px] text-white/15 font-mono tracking-widest">HOVER TO HIGHLIGHT</span>
-      </div>
+      <p className="text-xs text-[var(--gtr-muted)]">
+        Ogni linea è un pilota, colorata come la sua scuderia: a sinistra la posizione di
+        partenza, a destra quella d&apos;arrivo. Passa il mouse — o tocca — per isolarne una.
+      </p>
     </div>
   );
 }
@@ -815,7 +890,7 @@ export function QualifyingToRaceProgression({ raceResults, qualiResults, year, g
         </div>
 
         {mode==='race'
-          ? <GridToRaceChart raceResults={raceResults} year={year} grandPrix={grandPrix}/>
+          ? <GridToRaceChart raceResults={raceResults} year={year} grandPrix={grandPrix} dark/>
           : <QualiProgressionChart qualiResults={qualiResults} year={year} grandPrix={grandPrix}/>}
       </div>
     </div>

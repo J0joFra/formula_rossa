@@ -43,8 +43,6 @@ const DICT = {
     ft_legal: 'Note legali',
     ft_madeBy: '© {year} Formula Rossa · fatto con',
     ft_by: 'da',
-    ft_disclaimer: 'Formula Rossa è un progetto indipendente creato da appassionati e non è affiliato, sponsorizzato o approvato da Ferrari S.p.A. o da Scuderia Ferrari. Tutti i marchi, i nomi dei piloti e i loghi citati appartengono ai rispettivi proprietari.',
-    ft_disclaimerLabel: 'Disclaimer.',
 
     // stati comuni
     // banner cookie
@@ -74,8 +72,6 @@ const DICT = {
     ft_legal: 'Legal',
     ft_madeBy: '© {year} Formula Rossa · made with',
     ft_by: 'by',
-    ft_disclaimer: 'Formula Rossa is an independent project built by fans and is not affiliated with, sponsored by, or endorsed by Ferrari S.p.A. or Scuderia Ferrari. All trademarks, driver names and logos mentioned belong to their respective owners.',
-    ft_disclaimerLabel: 'Disclaimer.',
 
     ck_title: 'We respect your privacy',
     ck_body: 'We use necessary technical cookies and, with your consent, analytics (Google Analytics) and advertising (Google AdSense) cookies to understand how the site is used and to support the project. You can accept, decline or change your mind at any time. Details in the',
@@ -103,8 +99,6 @@ const DICT = {
     ft_legal: 'Mentions légales',
     ft_madeBy: '© {year} Formula Rossa · fait avec',
     ft_by: 'par',
-    ft_disclaimer: 'Formula Rossa est un projet indépendant créé par des passionnés, sans aucun lien, parrainage ni approbation de Ferrari S.p.A. ou de la Scuderia Ferrari. Toutes les marques, noms de pilotes et logos cités appartiennent à leurs propriétaires respectifs.',
-    ft_disclaimerLabel: 'Avertissement.',
 
     ck_title: 'Nous respectons votre vie privée',
     ck_body: 'Nous utilisons des cookies techniques nécessaires et, avec votre consentement, des cookies analytiques (Google Analytics) et publicitaires (Google AdSense) pour comprendre comment le site est utilisé et soutenir le projet. Vous pouvez accepter, refuser ou changer d’avis à tout moment. Détails dans la',
@@ -132,8 +126,6 @@ const DICT = {
     ft_legal: 'Avisos legales',
     ft_madeBy: '© {year} Formula Rossa · hecho con',
     ft_by: 'por',
-    ft_disclaimer: 'Formula Rossa es un proyecto independiente creado por aficionados y no está afiliado, patrocinado ni aprobado por Ferrari S.p.A. o Scuderia Ferrari. Todas las marcas, nombres de pilotos y logotipos citados pertenecen a sus respectivos propietarios.',
-    ft_disclaimerLabel: 'Aviso legal.',
 
     ck_title: 'Respetamos tu privacidad',
     ck_body: 'Usamos cookies técnicas necesarias y, con tu consentimiento, cookies analíticas (Google Analytics) y publicitarias (Google AdSense) para entender cómo se usa el sitio y sostener el proyecto. Puedes aceptar, rechazar o cambiar de opinión en cualquier momento. Detalles en la',
@@ -161,8 +153,6 @@ const DICT = {
     ft_legal: 'Rechtliches',
     ft_madeBy: '© {year} Formula Rossa · gemacht mit',
     ft_by: 'von',
-    ft_disclaimer: 'Formula Rossa ist ein unabhängiges Projekt von Fans und steht in keiner Verbindung zu Ferrari S.p.A. oder der Scuderia Ferrari, wird von diesen weder gesponsert noch unterstützt. Alle genannten Marken, Fahrernamen und Logos gehören den jeweiligen Eigentümern.',
-    ft_disclaimerLabel: 'Haftungsausschluss.',
 
     ck_title: 'Wir respektieren deine Privatsphäre',
     ck_body: 'Wir verwenden notwendige technische Cookies und, mit deiner Einwilligung, Analyse- (Google Analytics) und Werbe-Cookies (Google AdSense), um zu verstehen, wie die Website genutzt wird, und das Projekt zu unterstützen. Du kannst jederzeit zustimmen, ablehnen oder deine Meinung ändern. Details in der',

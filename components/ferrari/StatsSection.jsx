@@ -10,14 +10,7 @@ import {
   Settings, Weight, Shield, BarChart3, LineChart as LineChartIcon
 } from 'lucide-react';
 
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = typeof window !== 'undefined'
-  ? createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    )
-  : null;
+import { supabase } from '../../lib/supabaseClient';
 
 export default function StatsSection() {
   const [pilotWins, setPilotWins] = useState([]);
