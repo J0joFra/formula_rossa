@@ -11,8 +11,6 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
-import LanguageSwitcher from '../ui/LanguageSwitcher';
-import { useI18n } from '../../lib/i18n';
 import { GRIDUP_URL } from '../../lib/gridup';
 
 export { GRIDUP_URL } from '../../lib/gridup';
@@ -20,21 +18,21 @@ export { GRIDUP_URL } from '../../lib/gridup';
 /* Il menu contiene solo pagine che esistono davvero: una voce che porta a una
    pagina inesistente o a un vicolo cieco è peggio di una voce assente. */
 const ARCHIVIO = {
-  key: 'nav_archive',
+  label: 'Archivio',
   icon: BarChart3,
   items: [
-    { href: '/statistics', key: 'nav_stats',    desc: 'Record e dati storici Ferrari' },
-    { href: '/piloti',     key: 'nav_drivers',  desc: 'Schede e carriere' },
-    { href: '/circuiti',   key: 'nav_circuits', desc: 'Tracciati e statistiche' },
+    { href: '/statistics', label: 'Statistiche',    desc: 'Record e dati storici Ferrari' },
+    { href: '/piloti',     label: 'Piloti',  desc: 'Schede e carriere' },
+    { href: '/circuiti',   label: 'Circuiti', desc: 'Tracciati e statistiche' },
   ],
 };
 
 const STAGIONE = {
-  key: 'nav_season',
+  label: 'Stagione',
   icon: Trophy,
   items: [
-    { href: '/standings', key: 'nav_standings', desc: 'Piloti e costruttori' },
-    { href: '/gp',        key: 'nav_gp',        desc: 'Ogni gara nel dettaglio' },
+    { href: '/standings', label: 'Classifiche', desc: 'Piloti e costruttori' },
+    { href: '/gp',        label: 'Analisi GP',        desc: 'Ogni gara nel dettaglio' },
   ],
 };
 
@@ -42,8 +40,8 @@ const MENU = [ARCHIVIO, STAGIONE];
 
 /* Voci singole: una pagina, un link. Niente tendine da una voce sola. */
 const LINKS = [
-  { href: '/news',    key: 'nav_news', icon: Newspaper },
-  { href: '/fanzone', key: 'nav_play', icon: Gamepad2 },
+  { href: '/news',    label: 'News', icon: Newspaper },
+  { href: '/fanzone', label: 'Gioca', icon: Gamepad2 },
 ];
 
 export default function Navigation() {
@@ -51,7 +49,6 @@ export default function Navigation() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { data: session } = useSession();
   const pathname = usePathname();
-  const { t } = useI18n();
   const navRef = useRef(null);
 
   useEffect(() => { setOpenMenu(null); setMobileOpen(false); }, [pathname]);
@@ -108,7 +105,7 @@ export default function Navigation() {
               const active = groupActive(group);
               return (
                 <div
-                  key={group.key}
+                  key={group.label}
                   className="relative"
                   onMouseEnter={() => setOpenMenu(group.key)}
                   onMouseLeave={() => setOpenMenu(null)}
@@ -121,7 +118,7 @@ export default function Navigation() {
                     className={itemCls(active || open)}
                   >
                     <group.icon className={`w-4 h-4 ${active ? 'text-[var(--fr-red)]' : ''}`} aria-hidden="true" />
-                    {t(group.key)}
+                    {group.label}
                     <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
                   </button>
 
@@ -147,7 +144,7 @@ export default function Navigation() {
                                 }`}
                               >
                                 <span className={`block text-[13px] font-bold ${cur ? 'text-[var(--fr-red)]' : 'text-[var(--fr-text)]'}`}>
-                                  {t(item.key)}
+                                  {item.label}
                                 </span>
                                 <span className="block text-[11px] text-[var(--fr-text-faint)] leading-tight mt-0.5">
                                   {item.desc}
@@ -171,7 +168,7 @@ export default function Navigation() {
                 className={itemCls(isActive(l.href))}
               >
                 <l.icon className={`w-4 h-4 ${isActive(l.href) ? 'text-[var(--fr-red)]' : ''}`} aria-hidden="true" />
-                {t(l.key)}
+                {l.label}
               </Link>
             ))}
           </div>
@@ -186,11 +183,10 @@ export default function Navigation() {
               className="hidden sm:inline-flex items-center gap-2 bg-[var(--fr-red)] text-white px-4 py-2.5 rounded-xl text-[12px] font-bold whitespace-nowrap shadow-[var(--fr-glow-red)] hover:bg-[var(--fr-red-ink)] hover:-translate-y-0.5 transition-all"
             >
               <Smartphone className="w-4 h-4" aria-hidden="true" />
-              {t('nav_app')}
+              App GridUp
             </a>
 
             <div className="hidden sm:block"><ThemeToggle /></div>
-            <div className="hidden sm:block"><LanguageSwitcher /></div>
 
             <div className="hidden lg:flex items-center pl-2 ml-1 border-l border-[var(--fr-border)]">
               {session ? (
@@ -204,7 +200,7 @@ export default function Navigation() {
                     onClick={() => signOut()}
                     className="text-[11px] font-bold text-[var(--fr-text-muted)] hover:text-[var(--fr-text)] flex items-center gap-1 transition-colors"
                   >
-                    {t('nav_signout')} <LogOut className="w-3 h-3" aria-hidden="true" />
+                    Esci <LogOut className="w-3 h-3" aria-hidden="true" />
                   </button>
                 </div>
               ) : (
@@ -212,14 +208,14 @@ export default function Navigation() {
                   onClick={() => signIn('google')}
                   className="px-4 py-2.5 rounded-xl text-[12px] font-bold border-2 border-[var(--fr-border-strong)] text-[var(--fr-text)] hover:border-[var(--fr-red)] transition-colors"
                 >
-                  {t('nav_signin')}
+                  Accedi
                 </button>
               )}
             </div>
 
             <button
               onClick={() => setMobileOpen(o => !o)}
-              aria-label={t('nav_menu')}
+              aria-label="Menu"
               aria-expanded={mobileOpen}
               className="lg:hidden p-2.5 rounded-xl border border-[var(--fr-border)] bg-[var(--fr-surface-2)] text-[var(--fr-text)]"
             >
@@ -240,10 +236,10 @@ export default function Navigation() {
           >
             <div className="px-4 py-5 space-y-5 max-h-[calc(100vh-70px)] overflow-y-auto">
               {MENU.map((group) => (
-                <div key={group.key}>
+                <div key={group.label}>
                   <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--fr-red)] mb-2">
                     <group.icon className="w-3.5 h-3.5" aria-hidden="true" />
-                    {t(group.key)}
+                    {group.label}
                   </p>
                   <div className="grid gap-1">
                     {group.items.map((item) => (
@@ -258,7 +254,7 @@ export default function Navigation() {
                             : 'text-[var(--fr-text-muted)] hover:bg-[var(--fr-surface-2)] hover:text-[var(--fr-text)]'
                         }`}
                       >
-                        {t(item.key)}
+                        {item.label}
                       </Link>
                     ))}
                   </div>
@@ -279,7 +275,7 @@ export default function Navigation() {
                     }`}
                   >
                     <l.icon className="w-4 h-4" aria-hidden="true" />
-                    {t(l.key)}
+                    {l.label}
                   </Link>
                 ))}
               </div>
@@ -297,17 +293,16 @@ export default function Navigation() {
 
               <div className="flex items-center justify-between pt-4 border-t border-[var(--fr-border)]">
                 <ThemeToggle />
-                <LanguageSwitcher />
                 {session ? (
                   <button onClick={() => signOut()} className="flex items-center gap-2 text-sm font-bold text-[var(--fr-text-muted)]">
-                    {t('nav_signout')} <LogOut className="w-4 h-4" aria-hidden="true" />
+                    Esci <LogOut className="w-4 h-4" aria-hidden="true" />
                   </button>
                 ) : (
                   <button
                     onClick={() => signIn('google')}
                     className="px-5 py-2.5 rounded-xl text-[12px] font-bold border-2 border-[var(--fr-border-strong)] text-[var(--fr-text)]"
                   >
-                    {t('nav_signin')}
+                    Accedi
                   </button>
                 )}
               </div>

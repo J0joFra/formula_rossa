@@ -10,7 +10,6 @@ import NewsSection from '../components/ferrari/NewsSection';
 import GridUpPromo from '../components/ferrari/GridUpPromo';
 import Footer from '../components/ferrari/Footer';
 import SEO from '../components/seo';
-import { useI18n } from '../lib/i18n';
 import { GRIDUP_URL } from '../lib/gridup';
 
 /* I tre pilastri: stessa struttura del menu, così la home spiega il sito.
@@ -23,40 +22,40 @@ const PILLARS = [
     n: '01',
     id: 'archivio',
     icon: BarChart3,
-    title: 'nav_archive',
-    desc: 'hp_archiveDesc',
+    title: 'Archivio',
+    desc: 'Il cuore del sito: {years} anni di Ferrari in Formula 1. Record, statistiche, schede piloti e circuiti, con numeri verificabili.',
     tone: 'red',
     links: [
-      { href: '/statistics', key: 'nav_stats' },
-      { href: '/piloti',     key: 'nav_drivers' },
-      { href: '/circuiti',   key: 'nav_circuits' },
+      { href: '/statistics', label: 'Statistiche' },
+      { href: '/piloti',     label: 'Piloti' },
+      { href: '/circuiti',   label: 'Circuiti' },
     ],
   },
   {
     n: '02',
     id: 'stagione',
     icon: Trophy,
-    title: 'nav_season',
-    desc: 'hp_seasonDesc',
+    title: 'Stagione',
+    desc: 'Il campionato in corso: classifiche aggiornate, l’analisi di ogni Gran Premio e le notizie dal mondo Ferrari.',
     tone: 'teal',
     links: [
-      { href: '/standings', key: 'nav_standings' },
-      { href: '/gp',        key: 'nav_gp' },
-      { href: '/news',      key: 'nav_news' },
+      { href: '/standings', label: 'Classifiche' },
+      { href: '/gp',        label: 'Analisi GP' },
+      { href: '/news',      label: 'News' },
     ],
   },
   {
     n: '03',
     id: 'gioca',
     icon: Gamepad2,
-    title: 'nav_play',
-    desc: 'hp_playDesc',
+    title: 'Gioca',
+    desc: 'Un angolo leggero: mini-giochi a tema Ferrari per mettere alla prova la tua conoscenza tra un GP e l’altro.',
     tone: 'gold',
     links: [
-      { href: '/fanzone',            key: 'ft_fanzone' },
-      { href: '/games/trivia',       key: 'hp_trivia' },
-      { href: '/games/pitstop',      key: 'hp_pitstop' },
-      { href: '/games/circuit-rush', key: 'hp_circuitRush' },
+      { href: '/fanzone',            label: 'Fan Zone' },
+      { href: '/games/trivia',       label: 'Trivia' },
+      { href: '/games/pitstop',      label: 'Pit Stop' },
+      { href: '/games/circuit-rush', label: 'Circuit Rush' },
     ],
   },
 ];
@@ -67,7 +66,7 @@ const TONE = {
   gold: { bg: 'color-mix(in srgb, var(--fr-gold) 20%, transparent)', fg: 'var(--fr-gold)' },
 };
 
-function PillarCard({ pillar, index, t, years }) {
+function PillarCard({ pillar, index, years }) {
   const tone = TONE[pillar.tone];
   return (
     <motion.article
@@ -92,8 +91,8 @@ function PillarCard({ pillar, index, t, years }) {
         <pillar.icon className="w-6 h-6" />
       </span>
 
-      <h3 className="uppercase mb-2">{t(pillar.title)}</h3>
-      <p className="text-sm text-[var(--fr-text-muted)] mb-5">{t(pillar.desc, { years })}</p>
+      <h3 className="uppercase mb-2">{pillar.title}</h3>
+      <p className="text-sm text-[var(--fr-text-muted)] mb-5">{pillar.desc.replace('{years}', years)}</p>
 
       <div className="mt-auto flex flex-wrap gap-1.5">
         {pillar.links.map(l => (
@@ -102,7 +101,7 @@ function PillarCard({ pillar, index, t, years }) {
             href={l.href}
             className="text-xs font-semibold px-3 py-1.5 rounded-[9px] bg-[var(--fr-surface-2)] text-[var(--fr-text-muted)] hover:bg-[var(--fr-red)] hover:text-white transition-colors"
           >
-            {t(l.key)}
+            {l.label}
           </Link>
         ))}
       </div>
@@ -111,17 +110,17 @@ function PillarCard({ pillar, index, t, years }) {
 }
 
 /* Fatti solidi e verificabili — niente cifre gonfiate. */
-function FactsBand({ t, years }) {
+function FactsBand({ years }) {
   /* Niente `toLocaleString` qui: questi numeri si dipingono anche sul server,
      e Node e browser non raggruppano le migliaia allo stesso modo — in
      italiano il primo dà "1000" e il secondo "1.000", e React fallisce
      l'idratazione. Il separatore giusto per ogni lingua sta nel dizionario. */
   const facts = [
-    { key: 'hp_factSeasons', value: String(years) },
-    { key: 'hp_factGp',      value: t('hp_factGpValue') },
-    { key: 'hp_factCtor',    value: '16' },
-    { key: 'hp_factDriver',  value: '15' },
-    { key: 'hp_factSince',   value: '1950' },
+    { label: 'Stagioni in F1', value: String(years) },
+    { label: 'GP disputati',      value: '1.000+' },
+    { label: 'Titoli costruttori',    value: '16' },
+    { label: 'Titoli piloti',  value: '15' },
+    { label: 'Dal primo GP',   value: '1950' },
   ];
   return (
     <div className="snap-section border-y border-[var(--fr-border)] bg-[var(--fr-surface-3)]">
@@ -129,16 +128,16 @@ function FactsBand({ t, years }) {
         <dl className="grid grid-cols-2 md:grid-cols-5">
           {facts.map((f, i) => (
             <div
-              key={f.key}
+              key={f.label}
               className={`py-8 px-3 text-center border-[var(--fr-border)] ${i < facts.length - 1 ? 'md:border-r' : ''} ${i < 3 ? 'border-b md:border-b-0' : ''}`}
             >
-              <dt className="sr-only">{t(f.key)}</dt>
+              <dt className="sr-only">{f.label}</dt>
               <dd>
                 <span className="tabular block text-[30px] font-bold leading-none tracking-tight text-[var(--fr-text)]">
                   {f.value}
                 </span>
                 <span className="block text-[11px] uppercase tracking-[0.1em] font-semibold text-[var(--fr-text-faint)] mt-2">
-                  {t(f.key)}
+                  {f.label}
                 </span>
               </dd>
             </div>
@@ -150,7 +149,6 @@ function FactsBand({ t, years }) {
 }
 
 export default function Home() {
-  const { t } = useI18n();
   // 1950 è la prima stagione, quindi va contata.
   const stagioni = new Date().getFullYear() - 1950 + 1;
 
@@ -216,22 +214,22 @@ export default function Home() {
         <section className="snap-section py-12 md:py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-wrap mx-auto">
             <header className="mb-9">
-              <span className="fr-eyebrow">{t('hp_platformEyebrow')}</span>
-              <h2 className="uppercase mt-3">{t('hp_platformTitle')}</h2>
+              <span className="fr-eyebrow">La piattaforma</span>
+              <h2 className="uppercase mt-3">Tre modi per vivere la Rossa</h2>
               <p className="text-[var(--fr-text-muted)] mt-2.5 max-w-[56ch]">
-                {t('hp_platformLead')}
+                L’archivio storico al centro, la stagione in corso sempre aggiornata e un angolo per giocare. Il calcolatore del Mondiale vive nell’app GridUp.
               </p>
             </header>
 
             <div className="grid md:grid-cols-3 gap-5">
               {PILLARS.map((p, i) => (
-                <PillarCard key={p.id} pillar={p} index={i} t={t} years={stagioni} />
+                <PillarCard key={p.id} pillar={p} index={i} years={stagioni} />
               ))}
             </div>
           </div>
         </section>
 
-        <FactsBand t={t} years={stagioni} />
+        <FactsBand years={stagioni} />
 
         <GridUpPromo />
 

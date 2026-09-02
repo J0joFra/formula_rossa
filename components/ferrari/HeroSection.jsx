@@ -2,20 +2,35 @@
 /**
  * components/ferrari/HeroSection.jsx
  * Hero della home: tesi del sito a sinistra, riepilogo dati reali a destra.
- * I numeri sono calcolati dall'archivio F1DB, non hardcodati.
+ *
+ * I quattro numeri arrivano dalla riga `constructor` della Ferrari. Prima si
+ * ricavavano contando a mano dentro /data/f1db-races-race-results.json: un
+ * file da 19 MB scaricato dal browser a ogni apertura della home, per
+ * calcolare quattro totali. Su rete mobile era il costo più alto del sito.
+ *
+ * I totali dell'archivio sono anche più corretti di quelli che venivano
+ * contati: le pole si ricavavano da `gridPositionNumber === 1`, che è la prima
+ * casella in griglia, non la pole position — chi conquista la pole e prende
+ * una penalità parte più indietro, e il conteggio cambia.
  */
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { BarChart3, Trophy } from 'lucide-react';
-import { useI18n } from '../../lib/i18n';
+import { supabase } from '../../lib/supabaseClient';
 
-const FALLBACK = { wins: 0, podiums: 0, poles: 0, fastestLaps: 0, constructorTitles: 16, driverTitles: 15 };
+/* Finché la riga non arriva si mostra lo scheletro, quindi i valori iniziali
+   non compaiono mai: servono solo a dare forma all'oggetto. */
+const VUOTO = { wins: 0, podiums: 0, poles: 0, fastestLaps: 0, constructorTitles: 0 };
+
+/* I titoli piloti vinti al volante di una Ferrari non stanno nella riga della
+   scuderia: è un dato del pilota, non del costruttore. Resta una costante,
+   aggiornabile a fine stagione. */
+const TITOLI_PILOTI = 15;
 
 export default function HeroSection() {
-  const { t, lang } = useI18n();
-  const [stats, setStats] = useState(FALLBACK);
+  const [stats, setStats] = useState(VUOTO);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
 
@@ -23,26 +38,25 @@ export default function HeroSection() {
     let alive = true;
 
     (async () => {
+      if (!supabase) { setLoading(false); setFailed(true); return; }
       try {
-        const res = await fetch('/data/f1db-races-race-results.json');
-        if (!res.ok) throw new Error('richiesta fallita');
-        const data = await res.json();
+        const { data, error } = await supabase
+          .from('constructor')
+          .select('total_race_wins, total_podiums, total_pole_positions, total_fastest_laps, total_championship_wins')
+          .eq('id', 'ferrari')
+          .maybeSingle();
+        if (error) throw new Error(error.message);
         if (!alive) return;
+        if (!data) throw new Error('riga Ferrari non trovata');
 
-        const agg = data
-          .filter(r => r.constructorId === 'ferrari')
-          .reduce((acc, r) => {
-            if (r.positionNumber === 1) acc.wins++;
-            if (r.positionNumber >= 1 && r.positionNumber <= 3) acc.podiums++;
-            if (r.gridPositionNumber === 1) acc.poles++;
-            if (r.fastestLap === true) acc.fastestLaps++;
-            return acc;
-          }, { wins: 0, podiums: 0, poles: 0, fastestLaps: 0 });
-
-        if (alive) {
-          setStats(s => ({ ...s, ...agg }));
-          setFailed(false);
-        }
+        setStats({
+          wins:              data.total_race_wins ?? 0,
+          podiums:           data.total_podiums ?? 0,
+          poles:             data.total_pole_positions ?? 0,
+          fastestLaps:       data.total_fastest_laps ?? 0,
+          constructorTitles: data.total_championship_wins ?? 0,
+        });
+        setFailed(false);
       } catch (err) {
         console.error('Statistiche Ferrari non disponibili:', err);
         if (alive) setFailed(true);
@@ -57,10 +71,10 @@ export default function HeroSection() {
   const anno = new Date().getFullYear();
 
   const cells = [
-    { key: 'wins',        label: t('hp_wins'),        value: stats.wins, accent: true },
-    { key: 'podiums',     label: t('hp_podiums'),     value: stats.podiums },
-    { key: 'poles',       label: t('hp_poles'),       value: stats.poles },
-    { key: 'fastestLaps', label: t('hp_fastestLaps'), value: stats.fastestLaps },
+    { key: 'wins',        label: 'Vittorie',        value: stats.wins, accent: true },
+    { key: 'podiums',     label: 'Podi',     value: stats.podiums },
+    { key: 'poles',       label: 'Pole position',       value: stats.poles },
+    { key: 'fastestLaps', label: 'Giri veloci', value: stats.fastestLaps },
   ];
 
   return (
@@ -83,26 +97,26 @@ export default function HeroSection() {
           >
             <span className="fr-eyebrow inline-flex items-center gap-2.5 mb-5">
               <span className="w-[7px] h-[7px] rounded-full bg-[var(--fr-red)] shadow-[0_0_0_4px_var(--fr-red-soft)]" aria-hidden="true" />
-              {t('hp_heroEyebrow')}
+              Data Intelligence · Scuderia Ferrari
             </span>
 
             <h1 className="uppercase">
-              {t('hp_heroTitleA')}<br />
-              <span className="text-[var(--fr-red)]">{t('hp_heroTitleB')}</span>
+              La Rossa<br />
+              <span className="text-[var(--fr-red)]">nei numeri</span>
             </h1>
 
             <p className="text-base md:text-lg text-[var(--fr-text-muted)] max-w-[46ch] mt-5 mb-8">
-              {t('hp_heroLead')}
+              Ogni vittoria, pole e giro veloce della Scuderia Ferrari dal 1950 a oggi. Statistiche, classifiche e archivio storico, in un’unica piattaforma indipendente.
             </p>
 
             <div className="flex flex-wrap gap-3">
               <Link href="/statistics" className="btn btn-primary">
                 <BarChart3 className="w-4 h-4" aria-hidden="true" />
-                {t('hp_ctaStats')}
+                Esplora le statistiche
               </Link>
               <Link href="/standings" className="btn btn-outline-light">
                 <Trophy className="w-4 h-4" aria-hidden="true" />
-                {t('hp_ctaStandings', { year: anno })}
+                Classifiche {anno}
               </Link>
             </div>
           </motion.div>
@@ -116,7 +130,7 @@ export default function HeroSection() {
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--fr-border)]">
               <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[var(--fr-text-faint)]">
-                {t('hp_allTime')}
+                Ferrari · F1 all-time
               </span>
               <span className="font-mono text-[10px] tracking-[0.16em] uppercase font-bold text-[var(--fr-red)]">
                 1950 → {anno}
@@ -131,10 +145,10 @@ export default function HeroSection() {
                 >
                   <div className={`tabular text-[34px] font-bold leading-none tracking-tight ${c.accent ? 'text-[var(--fr-red)]' : 'text-[var(--fr-text)]'}`}>
                     {loading
-                      ? <span className="skeleton block w-20 h-8 rounded-lg" role="status" aria-label={t('loading')} />
+                      ? <span className="skeleton block w-20 h-8 rounded-lg" role="status" aria-label="Caricamento dati…" />
                       : failed
-                        ? <span className="text-[var(--fr-text-faint)] text-2xl">{t('hp_na')}</span>
-                        : c.value.toLocaleString(lang)}
+                        ? <span className="text-[var(--fr-text-faint)] text-2xl">N/D</span>
+                        : c.value.toLocaleString('it-IT')}
                   </div>
                   <div className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--fr-text-muted)] mt-1.5">
                     {c.label}
@@ -144,8 +158,8 @@ export default function HeroSection() {
             </div>
 
             <div className="flex justify-between px-5 py-3.5 text-xs text-[var(--fr-text-faint)]">
-              <span>{t('hp_ctorTitles', { n: stats.constructorTitles })}</span>
-              <span className="tabular">{t('hp_driverTitles', { n: stats.driverTitles })}</span>
+              <span>{stats.constructorTitles} Titoli Costruttori</span>
+              <span className="tabular">{TITOLI_PILOTI} Titoli Piloti</span>
             </div>
           </motion.div>
         </div>
