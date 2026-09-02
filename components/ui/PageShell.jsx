@@ -123,8 +123,11 @@ export default function PageShell({
   wide = false,
   className = '',
 }) {
+  /* Nessun fondo opaco qui: lo dipinge `body`. Un `bg-[var(--fr-bg)]` a tutta
+     pagina coprirebbe gli aloni ambientali di _app.jsx, che dopo il passaggio a
+     `-z-10` stanno dietro il contenuto e non più davanti. */
   return (
-    <div className={`min-h-screen bg-[var(--fr-bg)] text-[var(--fr-text)] ${className}`}>
+    <div className={`min-h-screen text-[var(--fr-text)] ${className}`}>
       {seo && <SEO {...seo} />}
       <Navigation />
       {/* pt-[70px] compensa la navbar fissa; il resto è respiro verticale */}

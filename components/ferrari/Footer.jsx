@@ -137,7 +137,7 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   aria-label={s.label}
                   title={s.label}
-                  className="w-9 h-9 rounded-[11px] grid place-items-center bg-[var(--fr-surface-2)] text-[var(--fr-text-muted)] hover:bg-[var(--fr-red)] hover:text-white transition-colors"
+                  className="w-11 h-11 rounded-[13px] grid place-items-center bg-[var(--fr-surface-2)] text-[var(--fr-text-muted)] hover:bg-[var(--fr-red)] hover:text-white transition-colors"
                 >
                   <s.icon className="w-4 h-4" aria-hidden="true" />
                 </a>
@@ -162,11 +162,9 @@ export default function Footer() {
           ))}
         </div>
 
-        {/* ── Disclaimer ── */}
-        <p className="mt-12 pt-8 border-t border-[var(--fr-border)] text-xs text-[var(--fr-text-faint)] leading-relaxed max-w-[92ch]">
-          <strong className="text-[var(--fr-text-muted)] font-semibold">{t('ft_disclaimerLabel')}</strong>{' '}
-          {t('ft_disclaimer')}
-        </p>
+        {/* Il disclaimer di non affiliazione sta in /about e in /legal/privacy,
+           dove chi lo cerca lo trova: qui occupava otto righe sotto ogni pagina
+           del sito per dire una cosa che nessuno legge due volte. */}
 
         {/* Testo per i motori di ricerca: non aggiunge rumore alla pagina. */}
         <p className="sr-only">
@@ -175,11 +173,12 @@ export default function Footer() {
           piloti e circuiti, classifiche aggiornate e analisi di ogni Gran Premio.
         </p>
 
-        {/* ── Riga di chiusura: le voci legali stavano in una colonna tutta loro,
-               qui occupano una riga e liberano spazio nella griglia. ── */}
-        <div className="mt-8 pt-6 border-t border-[var(--fr-border)] flex flex-col-reverse gap-5 md:flex-row md:items-center md:justify-between">
+        {/* ── Riga di chiusura: una riga sola, con le voci legali separate da
+               punti invece che da spazi vuoti, così su mobile si capisce dove
+               finisce un link e comincia il successivo. ── */}
+        <div className="mt-10 pt-6 border-t border-[var(--fr-border)] flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
-          <p className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--fr-text-faint)]">
+          <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-[var(--fr-text-faint)]">
             <span>{t('ft_madeBy', { year: anno })}</span>
             <Heart className="w-3 h-3 text-[var(--fr-red)] fill-current" aria-hidden="true" />
             <span>{t('ft_by')}</span>
@@ -187,30 +186,37 @@ export default function Footer() {
               href="https://github.com/J0joFra"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[var(--fr-text-muted)] hover:text-[var(--fr-red)] transition-colors"
+              className="font-medium text-[var(--fr-text-muted)] hover:text-[var(--fr-red)] transition-colors"
             >
               Joaquim Francalanci
             </a>
           </p>
 
-          <nav aria-label={t('ft_legal')} className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            {LEGALI.map((l) => (
-              <FooterLink
-                key={l.href}
-                href={l.href}
-                label={t(l.key)}
-                className="text-xs text-[var(--fr-text-faint)] hover:text-[var(--fr-red)] transition-colors"
-              />
+          <nav
+            aria-label={t('ft_legal')}
+            className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--fr-text-faint)]"
+          >
+            {LEGALI.map((l, i) => (
+              <React.Fragment key={l.href}>
+                {i > 0 && <span aria-hidden="true" className="text-[var(--fr-text-dim)]">·</span>}
+                <FooterLink
+                  href={l.href}
+                  label={t(l.key)}
+                  className="hover:text-[var(--fr-red)] transition-colors"
+                />
+              </React.Fragment>
             ))}
+            <span aria-hidden="true" className="text-[var(--fr-text-dim)]">·</span>
             <button
               type="button"
               onClick={() => window.dispatchEvent(new Event('open-cookie-settings'))}
-              className="text-xs text-[var(--fr-text-faint)] hover:text-[var(--fr-red)] transition-colors"
+              className="hover:text-[var(--fr-red)] transition-colors"
             >
               {t('ft_cookiePrefs')}
             </button>
           </nav>
         </div>
+
       </div>
     </footer>
   );

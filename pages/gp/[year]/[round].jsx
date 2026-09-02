@@ -14,8 +14,10 @@ import { useRouter } from 'next/router';
 import { Trophy, TrendingUp, Smartphone, ArrowUpRight } from 'lucide-react';
 import PageShell, { PageHeader, PageLoading, PageError, Panel, StatTile } from '../../../components/ui/PageShell';
 import { GridToRaceChart } from '../../../components/livetiming/Charts';
+import { RaceHighlights, PitStopChart, RetirementList } from '../../../components/gp/RaceExtras';
 import {
-  getRace, getRaceResults, getQualifying, getSprint, getNames, ferrariSummary,
+  getRace, getRaceResults, getQualifying, getSprint, getNames, getRaceExtras,
+  ferrariSummary, retirementSummary,
 } from '../../../lib/f1/gp';
 import { getFlagCode } from '../../../lib/flags';
 
@@ -212,6 +214,7 @@ export default function GpDetail() {
   const [results, setResults] = useState([]);
   const [quali, setQuali] = useState(null);
   const [sprint, setSprint] = useState([]);
+  const [extras, setExtras] = useState(null);
   const [names, setNames] = useState({ drivers: {}, constructors: {} });
   const [tab, setTab] = useState('gara');
   const [loading, setLoading] = useState(true);
@@ -230,21 +233,33 @@ export default function GpDetail() {
         const r = await getRace(Number(year), Number(round));
         if (!alive) return;
         setRace(r);
+        // Passando da un GP all'altro i dati del precedente resterebbero
+        // appesi finché non arrivano i nuovi: qui la scheda riparte pulita.
+        setExtras(null);
         if (r) {
           // Le tre sessioni si leggono in parallelo: sono indipendenti fra loro.
-          const [res, q, sp] = await Promise.all([
+          const [res, q, sp, ex] = await Promise.all([
             getRaceResults(r.id),
             getQualifying(r.id),
             getSprint(r.id),
+            getRaceExtras(r.id),
           ]);
           if (!alive) return;
           setResults(res);
           setQuali(q);
           setSprint(sp);
+          setExtras(ex);
           setTab('gara');
-          // Un nome solo per tutte le sessioni: in qualifica può comparire chi
-          // non si è qualificato e quindi manca dall'ordine d'arrivo.
-          setNames(await getNames([...res, ...(q?.rows || []), ...sp]));
+          // Un nome solo per tutte le sessioni e per i riquadri: in qualifica
+          // può comparire chi non si è qualificato, e giro veloce, pilota del
+          // giorno e soste possono riguardare chi manca dall'ordine d'arrivo.
+          setNames(await getNames([
+            ...res,
+            ...(q?.rows || []),
+            ...sp,
+            ...(ex.pitStops?.rows || []),
+            ...[ex.fastestLap, ex.driverOfTheDay].filter(Boolean),
+          ]));
         }
         setError(null);
       } catch (e) {
@@ -285,6 +300,11 @@ export default function GpDetail() {
   const ferrari = ferrariSummary(results);
   const podium = results.filter(r => r.positionNumber && r.positionNumber <= 3);
   const hasResults = results.length > 0;
+  const ritiri = retirementSummary(results);
+  // I giri del vincitore sono la lunghezza della gara: serve a posizionare le
+  // soste sull'asse dei giri.
+  const giriGara = results.find(r => r.positionNumber === 1)?.laps ?? null;
+
 
   const tabs = [
     { key: 'gara',       label: 'Gara' },
@@ -381,12 +401,34 @@ export default function GpDetail() {
             </Panel>
           )}
 
+          {/* Giro veloce, pilota del giorno, soste e ritiri: i riquadri senza
+              dato in archivio non compaiono, invece di mostrare uno zero. */}
+          <RaceHighlights
+            extras={extras}
+            retirements={ritiri}
+            names={names}
+            totalDrivers={results.length}
+          />
+
           {/* Dalla griglia all'arrivo — grafico riusato dal vecchio Live Timing */}
           <Panel title="Dalla griglia all'arrivo">
             <div className="p-4">
-              <GridToRaceChart raceResults={results} year={race.year} grandPrix={title} />
+              <GridToRaceChart
+                raceResults={results}
+                year={race.year}
+                grandPrix={title}
+                driverNames={names.drivers}
+              />
             </div>
           </Panel>
+
+          <PitStopChart
+            stops={extras?.pitStops?.rows || null}
+            names={names}
+            totalLaps={giriGara}
+          />
+
+          <RetirementList retirements={ritiri} names={names} />
 
           {/* Le sessioni del weekend. Qualifiche e sprint compaiono solo dove
               esistono: per 640 gare su 1.171 l'archivio non ha qualifiche, e la

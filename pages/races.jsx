@@ -3,15 +3,7 @@ import { useRouter } from 'next/router';
 import PageShell, { PageLoading, PageError } from '../components/ui/PageShell';
 import Link from 'next/link';
 
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = typeof window !== 'undefined'
-  ? createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    )
-  : null;
-
+import { supabase } from '../lib/supabaseClient';
 
 const circuitToCountry = {
   'monza': 'it', 'autodromo-nazionale-di-monza': 'it', 'milan': 'it', 'imola': 'it', 'enzo-e-dino-ferrari': 'it',

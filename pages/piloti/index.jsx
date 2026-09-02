@@ -1,15 +1,9 @@
 // pages/piloti/index.jsx
 import Link from 'next/link';
 import { useState, useMemo, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../../lib/supabaseClient';
 import PageShell from '../../components/ui/PageShell';
 import { getFlagCode } from '../../lib/flags';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
 
 function calcAge(dob, dod) {
   if (!dob) return null;

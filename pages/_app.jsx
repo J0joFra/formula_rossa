@@ -69,8 +69,15 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
 
       {/* Stili globali: design system in styles/globals.css + styles/tokens.css */}
 
-      {/* SFONDO AMBIENTALE */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+      {/* SFONDO AMBIENTALE
+         `-z-10` non era qui: un elemento `fixed` senza z-index si dipinge sopra
+         tutto il contenuto che non è a sua volta posizionato, quindi i tre aloni
+         passavano *davanti* alle pagine e le velavano di rosa — si vede nelle
+         tabelle e nei grafici, dove il fondo bianco diventa rosato. Il footer
+         aveva già una toppa locale (`relative z-10`); qui si toglie la causa.
+         Il colore di fondo lo mette `body` in styles/globals.css, quindi gli
+         aloni restano visibili dietro le pagine con sfondo trasparente. */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" aria-hidden="true">
         <div
           className="absolute top-1/4 left-1/4 w-64 h-64 bg-ferrari-red rounded-full opacity-10 animate-ferrari-pulse blur-3xl"
         />
