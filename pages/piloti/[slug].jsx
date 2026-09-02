@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabaseClient';
 import PageShell, { PageLoading, PageError } from '../../components/ui/PageShell';
 import { getFlagCode } from '../../lib/flags';
-import { driverPhoto, inquadratura } from '../../lib/driverPhoto';
+import { driverPhoto, driverPhotoCredit, inquadratura } from '../../lib/driverPhoto';
 
 function formatDate(d) {
   if (!d) return '—';
@@ -94,6 +94,33 @@ function HeroAvatar({ driver }) {
         }}/>
       )}
     </div>
+  );
+}
+
+/**
+ * Chi ha scattato la foto, e con che licenza.
+ *
+ * Le immagini raccolte da Wikimedia Commons si possono pubblicare a patto di
+ * citare l'autore: questa riga è la condizione, non un vezzo. Compare solo per
+ * quelle foto — i render della Formula 1 e le foto storiche non ne hanno
+ * bisogno, e la riga non si vede.
+ */
+function CreditoFoto({ driver }) {
+  const credito = driverPhotoCredit(driver.id, `${driver.first_name || ''} ${driver.last_name || ''}`);
+  if (!credito) return null;
+  return (
+    <a
+      href={credito.pagina}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        fontSize:'9px', color:'var(--fr-text-faint)', textDecoration:'none',
+        textAlign:'center', maxWidth:'140px', lineHeight:1.4,
+      }}
+      title={`Foto di ${credito.autore} — licenza ${credito.licenza}`}
+    >
+      foto: {credito.autore} · {credito.licenza}
+    </a>
   );
 }
  
@@ -246,7 +273,10 @@ export default function DriverDetail() {
               )}
  
               <div style={{ position:'relative', zIndex:1, display:'flex', gap:'28px', alignItems:'flex-start', flexWrap:'wrap' }}>
-                <HeroAvatar driver={driver}/>
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'6px' }}>
+                  <HeroAvatar driver={driver}/>
+                  <CreditoFoto driver={driver} />
+                </div>
  
                 <div style={{ flex:1, minWidth:'200px' }}>
                   {/* Tags */}
