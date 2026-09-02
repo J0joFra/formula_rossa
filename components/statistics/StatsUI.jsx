@@ -12,8 +12,8 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, User } from 'lucide-react';
 
-const RED  = '#DC0000';
-const GOLD = '#EAB308';
+const RED  = 'var(--fr-red)';
+const GOLD = 'var(--fr-accent-amber)';
 
 /**
  * Dal nome del pilota al nome del file della foto.
@@ -34,8 +34,8 @@ const normalizeDriverName = (name) => {
 const MEDAL = [
 
   { color: RED,      label: '1ST' },
-  { color: '#EBEBEB', label: '2ND' },
-  { color: '#D58936', label: '3RD' },
+  { color: 'var(--fr-text-muted)', label: '2ND' },
+  { color: 'var(--fr-accent-orange)', label: '3RD' },
 ];
 
 export function DarkTooltip({ active, payload, label, accentColor, extra }) {
@@ -136,7 +136,7 @@ export function TrophySVG({ size = 16, color = GOLD, opacity = 1 }) {
 export function WinnerRow({ driver, index, max }) {
   const pct    = max > 0 ? (driver.count / max) * 100 : 0;
   const isTop3 = index < 3;
-  const accent = isTop3 ? MEDAL[index].color : 'rgba(255,255,255,0.18)';
+  const accent = isTop3 ? MEDAL[index].color : 'var(--fr-text-faint)';
   const label  = isTop3 ? MEDAL[index].label : null;
 
   const multiplier   = Math.floor(driver.count / 10);
@@ -148,7 +148,7 @@ export function WinnerRow({ driver, index, max }) {
       initial={{ opacity: 0, x: -16 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.35, delay: index * 0.045 }}
-      className="group relative flex items-start gap-4 md:gap-5 py-5 px-1 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] transition-colors"
+      className="group relative flex items-start gap-4 md:gap-5 py-5 px-1 border-b border-[var(--fr-border)] last:border-0 hover:bg-[var(--fr-overlay)] transition-colors"
     >
       <div className="absolute left-0 top-3 bottom-3 w-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
         style={{ background: accent }} aria-hidden="true" />
@@ -156,12 +156,12 @@ export function WinnerRow({ driver, index, max }) {
       <div className="shrink-0 w-9 text-right select-none pt-1">
         {label
           ? <span className="text-[10px] font-black tracking-widest" style={{ color: accent }}>{label}</span>
-          : <span className="text-xl font-black tabular-nums" style={{ color: 'rgba(255,255,255,0.1)' }}>{index + 1}</span>
+          : <span className="text-xl font-black tabular-nums" style={{ color: 'var(--fr-text-faint)' }}>{index + 1}</span>
         }
       </div>
 
       <div className="relative shrink-0 w-11 h-11 md:w-13 md:h-13 rounded-xl overflow-hidden transition-transform duration-300 group-hover:scale-105 mt-0.5"
-        style={{ border: `1.5px solid ${isTop3 ? accent : 'rgba(255,255,255,0.1)'}` }}>
+        style={{ border: `1.5px solid ${isTop3 ? accent : 'var(--fr-border)'}` }}>
         <img
           src={`/data/ferrari-drivers/${normalizeDriverName(driver.name)}.jpg`}
           alt={`Foto di ${driver.name}`}
@@ -176,7 +176,7 @@ export function WinnerRow({ driver, index, max }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2 mb-2 flex-wrap">
           <span className="text-sm font-black uppercase tracking-tight truncate transition-colors group-hover:text-red-400"
-            style={{ color: isTop3 ? accent : 'white' }}>
+            style={{ color: isTop3 ? accent : 'var(--fr-text)' }}>
             {driver.name}
           </span>
         </div>
@@ -249,7 +249,7 @@ export function WinnerRow({ driver, index, max }) {
 
       <div className="shrink-0 text-right min-w-[3rem] pt-0.5">
         <span className="text-2xl md:text-3xl font-black tabular-nums transition-colors"
-          style={{ color: isTop3 ? accent : 'rgba(255,255,255,0.55)' }}>
+          style={{ color: isTop3 ? accent : 'var(--fr-text)' }}>
           {driver.count}
         </span>
         <p className="text-[9px] text-[var(--fr-text-faint)] uppercase tracking-widest">vitt.</p>

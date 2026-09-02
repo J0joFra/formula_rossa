@@ -18,13 +18,13 @@ import {
 /* ─────────────────────────────────────────────────────────────────────────────
    CONSTANTS
 ───────────────────────────────────────────────────────────────────────────── */
-const RED  = '#DC0000';
-const GOLD = '#EAB308';
+const RED  = 'var(--fr-red)';
+const GOLD = 'var(--fr-accent-amber)';
 
 const POINTS_PERIODS = [
   { 
     name: '1950-1959', 
-    color: '#DC0000', // Rosso Ferrari
+    color: 'var(--fr-red)', // Rosso Ferrari
     description: '8-6-4-3-2 · solo miglior risultato',
     start: 1950, 
     end: 1959,
@@ -32,7 +32,7 @@ const POINTS_PERIODS = [
   },
   { 
     name: '1960-1990', 
-    color: '#EAB308', // Oro
+    color: 'var(--fr-accent-amber)', // Oro
     description: '9-6-4-3-2-1 · dal 1976 entrambi i piloti',
     start: 1960, 
     end: 1990,
@@ -40,7 +40,7 @@ const POINTS_PERIODS = [
   },
   { 
     name: '1991-2009', 
-    color: '#3B82F6', // Blu
+    color: 'var(--fr-accent-blue)', // Blu
     description: '10-6-4-3-2-1 · tutti i risultati',
     start: 1991, 
     end: 2009,
@@ -48,7 +48,7 @@ const POINTS_PERIODS = [
   },
   { 
     name: '2010-oggi', 
-    color: '#22C55E', // Verde
+    color: 'var(--fr-accent-green)', // Verde
     description: '25-18-15-12-10-8-6-4-2-1 · sprint + giro veloce',
     start: 2010, 
     end: new Date().getFullYear(),
@@ -443,7 +443,7 @@ export default function StatisticsPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[10px] font-black uppercase text-[var(--fr-text)] truncate group-hover:text-yellow-400 transition-colors">
-                        {g.name.replace(' Grand Prix','').replace(' GP','')}
+                        {(g.name || '—').replace(' Grand Prix', '').replace(' GP', '')}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <div className="h-1 w-12 rounded-full bg-[var(--fr-surface-2)] overflow-hidden">
@@ -470,7 +470,7 @@ export default function StatisticsPage() {
                       <YAxis dataKey="name" type="category" width={140}
                         stroke="var(--fr-border)"
                         tick={{ fill: 'var(--fr-text-muted)', fontSize: 10, fontWeight: 900 }}
-                        tickFormatter={v => v.replace(' Grand Prix','').replace(' GP','').toUpperCase()}
+                        tickFormatter={v => (v || '').replace(' Grand Prix', '').replace(' GP', '').toUpperCase()}
                         axisLine={false} tickLine={false} />
                       <Tooltip cursor={{ fill: 'var(--fr-overlay)' }}
                         content={({ active, payload }) => {
@@ -539,7 +539,7 @@ export default function StatisticsPage() {
                             {s.championship_position ?? '—'}°
                           </span>
                         </td>
-                        <td className="py-3 pr-4 text-right font-black" style={{ color: s.wins > 0 ? RED : 'var(--fr-text-dim)' }}>{s.wins ?? 0}</td>
+                        <td className="py-3 pr-4 text-right font-black" style={{ color: s.wins > 0 ? RED : 'var(--fr-text-faint)' }}>{s.wins ?? 0}</td>
                         <td className="py-3 pr-4 text-right font-bold text-[var(--fr-text-muted)]">{s.podiums ?? 0}</td>
                         <td className="py-3 pr-4 text-right font-bold text-[var(--fr-text-faint)]">{s.poles ?? 0}</td>
                         <td className="py-3 pr-4 text-right font-bold text-[var(--fr-text-faint)]">{s.fastest_laps ?? 0}</td>
@@ -577,7 +577,7 @@ export default function StatisticsPage() {
                 return (
                   <div key={d.id} className="flex items-center gap-4 group">
                     <span className="text-[10px] font-black w-5 text-right shrink-0"
-                      style={{ color: i === 0 ? RED : 'var(--fr-text-dim)' }}>{i+1}</span>
+                      style={{ color: i === 0 ? RED : 'var(--fr-text-faint)' }}>{i+1}</span>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-black uppercase tracking-tight group-hover:text-red-400 transition-colors"
@@ -607,7 +607,7 @@ export default function StatisticsPage() {
                 return (
                   <div key={d.id} className="flex items-center gap-4 group">
                     <span className="text-[10px] font-black w-5 text-right shrink-0"
-                      style={{ color: i === 0 ? GOLD : 'var(--fr-text-dim)' }}>{i+1}</span>
+                      style={{ color: i === 0 ? GOLD : 'var(--fr-text-faint)' }}>{i+1}</span>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-black uppercase tracking-tight group-hover:text-yellow-400 transition-colors"
@@ -649,19 +649,19 @@ export default function StatisticsPage() {
                       <motion.div
                         initial={{ width: 0 }} animate={{ width: `${(d.p2/d.total)*100}%` }}
                         transition={{ duration: 0.7, delay: i*0.05+0.1 }}
-                        className="h-full" style={{ background: '#EBEBEB', minWidth: 4 }} />
+                        className="h-full" style={{ background: 'var(--fr-text-muted)', minWidth: 4 }} />
                     )}
                     {d.p3 > 0 && (
                       <motion.div
                         initial={{ width: 0 }} animate={{ width: `${(d.p3/d.total)*100}%` }}
                         transition={{ duration: 0.7, delay: i*0.05+0.2 }}
-                        className="h-full rounded-r-full" style={{ background: '#D58936', minWidth: 4 }} />
+                        className="h-full rounded-r-full" style={{ background: 'var(--fr-accent-orange)', minWidth: 4 }} />
                     )}
                   </div>
                   <div className="flex gap-4 mt-1.5">
                     <span className="text-[9px] font-black" style={{ color: RED }}>🥇 {d.wins}</span>
-                    <span className="text-[9px] font-black" style={{ color: '#EBEBEB' }}>🥈 {d.p2}</span>
-                    <span className="text-[9px] font-black" style={{ color: '#D58936' }}>🥉 {d.p3}</span>
+                    <span className="text-[9px] font-black" style={{ color: 'var(--fr-text-muted)' }}>🥈 {d.p2}</span>
+                    <span className="text-[9px] font-black" style={{ color: 'var(--fr-accent-orange)' }}>🥉 {d.p3}</span>
                   </div>
                 </div>
               ))}
@@ -671,7 +671,7 @@ export default function StatisticsPage() {
 
         </motion.div>
 
-        <p className="text-center text-[var(--fr-text-dim)] text-[11px] mt-8 tracking-wider">
+        <p className="text-center text-[var(--fr-text-faint)] text-[11px] mt-8 tracking-wider">
           Scuderia Ferrari F1 · 1950–{new Date().getFullYear()} · Dati aggiornati
         </p>
     </PageShell>

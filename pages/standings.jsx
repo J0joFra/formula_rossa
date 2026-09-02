@@ -1,8 +1,18 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import PageShell, { PageHeader, PageLoading } from '../components/ui/PageShell';
+import { Users, Trophy, CalendarDays, Flag } from 'lucide-react';
+import PageShell, { PageHeader, PageLoading, Panel } from '../components/ui/PageShell';
 
 import { supabase } from '../lib/supabaseClient';
+
+/** Le date arrivano in ISO e finivano a schermo così com'erano: "2026-01-14". */
+function formatDate(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime())
+    ? iso
+    : d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+}
 
 const nationalityToCountryCode = {
   'Monegasque': 'mc', 'British': 'gb', 'Italian': 'it', 'French': 'fr',
@@ -200,168 +210,199 @@ export default function StandingsPage() {
         actions={seasonPicker}
       />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
-          {/* Driver Table */}
-          <div className="bg-[var(--bg-tertiary)]/40 border border-[var(--border-light)]">
-            <h3 className="p-4 font-black uppercase text-sm border-b border-[var(--border-light)] text-[var(--ferrari-red)]">Drivers</h3>
-            <table className="w-full text-left text-sm">
-              <tbody>
-                {visibleDrivers.map((s) => {
-                  const driver = drivers[s.driver_id];
-                  return (
-                    <tr key={s.driver_id} className="border-b border-[var(--border-light)]/30 hover:bg-[var(--bg-card)] transition-colors">
-                      <td className="p-4 w-12 font-black italic text-[var(--text-tertiary)]">{s.position_number}</td>
-                      <td className="p-4 font-bold text-[var(--text-primary)]">{driver?.last_name?.toUpperCase()}</td>
-                      <td className="p-4 text-[var(--text-tertiary)] text-[10px] uppercase font-bold">
-                        {constructors[s.constructor_id]?.name || s.constructor_id}
-                      </td>
-                      <td className="p-4 text-right font-black text-[var(--text-primary)]">{s.points}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            <button
-              onClick={() => setShowFullDrivers(!showFullDrivers)}
-              className="w-full p-3 text-[10px] font-black uppercase text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
-            >
-              {showFullDrivers ? '↑ Close' : '↓ View All'}
-            </button>
-          </div>
+        {/* Le due classifiche.
+            Erano due riquadri con fondo semitrasparente (`bg-[var(--bg-tertiary)]/40`),
+            attraverso cui si vedevano gli aloni ambientali della pagina, e con
+            le intestazioni in inglese su un sito in italiano. Ora sono Panel
+            come nel resto del sito, con lo stile di tabella condiviso. */}
+        <div className="grid gap-6 lg:grid-cols-2 mb-6">
 
-          {/* Constructor Table */}
-          <div className="bg-[var(--bg-tertiary)]/40 border border-[var(--border-light)]">
-            <h3 className="p-4 font-black uppercase text-sm border-b border-[var(--border-light)] text-[var(--ferrari-red)]">Constructors</h3>
-            <table className="w-full text-left text-sm">
-              <tbody>
-                {visibleConstructors.map((s) => (
-                  <tr key={s.constructor_id} className="border-b border-[var(--border-light)]/30 hover:bg-[var(--bg-card)] transition-colors">
-                    <td className="p-4 w-12 font-black italic text-[var(--text-tertiary)]">{s.position_number}</td>
-                    <td className="p-4 font-bold text-[var(--text-primary)]">{constructors[s.constructor_id]?.name?.toUpperCase()}</td>
-                    <td className="p-4 text-right font-black text-[var(--text-primary)]">{s.points}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <button
-              onClick={() => setShowFullConstructors(!showFullConstructors)}
-              className="w-full p-3 text-[10px] font-black uppercase text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
-            >
-              {showFullConstructors ? '↑ Close' : '↓ View All'}
-            </button>
-          </div>
-        </div>
-
-        {/* Calendar Section with Sprint Race Toggle */}
-        <div className="flex justify-between items-center mb-8">
-          <h3 className="font-black uppercase tracking-widest text-sm text-[var(--ferrari-red)]">
-            {showSprintRaces ? 'Sprint Race Calendar' : 'Race Calendar'}
-          </h3>
-          <button
-            onClick={() => setShowSprintRaces(!showSprintRaces)}
-            className={`px-4 py-2 text-xs font-black uppercase transition-all border ${
-              showSprintRaces 
-                ? 'bg-[var(--ferrari-red)] text-white border-red-600' 
-                : 'bg-[var(--bg-tertiary)] text-[var(--text-tertiary)] border-[var(--border-light)] hover:border-red-600'
-            }`}
+          <Panel
+            title="Piloti"
+            icon={Users}
+            actions={driverStandings.length > 5 ? (
+              <button
+                type="button"
+                onClick={() => setShowFullDrivers(!showFullDrivers)}
+                className="text-xs font-bold uppercase tracking-wider text-[var(--fr-text-muted)] hover:text-[var(--fr-red)] transition-colors"
+              >
+                {showFullDrivers ? 'Primi 5' : `Tutti · ${driverStandings.length}`}
+              </button>
+            ) : null}
           >
-            {showSprintRaces ? 'Show All Races' : 'Show Only Sprint Races'}
-          </button>
+            <div className="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Pos</th>
+                    <th scope="col">Pilota</th>
+                    <th scope="col">Scuderia</th>
+                    <th scope="col">Punti</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleDrivers.map((s) => {
+                    const driver = drivers[s.driver_id];
+                    const ferrari = s.constructor_id === 'ferrari';
+                    return (
+                      <tr key={s.driver_id} className={ferrari ? 'bg-[var(--fr-red-soft)]' : undefined}>
+                        <td className="tabular font-bold">{s.position_number}</td>
+                        <td className={ferrari ? 'font-semibold text-[var(--fr-text)]' : undefined}>
+                          {driver ? `${driver.first_name} ${driver.last_name}` : s.driver_id}
+                        </td>
+                        <td>{constructors[s.constructor_id]?.name || s.constructor_id}</td>
+                        <td className="tabular font-bold">{s.points}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </Panel>
+
+          <Panel
+            title="Costruttori"
+            icon={Trophy}
+            actions={constructorStandings.length > 5 ? (
+              <button
+                type="button"
+                onClick={() => setShowFullConstructors(!showFullConstructors)}
+                className="text-xs font-bold uppercase tracking-wider text-[var(--fr-text-muted)] hover:text-[var(--fr-red)] transition-colors"
+              >
+                {showFullConstructors ? 'Primi 5' : `Tutti · ${constructorStandings.length}`}
+              </button>
+            ) : null}
+          >
+            <div className="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Pos</th>
+                    <th scope="col">Scuderia</th>
+                    <th scope="col">Punti</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleConstructors.map((s) => {
+                    const ferrari = s.constructor_id === 'ferrari';
+                    return (
+                      <tr key={s.constructor_id} className={ferrari ? 'bg-[var(--fr-red-soft)]' : undefined}>
+                        <td className="tabular font-bold">{s.position_number}</td>
+                        <td className={ferrari ? 'font-semibold text-[var(--fr-text)]' : undefined}>
+                          {constructors[s.constructor_id]?.name || s.constructor_id}
+                        </td>
+                        <td className="tabular font-bold">{s.points}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </Panel>
         </div>
 
-        {displayedCalendar.length === 0 ? (
-          <div className="text-center py-12 text-[var(--text-tertiary)] font-bold">
-            {showSprintRaces ? 'No sprint races in this season' : 'No races available'}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            {displayedCalendar.map((race) => {
-              const countryCode = circuitToCountry[race.circuit_id];
-              const hasSprint = race.sprint_race_date;
-              const isSuspended = SUSPENDED_GP.includes(race.grand_prix_id);
+        <Panel
+          title={showSprintRaces ? 'Calendario sprint' : 'Calendario della stagione'}
+          icon={CalendarDays}
+          actions={sprintRaces.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => setShowSprintRaces(!showSprintRaces)}
+              aria-pressed={showSprintRaces}
+              className={`px-3 py-1.5 rounded-[9px] text-xs font-bold uppercase tracking-wider border transition-colors ${
+                showSprintRaces
+                  ? 'bg-[var(--fr-red)] border-[var(--fr-red)] text-white'
+                  : 'bg-[var(--fr-surface-2)] border-[var(--fr-border)] text-[var(--fr-text-muted)] hover:text-[var(--fr-text)]'
+              }`}
+            >
+              {showSprintRaces ? 'Tutte le gare' : `Solo sprint · ${sprintRaces.length}`}
+            </button>
+          ) : null}
+        >
+          {displayedCalendar.length === 0 ? (
+            <p className="px-5 py-12 text-center text-sm text-[var(--fr-text-muted)]">
+              {showSprintRaces
+                ? 'Nessuna gara sprint in questa stagione.'
+                : 'Nessuna gara in calendario per questa stagione.'}
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 p-4">
+              {displayedCalendar.map((race) => {
+                const countryCode = circuitToCountry[race.circuit_id];
+                const hasSprint = Boolean(race.sprint_race_date);
+                const isSuspended = SUSPENDED_GP.includes(race.grand_prix_id);
+                const nome = race.official_name?.replace('Grand Prix', 'GP') || `Round ${race.round}`;
 
-              return (
-                <Link
-                  key={race.id}
-                  href={`/gp/${selectedSeason}/${race.round}`}
-                  className={`relative group rounded-sm overflow-hidden transition-all
-                    ${isSuspended
-                      ? 'bg-zinc-900/60 border border-zinc-700/50 cursor-default pointer-events-none grayscale opacity-60'
-                      : `bg-[var(--bg-tertiary)] border border-[var(--border-light)] hover:border-red-600 ${hasSprint ? 'border-l-4 border-l-[var(--ferrari-red)]' : ''}`
-                    }`}
-                >
-                  {/* Badge SPRINT */}
-                  {hasSprint && !isSuspended && (
-                    <div className="absolute -top-1 -right-1 z-30 bg-[var(--ferrari-red)] text-white text-[8px] font-black px-1 py-0.5 uppercase rotate-12 shadow-lg">
-                      Sprint
-                    </div>
-                  )}
+                /* Le schede erano riquadri scuri con la bandiera al 60% sotto
+                   una sfumatura `from-zinc-900/80`: sul tema chiaro restava una
+                   lastra grigia sopra ogni gara. Ora la bandiera si vede intera
+                   e la scheda segue i token come le altre griglie del sito. */
+                const contenuto = (
+                  <>
+                    <span className="relative block h-24 w-full overflow-hidden bg-[var(--fr-surface-2)]">
+                      {countryCode ? (
+                        <img
+                          src={`https://flagcdn.com/w320/${countryCode}.png`}
+                          alt=""
+                          className={`w-full h-full object-cover transition-transform duration-500 ${
+                            isSuspended ? 'grayscale opacity-50' : 'group-hover:scale-110'
+                          }`}
+                        />
+                      ) : (
+                        <span className="w-full h-full grid place-items-center">
+                          <Flag className="w-5 h-5 text-[var(--fr-text-dim)]" aria-hidden="true" />
+                        </span>
+                      )}
+                      <span className="absolute top-2 left-2 w-6 h-6 rounded-full grid place-items-center bg-[var(--fr-red-fill)] text-fixed-white text-[10px] font-black shadow-md">
+                        {race.round}
+                      </span>
+                      {hasSprint && !isSuspended && (
+                        <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-[5px] bg-[var(--fr-red-fill)] text-fixed-white text-[8px] font-black uppercase tracking-wider">
+                          Sprint
+                        </span>
+                      )}
+                    </span>
 
-                  {/* Badge SOSPESO */}
-                  {isSuspended && (
-                    <div className="absolute -top-1 -right-1 z-30 bg-zinc-600 text-zinc-300 text-[8px] font-black px-1.5 py-0.5 uppercase rotate-12 shadow-lg tracking-wider">
-                      Sospeso
-                    </div>
-                  )}
+                    <span className="block p-3">
+                      <span className="block text-[11px] font-bold leading-tight text-[var(--fr-text)] line-clamp-2">
+                        {nome}
+                      </span>
+                      <span className="block text-[10px] text-[var(--fr-text-muted)] mt-1">
+                        {isSuspended ? 'Data da definire' : formatDate(race.date)}
+                      </span>
+                      {hasSprint && !isSuspended && (
+                        <span className="block text-[10px] font-semibold text-[var(--fr-red-ink)] mt-0.5">
+                          Sprint {formatDate(race.sprint_race_date)}
+                        </span>
+                      )}
+                    </span>
+                  </>
+                );
 
-                  {/* Round bubble */}
-                  <div className={`absolute top-2 left-2 z-20 w-6 h-6 rounded-full flex items-center justify-center border border-black/20 shadow-md
-                    ${isSuspended ? 'bg-zinc-600' : 'bg-[var(--fr-red-fill)]'}`}>
-                    {/* La pastiglia del round è rossa: sopra ci va il bianco.
-                        Con `--text-primary` in tema chiaro era quasi nera. */}
-                    <span className="text-fixed-white text-[10px] font-black">{race.round}</span>
+                const cls = 'group block overflow-hidden rounded-[var(--radius-md)] border border-[var(--fr-border)] bg-[var(--fr-surface)] transition-all';
+
+                /* Una gara sospesa non porta da nessuna parte: prima restava un
+                   <Link> reso inerte con `pointer-events-none`, cioè un link che
+                   la tastiera raggiunge e lo screen reader annuncia a vuoto. */
+                return isSuspended ? (
+                  <div key={race.id} className={`${cls} opacity-70`}>
+                    {contenuto}
+                    <span className="sr-only">Gara sospesa</span>
                   </div>
+                ) : (
+                  <Link
+                    key={race.id}
+                    href={`/gp/${selectedSeason}/${race.round}`}
+                    className={`${cls} hover:-translate-y-1 hover:border-[var(--fr-border-strong)]`}
+                  >
+                    {contenuto}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </Panel>
 
-                  {/* Bandiera */}
-                  <div className="relative h-28 w-full overflow-hidden bg-[var(--bg-tertiary)]">
-                    {countryCode ? (
-                      <img
-                        src={`https://flagcdn.com/w320/${countryCode}.png`}
-                        className={`w-full h-full object-cover transition-all duration-500
-                          ${isSuspended
-                            ? 'opacity-25'
-                            : 'opacity-60 group-hover:opacity-100 group-hover:scale-110'}`}
-                        alt="Bandiera nazione"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[8px] text-[var(--text-muted)] uppercase font-black">No Flag</div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 to-transparent" />
-
-                    {/* Overlay icona sospeso */}
-                    {isSuspended && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-zinc-500 text-2xl" title="Gara sospesa">⏸</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Info testo */}
-                  <div className={`p-3 ${isSuspended ? 'bg-zinc-900/80' : 'bg-[var(--bg-tertiary)]'}`}>
-                    <div className={`font-black text-[10px] uppercase truncate mb-1 tracking-tighter
-                      ${isSuspended ? 'text-zinc-500' : 'text-[var(--text-primary)]'}`}>
-                      {race.official_name?.replace('Grand Prix', 'GP')}
-                    </div>
-                    <div className={`text-[9px] font-bold transition-colors
-                      ${isSuspended ? 'text-zinc-600' : 'text-[var(--text-tertiary)] group-hover:text-red-500'}`}>
-                      {isSuspended ? 'Data da definire' : race.date}
-                    </div>
-                    {hasSprint && !isSuspended && (
-                      <div className="text-[8px] font-black text-[var(--fr-red-ink)] uppercase mt-1">
-                        Sprint: {race.sprint_race_date}
-                      </div>
-                    )}
-                    {isSuspended && (
-                      <div className="text-[8px] font-black text-zinc-600 uppercase mt-1 tracking-wider">
-                        ⚠ Gara sospesa
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
     </PageShell>
   );
 }

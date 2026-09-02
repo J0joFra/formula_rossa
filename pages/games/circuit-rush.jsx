@@ -299,7 +299,7 @@ export default function CircuitRush() {
         <div className="max-w-[400px] w-full mb-4 flex justify-end items-center px-1">
           <div className="flex items-center gap-3 bg-[var(--fr-surface-2)] px-4 py-1.5 rounded-full">
             <Gauge className="w-4 h-4 text-[var(--fr-red)]" aria-hidden="true" />
-            <span className="tabular font-bold text-xs text-[var(--fr-red)]">{(speedRef.current * 18).toFixed(0)} KM/H</span>
+            <span className="tabular font-bold text-xs text-[var(--fr-red-ink)]">{(speedRef.current * 18).toFixed(0)} KM/H</span>
           </div>
         </div>
 

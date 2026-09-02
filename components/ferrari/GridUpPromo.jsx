@@ -4,23 +4,21 @@
  * Sezione "scopri l'app" — promuove GridUp, l'app companion di Formula Rossa.
  * GridUp: calcolatore del Mondiale F1 (punti per il titolo, scenari, classifiche).
  *
- * I due bottoni si sono scambiati i ruoli: il principale era "Apri l'app" e
- * portava alla web app, quello di Google Play era il secondario. Ma chi arriva
- * qui vuole installare l'app, e la web app rimbalzava su un altro indirizzo
- * ancora — due passaggi per finire dove non si voleva. Ora il Play Store è il
- * bottone pieno e la web app resta come alternativa, che su desktop serve
- * ancora: lì un link allo store non installa niente.
+ * C'è un bottone solo, e porta alla scheda su Google Play. Prima ce n'erano
+ * due, e il principale apriva la web app — che a sua volta rimbalzava su un
+ * altro indirizzo ancora: due passaggi per finire dove non si voleva. Chi
+ * arriva qui vuole installare l'app, quindi la strada è una.
  */
 
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
-  Smartphone, Trophy, Calculator, TrendingUp, Users,
+  Trophy, Calculator, TrendingUp, Users,
   ArrowUpRight, Play, Sparkles, Flag,
 } from 'lucide-react';
 import { useI18n } from '../../lib/i18n';
 
-import { GRIDUP_PLAY_URL, GRIDUP_WEB_URL, GRIDUP_ICON_URL } from '../../lib/gridup';
+import { GRIDUP_PLAY_URL, GRIDUP_ICON_URL } from '../../lib/gridup';
 
 /* Solo icona e chiavi: i testi erano scritti in italiano dentro l'array,
    quindi restavano in italiano anche col sito in un'altra lingua. */
@@ -96,8 +94,8 @@ export default function GridUpPromo() {
                 ))}
               </ul>
 
-              {/* CTA buttons */}
-              <div className="flex flex-col sm:flex-row gap-3">
+              {/* Un solo bottone: la scheda su Google Play. */}
+              <div className="flex">
                 <a
                   href={GRIDUP_PLAY_URL}
                   target="_blank"
@@ -113,15 +111,6 @@ export default function GridUpPromo() {
                   <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
                 </a>
 
-                <a
-                  href={GRIDUP_WEB_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm border-2 border-[var(--fr-border-strong)] text-[var(--fr-text)] transition-all duration-200 hover:border-[var(--fr-red)] hover:-translate-y-0.5"
-                >
-                  <Smartphone className="w-4 h-4" aria-hidden="true" />
-                  {t('gu_openWeb')}
-                </a>
               </div>
 
               <p className="mt-4 text-[10px] text-[var(--fr-text-faint)] uppercase tracking-wider">

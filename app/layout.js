@@ -1,6 +1,14 @@
+import Providers from './providers';
+import Navigation from '../components/ferrari/Navigation';
 import Footer from '../components/ferrari/Footer';
 import CookieConsent from '../components/CookieConsent';
-import './globals.css';
+/* Lo stesso foglio di stile del Pages Router. Qui c'era solo app/globals.css,
+   che importa i token ma non il design system: le pagine dell'App Router — le
+   legali — restavano senza le classi condivise (.btn, .table-wrapper,
+   .fr-eyebrow) e senza il layer di compatibilità, che è quello che tiene
+   leggibile il bianco sul rosso dei bottoni. Barra e piè di pagina sono gli
+   stessi componenti, quindi si vedeva la differenza. */
+import '../styles/globals.css';
 
 export const metadata = {
   title: 'Formula Rossa - Data Intelligence Scuderia Ferrari F1',
@@ -43,7 +51,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="it">
+    <html lang="it" suppressHydrationWarning>
       <head>
         {/* Meta tag aggiuntivi per SEO */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -58,10 +66,16 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
+      {/* `suppressHydrationWarning`: next-themes scrive la classe del tema su
+          <html> prima dell'idratazione, quindi server e client differiscono
+          per quell'attributo — è l'uso previsto della libreria. */}
       <body>
-        {children}
-        <Footer />
-        <CookieConsent />
+        <Providers>
+          <Navigation />
+          {children}
+          <Footer />
+          <CookieConsent />
+        </Providers>
       </body>
     </html>
   );
