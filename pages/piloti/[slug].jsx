@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabaseClient';
 import PageShell, { PageLoading, PageError } from '../../components/ui/PageShell';
 import { getFlagCode } from '../../lib/flags';
+import { driverPhoto, inquadratura } from '../../lib/driverPhoto';
 
 function formatDate(d) {
   if (!d) return '—';
@@ -44,23 +45,34 @@ function HeroAvatar({ driver }) {
   const initials = `${driver.first_name?.[0]||''}${driver.last_name?.[0]||''}`.toUpperCase();
   const isChamp  = driver.total_championship_wins > 0;
   const size = 140;
+  const foto = driverPhoto(driver.id, `${driver.first_name || ''} ${driver.last_name || ''}`);
+  const [rotta, setRotta] = useState(false);
   return (
     <div style={{ position:'relative', flexShrink:0 }}>
       <div style={{
         width:size, height:size, borderRadius:'50%',
         background: isChamp
           ? 'linear-gradient(135deg, #450a0a 0%, #7f1d1d 40%, var(--fr-red) 100%)'
-          : 'linear-gradient(135deg, #111 0%, #222 100%)',
+          : 'linear-gradient(135deg, var(--fr-surface-2) 0%, var(--fr-surface-3) 100%)',
         border: isChamp ? '3px solid rgba(220,38,38,.6)' : '2px solid var(--fr-border)',
         display:'flex', alignItems:'center', justifyContent:'center',
-        boxShadow: isChamp ? '0 0 40px rgba(220,38,38,.3), 0 0 80px rgba(220,38,38,.1)' : '0 8px 32px rgba(0,0,0,.5)',
+        boxShadow: isChamp ? '0 0 40px rgba(220,38,38,.3), 0 0 80px rgba(220,38,38,.1)' : 'var(--fr-shadow-sm)',
         position:'relative', zIndex:1,
       }}>
+        {/* Le iniziali stanno sotto: restano se la foto non c'è o non carica. */}
         <span style={{
-          fontSize:'52px', fontWeight:'900', fontFamily:'monospace',
-          color: isChamp ? 'var(--fr-text)' : 'var(--fr-text-faint)',
-          letterSpacing:'-2px',
-        }}>{initials}</span>
+          position:'absolute', inset:0, borderRadius:'50%', overflow:'hidden',
+          display:'flex', alignItems:'center', justifyContent:'center',
+        }}>
+          <span style={{
+            fontSize:'52px', fontWeight:'900', fontFamily:'monospace',
+            color: isChamp ? 'var(--fr-text)' : 'var(--fr-text-faint)',
+            letterSpacing:'-2px',
+          }}>{initials}</span>
+          {foto && !rotta && (
+            <img src={foto} alt="" onError={() => setRotta(true)} style={inquadratura(foto)} />
+          )}
+        </span>
       </div>
       {/* Numero permanente */}
       {driver.permanent_number && (

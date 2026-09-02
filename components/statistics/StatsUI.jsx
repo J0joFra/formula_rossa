@@ -8,28 +8,13 @@
  * dati: la pagina superava le 1.200 righe. Comportamento invariato.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, User } from 'lucide-react';
+import { driverPhoto, inquadratura } from '../../lib/driverPhoto';
 
 const RED  = 'var(--fr-red)';
 const GOLD = 'var(--fr-accent-amber)';
-
-/**
- * Dal nome del pilota al nome del file della foto.
- *
- * Viveva in pages/statistics.jsx ed è rimasta lì quando WinnerRow è stata
- * estratta qui: la funzione risultava quindi non definita a runtime e l'intera
- * pagina /statistics si fermava su "Application error". La build non se ne
- * accorge, perché è un riferimento risolto solo mentre la riga viene disegnata.
- */
-const normalizeDriverName = (name) => {
-  if (!name) return '';
-  return name.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/[^\w-]/g, '');
-};
 
 const MEDAL = [
 
@@ -134,6 +119,8 @@ export function TrophySVG({ size = 16, color = GOLD, opacity = 1 }) {
    WINNER ROW
 ───────────────────────────────────────────────────────────────────────────── */
 export function WinnerRow({ driver, index, max }) {
+  const foto = driverPhoto(null, driver.name);
+  const [rotta, setRotta] = useState(false);
   const pct    = max > 0 ? (driver.count / max) * 100 : 0;
   const isTop3 = index < 3;
   const accent = isTop3 ? MEDAL[index].color : 'var(--fr-text-faint)';
@@ -160,17 +147,15 @@ export function WinnerRow({ driver, index, max }) {
         }
       </div>
 
-      <div className="relative shrink-0 w-11 h-11 md:w-13 md:h-13 rounded-xl overflow-hidden transition-transform duration-300 group-hover:scale-105 mt-0.5"
+      {/* La sagoma sta sotto e si vede se la foto manca o non carica: prima
+          l'`onError` la scopriva a mano toccando `nextSibling.style`, che è
+          il DOM modificato alle spalle di React. */}
+      <div className="relative shrink-0 w-11 h-11 md:w-13 md:h-13 rounded-xl overflow-hidden transition-transform duration-300 group-hover:scale-105 mt-0.5 bg-[var(--fr-surface-2)] grid place-items-center"
         style={{ border: `1.5px solid ${isTop3 ? accent : 'var(--fr-border)'}` }}>
-        <img
-          src={`/data/ferrari-drivers/${normalizeDriverName(driver.name)}.jpg`}
-          alt={`Foto di ${driver.name}`}
-          className="w-full h-full object-cover"
-          onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'flex'; }}
-        />
-        <div className="absolute inset-0 bg-[var(--fr-surface)] items-center justify-center" style={{ display: 'none' }} aria-hidden="true">
-          <User className="w-4 h-4 text-[var(--fr-text-faint)]" />
-        </div>
+        <User className="w-4 h-4 text-[var(--fr-text-faint)]" aria-hidden="true" />
+        {foto && !rotta && (
+          <img src={foto} alt="" loading="lazy" onError={() => setRotta(true)} style={inquadratura(foto)} />
+        )}
       </div>
 
       <div className="flex-1 min-w-0">
