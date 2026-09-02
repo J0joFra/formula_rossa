@@ -9,10 +9,12 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { BarChart3, Trophy } from 'lucide-react';
+import { useI18n } from '../../lib/i18n';
 
 const FALLBACK = { wins: 0, podiums: 0, poles: 0, fastestLaps: 0, constructorTitles: 16, driverTitles: 15 };
 
 export default function HeroSection() {
+  const { t, lang } = useI18n();
   const [stats, setStats] = useState(FALLBACK);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -52,11 +54,13 @@ export default function HeroSection() {
     return () => { alive = false; };
   }, []);
 
+  const anno = new Date().getFullYear();
+
   const cells = [
-    { key: 'wins',        label: 'Vittorie',       value: stats.wins,        accent: true },
-    { key: 'podiums',     label: 'Podi',           value: stats.podiums },
-    { key: 'poles',       label: 'Pole position',  value: stats.poles },
-    { key: 'fastestLaps', label: 'Giri veloci',    value: stats.fastestLaps },
+    { key: 'wins',        label: t('hp_wins'),        value: stats.wins, accent: true },
+    { key: 'podiums',     label: t('hp_podiums'),     value: stats.podiums },
+    { key: 'poles',       label: t('hp_poles'),       value: stats.poles },
+    { key: 'fastestLaps', label: t('hp_fastestLaps'), value: stats.fastestLaps },
   ];
 
   return (
@@ -79,27 +83,26 @@ export default function HeroSection() {
           >
             <span className="fr-eyebrow inline-flex items-center gap-2.5 mb-5">
               <span className="w-[7px] h-[7px] rounded-full bg-[var(--fr-red)] shadow-[0_0_0_4px_var(--fr-red-soft)]" aria-hidden="true" />
-              Data Intelligence · Scuderia Ferrari
+              {t('hp_heroEyebrow')}
             </span>
 
             <h1 className="uppercase">
-              La Rossa<br />
-              <span className="text-[var(--fr-red)]">nei numeri</span>
+              {t('hp_heroTitleA')}<br />
+              <span className="text-[var(--fr-red)]">{t('hp_heroTitleB')}</span>
             </h1>
 
             <p className="text-base md:text-lg text-[var(--fr-text-muted)] max-w-[46ch] mt-5 mb-8">
-              Ogni vittoria, pole e giro veloce della Scuderia Ferrari dal 1950 a oggi.
-              Statistiche, classifiche e archivio storico, in un&apos;unica piattaforma indipendente.
+              {t('hp_heroLead')}
             </p>
 
             <div className="flex flex-wrap gap-3">
               <Link href="/statistics" className="btn btn-primary">
                 <BarChart3 className="w-4 h-4" aria-hidden="true" />
-                Esplora le statistiche
+                {t('hp_ctaStats')}
               </Link>
               <Link href="/standings" className="btn btn-outline-light">
                 <Trophy className="w-4 h-4" aria-hidden="true" />
-                Classifiche {new Date().getFullYear()}
+                {t('hp_ctaStandings', { year: anno })}
               </Link>
             </div>
           </motion.div>
@@ -113,10 +116,10 @@ export default function HeroSection() {
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--fr-border)]">
               <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[var(--fr-text-faint)]">
-                Ferrari · F1 all-time
+                {t('hp_allTime')}
               </span>
               <span className="font-mono text-[10px] tracking-[0.16em] uppercase font-bold text-[var(--fr-red)]">
-                1950 → {new Date().getFullYear()}
+                1950 → {anno}
               </span>
             </div>
 
@@ -128,10 +131,10 @@ export default function HeroSection() {
                 >
                   <div className={`tabular text-[34px] font-bold leading-none tracking-tight ${c.accent ? 'text-[var(--fr-red)]' : 'text-[var(--fr-text)]'}`}>
                     {loading
-                      ? <span className="skeleton block w-20 h-8 rounded-lg" role="status" aria-label="Caricamento" />
+                      ? <span className="skeleton block w-20 h-8 rounded-lg" role="status" aria-label={t('loading')} />
                       : failed
-                        ? <span className="text-[var(--fr-text-faint)] text-2xl">N/D</span>
-                        : c.value.toLocaleString('it-IT')}
+                        ? <span className="text-[var(--fr-text-faint)] text-2xl">{t('hp_na')}</span>
+                        : c.value.toLocaleString(lang)}
                   </div>
                   <div className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--fr-text-muted)] mt-1.5">
                     {c.label}
@@ -141,8 +144,8 @@ export default function HeroSection() {
             </div>
 
             <div className="flex justify-between px-5 py-3.5 text-xs text-[var(--fr-text-faint)]">
-              <span>{stats.constructorTitles} Titoli Costruttori</span>
-              <span className="tabular">{stats.driverTitles} Titoli Piloti</span>
+              <span>{t('hp_ctorTitles', { n: stats.constructorTitles })}</span>
+              <span className="tabular">{t('hp_driverTitles', { n: stats.driverTitles })}</span>
             </div>
           </motion.div>
         </div>

@@ -10,47 +10,52 @@ import NewsSection from '../components/ferrari/NewsSection';
 import GridUpPromo from '../components/ferrari/GridUpPromo';
 import Footer from '../components/ferrari/Footer';
 import SEO from '../components/seo';
+import { useI18n } from '../lib/i18n';
 
-/* I tre pilastri: stessa struttura del menu, così la home spiega il sito. */
+/* I tre pilastri: stessa struttura del menu, così la home spiega il sito.
+   Qui restano solo i dati che non cambiano con la lingua — icona, colore,
+   destinazioni. Titoli e descrizioni sono chiavi, risolte al render: prima
+   erano scritti in italiano dentro l'array, quindi restavano in italiano
+   anche col sito in inglese. Le voci dei link riusano le chiavi del menu. */
 const PILLARS = [
   {
     n: '01',
     id: 'archivio',
     icon: BarChart3,
-    title: 'Archivio',
+    title: 'nav_archive',
+    desc: 'hp_archiveDesc',
     tone: 'red',
-    desc: 'Il cuore del sito: 75 anni di Ferrari in Formula 1. Record, statistiche, schede piloti e circuiti, con numeri verificabili.',
     links: [
-      { href: '/statistics', label: 'Statistiche' },
-      { href: '/piloti',     label: 'Piloti' },
-      { href: '/circuiti',   label: 'Circuiti' },
+      { href: '/statistics', key: 'nav_stats' },
+      { href: '/piloti',     key: 'nav_drivers' },
+      { href: '/circuiti',   key: 'nav_circuits' },
     ],
   },
   {
     n: '02',
     id: 'stagione',
     icon: Trophy,
-    title: 'Stagione',
+    title: 'nav_season',
+    desc: 'hp_seasonDesc',
     tone: 'teal',
-    desc: 'Il campionato in corso: classifiche aggiornate, l\u2019analisi di ogni Gran Premio e le notizie dal mondo Ferrari.',
     links: [
-      { href: '/standings', label: 'Classifiche' },
-      { href: '/gp',        label: 'Analisi GP' },
-      { href: '/news',      label: 'News' },
+      { href: '/standings', key: 'nav_standings' },
+      { href: '/gp',        key: 'nav_gp' },
+      { href: '/news',      key: 'nav_news' },
     ],
   },
   {
     n: '03',
     id: 'gioca',
     icon: Gamepad2,
-    title: 'Gioca',
+    title: 'nav_play',
+    desc: 'hp_playDesc',
     tone: 'gold',
-    desc: 'Un angolo leggero: mini-giochi a tema Ferrari per mettere alla prova la tua conoscenza tra un GP e l\u2019altro.',
     links: [
-      { href: '/fanzone',            label: 'Fan Zone' },
-      { href: '/games/trivia',       label: 'Trivia' },
-      { href: '/games/pitstop',      label: 'Pit Stop' },
-      { href: '/games/circuit-rush', label: 'Circuit Rush' },
+      { href: '/fanzone',            key: 'ft_fanzone' },
+      { href: '/games/trivia',       key: 'hp_trivia' },
+      { href: '/games/pitstop',      key: 'hp_pitstop' },
+      { href: '/games/circuit-rush', key: 'hp_circuitRush' },
     ],
   },
 ];
@@ -61,7 +66,7 @@ const TONE = {
   gold: { bg: 'color-mix(in srgb, var(--fr-gold) 20%, transparent)', fg: 'var(--fr-gold)' },
 };
 
-function PillarCard({ pillar, index }) {
+function PillarCard({ pillar, index, t, years }) {
   const tone = TONE[pillar.tone];
   return (
     <motion.article
@@ -86,8 +91,8 @@ function PillarCard({ pillar, index }) {
         <pillar.icon className="w-6 h-6" />
       </span>
 
-      <h3 className="uppercase mb-2">{pillar.title}</h3>
-      <p className="text-sm text-[var(--fr-text-muted)] mb-5">{pillar.desc}</p>
+      <h3 className="uppercase mb-2">{t(pillar.title)}</h3>
+      <p className="text-sm text-[var(--fr-text-muted)] mb-5">{t(pillar.desc, { years })}</p>
 
       <div className="mt-auto flex flex-wrap gap-1.5">
         {pillar.links.map(l => (
@@ -96,7 +101,7 @@ function PillarCard({ pillar, index }) {
             href={l.href}
             className="text-xs font-semibold px-3 py-1.5 rounded-[9px] bg-[var(--fr-surface-2)] text-[var(--fr-text-muted)] hover:bg-[var(--fr-red)] hover:text-white transition-colors"
           >
-            {l.label}
+            {t(l.key)}
           </Link>
         ))}
       </div>
@@ -105,14 +110,17 @@ function PillarCard({ pillar, index }) {
 }
 
 /* Fatti solidi e verificabili — niente cifre gonfiate. */
-function FactsBand() {
-  const seasons = new Date().getFullYear() - 1950;
+function FactsBand({ t, years }) {
+  /* Niente `toLocaleString` qui: questi numeri si dipingono anche sul server,
+     e Node e browser non raggruppano le migliaia allo stesso modo — in
+     italiano il primo dà "1000" e il secondo "1.000", e React fallisce
+     l'idratazione. Il separatore giusto per ogni lingua sta nel dizionario. */
   const facts = [
-    { value: `${seasons}`, label: 'Stagioni in F1' },
-    { value: '1.000+',     label: 'GP disputati' },
-    { value: '16',         label: 'Titoli costruttori' },
-    { value: '15',         label: 'Titoli piloti' },
-    { value: '1950',       label: 'Dal primo GP' },
+    { key: 'hp_factSeasons', value: String(years) },
+    { key: 'hp_factGp',      value: t('hp_factGpValue') },
+    { key: 'hp_factCtor',    value: '16' },
+    { key: 'hp_factDriver',  value: '15' },
+    { key: 'hp_factSince',   value: '1950' },
   ];
   return (
     <div className="border-y border-[var(--fr-border)] bg-[var(--fr-surface-3)]">
@@ -120,16 +128,16 @@ function FactsBand() {
         <dl className="grid grid-cols-2 md:grid-cols-5">
           {facts.map((f, i) => (
             <div
-              key={f.label}
+              key={f.key}
               className={`py-8 px-3 text-center border-[var(--fr-border)] ${i < facts.length - 1 ? 'md:border-r' : ''} ${i < 3 ? 'border-b md:border-b-0' : ''}`}
             >
-              <dt className="sr-only">{f.label}</dt>
+              <dt className="sr-only">{t(f.key)}</dt>
               <dd>
                 <span className="tabular block text-[30px] font-bold leading-none tracking-tight text-[var(--fr-text)]">
                   {f.value}
                 </span>
                 <span className="block text-[11px] uppercase tracking-[0.1em] font-semibold text-[var(--fr-text-faint)] mt-2">
-                  {f.label}
+                  {t(f.key)}
                 </span>
               </dd>
             </div>
@@ -141,6 +149,10 @@ function FactsBand() {
 }
 
 export default function Home() {
+  const { t } = useI18n();
+  // 1950 è la prima stagione, quindi va contata.
+  const stagioni = new Date().getFullYear() - 1950 + 1;
+
   const homeJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
@@ -201,21 +213,22 @@ export default function Home() {
         <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-wrap mx-auto">
             <header className="mb-9">
-              <span className="fr-eyebrow">La piattaforma</span>
-              <h2 className="uppercase mt-3">Tre modi per vivere la Rossa</h2>
+              <span className="fr-eyebrow">{t('hp_platformEyebrow')}</span>
+              <h2 className="uppercase mt-3">{t('hp_platformTitle')}</h2>
               <p className="text-[var(--fr-text-muted)] mt-2.5 max-w-[56ch]">
-                L&apos;archivio storico al centro, la stagione in corso sempre aggiornata
-                e un angolo per giocare. Il calcolatore del Mondiale vive nell&apos;app GridUp.
+                {t('hp_platformLead')}
               </p>
             </header>
 
             <div className="grid md:grid-cols-3 gap-5">
-              {PILLARS.map((p, i) => <PillarCard key={p.id} pillar={p} index={i} />)}
+              {PILLARS.map((p, i) => (
+                <PillarCard key={p.id} pillar={p} index={i} t={t} years={stagioni} />
+              ))}
             </div>
           </div>
         </section>
 
-        <FactsBand />
+        <FactsBand t={t} years={stagioni} />
 
         <GridUpPromo />
 

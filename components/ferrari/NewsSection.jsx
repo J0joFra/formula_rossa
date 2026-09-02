@@ -1,189 +1,227 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { ExternalLink, RefreshCw, Newspaper } from 'lucide-react';
+'use client';
+/**
+ * components/ferrari/NewsSection.jsx
+ * Flash news dal feed di Motorsport.com, in fondo alla home.
+ *
+ * Era rimasta allo stile precedente: fondo scuro scritto a mano
+ * (`from-[#111] via-[#1a1a1a]`), titoli in corsivo, `rounded-2xl`, alias
+ * legacy (`--bg-tertiary`, `--ferrari-red`) e una categoria in `text-zinc-300`
+ * che sul tema chiaro spariva. Ora usa i token `--fr-*` e le stesse misure
+ * delle altre sezioni della home: intestazione con occhiello, griglia di
+ * schede su `--fr-surface`, bordi `--fr-border`.
+ *
+ * Cambia anche il comportamento: la scheda intera è il link, non solo la
+ * scritta "Leggi" in fondo; e se il feed non risponde la sezione lo dice e
+ * offre di riprovare, invece di lasciare tre riquadri vuoti in pagina.
+ */
 
-const CATEGORY_STYLES = {
-  SCUDERIA:  { bg: 'bg-[var(--ferrari-red)]/15',    border: 'border-red-500/30',    text: 'text-[var(--ferrari-red)]'    },
-  PILOTI:    { bg: 'bg-[var(--ferrari-yellow)]/10', border: 'border-yellow-500/30', text: 'text-[var(--ferrari-yellow)]' },
-  'F1 NEWS': { bg: 'bg-zinc-700/40',   border: 'border-zinc-500/30',   text: 'text-zinc-300'   },
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { ArrowUpRight, RefreshCw, Newspaper } from 'lucide-react';
+import { useI18n } from '../../lib/i18n';
+
+const RSS_URL = 'https://it.motorsport.com/rss/f1/news/';
+
+/* Le categorie sono tre bucket ricavati dal titolo, non un campo del feed.
+   Ognuna ha il suo colore preso dai token, così resta leggibile su entrambi
+   i temi: prima "F1" era `text-zinc-300`, invisibile sul bianco. */
+const CATEGORIE = {
+  team:    { key: 'nw_catTeam',    fg: 'var(--fr-red)',  bg: 'var(--fr-red-soft)' },
+  drivers: { key: 'nw_catDrivers', fg: 'var(--fr-gold)',  bg: 'color-mix(in srgb, var(--fr-gold) 16%, transparent)' },
+  f1:      { key: 'nw_catF1',      fg: 'var(--fr-teal)',  bg: 'color-mix(in srgb, var(--fr-teal) 14%, transparent)' },
 };
 
-export default function NewsSection() {
-  const [news, setNews] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+function categoria(titolo = '') {
+  const t = titolo.toLowerCase();
+  if (t.includes('leclerc') || t.includes('hamilton')) return 'drivers';
+  if (t.includes('ferrari')) return 'team';
+  return 'f1';
+}
 
-  const fetchRealNews = async () => {
+/* L'immagine sta in tre posti diversi a seconda di come il feed è stato
+   generato: enclosure, un <img> dentro il contenuto, o il campo thumbnail. */
+function anteprima(item) {
+  if (item.enclosure?.link) return item.enclosure.link;
+  const nelContenuto = item.content?.match(/<img[^>]+src="([^">]+)"/);
+  if (nelContenuto) return nelContenuto[1];
+  return item.thumbnail || null;
+}
+
+function Scheda({ item, index, t }) {
+  const cat = CATEGORIE[item.category];
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: .45, delay: index * .08 }}
+      className="group flex flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)] shadow-[var(--fr-shadow-sm)] transition-all hover:-translate-y-1 hover:border-[var(--fr-border-strong)]"
+    >
+      <a
+        href={item.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fr-red)] rounded-[var(--radius)]"
+      >
+        <div className="relative w-full aspect-[16/9] shrink-0 overflow-hidden bg-[var(--fr-surface-2)]">
+          {/* Se l'immagine non carica resta il fondo del riquadro, che è già
+              del colore giusto: nascondere l'img basta. */}
+          {item.thumbnail ? (
+            <img
+              src={item.thumbnail}
+              alt=""
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              loading="lazy"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+          ) : (
+            <span className="w-full h-full grid place-items-center">
+              <Newspaper className="w-9 h-9 text-[var(--fr-text-dim)]" aria-hidden="true" />
+            </span>
+          )}
+          <span
+            className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-[0.14em] px-2.5 py-1 rounded-full backdrop-blur-sm"
+            style={{ background: cat.bg, color: cat.fg }}
+          >
+            {t(cat.key)}
+          </span>
+        </div>
+
+        <div className="flex flex-col flex-grow p-5">
+          <h3 className="text-sm font-bold leading-snug text-[var(--fr-text)] group-hover:text-[var(--fr-red)] transition-colors line-clamp-2">
+            {item.title}
+          </h3>
+          <p className="text-xs leading-relaxed text-[var(--fr-text-muted)] mt-2 line-clamp-3 flex-grow">
+            {item.description}
+          </p>
+
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-[var(--fr-border)]">
+            {/* `dateTime` vuole la data ISO: prima ci finiva "02 set", che non
+                è un formato valido e non diceva nulla agli assistenti vocali. */}
+            <time
+              className="text-[11px] font-semibold uppercase tracking-wider text-[var(--fr-text-faint)]"
+              dateTime={item.iso}
+            >
+              {item.date}
+            </time>
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[var(--fr-text-muted)] group-hover:text-[var(--fr-red)] transition-colors">
+              {t('nw_read')}
+              <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
+            </span>
+          </div>
+        </div>
+      </a>
+    </motion.article>
+  );
+}
+
+export default function NewsSection() {
+  const { t, lang } = useI18n();
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
+
+  const carica = useCallback(async () => {
     if (typeof window === 'undefined') return;
-    setIsLoading(true);
+    setLoading(true);
+
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeout = setTimeout(() => controller.abort(), 5000);
 
     try {
-      const rssUrl = "https://it.motorsport.com/rss/f1/news/";
-      const response = await fetch(
-        `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`,
-        { signal: controller.signal }
+      const res = await fetch(
+        `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(RSS_URL)}`,
+        { signal: controller.signal },
       );
-      const data = await response.json();
-      clearTimeout(timeoutId);
+      const data = await res.json();
+      if (data.status !== 'ok' || !data.items?.length) throw new Error('feed vuoto');
 
-      if (data.status === 'ok') {
-        const formattedNews = data.items.slice(0, 3).map((item, index) => {
-          let category = "F1 NEWS";
-          const t = item.title.toLowerCase();
-          if (t.includes("ferrari")) category = "SCUDERIA";
-          if (t.includes("leclerc") || t.includes("hamilton")) category = "PILOTI";
-
-          // Estrae thumbnail: enclosure → content img tag → item.thumbnail
-          let thumbnail = item.enclosure?.link || null;
-          if (!thumbnail && item.content) {
-            const match = item.content.match(/<img[^>]+src="([^">]+)"/);
-            if (match) thumbnail = match[1];
-          }
-          if (!thumbnail && item.thumbnail) thumbnail = item.thumbnail;
-
-          return {
-            id: index,
-            title: item.title,
-            description: item.description.replace(/<[^>]*>?/gm, '').slice(0, 130) + "…",
-            category,
-            date: new Date(item.pubDate).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }),
-            url: item.link,
-            thumbnail,
-          };
-        });
-        setNews(formattedNews);
-      }
-    } catch (error) {
-      console.error("Errore o timeout news:", error);
+      setNews(data.items.slice(0, 3).map((item, i) => {
+        const d = new Date(item.pubDate);
+        const valida = !Number.isNaN(d.getTime());
+        return {
+          id: item.guid || item.link || i,
+          title: item.title,
+          description: `${(item.description || '').replace(/<[^>]*>?/gm, '').slice(0, 130)}…`,
+          category: categoria(item.title),
+          date: valida ? d.toLocaleDateString(lang, { day: '2-digit', month: 'short' }) : '',
+          iso: valida ? d.toISOString() : undefined,
+          url: item.link,
+          thumbnail: anteprima(item),
+        };
+      }));
+      setFailed(false);
+    } catch (err) {
+      // Il feed è di terze parti e cade spesso: è un caso previsto, non un bug.
+      console.error('Flash news non disponibili:', err);
+      setFailed(true);
     } finally {
-      setIsLoading(false);
+      clearTimeout(timeout);
+      setLoading(false);
     }
-  };
+  }, [lang]);
 
   useEffect(() => {
-    fetchRealNews();
-    const interval = setInterval(fetchRealNews, 30 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
+    carica();
+    // Mezz'ora: il feed non cambia più spesso di così.
+    const timer = setInterval(carica, 30 * 60 * 1000);
+    return () => clearInterval(timer);
+  }, [carica]);
 
   return (
-    <>
-      {/* Separatore visivo tra sezioni */}
-      <div className="h-px w-full bg-gradient-to-r from-transparent via-red-600/30 to-transparent" aria-hidden="true" />
+    <section
+      className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 border-t border-[var(--fr-border)]"
+      aria-label={t('nw_title')}
+    >
+      <div className="max-w-wrap mx-auto">
 
-      <section
-        className="py-24 px-4 bg-gradient-to-b from-[#111] via-[#1a1a1a] to-[#111] border-y border-[var(--border-light)]"
-        aria-label="Flash News Formula 1"
-      >
-        <div className="max-w-6xl mx-auto">
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6"
-          >
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--ferrari-red)]/10 text-red-500 text-[10px] font-black uppercase tracking-widest mb-4">
-                <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
-                Live Updates
-              </div>
-              <h2 className="text-4xl md:text-5xl font-black uppercase italic tracking-tighter text-[var(--text-primary)]">
-                Flash <span className="text-[var(--ferrari-red)]">News</span>
-              </h2>
-              <p className="mt-2 text-[var(--text-tertiary)] text-sm max-w-md">
-                Le ultime notizie dalla Formula 1 e dalla Scuderia Ferrari, aggiornate in tempo reale.
-              </p>
-            </div>
-            <p className="text-[var(--text-tertiary)] text-sm max-w-xs border-l border-[var(--border-light)] pl-4 italic hidden md:block">
-              Ultime 3 notizie in tempo reale dal paddock di Motorsport.com
+        <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-9">
+          <div>
+            <span className="fr-eyebrow inline-flex items-center gap-2">
+              <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
+              {t('nw_eyebrow')}
+            </span>
+            <h2 className="uppercase mt-3">{t('nw_title')}</h2>
+            <p className="text-[var(--fr-text-muted)] mt-2.5 max-w-[56ch]">
+              {t('nw_lead')}
             </p>
-          </motion.div>
+          </div>
 
-          {isLoading && news.length === 0 ? (
-            <div className="grid md:grid-cols-3 gap-6" aria-label="Caricamento notizie">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="h-64 bg-[var(--bg-tertiary)]/50 animate-pulse rounded-2xl border border-[var(--border-light)]" aria-hidden="true" />
-              ))}
-            </div>
-          ) : (
-            <>
-              <div className="grid md:grid-cols-3 gap-6 mb-12">
-                {news.map((item, index) => {
-                  const catStyle = CATEGORY_STYLES[item.category] ?? CATEGORY_STYLES['F1 NEWS'];
-                  return (
-                    <motion.article
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.1 }}
-                      className="group bg-[var(--bg-tertiary)]/60 backdrop-blur-md rounded-2xl border border-white/8 hover:border-[var(--ferrari-red)]/40 transition-all flex flex-col overflow-hidden shadow-xl"
-                    >
-                      {/* Thumbnail */}
-                      <div className="relative w-full h-40 overflow-hidden bg-[var(--bg-tertiary)] shrink-0">
-                        {item.thumbnail ? (
-                          <img
-                            src={item.thumbnail}
-                            alt={`Immagine per: ${item.title}`}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            loading="lazy"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900">
-                            <Newspaper className="w-10 h-10 text-[var(--text-muted)]" aria-hidden="true" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent" aria-hidden="true" />
-                        {/* Badge categoria sovrapposto */}
-                        <span className={`absolute top-3 left-3 text-[9px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full border backdrop-blur-sm ${catStyle.bg} ${catStyle.border} ${catStyle.text}`}>
-                          {item.category}
-                        </span>
-                      </div>
+          <p className="text-xs text-[var(--fr-text-faint)] shrink-0">
+            {t('nw_source')}
+          </p>
+        </header>
 
-                      {/* Contenuto */}
-                      <div className="flex flex-col flex-grow p-5">
-                        <h3 className="text-sm font-bold text-[var(--text-primary)] leading-snug group-hover:text-[var(--ferrari-red)] transition-colors mb-2 line-clamp-2">
-                          {item.title}
-                        </h3>
-                        <p className="text-[var(--text-tertiary)] text-xs leading-relaxed line-clamp-3 flex-grow">
-                          {item.description}
-                        </p>
+        {loading && !news.length && (
+          <div className="grid md:grid-cols-3 gap-5" role="status" aria-label={t('nw_loading')}>
+            {[0, 1, 2].map(i => (
+              <div
+                key={i}
+                className="h-72 rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)] skeleton"
+                aria-hidden="true"
+              />
+            ))}
+          </div>
+        )}
 
-                        <div className="flex justify-between items-center mt-4 pt-4 border-t border-[var(--border-light)]">
-                          <time className="text-[var(--text-muted)] text-[10px] font-bold uppercase" dateTime={item.date}>
-                            {item.date}
-                          </time>
-                          <a
-                            href={item.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={`Leggi articolo completo: ${item.title}`}
-                            className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] hover:text-[var(--ferrari-red)] transition-colors"
-                          >
-                            Leggi
-                            <ExternalLink className="w-3 h-3" aria-hidden="true" />
-                          </a>
-                        </div>
-                      </div>
-                    </motion.article>
-                  );
-                })}
-              </div>
+        {!loading && failed && !news.length && (
+          <div className="rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)] px-6 py-12 text-center">
+            <Newspaper className="w-8 h-8 mx-auto text-[var(--fr-text-dim)]" aria-hidden="true" />
+            <p className="text-sm text-[var(--fr-text-muted)] mt-3">{t('nw_empty')}</p>
+            <button type="button" onClick={carica} className="btn btn-outline mt-5">
+              {t('nw_retry')}
+            </button>
+          </div>
+        )}
 
-              <p className="text-center text-[var(--text-muted)] text-xs max-w-2xl mx-auto">
-                Aggiornamenti F1 in tempo reale: segui le ultime notizie sulla Scuderia Ferrari,
-                i risultati dei Gran Premi, le dichiarazioni di Charles Leclerc e Lewis Hamilton
-                e tutti gli sviluppi tecnici dalla stagione di Formula 1.
-              </p>
-            </>
-          )}
-        </div>
-      </section>
-    </>
+        {news.length > 0 && (
+          <div className="grid md:grid-cols-3 gap-5">
+            {news.map((item, i) => (
+              <Scheda key={item.id} item={item} index={i} t={t} />
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }

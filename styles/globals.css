@@ -413,6 +413,23 @@ input:focus, select:focus, textarea:focus {
 
 /* Testi */
 .text-white       { color: var(--fr-text) !important; }
+
+/* Eccezioni al rimappaggio qui sopra.
+   `.text-white` viene riportato sul colore di testo del tema perché le pagine
+   vecchie lo usano come "bianco predefinito" su fondo scuro. In due casi però
+   il bianco è una scelta, non un'abitudine, e rimapparlo rompeva il contrasto:
+   - bianco su rosso Ferrari — i bottoni principali del sito, il pulsante "App
+     GridUp" in barra, "Accetta tutti" nel banner cookie: in tema chiaro il
+     testo diventava quasi nero sul rosso;
+   - testo sopra una foto o dentro il mockup nero del telefono, che non seguono
+     il tema perché l'immagine sotto resta la stessa — lì il bianco spariva del
+     tutto.
+   Il primo caso si riconosce dalla coppia di classi sullo stesso elemento e si
+   corregge da solo, anche per i bottoni che verranno; per il secondo c'è
+   `.text-fixed-white`, da mettere a mano dove serve. */
+.bg-\[var\(--fr-red\)\].text-white,
+.bg-red-600.text-white,
+.text-fixed-white { color: #fff !important; }
 .text-gray-300,
 .text-zinc-300,
 .text-zinc-400,
