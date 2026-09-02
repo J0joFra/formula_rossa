@@ -1,3 +1,8 @@
+/* Stessa destinazione di lib/gridup.js. Qui è ripetuta perché questo file è
+   CommonJS e viene letto da Node all'avvio, mentre lib/gridup.js è un modulo
+   ES del bundle: importarlo qui non funziona. Se cambia lì, cambia anche qui. */
+const GRIDUP_URL = 'https://play.google.com/store/apps/details?id=com.gridup.app';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -91,10 +96,12 @@ const nextConfig = {
         permanent: true,
       },
       /* Fanta e pronostici ora vivono nell'app GridUp: le vecchie URL non
-         restano orfane. Redirect temporaneo (307) e non permanente, così la
-         scelta resta reversibile senza cache aggressiva nei browser. */
-      { source: '/fantaf1',    destination: 'https://gridup-f1.web.app', permanent: false },
-      { source: '/predictions', destination: 'https://gridup-f1.web.app', permanent: false },
+         restano orfane. Portano alla scheda su Google Play e non più alla web
+         app, che rimbalzava su un altro indirizzo ancora. Redirect temporaneo
+         (307) e non permanente, così la scelta resta reversibile senza cache
+         aggressiva nei browser. */
+      { source: '/fantaf1',     destination: GRIDUP_URL, permanent: false },
+      { source: '/predictions', destination: GRIDUP_URL, permanent: false },
       /* Il live timing in tempo reale richiederebbe il tier a pagamento di
          OpenF1, ed è una commodity già coperta meglio dall'app ufficiale F1.
          La pagina resta nel repo: i suoi grafici (components/livetiming/)

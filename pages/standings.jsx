@@ -306,8 +306,10 @@ export default function StandingsPage() {
 
                   {/* Round bubble */}
                   <div className={`absolute top-2 left-2 z-20 w-6 h-6 rounded-full flex items-center justify-center border border-black/20 shadow-md
-                    ${isSuspended ? 'bg-zinc-600' : 'bg-[var(--ferrari-red)]'}`}>
-                    <span className="text-[var(--text-primary)] text-[10px] font-black">{race.round}</span>
+                    ${isSuspended ? 'bg-zinc-600' : 'bg-[var(--fr-red-fill)]'}`}>
+                    {/* La pastiglia del round è rossa: sopra ci va il bianco.
+                        Con `--text-primary` in tema chiaro era quasi nera. */}
+                    <span className="text-fixed-white text-[10px] font-black">{race.round}</span>
                   </div>
 
                   {/* Bandiera */}
@@ -345,7 +347,7 @@ export default function StandingsPage() {
                       {isSuspended ? 'Data da definire' : race.date}
                     </div>
                     {hasSprint && !isSuspended && (
-                      <div className="text-[8px] font-black text-[var(--ferrari-red)] uppercase mt-1">
+                      <div className="text-[8px] font-black text-[var(--fr-red-ink)] uppercase mt-1">
                         Sprint: {race.sprint_race_date}
                       </div>
                     )}

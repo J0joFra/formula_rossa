@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import PageShell, { PageHeader, Panel } from '../components/ui/PageShell';
 
-const GRIDUP_URL = 'https://gridup-f1.web.app';
+import { GRIDUP_URL } from '../lib/gridup';
 
 /* Un solo posto per gli anni di storia: scritto a mano in due punti diversi,
    prima o poi uno dei due resta indietro. */

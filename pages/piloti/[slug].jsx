@@ -34,7 +34,7 @@ function ReadingProgress() {
   },[]);
   return (
     <div style={{ position:'fixed', top:0, left:0, right:0, zIndex:9999, height:'2px', background:'rgba(0,0,0,.5)' }}>
-      <div style={{ height:'100%', width:`${p}%`, background:'linear-gradient(90deg,var(--fr-red),#ef4444)', transition:'width .1s linear' }}/>
+      <div style={{ height:'100%', width:`${p}%`, background:'linear-gradient(90deg,var(--fr-red),var(--fr-red-ink))', transition:'width .1s linear' }}/>
     </div>
   );
 }
@@ -91,16 +91,16 @@ function BigStat({ label, value, accent, sub }) {
     <div style={{
       padding:'16px 20px', borderRadius:'4px',
       border: accent ? '1px solid rgba(220,38,38,.25)' : '1px solid var(--fr-border)',
-      background: accent ? 'rgba(220,38,38,.08)' : '#0d0d0d',
+      background: accent ? 'rgba(220,38,38,.08)' : 'var(--fr-surface-3)',
       textAlign:'center',
     }}>
       <div style={{
         fontSize:'36px', fontWeight:'900', fontFamily:'monospace',
-        color: accent ? '#ef4444' : 'var(--fr-text)', lineHeight:1,
+        color: accent ? 'var(--fr-red)' : 'var(--fr-text)', lineHeight:1,
       }}>{value ?? '—'}</div>
-      {sub && <div style={{ fontSize:'9px', color:'var(--fr-text-dim)', fontFamily:'monospace', marginTop:'2px' }}>{sub}</div>}
+      {sub && <div style={{ fontSize:'9px', color:'var(--fr-text-faint)', fontFamily:'monospace', marginTop:'2px' }}>{sub}</div>}
       <div style={{
-        fontSize:'8px', color:'var(--fr-text-dim)',
+        fontSize:'8px', color:'var(--fr-text-faint)',
         fontFamily:'monospace', letterSpacing:'1.5px',
         textTransform:'uppercase', marginTop:'6px',
       }}>{label}</div>
@@ -198,15 +198,15 @@ export default function DriverDetail() {
           {/* ── BREADCRUMB ── */}
           <nav style={{ marginBottom:'32px', display:'flex', alignItems:'center', gap:'10px', animation:'fadeUp .5s ease both' }}>
             <Link href="/piloti" style={{
-              color:'var(--fr-text-dim)', textDecoration:'none',
+              color:'var(--fr-text-faint)', textDecoration:'none',
               fontSize:'11px', fontFamily:'monospace', letterSpacing:'.5px',
               display:'flex', alignItems:'center', gap:'6px', transition:'color .2s',
             }}
-              onMouseEnter={e=>e.currentTarget.style.color='#ef4444'}
+              onMouseEnter={e=>e.currentTarget.style.color='var(--fr-red)'}
               onMouseLeave={e=>e.currentTarget.style.color='var(--fr-text-dim)'}
             >← PILOTI</Link>
-            <span style={{ color:'var(--fr-border)', fontSize:'11px' }}>/</span>
-            <span style={{ fontSize:'11px', color:'var(--fr-text-dim)', fontFamily:'monospace' }}>{driver.abbreviation}</span>
+            <span style={{ color:'var(--fr-text-faint)', fontSize:'11px' }}>/</span>
+            <span style={{ fontSize:'11px', color:'var(--fr-text-faint)', fontFamily:'monospace' }}>{driver.abbreviation}</span>
           </nav>
  
           {/* ── HERO ── */}
@@ -216,8 +216,8 @@ export default function DriverDetail() {
               position:'relative', borderRadius:'6px', overflow:'hidden',
               border:`1px solid ${isChamp ? 'rgba(220,38,38,.2)' : 'var(--fr-border)'}`,
               background: isChamp
-                ? 'linear-gradient(135deg, var(--fr-bg) 0%, #0f0303 60%, #130505 100%)'
-                : '#0d0d0d',
+                ? 'linear-gradient(135deg, var(--fr-surface) 0%, var(--fr-red-soft) 100%)'
+                : 'var(--fr-surface-3)',
               padding:'32px',
             }}>
               {/* Pattern decorativo */}
@@ -259,7 +259,7 @@ export default function DriverDetail() {
                       <span style={{
                         fontSize:'9px', fontFamily:'monospace', fontWeight:'800',
                         padding:'3px 10px', borderRadius:'2px', letterSpacing:'1px',
-                        background:'#0f0f0f', color:'var(--fr-text-dim)',
+                        background:'var(--fr-surface-2)', color:'var(--fr-text-faint)',
                         border:'1px solid var(--fr-border)',
                       }}>†</span>
                     )}
@@ -276,7 +276,7 @@ export default function DriverDetail() {
                   {/* Abbreviazione */}
                   <div style={{
                     fontSize:'13px', fontFamily:'monospace', fontWeight:'800',
-                    color:'var(--fr-text-dim)', letterSpacing:'3px', marginBottom:'14px',
+                    color:'var(--fr-text-faint)', letterSpacing:'3px', marginBottom:'14px',
                   }}>{driver.abbreviation}</div>
  
                   {/* Nazione */}
@@ -291,14 +291,14 @@ export default function DriverDetail() {
                   </div>
  
                   {/* Nascita / Morte */}
-                  <div style={{ fontSize:'11px', color:'var(--fr-text-dim)', fontFamily:'monospace' }}>
+                  <div style={{ fontSize:'11px', color:'var(--fr-text-faint)', fontFamily:'monospace' }}>
                     {formatDate(driver.date_of_birth)}
                     {driver.date_of_death && ` — † ${formatDate(driver.date_of_death)}`}
-                    {age && <span style={{ marginLeft:'8px', color:'var(--fr-text-dim)' }}>({isDead ? `† ${age} anni` : `${age} anni`})</span>}
+                    {age && <span style={{ marginLeft:'8px', color:'var(--fr-text-faint)' }}>({isDead ? `† ${age} anni` : `${age} anni`})</span>}
                   </div>
  
                   {driver.place_of_birth && (
-                    <div style={{ fontSize:'11px', color:'var(--fr-text-dim)', fontFamily:'monospace', marginTop:'3px' }}>
+                    <div style={{ fontSize:'11px', color:'var(--fr-text-faint)', fontFamily:'monospace', marginTop:'3px' }}>
                       📍 {driver.place_of_birth}
                     </div>
                   )}
@@ -334,7 +334,7 @@ export default function DriverDetail() {
                 padding:'10px 20px', background:'none', border:'none', cursor:'pointer',
                 fontSize:'11px', fontFamily:'monospace', fontWeight:'800',
                 letterSpacing:'1px', textTransform:'uppercase',
-                color: tab===t.id ? 'var(--fr-text)' : 'var(--fr-text-dim)',
+                color: tab===t.id ? 'var(--fr-text)' : 'var(--fr-text-faint)',
                 borderBottom: tab===t.id ? '2px solid var(--fr-red)' : '2px solid transparent',
                 marginBottom:'-1px', transition:'all .18s',
               }}>{t.label}</button>
@@ -349,19 +349,19 @@ export default function DriverDetail() {
               <div style={{
                 padding:'24px', borderRadius:'4px',
                 border:'1px solid var(--fr-border)',
-                background:'#0d0d0d',
+                background:'var(--fr-surface-3)',
               }}>
                 <h2 style={{
                   margin:'0 0 20px', fontSize:'9px',
-                  color:'var(--fr-text-dim)', fontFamily:'monospace',
+                  color:'var(--fr-text-faint)', fontFamily:'monospace',
                   letterSpacing:'2.5px', textTransform:'uppercase',
                 }}>Performance in gara</h2>
                 <div style={{ display:'flex', flexDirection:'column', gap:'14px' }}>
                   <StatBar label="Vittorie"      value={driver.total_race_wins}       max={105}  color='var(--fr-red)'/>
-                  <StatBar label="Podi"          value={driver.total_podiums}         max={200}  color='#ef4444'/>
-                  <StatBar label="Pole Position" value={driver.total_pole_positions}  max={105}  color='#f87171'/>
-                  <StatBar label="Giri veloci"   value={driver.total_fastest_laps}    max={80}   color='#fca5a5'/>
-                  <StatBar label="Grand Slam"    value={driver.total_grand_slams}     max={10}   color='#fecaca'/>
+                  <StatBar label="Podi"          value={driver.total_podiums}         max={200}  color='var(--fr-red)'/>
+                  <StatBar label="Pole Position" value={driver.total_pole_positions}  max={105}  color='var(--fr-red-ink)'/>
+                  <StatBar label="Giri veloci"   value={driver.total_fastest_laps}    max={80}   color='var(--fr-accent-orange)'/>
+                  <StatBar label="Grand Slam"    value={driver.total_grand_slams}     max={10}   color='var(--fr-accent-amber)'/>
                 </div>
               </div>
  
@@ -377,11 +377,11 @@ export default function DriverDetail() {
                   <div key={s.label} style={{
                     padding:'18px 20px', borderRadius:'4px',
                     border:'1px solid var(--fr-border)',
-                    background:'#0d0d0d',
+                    background:'var(--fr-surface-3)',
                   }}>
                     <div style={{ fontSize:'28px', fontWeight:'900', fontFamily:'monospace', color:'var(--fr-red)', lineHeight:1 }}>{s.value}</div>
-                    <div style={{ fontSize:'9px', color:'var(--fr-text-dim)', fontFamily:'monospace', letterSpacing:'1px', textTransform:'uppercase', marginTop:'6px' }}>{s.label}</div>
-                    <div style={{ fontSize:'10px', color:'var(--fr-text-dim)', fontFamily:'monospace', marginTop:'4px' }}>{s.sub}</div>
+                    <div style={{ fontSize:'9px', color:'var(--fr-text-faint)', fontFamily:'monospace', letterSpacing:'1px', textTransform:'uppercase', marginTop:'6px' }}>{s.label}</div>
+                    <div style={{ fontSize:'10px', color:'var(--fr-text-faint)', fontFamily:'monospace', marginTop:'4px' }}>{s.sub}</div>
                   </div>
                 ))}
               </div>
@@ -390,11 +390,11 @@ export default function DriverDetail() {
               <div style={{
                 padding:'24px', borderRadius:'4px',
                 border:'1px solid var(--fr-border)',
-                background:'#0d0d0d',
+                background:'var(--fr-surface-3)',
               }}>
                 <h2 style={{
                   margin:'0 0 16px', fontSize:'9px',
-                  color:'var(--fr-text-dim)', fontFamily:'monospace',
+                  color:'var(--fr-text-faint)', fontFamily:'monospace',
                   letterSpacing:'2.5px', textTransform:'uppercase',
                 }}>Statistiche complete</h2>
                 {(() => {
@@ -428,7 +428,7 @@ export default function DriverDetail() {
                               padding:'8px 12px',
                               fontSize:'8px', fontFamily:'monospace', fontWeight:'800',
                               letterSpacing:'2px', textTransform:'uppercase',
-                              color:'var(--fr-text-dim)',
+                              color:'var(--fr-text-faint)',
                               textAlign: i%2===0 ? 'left' : 'right',
                               background:'var(--fr-surface)',
                               ...(i===2 ? {borderLeft:'1px solid var(--fr-border)', paddingLeft:'20px'} : {}),
@@ -441,7 +441,7 @@ export default function DriverDetail() {
                           const l = rows[i];
                           const r = rows[i + Math.ceil(rows.length / 2)];
                           const isEven = i % 2 === 0;
-                          const rowBg = isEven ? '#0d0d0d' : 'var(--fr-surface)';
+                          const rowBg = isEven ? 'var(--fr-surface-3)' : 'var(--fr-surface)';
                           return (
                             <tr key={i} style={{ background: rowBg }}>
                               {/* Label sinistra */}
@@ -458,7 +458,7 @@ export default function DriverDetail() {
                               <td style={{
                                 padding:'11px 12px',
                                 fontSize:'14px', fontWeight:'900', fontFamily:'monospace',
-                                color: l?.value > 0 ? 'var(--fr-text)' : 'var(--fr-text-dim)',
+                                color: l?.value > 0 ? 'var(--fr-text)' : 'var(--fr-text-faint)',
                                 textAlign:'right',
                                 borderBottom:'1px solid var(--fr-overlay)',
                               }}>{l?.value ?? '—'}</td>
@@ -477,7 +477,7 @@ export default function DriverDetail() {
                               <td style={{
                                 padding:'11px 12px',
                                 fontSize:'14px', fontWeight:'900', fontFamily:'monospace',
-                                color: r?.value > 0 ? 'var(--fr-text)' : 'var(--fr-text-dim)',
+                                color: r?.value > 0 ? 'var(--fr-text)' : 'var(--fr-text-faint)',
                                 textAlign:'right',
                                 borderBottom:'1px solid var(--fr-overlay)',
                               }}>{r?.value ?? ''}</td>
@@ -498,11 +498,11 @@ export default function DriverDetail() {
               <div style={{
                 padding:'24px', borderRadius:'4px',
                 border:'1px solid var(--fr-border)',
-                background:'#0d0d0d',
+                background:'var(--fr-surface-3)',
               }}>
                 <h2 style={{
                   margin:'0 0 16px', fontSize:'9px',
-                  color:'var(--fr-text-dim)', fontFamily:'monospace',
+                  color:'var(--fr-text-faint)', fontFamily:'monospace',
                   letterSpacing:'2.5px', textTransform:'uppercase',
                 }}>Dati anagrafici</h2>
                 <div style={{ display:'flex', flexDirection:'column', gap:'0' }}>
@@ -529,7 +529,7 @@ export default function DriverDetail() {
                       padding:'11px 0',
                       borderBottom:'1px solid var(--fr-overlay)',
                     }}>
-                      <span style={{ fontSize:'11px', color:'var(--fr-text-dim)', fontFamily:'monospace' }}>{label}</span>
+                      <span style={{ fontSize:'11px', color:'var(--fr-text-faint)', fontFamily:'monospace' }}>{label}</span>
                       <span style={{ fontSize:'13px', fontWeight:'700', color:'var(--fr-text-muted)', textTransform:'capitalize' }}>
                         {value ?? '—'}
                       </span>
@@ -548,10 +548,10 @@ export default function DriverDetail() {
               letterSpacing:'1px', textTransform:'uppercase',
               display:'flex', alignItems:'center', gap:'8px', transition:'gap .2s, color .2s',
             }}
-              onMouseEnter={e=>{e.currentTarget.style.gap='12px';e.currentTarget.style.color='#ef4444';}}
+              onMouseEnter={e=>{e.currentTarget.style.gap='12px';e.currentTarget.style.color='var(--fr-red)';}}
               onMouseLeave={e=>{e.currentTarget.style.gap='8px';e.currentTarget.style.color='var(--fr-red)';}}
             >← Tutti i piloti</Link>
-            <span style={{ fontSize:'10px', color:'var(--fr-border-strong)', fontFamily:'monospace' }}>formula-rossa.it</span>
+            <span style={{ fontSize:'10px', color:'var(--fr-text-faint)', fontFamily:'monospace' }}>formula-rossa.it</span>
           </div>
  
       </div>

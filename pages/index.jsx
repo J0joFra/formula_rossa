@@ -11,6 +11,7 @@ import GridUpPromo from '../components/ferrari/GridUpPromo';
 import Footer from '../components/ferrari/Footer';
 import SEO from '../components/seo';
 import { useI18n } from '../lib/i18n';
+import { GRIDUP_URL } from '../lib/gridup';
 
 /* I tre pilastri: stessa struttura del menu, così la home spiega il sito.
    Qui restano solo i dati che non cambiano con la lingua — icona, colore,
@@ -123,7 +124,7 @@ function FactsBand({ t, years }) {
     { key: 'hp_factSince',   value: '1950' },
   ];
   return (
-    <div className="border-y border-[var(--fr-border)] bg-[var(--fr-surface-3)]">
+    <div className="snap-section border-y border-[var(--fr-border)] bg-[var(--fr-surface-3)]">
       <div className="max-w-wrap mx-auto px-4 sm:px-6 lg:px-8">
         <dl className="grid grid-cols-2 md:grid-cols-5">
           {facts.map((f, i) => (
@@ -186,8 +187,10 @@ export default function Home() {
     operatingSystem: 'Android, Web',
     applicationCategory: 'SportsApplication',
     description: 'Calcola i punti necessari per vincere il Campionato del Mondo di F1: scenari in tempo reale, classifiche piloti e costruttori e confronti tra piloti.',
-    url: 'https://gridup-f1.web.app',
-    installUrl: 'https://play.google.com/store/apps/details?id=com.gridup.app',
+    /* `url` è la pagina canonica dell'app: ora è la scheda dello store, la
+       stessa a cui puntano i link del sito. */
+    url: GRIDUP_URL,
+    installUrl: GRIDUP_URL,
     inLanguage: 'it',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
     author: { '@type': 'Organization', name: 'Formula Rossa', url: 'https://formula-rossa.it' },
@@ -210,7 +213,7 @@ export default function Home() {
         <HeroSection />
 
         {/* ── I tre pilastri ── */}
-        <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8">
+        <section className="snap-section py-12 md:py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-wrap mx-auto">
             <header className="mb-9">
               <span className="fr-eyebrow">{t('hp_platformEyebrow')}</span>

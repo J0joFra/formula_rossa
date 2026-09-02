@@ -21,6 +21,7 @@ import {
   Instagram, Twitter, Youtube, Linkedin, MessageCircle, Heart,
 } from 'lucide-react';
 import { useI18n } from '../../lib/i18n';
+import { GRIDUP_URL } from '../../lib/gridup';
 
 const SEZIONI = [
   {
@@ -45,7 +46,7 @@ const SEZIONI = [
       { key: 'ft_fanzone', href: '/fanzone' },
       { key: 'ft_about',   href: '/about' },
       { key: 'ft_contact', href: 'mailto:info@formula-rossa.it' },
-      { key: 'nav_app',    href: 'https://gridup-f1.web.app' },
+      { key: 'nav_app',    href: GRIDUP_URL },
     ],
   },
 ];
@@ -198,7 +199,7 @@ export default function Footer() {
           >
             {LEGALI.map((l, i) => (
               <React.Fragment key={l.href}>
-                {i > 0 && <span aria-hidden="true" className="text-[var(--fr-text-dim)]">·</span>}
+                {i > 0 && <span aria-hidden="true" className="text-[var(--fr-text-faint)]">·</span>}
                 <FooterLink
                   href={l.href}
                   label={t(l.key)}
@@ -206,7 +207,7 @@ export default function Footer() {
                 />
               </React.Fragment>
             ))}
-            <span aria-hidden="true" className="text-[var(--fr-text-dim)]">·</span>
+            <span aria-hidden="true" className="text-[var(--fr-text-faint)]">·</span>
             <button
               type="button"
               onClick={() => window.dispatchEvent(new Event('open-cookie-settings'))}

@@ -1,15 +1,20 @@
-import Head from 'next/head';
+/**
+ * pages/circuiti/[slug].jsx
+ * Scheda di un circuito.
+ *
+ * Era l'ultima pagina rimasta fuori dal design system: montava a mano
+ * Navigation/main/Footer dentro un `bg-zinc-950 text-white` e scriveva i
+ * colori come opacità del bianco (`text-white/30`, `text-white/35`). Sul tema
+ * chiaro quelle scritte arrivavano a 1,03:1 di contrasto — cioè invisibili.
+ * Ora usa PageShell come le altre pagine e prende i colori dai token.
+ */
+
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabaseClient';
-import Navigation from '../../components/ferrari/Navigation';
-import Footer from '../../components/ferrari/Footer';
+import PageShell, { PageHeader, PageLoading, PageError, Panel, StatTile } from '../../components/ui/PageShell';
 import { getFlagCode } from '../../lib/flags';
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-// ── Main component ────────────────────────────────────────────────────────────
 
 export default function CircuitDetail() {
   const router = useRouter();
@@ -62,212 +67,175 @@ export default function CircuitDetail() {
     { id: 'history', label: 'Gare' },
   ];
 
-  if (loading) return (
-    <div className="min-h-screen bg-zinc-950 text-white">
-      <Navigation />
-      <main className="max-w-5xl mx-auto px-4 pt-24 pb-20">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 w-48 rounded-xl bg-white/5" />
-          <div className="h-64 rounded-2xl bg-white/5" />
-          <div className="h-48 rounded-2xl bg-white/5" />
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
+  const seo = circuit ? {
+    title: `${circuit.name} — circuito di Formula 1`,
+    description: `${circuit.name}: lunghezza ${circuit.length ?? '?'} km, ${circuit.turns ?? '?'} curve, ${circuit.total_races_held ?? '?'} gare disputate.`,
+    path: `/circuiti/${circuit.id}`,
+  } : null;
+
+  if (loading) return <PageShell><PageLoading label="Caricamento circuito…" /></PageShell>;
 
   if (error || !circuit) return (
-    <div className="min-h-screen bg-zinc-950 text-white">
-      <Navigation />
-      <main className="max-w-5xl mx-auto px-4 pt-24 pb-20 text-center">
-        <p className="text-red-400 font-mono">{error || 'Circuito non trovato.'}</p>
-        <Link href="/circuiti" className="mt-6 inline-block text-sm font-mono text-white/35 hover:text-red-400 transition-colors">
-          ← Tutti i circuiti
-        </Link>
-      </main>
-      <Footer />
-    </div>
+    <PageShell>
+      <PageHeader
+        eyebrow="Dati"
+        title="Circuito"
+        breadcrumb={[{ label: 'Dati' }, { label: 'Circuiti', href: '/circuiti' }]}
+      />
+      <PageError
+        title="Circuito non trovato"
+        message={error || 'Questo circuito non è presente in archivio.'}
+      />
+      <p className="text-center">
+        <Link href="/circuiti" className="btn btn-outline">Tutti i circuiti</Link>
+      </p>
+    </PageShell>
   );
 
   return (
-    <>
-      <Head>
-        <title>{circuit.name} — Circuiti F1 · Telemetry Explorer</title>
-        <meta name="description"
-          content={`${circuit.name}: lunghezza ${circuit.length ?? '?'} km, ${circuit.turns ?? '?'} curve. Tutte le gare disputate.`}
-        />
-      </Head>
-      <div className="min-h-screen bg-zinc-950 text-white">
-        <Navigation />
-        <main className="max-w-5xl mx-auto px-4 pt-24 pb-20">
+    <PageShell seo={seo}>
+      <PageHeader
+        eyebrow={[circuit.country_id?.replace(/-/g, ' '), circuit.place_name].filter(Boolean).join(' · ')}
+        title={circuit.name}
+        subtitle={circuit.full_name && circuit.full_name !== circuit.name ? circuit.full_name : null}
+        breadcrumb={[
+          { label: 'Dati' },
+          { label: 'Circuiti', href: '/circuiti' },
+          { label: circuit.name },
+        ]}
+        actions={flag ? (
+          <img
+            src={`https://flagcdn.com/w80/${flag}.png`}
+            alt=""
+            width={48}
+            height={36}
+            className="w-12 rounded-sm"
+          />
+        ) : null}
+      />
 
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-[11px] font-mono text-white/30 mb-6">
-            <Link href="/circuiti" className="hover:text-red-400 transition-colors">Circuiti</Link>
-            <span>/</span>
-            <span className="text-white/60">{circuit.name}</span>
+      {circuit.previous_names && (
+        <p className="text-xs text-[var(--fr-text-faint)] -mt-4 mb-6">
+          Precedentemente: {circuit.previous_names}
+        </p>
+      )}
+
+      <div className="grid gap-6">
+
+        {/* I quattro numeri della pista */}
+        <Panel title="La pista">
+          <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-[var(--fr-border)]">
+            <StatTile value={circuit.length ? `${circuit.length} km` : '—'} label="Lunghezza" accent />
+            <StatTile value={circuit.turns ?? '—'} label="Curve" />
+            <StatTile value={circuit.total_races_held ?? '—'} label="Gare disputate" />
+            <StatTile
+              value={circuit.direction ? circuit.direction.toLowerCase().replace('clockwise', 'orario').replace('anti-orario', 'antiorario') : '—'}
+              label="Senso di marcia"
+            />
           </div>
+        </Panel>
 
-          {/* Hero */}
-          <div className="relative overflow-hidden rounded-2xl border border-white/8 mb-8"
-               style={{ background: 'linear-gradient(135deg,#0e0e0e 0%,#111 100%)' }}>
-            <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full pointer-events-none"
-                 style={{ background: 'radial-gradient(circle,rgba(220,0,0,0.12) 0%,transparent 65%)' }} />
-            <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
-                 style={{ backgroundImage: 'radial-gradient(circle at 1px 1px,#fff 1px,transparent 0)', backgroundSize: '32px 32px' }} />
-
-            <div className="relative z-10 p-8 md:p-12">
-              <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    {flag && (
-                      <img src={`https://flagcdn.com/w28/${flag}.png`} alt={circuit.country_id}
-                           className="w-7 h-4 object-cover rounded-sm" />
-                    )}
-                    <span className="text-[11px] text-white/40 font-mono tracking-[0.25em] uppercase">
-                      {circuit.country_id?.replace(/-/g, ' ')}{circuit.place_name ? ` · ${circuit.place_name}` : ''}
-                    </span>
-                  </div>
-                  <h1 className="text-3xl md:text-5xl font-black tracking-tighter leading-tight mb-1">
-                    {circuit.name}
-                  </h1>
-                  {circuit.full_name && circuit.full_name !== circuit.name && (
-                    <p className="text-white/35 text-sm font-mono mt-1">{circuit.full_name}</p>
-                  )}
-                  {circuit.previous_names && (
-                    <p className="text-white/20 text-[11px] font-mono mt-1 italic">
-                      Precedentemente: {circuit.previous_names}
-                    </p>
-                  )}
-                </div>
-
-                {circuit.direction && (
-                  <div className="px-4 py-2 rounded-xl border border-white/10 text-center flex-shrink-0"
-                       style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <div className="text-[9px] text-white/30 font-mono tracking-widest uppercase mb-1">Direzione</div>
-                    <div className="text-sm font-black font-mono text-white/70 capitalize">{circuit.direction}</div>
-                  </div>
-                )}
-              </div>
-
-              {/* Big stats */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8">
-                <HeroStat label="Lunghezza"    value={circuit.length ? `${circuit.length} km` : '—'} accent />  {/* ← era lap_length_km */}
-                <HeroStat label="Curve"        value={circuit.turns ?? '—'} />                                   {/* ← era number_of_corners */}
-                <HeroStat label="Tipo"         value={circuit.type ?? '—'} />                                    {/* colonna reale */}
-                <HeroStat label="Gare totali"  value={circuit.total_races_held ?? '—'} />
-              </div>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex gap-1 mb-6 border-b border-white/8">
-            {TABS.map(t => (
-              <button key={t.id} onClick={() => setTab(t.id)}
-                className={`px-5 py-3 text-sm font-mono font-bold transition-all border-b-2 -mb-px ${
-                  tab === t.id
-                    ? 'border-red-600 text-white'
-                    : 'border-transparent text-white/35 hover:text-white/70'
-                }`}>
+        {/* Le due schede erano bottoni con `border-red-600 text-white` sopra un
+            fondo nero: qui riusano lo stile dei selettori di sessione della
+            scheda GP, così i due posti si somigliano. */}
+        <div role="tablist" aria-label="Sezioni del circuito" className="flex gap-1">
+          {TABS.map(t => {
+            const on = t.id === tab;
+            return (
+              <button
+                key={t.id}
+                role="tab"
+                type="button"
+                aria-selected={on}
+                onClick={() => setTab(t.id)}
+                className={`px-3.5 py-2 rounded-[9px] text-xs font-bold uppercase tracking-wider transition-colors ${
+                  on
+                    ? 'bg-[var(--fr-red)] text-white'
+                    : 'bg-[var(--fr-surface-2)] text-[var(--fr-text-muted)] hover:text-[var(--fr-text)]'
+                }`}
+              >
                 {t.label}
               </button>
-            ))}
-          </div>
+            );
+          })}
+        </div>
 
-          {/* Tab: Dati tecnici */}
-          {tab === 'info' && (
-            <div className="space-y-6">
-              <div className="rounded-2xl border border-white/8 p-6"
-                   style={{ background: 'rgba(255,255,255,0.02)' }}>
-                <h2 className="text-xs text-white/30 font-mono tracking-[0.25em] uppercase mb-4">
-                  Caratteristiche tecniche
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {[
-                    { label: 'Lunghezza giro',  value: circuit.length    ? `${circuit.length} km` : '—' },
-                    { label: 'Numero di curve', value: circuit.turns     ?? '—' },
-                    { label: 'Tipo circuito',   value: circuit.type      ?? '—' },
-                    { label: 'Direzione pista', value: circuit.direction ?? '—' },
-                    { label: 'Gare disputate',  value: circuit.total_races_held ?? '—' },
-                    { label: 'Città / Luogo',   value: circuit.place_name ?? '—' },  
-                    { label: 'Nazione',         value: circuit.country_id?.replace(/-/g, ' ') ?? '—' },
-                    { label: 'Latitudine',      value: circuit.latitude  ?? '—' },
-                    { label: 'Longitudine',     value: circuit.longitude ?? '—' },
-                  ].map(({ label, value }) => (
-                    <div key={label} className="flex items-center justify-between py-2.5 border-b border-white/5 last:border-0">
-                      <span className="text-xs text-white/35 font-mono">{label}</span>
-                      <span className="text-sm font-bold text-white capitalize">{value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Layout variants */}
-              {layouts.length > 0 && (
-                <div className="rounded-2xl border border-white/8 p-6"
-                     style={{ background: 'rgba(255,255,255,0.02)' }}>
-                  <h2 className="text-xs text-white/30 font-mono tracking-[0.25em] uppercase mb-4">
-                    Varianti del tracciato ({layouts.length})
-                  </h2>
-                  <div className="space-y-2">
-                    {layouts.map(l => (
-                      <div key={l.id} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs font-mono text-white/50">{l.id}</span>
-                        </div>
-                        <div className="flex gap-6 text-xs font-mono">
-                          <span className="text-white/60">{l.length ? `${l.length} km` : '—'}</span>
-                          <span className="text-white/35">{l.turns ? `${l.turns} curve` : '—'}</span>
-                        </div>
-                      </div>
-                    ))}
+        {tab === 'info' && (
+          <>
+            <Panel title="Caratteristiche tecniche">
+              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 px-5 py-2">
+                {[
+                  { label: 'Lunghezza giro',  value: circuit.length ? `${circuit.length} km` : '—' },
+                  { label: 'Numero di curve', value: circuit.turns ?? '—' },
+                  { label: 'Tipo circuito',   value: circuit.type ?? '—' },
+                  { label: 'Senso di marcia', value: circuit.direction ?? '—' },
+                  { label: 'Gare disputate',  value: circuit.total_races_held ?? '—' },
+                  { label: 'Città',           value: circuit.place_name ?? '—' },
+                  { label: 'Nazione',         value: circuit.country_id?.replace(/-/g, ' ') ?? '—' },
+                  { label: 'Latitudine',      value: circuit.latitude ?? '—' },
+                  { label: 'Longitudine',     value: circuit.longitude ?? '—' },
+                ].map(({ label, value }) => (
+                  <div
+                    key={label}
+                    className="flex items-center justify-between gap-4 py-3 border-b border-[var(--fr-border)] last:border-0"
+                  >
+                    <dt className="text-sm text-[var(--fr-text-muted)]">{label}</dt>
+                    <dd className="text-sm font-semibold text-[var(--fr-text)] capitalize text-right">{value}</dd>
                   </div>
+                ))}
+              </dl>
+            </Panel>
+
+            {layouts.length > 0 && (
+              <Panel title={`Varianti del tracciato · ${layouts.length}`}>
+                <div className="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th scope="col">Variante</th>
+                        <th scope="col">Anno</th>
+                        <th scope="col">Lunghezza</th>
+                        <th scope="col">Curve</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {layouts.map(l => (
+                        <tr key={`${l.id ?? l.circuit_id}-${l.year}`}>
+                          <td>{l.id ?? l.circuit_id}</td>
+                          <td className="tabular">{l.year ?? '—'}</td>
+                          <td className="tabular">{l.length ? `${l.length} km` : '—'}</td>
+                          <td className="tabular">{l.turns ?? '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              )}
+              </Panel>
+            )}
 
-              <CircuitNotes circuitId={circuit.id} />
-            </div>
-          )}
+            <CircuitNotes circuitId={circuit.id} />
+          </>
+        )}
 
-          {/* Tab: Storia gare */}
-          {tab === 'history' && (
-            <div className="rounded-2xl border border-white/8 p-8 text-center"
-                 style={{ background: 'rgba(255,255,255,0.02)' }}>
-              <p className="text-white/25 font-mono text-sm tracking-widest uppercase">
-                Storico gare non ancora disponibile
-              </p>
-              <p className="text-white/15 font-mono text-xs mt-2">
-                Migrare la tabella race su Supabase per abilitare questa sezione
-              </p>
-            </div>
-          )}
-
-          {/* Back link */}
-          <div className="mt-10">
-            <Link href="/circuiti"
-              className="inline-flex items-center gap-2 text-sm font-mono text-white/35 hover:text-red-400 transition-colors">
-              ← Tutti i circuiti
-            </Link>
+        {tab === 'history' && (
+          <div className="empty-state">
+            <p className="empty-state-title">Storico gare non ancora disponibile</p>
+            <p className="empty-state-description">
+              Le gare disputate su questo circuito si trovano intanto nelle{' '}
+              <Link href="/gp" className="text-[var(--fr-red)] hover:underline">analisi GP</Link>.
+            </p>
           </div>
+        )}
 
-        </main>
-        <Footer />
+        <p>
+          <Link href="/circuiti" className="btn btn-outline">← Tutti i circuiti</Link>
+        </p>
       </div>
-    </>
+    </PageShell>
   );
 }
 
 // ── Subcomponents ─────────────────────────────────────────────────────────────
-
-function HeroStat({ label, value, accent }) {
-  return (
-    <div className="rounded-xl px-4 py-3 border border-white/8"
-         style={{ background: accent ? 'rgba(220,0,0,0.08)' : 'rgba(255,255,255,0.03)' }}>
-      <div className="text-[9px] text-white/30 font-mono tracking-widest uppercase mb-1">{label}</div>
-      <div className={`text-2xl font-black font-mono ${accent ? 'text-red-400' : 'text-white'}`}>{value}</div>
-    </div>
-  );
-}
 
 const CIRCUIT_NOTES = {
   'monza':             { title: 'Il Tempio della Velocità',        body: `Monza è il circuito più veloce del calendario F1. I suoi lunghi rettilinei — tra cui il Rettifilo Tribune lungo oltre un chilometro — spingono le monoposto oltre i 350 km/h. Le scuderie montano setup ad altissima efficienza aerodinamica con pochissimo carico, sacrificando la tenuta in curva per la velocità massima. Le storiche paraboliche e la Prima Variante sono tra i punti di frenata più impegnativi dell'intera stagione. Ospita il Gran Premio d'Italia dal 1950, primo anno del Mondiale.` },
@@ -279,22 +247,13 @@ const CIRCUIT_NOTES = {
 
 function CircuitNotes({ circuitId }) {
   const note = CIRCUIT_NOTES[circuitId] || null;
+  if (!note) return null;   // Meglio niente che un riquadro che dice "non c'è niente".
   return (
-    <div className="rounded-2xl border border-white/8 p-6"
-         style={{ background: 'rgba(255,255,255,0.02)' }}>
-      <h2 className="text-xs text-white/30 font-mono tracking-[0.25em] uppercase mb-4">
-        {note ? 'Note editoriali' : 'Descrizione'}
-      </h2>
-      {note ? (
-        <>
-          <h3 className="text-lg font-black text-white mb-3">{note.title}</h3>
-          <p className="text-sm text-white/60 leading-relaxed">{note.body}</p>
-        </>
-      ) : (
-        <p className="text-sm text-white/30 font-mono italic">
-          Informazioni editoriali non ancora disponibili per questo circuito.
-        </p>
-      )}
-    </div>
+    <Panel title="Note editoriali">
+      <div className="p-5">
+        <h3 className="text-lg font-black text-[var(--fr-text)] mb-2">{note.title}</h3>
+        <p className="text-sm leading-relaxed text-[var(--fr-text-muted)]">{note.body}</p>
+      </div>
+    </Panel>
   );
 }

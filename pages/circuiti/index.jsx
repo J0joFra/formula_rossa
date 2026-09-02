@@ -98,11 +98,12 @@ export default function CircuitiIndex() {
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Cerca circuito o paese…"
-                  className="w-full bg-zinc-900 border border-white/10 rounded-xl px-4 py-2.5 text-sm font-mono text-white placeholder-white/25 focus:outline-none focus:border-red-600/50 transition-colors"
+                  className="w-full rounded-xl px-4 py-2.5 text-sm bg-[var(--fr-surface)] border border-[var(--fr-border)] text-[var(--fr-text)] placeholder:text-[var(--fr-text-faint)] focus:outline-none focus:border-[var(--fr-red)] transition-colors"
                 />
                 {search && (
                   <button onClick={() => setSearch('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white text-lg leading-none">
+                    aria-label="Cancella la ricerca"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--fr-text-faint)] hover:text-[var(--fr-text)] text-lg leading-none">
                     ×
                   </button>
                 )}
@@ -111,10 +112,11 @@ export default function CircuitiIndex() {
               <div className="flex flex-wrap gap-1.5">
                 {regions.map(r => (
                   <button key={r} onClick={() => setRegion(r)}
-                    className={`px-3 py-2 rounded-lg text-[11px] font-mono transition-colors ${
+                    aria-pressed={region === r}
+                    className={`px-3 py-2 rounded-lg text-[11px] font-semibold border transition-colors ${
                       region === r
-                        ? 'bg-red-600 text-white'
-                        : 'bg-zinc-900 border border-white/8 text-white/50 hover:text-white hover:border-white/20'
+                        ? 'bg-[var(--fr-red)] border-[var(--fr-red)] text-white'
+                        : 'bg-[var(--fr-surface)] border-[var(--fr-border)] text-[var(--fr-text-muted)] hover:text-[var(--fr-text)] hover:border-[var(--fr-border-strong)]'
                     }`}>
                     {r === 'all' ? `Tutti · ${circuits.length}` : r}
                   </button>
@@ -123,7 +125,8 @@ export default function CircuitiIndex() {
 
               <select
                 value={sortBy} onChange={e => setSortBy(e.target.value)}
-                className="bg-zinc-900 border border-white/10 rounded-xl px-3 py-2.5 text-[11px] font-mono text-white/70 focus:outline-none focus:border-red-600/50">
+                aria-label="Ordina i circuiti"
+                className="rounded-xl px-3 py-2.5 text-[11px] font-semibold bg-[var(--fr-surface)] border border-[var(--fr-border)] text-[var(--fr-text-muted)] focus:outline-none focus:border-[var(--fr-red)]">
                 <option value="name">Ordina: Nome</option>
                 <option value="country">Ordina: Paese</option>
                 <option value="length">Ordina: Lunghezza</option>
@@ -135,16 +138,15 @@ export default function CircuitiIndex() {
           {loading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 9 }).map((_, i) => (
-                <div key={i} className="rounded-2xl border border-white/8 h-44 animate-pulse"
-                     style={{ background: 'rgba(255,255,255,0.03)' }} />
+                <div key={i} className="rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)] h-44 skeleton" />
               ))}
             </div>
           )}
 
           {/* Grid */}
           {!loading && filtered.length === 0 && !error && (
-            <div className="text-center py-20 text-white/25 font-mono tracking-widest uppercase text-sm">
-              Nessun circuito trovato
+            <div className="text-center py-20 text-sm text-[var(--fr-text-muted)]">
+              Nessun circuito trovato.
             </div>
           )}
           {!loading && filtered.length > 0 && (
@@ -159,52 +161,67 @@ export default function CircuitiIndex() {
 
 // ── Circuit Card ──────────────────────────────────────────────────────────────
 
+/* La regione dà il colore alla pastiglia. Erano quattro `rgba(...)` fissi con
+   testo `rgba(255,255,255,.5)`: sul tema chiaro la scritta spariva. Ora usa le
+   stesse tinte d'accento delle epoche in /piloti (styles/tokens.css), scelte
+   per passare il contrasto minimo in entrambi i temi; il fondo si ricava dalla
+   tinta con `color-mix`, invece di essere un secondo colore scritto a mano. */
+const TINTA_REGIONE = {
+  'Europe':             'var(--fr-accent-blue)',
+  'Asia & Middle East': 'var(--fr-accent-orange)',
+  'Americas':           'var(--fr-accent-green)',
+  'Oceania':            'var(--fr-accent-violet)',
+  'Other':              'var(--fr-accent-neutral)',
+};
+
 function CircuitCard({ circuit }) {
   const flag = getFlagCode(circuit.country_id || '');
-  const regionColors = {
-    'Europe':             'rgba(99,102,241,0.15)',
-    'Asia & Middle East': 'rgba(245,158,11,0.15)',
-    'Americas':           'rgba(34,197,94,0.15)',
-    'Oceania':            'rgba(6,182,212,0.15)',
-    'Other':              'rgba(255,255,255,0.05)',
-  };
-  const bg = regionColors[circuit.region] || regionColors['Other'];
+  const tinta = TINTA_REGIONE[circuit.region] || TINTA_REGIONE.Other;
 
   return (
-    <Link href={`/circuiti/${circuit.id}`}>
-      <div className="group relative rounded-2xl border border-white/8 overflow-hidden cursor-pointer transition-all duration-200 hover:border-red-600/40 hover:scale-[1.01]"
-           style={{ background: 'rgba(255,255,255,0.02)' }}>
-        <div className="h-0.5 w-full"
-             style={{ background: 'linear-gradient(90deg,transparent,rgba(220,0,0,0.6),transparent)' }} />
-        <div className="p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              {flag && (
-                <img src={`https://flagcdn.com/w20/${flag}.png`} alt={circuit.country_id}
-                     className="w-5 h-3 object-cover rounded-sm opacity-80" />
-              )}
-              <span className="text-[10px] text-white/40 font-mono tracking-widest uppercase">
-                {circuit.country_id?.replace(/-/g, ' ')}
-              </span>
-            </div>
-            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full"
-                  style={{ background: bg, color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              {circuit.region}
+    <Link
+      href={`/circuiti/${circuit.id}`}
+      className="group relative block rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)] shadow-[var(--fr-shadow-sm)] overflow-hidden transition-all hover:-translate-y-1 hover:border-[var(--fr-border-strong)]"
+    >
+      <div className="p-5">
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <span className="flex items-center gap-2 min-w-0">
+            {flag && (
+              <img
+                src={`https://flagcdn.com/w20/${flag}.png`}
+                alt=""
+                width={20}
+                height={12}
+                className="w-5 h-3 object-cover rounded-sm shrink-0"
+              />
+            )}
+            <span className="text-[10px] font-semibold tracking-[0.14em] uppercase text-[var(--fr-text-muted)] truncate">
+              {circuit.country_id?.replace(/-/g, ' ')}
             </span>
-          </div>
-          <h2 className="text-base font-black tracking-tight leading-tight text-white group-hover:text-red-400 transition-colors mb-1">
-            {circuit.name}
-          </h2>
-          {circuit.place_name && (                          
-            <p className="text-xs text-white/35 font-mono mb-4">{circuit.place_name}</p>
-          )}
-          <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/6">
-            <StatMini label="Lunghezza" value={circuit.length ? `${circuit.length} km` : '—'} />  
-            <StatMini label="Curve"     value={circuit.turns ?? '—'} />                             
-            <StatMini label="Gare"      value={circuit.total_races_held ?? '—'} />         
-          </div>
+          </span>
+          <span
+            className="text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0"
+            style={{
+              color: tinta,
+              background: `color-mix(in srgb, ${tinta} 14%, transparent)`,
+            }}
+          >
+            {circuit.region}
+          </span>
         </div>
-        <div className="absolute bottom-4 right-4 text-red-600 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-mono">→</div>
+
+        <h2 className="text-base font-black tracking-tight leading-tight text-[var(--fr-text)] group-hover:text-[var(--fr-red)] transition-colors mb-1">
+          {circuit.name}
+        </h2>
+        {circuit.place_name && (
+          <p className="text-xs text-[var(--fr-text-muted)] mb-4">{circuit.place_name}</p>
+        )}
+
+        <div className="grid grid-cols-3 gap-2 pt-3 border-t border-[var(--fr-border)]">
+          <StatMini label="Lunghezza" value={circuit.length ? `${circuit.length} km` : '—'} />
+          <StatMini label="Curve"     value={circuit.turns ?? '—'} />
+          <StatMini label="Gare"      value={circuit.total_races_held ?? '—'} />
+        </div>
       </div>
     </Link>
   );
@@ -213,8 +230,10 @@ function CircuitCard({ circuit }) {
 function StatMini({ label, value }) {
   return (
     <div>
-      <div className="text-[9px] text-white/25 font-mono tracking-widest uppercase mb-0.5">{label}</div>
-      <div className="text-xs font-bold font-mono text-white/70">{value}</div>
+      <div className="text-[9px] font-semibold tracking-[0.14em] uppercase text-[var(--fr-text-faint)] mb-0.5">
+        {label}
+      </div>
+      <div className="tabular text-xs font-bold text-[var(--fr-text)]">{value}</div>
     </div>
   );
 }

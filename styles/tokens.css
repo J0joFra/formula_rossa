@@ -56,6 +56,17 @@
   /* ── Brand (invariante fra i temi) ──────────────────────────────────────── */
   --fr-red-brand: #E8002D;
 
+  /* Nota sui quattro livelli di testo (text / muted / faint / dim).
+     Erano tarati a occhio e i due più chiari non arrivavano al contrasto
+     minimo: in tema chiaro `faint` stava a 3.0:1 su bianco e `dim` a 2.1:1,
+     contro i 4.5:1 che servono per il testo normale. Sono le due tinte usate
+     per etichette, didascalie, briciole di pane e piedi di pagina, quindi il
+     problema si vedeva su ogni pagina del sito.
+     Ora `text`, `muted` e `faint` passano il minimo su tutti e tre i fondi
+     (superficie, pagina, superficie-2) e `dim` resta sopra 3:1, il minimo per
+     ciò che non è testo: separatori, "·", cornici. Se serve un quinto livello
+     più chiaro, non prenderlo da qui — quel contrasto non esiste. */
+
   /* ══════════════════════════════════════════════════════════════════════════
      TEMA SCURO — default
      ══════════════════════════════════════════════════════════════════════════ */
@@ -67,19 +78,39 @@
   --fr-overlay-2:  rgba(255, 255, 255, 0.08);
 
   --fr-text:       #e9f1ea;
-  --fr-text-muted: #93a8ab;
-  --fr-text-faint: #5f767b;
-  --fr-text-dim:   #3f5257;
+  --fr-text-muted: #9db1b4;
+  --fr-text-faint: #849a9e;
+  --fr-text-dim:   #5a7075;
 
   --fr-border:        #153039;
   --fr-border-strong: #1e3f49;
   --fr-border-hair:   rgba(255, 255, 255, 0.07);
 
+  /* Due rossi, non uno.
+     `--fr-red` è il rosso che si legge COME testo su fondo scuro, quindi deve
+     essere chiaro; `--fr-red-fill` è il rosso che sta SOTTO il testo bianco —
+     bottoni, pastiglie — e deve essere scuro abbastanza da reggerlo. Con un
+     valore solo uno dei due casi perde: #FF2A46 come testo dà 4,5:1 sul fondo
+     scuro, ma il bianco sopra scende a 3,7:1. */
   --fr-red:      #FF2A46;
+  --fr-red-fill: #D9002C;
   --fr-red-ink:  #ff5069;
   --fr-red-soft: rgba(255, 42, 70, 0.12);
   --fr-gold:     #E7B84E;
   --fr-teal:     #37b0c0;
+
+  /* Tinte d'accento per le categorie: le epoche in /piloti, le regioni in
+     /circuiti. Erano colori scritti a mano in due oggetti JS diversi, scelti
+     per un fondo scuro — sul tema chiaro scendevano fino a 1,9:1. Qui stanno
+     in un posto solo, cambiano con il tema e passano tutte il minimo di
+     contrasto su superficie e pagina. */
+  --fr-accent-violet: #a78bfa;
+  --fr-accent-orange:      #fb923c;
+  --fr-accent-amber:      #facc15;
+  --fr-accent-green:      #34d399;
+  --fr-accent-blue:      #60a5fa;
+  --fr-accent-red:   #ff7a8a;
+  --fr-accent-neutral:  #9db1b4;
 
   --fr-success: #2fd39a;
   --fr-warning: #E7B84E;
@@ -105,19 +136,28 @@
   --fr-overlay-2:  rgba(10, 30, 35, 0.06);
 
   --fr-text:       #12181a;
-  --fr-text-muted: #586268;
-  --fr-text-faint: #8b979c;
-  --fr-text-dim:   #a9b3b6;
+  --fr-text-muted: #4f5a60;
+  --fr-text-faint: #5e6a70;
+  --fr-text-dim:   #8b979c;
 
   --fr-border:        #e0e3e4;
   --fr-border-strong: #cdd2d3;
   --fr-border-hair:   rgba(10, 30, 35, 0.08);
 
-  --fr-red:      #E8002D;
-  --fr-red-ink:  #c00023;
-  --fr-red-soft: rgba(232, 0, 45, 0.08);
-  --fr-gold:     #C9922B;
+  --fr-red:      #DC002B;
+  --fr-red-fill: #DC002B;
+  --fr-red-ink:  #a3001e;
+  --fr-red-soft: rgba(220, 0, 43, 0.08);
+  --fr-gold:     #8a5309;
   --fr-teal:     #0d6f7e;
+
+  --fr-accent-violet: #6d28d9;
+  --fr-accent-orange:      #c2410c;
+  --fr-accent-amber:      #a16207;
+  --fr-accent-green:      #047857;
+  --fr-accent-blue:      #1d4ed8;
+  --fr-accent-red:   #c0002a;
+  --fr-accent-neutral:  #4f5a60;
 
   --fr-success: #0f8a63;
   --fr-warning: #b07d19;
