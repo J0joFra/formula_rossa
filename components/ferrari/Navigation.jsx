@@ -18,6 +18,7 @@ export { GRIDUP_URL } from '../../lib/gridup';
 /* Il menu contiene solo pagine che esistono davvero: una voce che porta a una
    pagina inesistente o a un vicolo cieco è peggio di una voce assente. */
 const ARCHIVIO = {
+  id: 'archivio',
   label: 'Archivio',
   icon: BarChart3,
   items: [
@@ -28,6 +29,7 @@ const ARCHIVIO = {
 };
 
 const STAGIONE = {
+  id: 'stagione',
   label: 'Stagione',
   icon: Trophy,
   items: [
@@ -101,18 +103,22 @@ export default function Navigation() {
           {/* Menu desktop */}
           <div className="hidden lg:flex items-center gap-1">
             {MENU.map((group) => {
-              const open = openMenu === group.key;
+              /* L'identificativo del gruppo aperto era `group.key`, un campo che
+                 non esiste più: `undefined === undefined` è vero per tutti e
+                 due i gruppi, quindi al passaggio del mouse su uno si aprivano
+                 entrambe le tendine, una sopra l'altra. */
+              const open = openMenu === group.id;
               const active = groupActive(group);
               return (
                 <div
-                  key={group.label}
+                  key={group.id}
                   className="relative"
-                  onMouseEnter={() => setOpenMenu(group.key)}
+                  onMouseEnter={() => setOpenMenu(group.id)}
                   onMouseLeave={() => setOpenMenu(null)}
                 >
                   <button
                     type="button"
-                    onClick={() => setOpenMenu(open ? null : group.key)}
+                    onClick={() => setOpenMenu(open ? null : group.id)}
                     aria-expanded={open}
                     aria-haspopup="true"
                     className={itemCls(active || open)}
@@ -236,7 +242,7 @@ export default function Navigation() {
           >
             <div className="px-4 py-5 space-y-5 max-h-[calc(100vh-70px)] overflow-y-auto">
               {MENU.map((group) => (
-                <div key={group.label}>
+                <div key={group.id}>
                   <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--fr-red)] mb-2">
                     <group.icon className="w-3.5 h-3.5" aria-hidden="true" />
                     {group.label}

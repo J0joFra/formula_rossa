@@ -16,8 +16,11 @@ const supabase = createClient(
 );
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+/* I dump F1DB stanno in ./data e non più in ./public/data: erano 44 MB serviti
+   pubblicamente e spediti a ogni deploy, per un uso che è solo questo — il
+   caricamento iniziale su Supabase, che gira a mano da riga di comando. */
 function loadJson(filename) {
-  const raw = readFileSync(resolve(`./public/data/${filename}`), 'utf-8');
+  const raw = readFileSync(resolve(`./data/${filename}`), 'utf-8');
   const data = JSON.parse(raw);
   return Array.isArray(data) ? data : [data];
 }
