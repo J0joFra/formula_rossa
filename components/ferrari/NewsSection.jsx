@@ -18,7 +18,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, RefreshCw, Newspaper } from 'lucide-react';
-import { useI18n } from '../../lib/i18n';
 
 const RSS_URL = 'https://it.motorsport.com/rss/f1/news/';
 
@@ -26,9 +25,9 @@ const RSS_URL = 'https://it.motorsport.com/rss/f1/news/';
    Ognuna ha il suo colore preso dai token, così resta leggibile su entrambi
    i temi: prima "F1" era `text-zinc-300`, invisibile sul bianco. */
 const CATEGORIE = {
-  team:    { key: 'nw_catTeam',    fg: 'var(--fr-red)',  bg: 'var(--fr-red-soft)' },
-  drivers: { key: 'nw_catDrivers', fg: 'var(--fr-gold)',  bg: 'color-mix(in srgb, var(--fr-gold) 16%, transparent)' },
-  f1:      { key: 'nw_catF1',      fg: 'var(--fr-teal)',  bg: 'color-mix(in srgb, var(--fr-teal) 14%, transparent)' },
+  team:    { label: 'Scuderia',    fg: 'var(--fr-red)',  bg: 'var(--fr-red-soft)' },
+  drivers: { label: 'Piloti', fg: 'var(--fr-gold)',  bg: 'color-mix(in srgb, var(--fr-gold) 16%, transparent)' },
+  f1:      { label: 'F1',      fg: 'var(--fr-teal)',  bg: 'color-mix(in srgb, var(--fr-teal) 14%, transparent)' },
 };
 
 function categoria(titolo = '') {
@@ -47,7 +46,7 @@ function anteprima(item) {
   return item.thumbnail || null;
 }
 
-function Scheda({ item, index, t }) {
+function Scheda({ item, index }) {
   const cat = CATEGORIE[item.category];
   return (
     <motion.article
@@ -83,7 +82,7 @@ function Scheda({ item, index, t }) {
             className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-[0.14em] px-2.5 py-1 rounded-full backdrop-blur-sm"
             style={{ background: cat.bg, color: cat.fg }}
           >
-            {t(cat.key)}
+            {cat.label}
           </span>
         </div>
 
@@ -105,7 +104,7 @@ function Scheda({ item, index, t }) {
               {item.date}
             </time>
             <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[var(--fr-text-muted)] group-hover:text-[var(--fr-red)] transition-colors">
-              {t('nw_read')}
+              Leggi
               <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
             </span>
           </div>
@@ -116,7 +115,6 @@ function Scheda({ item, index, t }) {
 }
 
 export default function NewsSection() {
-  const { t, lang } = useI18n();
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -144,7 +142,7 @@ export default function NewsSection() {
           title: item.title,
           description: `${(item.description || '').replace(/<[^>]*>?/gm, '').slice(0, 130)}…`,
           category: categoria(item.title),
-          date: valida ? d.toLocaleDateString(lang, { day: '2-digit', month: 'short' }) : '',
+          date: valida ? d.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }) : '',
           iso: valida ? d.toISOString() : undefined,
           url: item.link,
           thumbnail: anteprima(item),
@@ -159,7 +157,7 @@ export default function NewsSection() {
       clearTimeout(timeout);
       setLoading(false);
     }
-  }, [lang]);
+  }, []);
 
   useEffect(() => {
     carica();
@@ -171,7 +169,7 @@ export default function NewsSection() {
   return (
     <section
       className="snap-section py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-t border-[var(--fr-border)]"
-      aria-label={t('nw_title')}
+      aria-label="Flash news"
     >
       <div className="max-w-wrap mx-auto">
 
@@ -179,21 +177,21 @@ export default function NewsSection() {
           <div>
             <span className="fr-eyebrow inline-flex items-center gap-2">
               <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
-              {t('nw_eyebrow')}
+              Aggiornamenti in tempo reale
             </span>
-            <h2 className="uppercase mt-3">{t('nw_title')}</h2>
+            <h2 className="uppercase mt-3">Flash news</h2>
             <p className="text-[var(--fr-text-muted)] mt-2.5 max-w-[56ch]">
-              {t('nw_lead')}
+              Le ultime notizie dalla Formula 1 e dalla Scuderia Ferrari, aggiornate durante la giornata.
             </p>
           </div>
 
           <p className="text-xs text-[var(--fr-text-faint)] shrink-0">
-            {t('nw_source')}
+            Fonte: Motorsport.com
           </p>
         </header>
 
         {loading && !news.length && (
-          <div className="grid md:grid-cols-3 gap-5" role="status" aria-label={t('nw_loading')}>
+          <div className="grid md:grid-cols-3 gap-5" role="status" aria-label="Caricamento notizie">
             {[0, 1, 2].map(i => (
               <div
                 key={i}
@@ -207,9 +205,9 @@ export default function NewsSection() {
         {!loading && failed && !news.length && (
           <div className="rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)] px-6 py-12 text-center">
             <Newspaper className="w-8 h-8 mx-auto text-[var(--fr-text-dim)]" aria-hidden="true" />
-            <p className="text-sm text-[var(--fr-text-muted)] mt-3">{t('nw_empty')}</p>
+            <p className="text-sm text-[var(--fr-text-muted)] mt-3">Le notizie non sono raggiungibili in questo momento.</p>
             <button type="button" onClick={carica} className="btn btn-outline mt-5">
-              {t('nw_retry')}
+              Riprova
             </button>
           </div>
         )}
@@ -217,7 +215,7 @@ export default function NewsSection() {
         {news.length > 0 && (
           <div className="grid md:grid-cols-3 gap-5">
             {news.map((item, i) => (
-              <Scheda key={item.id} item={item} index={i} t={t} />
+              <Scheda key={item.id} item={item} index={i} />
             ))}
           </div>
         )}

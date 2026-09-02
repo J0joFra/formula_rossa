@@ -10,7 +10,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Cookie, X } from 'lucide-react';
-import { useI18n } from '../lib/i18n';
 
 const STORAGE_KEY = 'cookieConsent'; // 'accepted' | 'rejected'
 
@@ -38,7 +37,6 @@ function applyConsent(granted) {
 }
 
 export default function CookieConsent() {
-  const { t } = useI18n();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -68,7 +66,7 @@ export default function CookieConsent() {
     <div
       role="dialog"
       aria-live="polite"
-      aria-label={t('ft_cookiePrefs')}
+      aria-label="Preferenze cookie"
       className="fixed inset-x-0 bottom-0 z-[200] px-3 pb-3 sm:px-4 sm:pb-4"
     >
       <div className="mx-auto max-w-3xl rounded-2xl border border-[var(--fr-border)] bg-[var(--fr-surface)] backdrop-blur-md shadow-[var(--fr-shadow)] p-5 sm:p-6">
@@ -78,11 +76,11 @@ export default function CookieConsent() {
           </span>
           <div className="min-w-0 flex-1">
             <h2 className="text-sm font-black uppercase tracking-wider text-[var(--fr-text)]">
-              {t('ck_title')}
+              Rispettiamo la tua privacy
             </h2>
             <p className="mt-1.5 text-xs leading-relaxed text-[var(--fr-text-muted)]">
-              {t('ck_body')}{' '}
-              <Link href="/legal/cookies" className="text-red-500 hover:underline">{t('ck_policy')}</Link>.
+              Usiamo cookie tecnici necessari e, con il tuo consenso, cookie analitici (Google Analytics) e pubblicitari (Google AdSense) per capire come viene usato il sito e sostenere il progetto. Puoi accettare, rifiutare o cambiare idea in qualsiasi momento. Dettagli nella{' '}
+              <Link href="/legal/cookies" className="text-red-500 hover:underline">Cookie Policy</Link>.
             </p>
 
             <div className="mt-4 flex flex-col sm:flex-row gap-2.5">
@@ -91,14 +89,14 @@ export default function CookieConsent() {
                 onClick={() => decide(true)}
                 className="order-1 sm:order-2 inline-flex items-center justify-center bg-[var(--fr-red)] text-white px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-[var(--fr-red-ink)] transition-colors"
               >
-                {t('ck_accept')}
+                Accetta tutti
               </button>
               <button
                 type="button"
                 onClick={() => decide(false)}
                 className="order-2 sm:order-1 inline-flex items-center justify-center bg-transparent text-[var(--fr-text-muted)] px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest border border-[var(--fr-border-strong)] hover:border-[var(--fr-red)] hover:text-[var(--fr-text)] transition-colors"
               >
-                {t('ck_reject')}
+                Rifiuta non essenziali
               </button>
             </div>
           </div>
@@ -106,7 +104,7 @@ export default function CookieConsent() {
           <button
             type="button"
             onClick={() => decide(false)}
-            aria-label={t('ck_close')}
+            aria-label="Chiudi e rifiuta i cookie non essenziali"
             className="shrink-0 p-1.5 text-[var(--fr-text-faint)] hover:text-[var(--fr-text)] transition-colors"
           >
             <X className="w-4 h-4" aria-hidden="true" />

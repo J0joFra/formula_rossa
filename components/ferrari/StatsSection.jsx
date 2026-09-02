@@ -12,53 +12,51 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Cpu, Zap, Activity, ChevronRight, Settings, Shield } from 'lucide-react';
-import { useI18n } from '../../lib/i18n';
 
 /* Le tre colonne della scheda: etichette e note sono chiavi, i valori no —
    "770 KG" e "1.600 CC" non cambiano con la lingua. Prima era tutto scritto
    in italiano dentro il JSX, e restava in italiano su tutto il sito. */
 const SCHEDA = [
   {
-    titolo: 'sf_car',
+    titolo: 'Vettura',
     icon: Shield,
     tinta: 'var(--fr-red)',
     voci: [
-      { k: 'sf_weight',  v: '770 kg',       s: 'sf_weightSub' },
-      { k: 'sf_chassis', vk: 'sf_chassisVal', s: 'sf_chassisSub' },
-      { k: 'sf_gearbox', vk: 'sf_gearboxVal', s: 'sf_gearboxSub' },
-      { k: 'sf_brakes',  v: 'Brembo',       s: 'sf_brakesSub' },
-      { k: 'sf_wheels',  vk: 'sf_wheelsVal', s: 'sf_wheelsSub' },
+      { k: 'Peso totale',  v: '770 kg',       s: 'Con pilota e liquidi' },
+      { k: 'Telaio', v: 'Composito', s: 'Carbonio a nido d’ape' },
+      { k: 'Cambio', v: '8 marce + RM', s: 'Longitudinale Ferrari' },
+      { k: 'Freni',  v: 'Brembo',       s: 'Carbonio autoventilanti' },
+      { k: 'Ruote',  v: '18 pollici', s: 'Anteriore e posteriore' },
     ],
   },
   {
-    titolo: 'sf_pu',
+    titolo: 'Power unit',
     icon: Cpu,
     tinta: 'var(--fr-red)',
     evidenza: true,
     voci: [
-      { k: 'sf_model',  v: '067/6',      s: 'sf_modelSub' },
-      { k: 'sf_displ',  v: '1.600 cc',   s: 'sf_displSub' },
-      { k: 'sf_inject', v: '350 bar',    s: 'sf_injectSub' },
-      { k: 'sf_turbo',  vk: 'sf_turboVal', s: 'sf_turboSub' },
-      { k: 'sf_energy', v: '3.000 MJ/h', s: 'sf_energySub' },
+      { k: 'Nome modello',  v: '067/6',      s: 'V6 90° sovralimentato' },
+      { k: 'Cilindrata',  v: '1.600 cc',   s: 'Max 15.000 giri/min' },
+      { k: 'Iniezione', v: '350 bar',    s: 'Diretta ad alta pressione' },
+      { k: 'Turbo',  v: 'Singolo', s: '150.000 giri/min max' },
+      { k: 'Energia', v: '3.000 MJ/h', s: 'Portata energetica benzina' },
     ],
   },
   {
-    titolo: 'sf_ers',
+    titolo: 'Sistema ERS',
     icon: Zap,
     tinta: 'var(--fr-gold)',
     voci: [
-      { k: 'sf_mguk',   v: '350 kW',  s: 'sf_mgukSub' },
-      { k: 'sf_volt',   v: '1.000 V', s: 'sf_voltSub' },
-      { k: 'sf_batt',   v: '4 MJ',    s: 'sf_battSub' },
-      { k: 'sf_rpm',    v: '60.000',  s: 'sf_rpmSub' },
-      { k: 'sf_charge', vk: 'sf_chargeVal', s: 'sf_chargeSub' },
+      { k: 'Potenza MGU-K',   v: '350 kW',  s: 'Recupero di energia singolo' },
+      { k: 'Tensione max',   v: '1.000 V', s: 'Elettronica di controllo' },
+      { k: 'Batteria',   v: '4 MJ',    s: 'Ioni di litio (35 kg)' },
+      { k: 'MGU-K giri/min',    v: '60.000',  s: 'Giri al minuto massimi' },
+      { k: 'Ricarica', v: '9 MJ max', s: 'Energia in ricarica' },
     ],
   },
 ];
 
 export default function StatsSection() {
-  const { t } = useI18n();
   return (
     <section
       className="snap-section py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-t border-[var(--fr-border)]"
@@ -69,10 +67,10 @@ export default function StatsSection() {
         <header className="mb-9">
           <span className="fr-eyebrow inline-flex items-center gap-2">
             <Settings className="w-3.5 h-3.5" aria-hidden="true" />
-            {t('sf_eyebrow')}
+            Scheda tecnica 2026
           </span>
           <h2 id="sf26-heading" className="uppercase mt-3">
-            {t('sf_titleA')} <span className="text-[var(--fr-red)]">{t('sf_titleB')}</span>
+            Engineering <span className="text-[var(--fr-red)]">Legend</span>
           </h2>
         </header>
 
@@ -86,7 +84,7 @@ export default function StatsSection() {
         >
           <img
             src="/data/images/sf26.jpg"
-            alt={t('sf_imgAlt')}
+            alt="Ferrari SF-26 — monoposto di Formula 1 della stagione 2026"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             width={1400}
             height={600}
@@ -104,10 +102,10 @@ export default function StatsSection() {
             <p className="font-head text-4xl md:text-6xl font-black uppercase leading-none text-fixed-white">SF-26</p>
             <div className="flex flex-wrap items-center gap-3 mt-2">
               <span className="bg-[var(--fr-red)] text-white px-2.5 py-1 rounded-[7px] text-[10px] font-bold uppercase tracking-[0.14em]">
-                {t('sf_newEra')}
+                Nuova era
               </span>
               <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/75">
-                {t('sf_projectCode')}
+                Codice progetto: 677
               </span>
             </div>
           </div>
@@ -131,15 +129,15 @@ export default function StatsSection() {
               )}
               <h3 className="flex items-center gap-2.5 uppercase text-lg pb-4 mb-5 border-b border-[var(--fr-border)]">
                 <col.icon className="w-5 h-5 shrink-0" style={{ color: col.tinta }} aria-hidden="true" />
-                {t(col.titolo)}
+                {col.titolo}
               </h3>
               <ul className="space-y-4">
                 {col.voci.map((v) => (
                   <TechItem
                     key={v.k}
-                    label={t(v.k)}
-                    value={v.vk ? t(v.vk) : v.v}
-                    sub={t(v.s)}
+                    label={v.k}
+                    value={v.v}
+                    sub={v.s}
                   />
                 ))}
               </ul>
@@ -154,7 +152,7 @@ export default function StatsSection() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--fr-text-faint)] hover:text-[var(--fr-red)] transition-colors"
           >
-            {t('sf_source')}
+            Fonte tecnica: Motorsport.com
             <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
           </a>
         </p>
