@@ -32,7 +32,7 @@ export default function GridUpPromo() {
   return (
     <section
       aria-labelledby="gridup-heading"
-      className="relative py-16 md:py-24 px-4 overflow-hidden"
+      className="snap-section relative py-12 md:py-16 px-4 overflow-hidden"
     >
       <div className="max-w-7xl mx-auto">
         <div className="relative overflow-hidden rounded-3xl border border-[var(--border-strong)] bg-[var(--bg-tertiary)]/60 backdrop-blur-sm">
@@ -120,7 +120,7 @@ export default function GridUpPromo() {
                 </a>
               </div>
 
-              <p className="mt-4 text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+              <p className="mt-4 text-[10px] text-[var(--fr-text-faint)] uppercase tracking-wider">
                 {t('gu_terms')}
               </p>
             </div>

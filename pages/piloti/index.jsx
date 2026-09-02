@@ -26,15 +26,23 @@ function getEra(dob) {
   return 'Era Moderna';
 }
  
+/* Un colore per epoca. Erano sei tinte fisse pensate per il fondo scuro — sul
+   tema chiaro "Anni '80" arrivava a 1,9:1 su bianco. Ora la tinta è un token
+   che cambia con il tema (vedi styles/tokens.css) e il fondo della pastiglia
+   si ricava da quella con `color-mix`, invece di essere un secondo colore
+   scritto a mano che poteva non corrispondere. */
 const ERA_META = {
-  'Pionieri':    { color:'#a78bfa', glow:'rgba(167,139,250,0.12)' },
-  'Anni \'60':   { color:'#fb923c', glow:'rgba(251,146,60,0.12)'  },
-  'Anni \'70':   { color:'#facc15', glow:'rgba(250,204,21,0.12)'  },
-  'Anni \'80':   { color:'#34d399', glow:'rgba(52,211,153,0.12)'  },
-  'Anni \'90':   { color:'#60a5fa', glow:'rgba(96,165,250,0.12)'  },
-  'Era Moderna': { color:'#f87171', glow:'rgba(248,113,113,0.12)' },
-  'Unknown':     { color:'#9ca3af', glow:'rgba(156,163,175,0.05)' },
+  'Pionieri':    { color: 'var(--fr-accent-violet)' },
+  'Anni \'60':   { color: 'var(--fr-accent-orange)' },
+  'Anni \'70':   { color: 'var(--fr-accent-amber)' },
+  'Anni \'80':   { color: 'var(--fr-accent-green)' },
+  'Anni \'90':   { color: 'var(--fr-accent-blue)' },
+  'Era Moderna': { color: 'var(--fr-accent-red)' },
+  'Unknown':     { color: 'var(--fr-accent-neutral)' },
 };
+
+/** Sfondo tenue della stessa tinta, per pastiglie e filtri attivi. */
+const alone = (colore, pct = 14) => `color-mix(in srgb, ${colore} ${pct}%, transparent)`;
  
 // Iniziali stilizzate come avatar
 function DriverAvatar({ firstName, lastName, number, size = 64, championships = 0 }) {
@@ -45,7 +53,7 @@ function DriverAvatar({ firstName, lastName, number, size = 64, championships = 
       width: size, height: size, borderRadius: '50%', flexShrink: 0,
       background: isChamp
         ? 'linear-gradient(135deg, #7f1d1d 0%, var(--fr-red) 50%, #b91c1c 100%)'
-        : 'linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)',
+        : 'linear-gradient(135deg, var(--fr-surface-2) 0%, var(--fr-surface-3) 100%)',
       border: isChamp ? '2px solid rgba(220,38,38,0.6)' : '1px solid var(--fr-border)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       position: 'relative',
@@ -59,10 +67,12 @@ function DriverAvatar({ firstName, lastName, number, size = 64, championships = 
       {number && (
         <span style={{
           position: 'absolute', bottom: '-4px', right: '-4px',
-          background: 'var(--fr-red)', color: 'var(--fr-text)',
+          /* Sul rosso ci va il bianco: con `var(--fr-text)` in tema chiaro
+             questo numero era quasi nero sul rosso, 3,5:1. */
+          background: 'var(--fr-red-fill)', color: '#fff',
           fontSize: size * 0.18, fontWeight: '800', fontFamily: 'monospace',
           padding: '1px 4px', borderRadius: '3px',
-          border: '1px solid rgba(0,0,0,0.4)',
+          border: '1px solid var(--fr-border)',
           lineHeight: 1.4,
         }}>{number}</span>
       )}
@@ -173,7 +183,7 @@ export default function PilotiIndex() {
             }}>
               I PILOTI <span style={{ color:'var(--fr-red)' }}>DELLA STORIA</span>
             </h1>
-            <p style={{ margin:'14px 0 0', fontSize:'12px', fontFamily:'monospace', color:'var(--fr-text-dim)', letterSpacing:'1px' }}>
+            <p style={{ margin:'14px 0 0', fontSize:'12px', fontFamily:'monospace', color:'var(--fr-text-faint)', letterSpacing:'1px' }}>
               Vittorie, pole position, campionati e ogni record del Mondiale F1
             </p>
  
@@ -192,9 +202,9 @@ export default function PilotiIndex() {
                   <div key={s.label}>
                     <div style={{ display:'flex', alignItems:'baseline', gap:'6px' }}>
                       <span style={{ fontSize:'26px', fontWeight:'900', fontFamily:'monospace', color:'var(--fr-text)' }}>{s.value}</span>
-                      {s.sub && <span style={{ fontSize:'11px', color:'var(--fr-text-dim)', fontFamily:'monospace' }}>{s.sub}</span>}
+                      {s.sub && <span style={{ fontSize:'11px', color:'var(--fr-text-faint)', fontFamily:'monospace' }}>{s.sub}</span>}
                     </div>
-                    <div style={{ fontSize:'9px', color:'var(--fr-text-dim)', fontFamily:'monospace', letterSpacing:'1px', textTransform:'uppercase', marginTop:'2px' }}>{s.label}</div>
+                    <div style={{ fontSize:'9px', color:'var(--fr-text-faint)', fontFamily:'monospace', letterSpacing:'1px', textTransform:'uppercase', marginTop:'2px' }}>{s.label}</div>
                   </div>
                 ))}
               </div>
@@ -210,7 +220,7 @@ export default function PilotiIndex() {
             }}>
               {/* Search */}
               <div style={{ position:'relative', flex:'1', minWidth:'220px' }}>
-                <span style={{ position:'absolute', left:'14px', top:'50%', transform:'translateY(-50%)', fontSize:'13px', color:'var(--fr-text-dim)', pointerEvents:'none' }}>🔍</span>
+                <span style={{ position:'absolute', left:'14px', top:'50%', transform:'translateY(-50%)', fontSize:'13px', color:'var(--fr-text-faint)', pointerEvents:'none' }}>🔍</span>
                 <input
                   value={search} onChange={e=>setSearch(e.target.value)}
                   placeholder="Cerca pilota, nazionalità, numero…"
@@ -226,7 +236,7 @@ export default function PilotiIndex() {
                 {search && (
                   <button onClick={()=>setSearch('')} style={{
                     position:'absolute', right:'12px', top:'50%', transform:'translateY(-50%)',
-                    background:'none', border:'none', color:'var(--fr-text-dim)', cursor:'pointer', fontSize:'16px',
+                    background:'none', border:'none', color:'var(--fr-text-faint)', cursor:'pointer', fontSize:'16px',
                   }}>×</button>
                 )}
               </div>
@@ -238,7 +248,7 @@ export default function PilotiIndex() {
                 letterSpacing:'1.5px', textTransform:'uppercase',
                 border: champOnly ? '1px solid #fbbf24' : '1px solid var(--fr-border)',
                 background: champOnly ? 'rgba(251,191,36,.12)' : 'var(--fr-overlay)',
-                color: champOnly ? '#fbbf24' : 'var(--fr-text-faint)',
+                color: champOnly ? 'var(--fr-accent-amber)' : 'var(--fr-text-faint)',
                 transition:'all .2s',
                 display:'flex', alignItems:'center', gap:'6px',
               }}>
@@ -255,9 +265,9 @@ export default function PilotiIndex() {
                       padding:'7px 12px', borderRadius:'3px', cursor:'pointer',
                       fontSize:'9px', fontFamily:'monospace', fontWeight:'800',
                       letterSpacing:'1px', textTransform:'uppercase',
-                      border: active ? `1px solid ${meta?.color}` : '1px solid var(--fr-border)',
-                      background: active ? `${meta?.color}18` : 'var(--fr-overlay)',
-                      color: active ? meta?.color : 'var(--fr-text-faint)',
+                      border: `1px solid ${active ? meta?.color : 'var(--fr-text-faint)'}`,
+                      background: active ? alone(meta?.color) : 'var(--fr-overlay)',
+                      color: active ? meta?.color : 'var(--fr-text-muted)',
                       transition:'all .2s',
                     }}>{e==='all' ? `Tutti` : e}</button>
                   );
@@ -283,7 +293,7 @@ export default function PilotiIndex() {
  
           {/* ── ERROR ── */}
           {error && (
-            <div style={{ padding:'16px 20px', borderRadius:'4px', border:'1px solid rgba(220,38,38,.3)', background:'rgba(220,38,38,.06)', color:'#f87171', fontFamily:'monospace', fontSize:'13px', marginBottom:'24px' }}>
+            <div style={{ padding:'16px 20px', borderRadius:'4px', border:'1px solid rgba(220,38,38,.3)', background:'rgba(220,38,38,.06)', color:'var(--fr-red-ink)', fontFamily:'monospace', fontSize:'13px', marginBottom:'24px' }}>
               ⚠ Errore: {error}
             </div>
           )}
@@ -295,7 +305,7 @@ export default function PilotiIndex() {
                 <div key={i} style={{
                   height:'72px', borderRadius:'4px',
                   border:'1px solid var(--fr-overlay)',
-                  background:'#0d0d0d',
+                  background:'var(--fr-surface-3)',
                   overflow:'hidden', position:'relative',
                 }}>
                   <div style={{
@@ -310,7 +320,7 @@ export default function PilotiIndex() {
  
           {/* ── EMPTY ── */}
           {!loading && filtered.length===0 && !error && (
-            <div style={{ textAlign:'center', padding:'80px 0', color:'var(--fr-text-dim)', fontFamily:'monospace' }}>
+            <div style={{ textAlign:'center', padding:'80px 0', color:'var(--fr-text-faint)', fontFamily:'monospace' }}>
               <div style={{ fontSize:'36px', marginBottom:'16px' }}>🏎</div>
               <p style={{ fontSize:'12px', letterSpacing:'2px', textTransform:'uppercase' }}>Nessun pilota trovato</p>
             </div>
@@ -330,7 +340,7 @@ export default function PilotiIndex() {
                 fontSize:'8px', color:'var(--fr-text-faint)',
                 fontFamily:'monospace', letterSpacing:'1.5px', textTransform:'uppercase',
                 borderBottom:'1px solid var(--fr-border)',
-                background:'#0f0f0f',
+                background:'var(--fr-surface-2)',
                 borderRadius:'4px 4px 0 0',
               }}>
                 <span>#</span>
@@ -350,7 +360,7 @@ export default function PilotiIndex() {
           {!loading && filtered.length>0 && (
             <p style={{
               marginTop:'32px', textAlign:'center',
-              fontSize:'10px', color:'var(--fr-border-strong)',
+              fontSize:'10px', color:'var(--fr-text-faint)',
               fontFamily:'monospace', letterSpacing:'2px',
             }}>
               {filtered.length} / {drivers.length} PILOTI
@@ -396,7 +406,7 @@ function DriverRow({ driver: d, rank, sortBy }) {
             ? `1px solid ${isChamp ? 'rgba(220,38,38,.35)' : 'var(--fr-border)'}`
             : '1px solid var(--fr-overlay)',
           background: hovered
-            ? (isChamp ? '#0f0303' : '#0f0f0f')
+            ? (isChamp ? 'var(--fr-red-soft)' : 'var(--fr-surface-2)')
             : 'var(--fr-surface)',
           cursor:'pointer', transition:'all .18s ease',
           position:'relative',
@@ -405,7 +415,7 @@ function DriverRow({ driver: d, rank, sortBy }) {
         {/* Rank */}
         <div style={{
           fontSize:'11px', fontFamily:'monospace', fontWeight:'800',
-          color: rank <= 3 ? 'var(--fr-red)' : 'var(--fr-border-strong)',
+          color: rank <= 3 ? 'var(--fr-red)' : 'var(--fr-text-faint)',
           textAlign:'center',
         }}>{rank <= 3 ? ['①','②','③'][rank-1] : rank}</div>
  
@@ -437,7 +447,7 @@ function DriverRow({ driver: d, rank, sortBy }) {
                 </span>
               )}
               {isDead && (
-                <span style={{ fontSize:'8px', color:'var(--fr-text-dim)', fontFamily:'monospace' }}>†</span>
+                <span style={{ fontSize:'8px', color:'var(--fr-text-faint)', fontFamily:'monospace' }}>†</span>
               )}
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:'8px', marginTop:'2px' }}>
@@ -445,14 +455,14 @@ function DriverRow({ driver: d, rank, sortBy }) {
                 <img src={`https://flagcdn.com/w20/${flag}.png`} alt={d.nationality_country_id}
                   style={{ width:'16px', height:'10px', objectFit:'cover', borderRadius:'1px', opacity:.7 }}/>
               )}
-              <span style={{ fontSize:'10px', color:'var(--fr-text-dim)', fontFamily:'monospace' }}>
+              <span style={{ fontSize:'10px', color:'var(--fr-text-faint)', fontFamily:'monospace' }}>
                 {d.nationality_country_id?.replace(/-/g,' ')}
                 {age && <span style={{ marginLeft:'8px' }}>{isDead ? `† età ${age}` : `${age} anni`}</span>}
               </span>
               <span style={{
                 fontSize:'8px', padding:'1px 6px', borderRadius:'2px',
-                background: era.glow, color: era.color,
-                border:`1px solid ${era.color}30`, fontFamily:'monospace',
+                background: alone(era.color), color: era.color,
+                border: `1px solid ${alone(era.color, 35)}`,
                 letterSpacing:'0.5px',
               }}>{d.era}</span>
             </div>

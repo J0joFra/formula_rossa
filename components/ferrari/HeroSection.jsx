@@ -64,7 +64,7 @@ export default function HeroSection() {
   ];
 
   return (
-    <section className="relative overflow-hidden pt-[70px]">
+    <section className="snap-section relative overflow-hidden pt-[70px]">
       {/* Alone ambientale */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -72,7 +72,7 @@ export default function HeroSection() {
         style={{ background: 'radial-gradient(60% 80% at 85% 0%, var(--fr-red-soft), transparent 70%)' }}
       />
 
-      <div className="relative max-w-wrap mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      <div className="relative max-w-wrap mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
         <div className="grid lg:grid-cols-[1.15fr_.85fr] gap-10 lg:gap-12 items-center">
 
           {/* ── Tesi ── */}

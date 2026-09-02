@@ -123,7 +123,7 @@ function FactsBand({ t, years }) {
     { key: 'hp_factSince',   value: '1950' },
   ];
   return (
-    <div className="border-y border-[var(--fr-border)] bg-[var(--fr-surface-3)]">
+    <div className="snap-section border-y border-[var(--fr-border)] bg-[var(--fr-surface-3)]">
       <div className="max-w-wrap mx-auto px-4 sm:px-6 lg:px-8">
         <dl className="grid grid-cols-2 md:grid-cols-5">
           {facts.map((f, i) => (
@@ -210,7 +210,7 @@ export default function Home() {
         <HeroSection />
 
         {/* ── I tre pilastri ── */}
-        <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8">
+        <section className="snap-section py-12 md:py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-wrap mx-auto">
             <header className="mb-9">
               <span className="fr-eyebrow">{t('hp_platformEyebrow')}</span>

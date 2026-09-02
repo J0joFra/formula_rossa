@@ -170,7 +170,7 @@ export default function NewsSection() {
 
   return (
     <section
-      className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 border-t border-[var(--fr-border)]"
+      className="snap-section py-12 md:py-16 px-4 sm:px-6 lg:px-8 border-t border-[var(--fr-border)]"
       aria-label={t('nw_title')}
     >
       <div className="max-w-wrap mx-auto">

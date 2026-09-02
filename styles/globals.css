@@ -24,6 +24,35 @@ html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+
+  /* Aggancio alle sezioni: chi scorre si ferma sull'inizio della sezione
+     successiva invece che a metà di due.
+     È `proximity` e non `mandatory` di proposito. Con `mandatory` il browser
+     DEVE fermarsi su un punto di aggancio, e le sezioni più alte della
+     finestra — la scheda tecnica, la tabella dei risultati — diventano in
+     parte irraggiungibili: si salta oltre la loro coda. Con `proximity`
+     l'aggancio scatta solo se il punto d'arrivo è già vicino a un inizio di
+     sezione, quindi assiste senza intrappolare.
+     `scroll-padding-top` tiene conto della barra fissa (70px), altrimenti
+     l'aggancio infilerebbe il titolo della sezione sotto il menu. */
+  scroll-snap-type: y proximity;
+  scroll-padding-top: 70px;
+}
+
+/* I punti di aggancio. `.snap-section` va messa solo sulle sezioni di primo
+   livello di una pagina: agganciare qualcosa di annidato manda lo scorrimento
+   avanti e indietro. */
+.snap-section {
+  scroll-snap-align: start;
+  scroll-margin-top: 70px;
+}
+
+/* Chi ha chiesto meno animazioni al sistema operativo di solito lo fa anche
+   per lo scorrimento che si muove da solo: qui l'aggancio si spegne del
+   tutto. Il blocco `prefers-reduced-motion` più in basso toglie già lo
+   scorrimento morbido. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-snap-type: none; }
 }
 
 body {
@@ -181,7 +210,7 @@ td {
   cursor: pointer;
   transition: transform .16s ease, background-color .16s ease, border-color .16s ease, box-shadow .16s ease;
 }
-.btn-primary { background: var(--fr-red); color: #fff; box-shadow: var(--fr-glow-red); }
+.btn-primary { background: var(--fr-red-fill); color: #fff; box-shadow: var(--fr-glow-red); }
 .btn-secondary { background: var(--fr-gold); color: #12181a; }
 .btn-outline { background: transparent; color: var(--fr-red); border-color: var(--fr-red); }
 .btn-outline-light { background: transparent; color: var(--fr-text); border-color: var(--fr-border-strong); }
@@ -427,8 +456,17 @@ input:focus, select:focus, textarea:focus {
    Il primo caso si riconosce dalla coppia di classi sullo stesso elemento e si
    corregge da solo, anche per i bottoni che verranno; per il secondo c'è
    `.text-fixed-white`, da mettere a mano dove serve. */
+/* Bianco su rosso: oltre a tenere il bianco, il fondo passa a `--fr-red-fill`,
+   il rosso pensato per stare sotto il testo bianco. Così ogni bottone già
+   scritto come `bg-[var(--fr-red)] text-white` si sistema da sé, senza dover
+   toccare le pagine una per una. */
 .bg-\[var\(--fr-red\)\].text-white,
+.bg-\[var\(--ferrari-red\)\].text-white,
 .bg-red-600.text-white,
+.bg-red-700.text-white {
+  color: #fff !important;
+  background-color: var(--fr-red-fill) !important;
+}
 .text-fixed-white { color: #fff !important; }
 .text-gray-300,
 .text-zinc-300,

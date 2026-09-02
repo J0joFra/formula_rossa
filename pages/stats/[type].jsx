@@ -13,8 +13,8 @@ const CONFIG = {
     subtitle: 'Race Wins',
     description: 'Ogni volta che un pilota ha tagliato il traguardo in prima posizione con una Ferrari.',
     field: 'wins',
-    color: '#DC0000',
-    colorMuted: 'rgba(220,0,0,0.15)',
+    color: 'var(--fr-red)',
+    colorMuted: 'var(--fr-red-soft)',
     icon: Trophy,
   },
   'podiums': {
@@ -22,8 +22,8 @@ const CONFIG = {
     subtitle: 'Podium Finishes',
     description: 'Piazzamenti tra i primi tre classificati: simbolo di costanza al vertice.',
     field: 'podiums',
-    color: '#EAB308',
-    colorMuted: 'rgba(234,179,8,0.15)',
+    color: 'var(--fr-accent-amber)',
+    colorMuted: 'color-mix(in srgb, var(--fr-accent-amber) 14%, transparent)',
     icon: Star,
   },
   'poles': {
@@ -31,8 +31,8 @@ const CONFIG = {
     subtitle: 'Starting Grid P1',
     description: 'Il miglior tempo assoluto in qualifica: la perfezione espressa in un singolo giro.',
     field: 'poles',
-    color: '#DC0000',
-    colorMuted: 'rgba(220,0,0,0.15)',
+    color: 'var(--fr-red)',
+    colorMuted: 'var(--fr-red-soft)',
     icon: Timer,
   },
   'fastest-laps': {
@@ -40,8 +40,8 @@ const CONFIG = {
     subtitle: 'Fastest Laps',
     description: 'Il giro più rapido in gara: velocità pura della vettura e talento assoluto.',
     field: 'fastest_laps',
-    color: '#EAB308',
-    colorMuted: 'rgba(234,179,8,0.15)',
+    color: 'var(--fr-accent-amber)',
+    colorMuted: 'color-mix(in srgb, var(--fr-accent-amber) 14%, transparent)',
     icon: Zap,
   },
   'points': {
@@ -50,8 +50,8 @@ const CONFIG = {
     description: 'La somma totale dei punti conquistati, calcolata su tutti i sistemi di punteggio F1 dal 1950.',
     field: 'points',
     isSum: true,
-    color: '#DC0000',
-    colorMuted: 'rgba(220,0,0,0.15)',
+    color: 'var(--fr-red)',
+    colorMuted: 'var(--fr-red-soft)',
     icon: Gauge,
   },
   'grand-slams': {
@@ -59,17 +59,20 @@ const CONFIG = {
     subtitle: 'Perfect Weekends',
     description: "L'impresa suprema: Pole, Vittoria, Giro Veloce e in testa dal primo all'ultimo giro.",
     field: 'grand_slams',
-    color: '#EAB308',
-    colorMuted: 'rgba(234,179,8,0.15)',
+    color: 'var(--fr-accent-amber)',
+    colorMuted: 'color-mix(in srgb, var(--fr-accent-amber) 14%, transparent)',
     icon: Award,
   },
 };
 
-/* ─── Medal colors ──────────────────────────────────────────────────────── */
+/* ─── Colori del podio ──────────────────────────────────────────────────────
+   Erano tre hex fissi: `#DC0000` come testo sul fondo scuro scendeva a 3,2:1,
+   e argento e bronzo, chiari, sparivano sul tema chiaro. Ora oro/argento/bronzo
+   passano dai token, che cambiano con il tema. */
 const MEDAL = [
-  { ring: '#DC0000', glow: 'rgba(220,0,0,0.4)',     label: '1°' },
-  { ring: '#C0C0C0', glow: 'rgba(192,192,192,0.3)', label: '2°' },
-  { ring: '#CD7F32', glow: 'rgba(205,127,50,0.3)',  label: '3°' },
+  { ring: 'var(--fr-red)',            label: '1°' },
+  { ring: 'var(--fr-text-muted)',     label: '2°' },
+  { ring: 'var(--fr-accent-orange)',  label: '3°' },
 ];
 
 /* ─── Driver row ────────────────────────────────────────────────────────── */
@@ -111,7 +114,7 @@ function DriverRow({ driver, index, max, cfg }) {
         className="relative shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-xl overflow-hidden transition-transform duration-300 group-hover:scale-105"
         style={{
           border: `2px solid ${medal ? medal.ring : 'var(--fr-border)'}`,
-          boxShadow: medal ? `0 0 16px ${medal.glow}` : 'none',
+          boxShadow: medal ? `0 0 16px color-mix(in srgb, ${medal.ring} 35%, transparent)` : 'none',
         }}
       >
         <img
@@ -136,7 +139,7 @@ function DriverRow({ driver, index, max, cfg }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-3 mb-2 flex-wrap">
           <span
-            className="text-base md:text-lg font-black uppercase tracking-tight group-hover:text-red-400 transition-colors truncate"
+            className="text-base md:text-lg font-black uppercase tracking-tight group-hover:text-[var(--fr-red)] transition-colors truncate"
             style={{ color: medal ? medal.ring : 'var(--fr-text)' }}
           >
             {driver.name}

@@ -198,7 +198,7 @@ export default function Footer() {
           >
             {LEGALI.map((l, i) => (
               <React.Fragment key={l.href}>
-                {i > 0 && <span aria-hidden="true" className="text-[var(--fr-text-dim)]">·</span>}
+                {i > 0 && <span aria-hidden="true" className="text-[var(--fr-text-faint)]">·</span>}
                 <FooterLink
                   href={l.href}
                   label={t(l.key)}
@@ -206,7 +206,7 @@ export default function Footer() {
                 />
               </React.Fragment>
             ))}
-            <span aria-hidden="true" className="text-[var(--fr-text-dim)]">·</span>
+            <span aria-hidden="true" className="text-[var(--fr-text-faint)]">·</span>
             <button
               type="button"
               onClick={() => window.dispatchEvent(new Event('open-cookie-settings'))}
