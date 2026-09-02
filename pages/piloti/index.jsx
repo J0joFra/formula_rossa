@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useState, useMemo, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import { driverPhoto, inquadratura } from '../../lib/driverPhoto';
 import PageShell from '../../components/ui/PageShell';
 import { getFlagCode } from '../../lib/flags';
 
@@ -45,9 +46,16 @@ const ERA_META = {
 const alone = (colore, pct = 14) => `color-mix(in srgb, ${colore} ${pct}%, transparent)`;
  
 // Iniziali stilizzate come avatar
-function DriverAvatar({ firstName, lastName, number, size = 64, championships = 0 }) {
+function DriverAvatar({ driverId, firstName, lastName, number, size = 64, championships = 0 }) {
   const initials = `${firstName?.[0]||''}${lastName?.[0]||''}`.toUpperCase();
   const isChamp  = championships > 0;
+  const foto     = driverPhoto(driverId, `${firstName || ''} ${lastName || ''}`);
+  /* La foto può mancare — l'archivio ha 900 piloti e le immagini sono una
+     settantina — e può anche non caricarsi: in entrambi i casi restano le
+     iniziali, che stanno sotto e si vedono appena l'immagine sparisce. */
+  const [rotta, setRotta] = useState(false);
+  const mostraFoto = foto && !rotta;
+
   return (
     <div style={{
       width: size, height: size, borderRadius: '50%', flexShrink: 0,
@@ -56,14 +64,30 @@ function DriverAvatar({ firstName, lastName, number, size = 64, championships = 
         : 'linear-gradient(135deg, var(--fr-surface-2) 0%, var(--fr-surface-3) 100%)',
       border: isChamp ? '2px solid rgba(220,38,38,0.6)' : '1px solid var(--fr-border)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      position: 'relative',
+      position: 'relative', overflow: 'visible',
       boxShadow: isChamp ? '0 0 16px rgba(220,38,38,0.25)' : 'none',
     }}>
       <span style={{
-        fontSize: size * 0.3, fontWeight: '900', fontFamily: 'monospace',
-        color: isChamp ? 'var(--fr-text)' : 'var(--fr-text-faint)',
-        letterSpacing: '-1px',
-      }}>{initials || '?'}</span>
+        position: 'absolute', inset: 0, borderRadius: '50%', overflow: 'hidden',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <span style={{
+          fontSize: size * 0.3, fontWeight: '900', fontFamily: 'monospace',
+          color: isChamp ? 'var(--fr-text)' : 'var(--fr-text-faint)',
+          letterSpacing: '-1px',
+        }}>{initials || '?'}</span>
+
+        {mostraFoto && (
+          <img
+            src={foto}
+            alt=""
+            loading="lazy"
+            onError={() => setRotta(true)}
+            style={inquadratura(foto)}
+          />
+        )}
+      </span>
+
       {number && (
         <span style={{
           position: 'absolute', bottom: '-4px', right: '-4px',
@@ -73,7 +97,7 @@ function DriverAvatar({ firstName, lastName, number, size = 64, championships = 
           fontSize: size * 0.18, fontWeight: '800', fontFamily: 'monospace',
           padding: '1px 4px', borderRadius: '3px',
           border: '1px solid var(--fr-border)',
-          lineHeight: 1.4,
+          lineHeight: 1.4, zIndex: 1,
         }}>{number}</span>
       )}
     </div>
@@ -422,6 +446,7 @@ function DriverRow({ driver: d, rank, sortBy }) {
         {/* Pilota info */}
         <div style={{ display:'flex', alignItems:'center', gap:'12px', minWidth:0 }}>
           <DriverAvatar
+            driverId={d.id}
             firstName={d.first_name} lastName={d.last_name}
             number={d.permanent_number}
             championships={d.total_championship_wins}

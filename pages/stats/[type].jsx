@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { User, Trophy, Timer, Zap, Star, Award, Gauge } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabaseClient';
+import { driverPhoto, inquadratura } from '../../lib/driverPhoto';
 
 /* ─── Config — ora solo metadati, niente query ──────────────────────────── */
 const CONFIG = {
@@ -77,6 +78,8 @@ const MEDAL = [
 
 /* ─── Driver row ────────────────────────────────────────────────────────── */
 function DriverRow({ driver, index, max, cfg }) {
+  const foto = driverPhoto(driver.id, driver.name);
+  const [rotta, setRotta] = useState(false);
   const pct = max > 0 ? (driver.count / max) * 100 : 0;
   const medal = MEDAL[index] ?? null;
   const displayValue = cfg.isSum
@@ -117,22 +120,15 @@ function DriverRow({ driver, index, max, cfg }) {
           boxShadow: medal ? `0 0 16px color-mix(in srgb, ${medal.ring} 35%, transparent)` : 'none',
         }}
       >
-        <img
-          src={`/data/ferrari-drivers/${driver.id}.jpg`}
-          alt={`Foto di ${driver.name}`}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-            e.currentTarget.nextSibling.style.display = 'flex';
-          }}
-        />
-        <div
-          className="absolute inset-0 items-center justify-center bg-[var(--fr-surface-2)]"
-          style={{ display: 'none' }}
-          aria-hidden="true"
-        >
+        {/* La sagoma sta sotto e resta se la foto manca o non carica: prima
+            l'`onError` la scopriva toccando `nextSibling.style`, cioè il DOM
+            modificato alle spalle di React. */}
+        <span className="absolute inset-0 grid place-items-center bg-[var(--fr-surface-2)]" aria-hidden="true">
           <User className="w-5 h-5 text-[var(--fr-text-faint)]" />
-        </div>
+        </span>
+        {foto && !rotta && (
+          <img src={foto} alt="" loading="lazy" onError={() => setRotta(true)} style={inquadratura(foto)} />
+        )}
       </div>
 
       {/* Name + progress + years */}
