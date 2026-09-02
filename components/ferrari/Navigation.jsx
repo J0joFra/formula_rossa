@@ -12,8 +12,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
 import LanguageSwitcher from '../ui/LanguageSwitcher';
 import { useI18n } from '../../lib/i18n';
+import { GRIDUP_URL } from '../../lib/gridup';
 
-export const GRIDUP_URL = 'https://gridup-f1.web.app';
+export { GRIDUP_URL } from '../../lib/gridup';
 
 /* Il menu contiene solo pagine che esistono davvero: una voce che porta a una
    pagina inesistente o a un vicolo cieco è peggio di una voce assente. */

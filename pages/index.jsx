@@ -11,6 +11,7 @@ import GridUpPromo from '../components/ferrari/GridUpPromo';
 import Footer from '../components/ferrari/Footer';
 import SEO from '../components/seo';
 import { useI18n } from '../lib/i18n';
+import { GRIDUP_URL } from '../lib/gridup';
 
 /* I tre pilastri: stessa struttura del menu, così la home spiega il sito.
    Qui restano solo i dati che non cambiano con la lingua — icona, colore,
@@ -186,8 +187,10 @@ export default function Home() {
     operatingSystem: 'Android, Web',
     applicationCategory: 'SportsApplication',
     description: 'Calcola i punti necessari per vincere il Campionato del Mondo di F1: scenari in tempo reale, classifiche piloti e costruttori e confronti tra piloti.',
-    url: 'https://gridup-f1.web.app',
-    installUrl: 'https://play.google.com/store/apps/details?id=com.gridup.app',
+    /* `url` è la pagina canonica dell'app: ora è la scheda dello store, la
+       stessa a cui puntano i link del sito. */
+    url: GRIDUP_URL,
+    installUrl: GRIDUP_URL,
     inLanguage: 'it',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
     author: { '@type': 'Organization', name: 'Formula Rossa', url: 'https://formula-rossa.it' },

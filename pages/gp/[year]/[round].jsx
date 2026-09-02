@@ -21,7 +21,7 @@ import {
 } from '../../../lib/f1/gp';
 import { getFlagCode } from '../../../lib/flags';
 
-const GRIDUP_URL = 'https://gridup-f1.web.app';
+import { GRIDUP_URL } from '../../../lib/gridup';
 
 const SESSION_LABEL = {
   gara:       "Ordine d'arrivo",

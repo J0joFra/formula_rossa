@@ -21,6 +21,7 @@ import {
   Instagram, Twitter, Youtube, Linkedin, MessageCircle, Heart,
 } from 'lucide-react';
 import { useI18n } from '../../lib/i18n';
+import { GRIDUP_URL } from '../../lib/gridup';
 
 const SEZIONI = [
   {
@@ -45,7 +46,7 @@ const SEZIONI = [
       { key: 'ft_fanzone', href: '/fanzone' },
       { key: 'ft_about',   href: '/about' },
       { key: 'ft_contact', href: 'mailto:info@formula-rossa.it' },
-      { key: 'nav_app',    href: 'https://gridup-f1.web.app' },
+      { key: 'nav_app',    href: GRIDUP_URL },
     ],
   },
 ];

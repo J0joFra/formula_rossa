@@ -3,7 +3,13 @@
  * components/ferrari/GridUpPromo.jsx
  * Sezione "scopri l'app" — promuove GridUp, l'app companion di Formula Rossa.
  * GridUp: calcolatore del Mondiale F1 (punti per il titolo, scenari, classifiche).
- * Web app: https://gridup-f1.web.app · Android: com.gridup.app
+ *
+ * I due bottoni si sono scambiati i ruoli: il principale era "Apri l'app" e
+ * portava alla web app, quello di Google Play era il secondario. Ma chi arriva
+ * qui vuole installare l'app, e la web app rimbalzava su un altro indirizzo
+ * ancora — due passaggi per finire dove non si voleva. Ora il Play Store è il
+ * bottone pieno e la web app resta come alternativa, che su desktop serve
+ * ancora: lì un link allo store non installa niente.
  */
 
 import React from 'react';
@@ -14,9 +20,7 @@ import {
 } from 'lucide-react';
 import { useI18n } from '../../lib/i18n';
 
-const GRIDUP_WEB_URL = 'https://gridup-f1.web.app';
-const GRIDUP_PLAY_URL = 'https://play.google.com/store/apps/details?id=com.gridup.app';
-const GRIDUP_ICON_URL = 'https://gridup-f1.web.app/icons/icon-512.png';
+import { GRIDUP_PLAY_URL, GRIDUP_WEB_URL, GRIDUP_ICON_URL } from '../../lib/gridup';
 
 /* Solo icona e chiavi: i testi erano scritti in italiano dentro l'array,
    quindi restavano in italiano anche col sito in un'altra lingua. */
@@ -95,28 +99,28 @@ export default function GridUpPromo() {
               {/* CTA buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <a
-                  href={GRIDUP_WEB_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-flex items-center justify-center gap-2 bg-[var(--fr-red)] text-white px-7 py-3.5 rounded-xl font-black text-[11px] uppercase tracking-[0.14em] transition-all duration-200 hover:bg-[var(--fr-red-ink)] hover:-translate-y-0.5 hover:shadow-[var(--fr-glow-red)]"
-                >
-                  <Smartphone className="w-4 h-4" aria-hidden="true" />
-                  {t('gu_open')}
-                  <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
-                </a>
-
-                <a
                   href={GRIDUP_PLAY_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={t('gu_playAria')}
-                  className="inline-flex items-center justify-center gap-2.5 bg-transparent text-[var(--text-primary)] px-6 py-3.5 rounded-xl font-bold border-2 border-[var(--border-strong)] transition-all duration-200 hover:border-[var(--fr-red)] hover:-translate-y-0.5"
+                  className="group inline-flex items-center justify-center gap-2.5 bg-[var(--fr-red)] text-white px-6 py-3.5 rounded-xl transition-all duration-200 hover:bg-[var(--fr-red-ink)] hover:-translate-y-0.5 hover:shadow-[var(--fr-glow-red)]"
                 >
                   <Play className="w-4 h-4 fill-current" aria-hidden="true" />
                   <span className="text-left leading-none">
-                    <span className="block text-[8px] uppercase tracking-widest text-[var(--text-tertiary)]">{t('gu_getOn')}</span>
+                    <span className="block text-[8px] uppercase tracking-widest opacity-80">{t('gu_getOn')}</span>
                     <span className="block text-sm font-black">Google Play</span>
                   </span>
+                  <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+                </a>
+
+                <a
+                  href={GRIDUP_WEB_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm border-2 border-[var(--fr-border-strong)] text-[var(--fr-text)] transition-all duration-200 hover:border-[var(--fr-red)] hover:-translate-y-0.5"
+                >
+                  <Smartphone className="w-4 h-4" aria-hidden="true" />
+                  {t('gu_openWeb')}
                 </a>
               </div>
 
