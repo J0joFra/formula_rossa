@@ -472,10 +472,35 @@ input:focus, select:focus, textarea:focus {
 .text-zinc-300,
 .text-zinc-400,
 .text-gray-400    { color: var(--fr-text-muted) !important; }
+/* 500 e 600 finiscono entrambi su `faint`. Prima 600 andava su `dim`, che non
+   è un livello di testo: è la tinta di separatori e cornici, e sotto i 3:1 di
+   contrasto. I quattro gradini del grigio Tailwind non hanno quattro gradini
+   leggibili in cui atterrare. */
 .text-zinc-500,
-.text-gray-500    { color: var(--fr-text-faint) !important; }
+.text-gray-500,
 .text-zinc-600,
-.text-gray-600    { color: var(--fr-text-dim) !important; }
+.text-gray-600    { color: var(--fr-text-faint) !important; }
+
+/* Le tinte colorate delle pagine più vecchie — soprattutto i giochi — sui
+   livelli 300-700 di Tailwind. Erano scelte per un fondo scuro: sul tema
+   chiaro un `text-yellow-400` su bianco sta a 1,7:1. Qui atterrano sulla scala
+   d'accento del design system, che cambia con il tema. */
+.text-red-300, .text-red-400, .text-red-500,
+.text-red-600, .text-red-700        { color: var(--fr-red) !important; }
+.text-yellow-300, .text-yellow-400, .text-yellow-500, .text-yellow-600,
+.text-amber-300, .text-amber-400, .text-amber-500   { color: var(--fr-accent-amber) !important; }
+.text-green-300, .text-green-400, .text-green-500,
+.text-emerald-300, .text-emerald-400, .text-emerald-500 { color: var(--fr-accent-green) !important; }
+.text-orange-300, .text-orange-400, .text-orange-500 { color: var(--fr-accent-orange) !important; }
+.text-blue-300, .text-blue-400, .text-blue-500,
+.text-indigo-400, .text-indigo-500  { color: var(--fr-accent-blue) !important; }
+.text-violet-400, .text-purple-400  { color: var(--fr-accent-violet) !important; }
+
+/* I fondi rossi pieni: sopra ci va quasi sempre il bianco, quindi prendono il
+   rosso pensato per stare sotto al bianco. */
+.bg-red-400, .bg-red-500, .bg-red-600,
+.bg-red-700, .bg-red-900            { background-color: var(--fr-red-fill) !important; }
+.border-red-600, .border-red-500    { border-color: var(--fr-red) !important; }
 
 /* Bordi */
 .border-zinc-800,

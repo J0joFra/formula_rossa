@@ -1,3 +1,4 @@
+'use client';
 // components/ferrari/Navigation.jsx
 // Menu: Archivio ▾ · Stagione ▾ · News · Gioca + app GridUp.
 import { useState, useEffect, useRef } from 'react';
