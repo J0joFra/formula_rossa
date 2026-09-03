@@ -46,3 +46,6 @@ Allow: /
 Disallow: /api/
 
 Sitemap: https://formula-rossa.it/sitemap.xml
+
+# Il feed delle news, per chi lo cerca qui invece che nel <head>.
+# https://formula-rossa.it/news/feed.xml

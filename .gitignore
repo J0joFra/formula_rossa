@@ -35,3 +35,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# log del bot news, generato a ogni esecuzione
+f1_bot.log

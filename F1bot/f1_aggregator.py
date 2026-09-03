@@ -520,6 +520,63 @@ def publish_to_firestore(article: dict, db, mode: str = "normale") -> bool:
         log.error(f"Errore Firestore: {e}")
         return False
 
+# ─── RIPUBBLICAZIONE SU MEDIUM ─────────────────────────────────────────────────
+
+SITO_BASE = "https://formula-rossa.it"
+MEDIUM_IMPORT = "https://medium.com/p/import"
+
+
+def promemoria_medium(article: dict) -> str:
+    """
+    Prepara il promemoria per ripubblicare l'articolo su Medium.
+
+    Non lo pubblica: non può. Medium ha chiuso l'API alle nuove integrazioni il
+    1° gennaio 2025 e non rilascia più integration token, quindi non esiste un
+    modo lecito di postare da uno script. Quello che resta è lo strumento di
+    import di Medium, che prende l'indirizzo di un articolo, ne ricrea una
+    bozza e — questa è la parte che conta — imposta da solo il rel=canonical
+    verso l'originale e retrodata il pezzo. Il sito non viene quindi penalizzato
+    per contenuto duplicato: l'import è il modo che Medium stesso indica per
+    ripubblicare, e fa meglio di quanto farebbe l'API.
+
+    Resta un'azione manuale, ed è opportuno che lo sia: questi articoli li
+    scrive un modello a partire dai feed di altre testate, e le regole di Medium
+    sul contenuto generato e sulla pubblicazione automatica di massa non sono
+    un dettaglio da aggirare. Una bozza che rileggi prima di pubblicare è la
+    differenza fra ripubblicare e spammare.
+    """
+    url = f"{SITO_BASE}/news/{article['slug']}"
+    return (
+        f"\n  Articolo:  {url}"
+        f"\n  Ripubblica su Medium: {MEDIUM_IMPORT}"
+        f"\n  (incolla l'indirizzo qui sopra, rileggi la bozza, poi pubblica)"
+    )
+
+
+def scrivi_riepilogo_azione(article: dict) -> None:
+    """
+    Su GitHub Actions scrive il promemoria nel riepilogo del job.
+
+    Il log di un workflow lo apre chi sta cercando un errore; il riepilogo
+    arriva invece in cima alla pagina della run e nella notifica. Fuori da
+    Actions la variabile non esiste e la funzione non fa niente.
+    """
+    percorso = os.getenv("GITHUB_STEP_SUMMARY")
+    if not percorso:
+        return
+    url = f"{SITO_BASE}/news/{article['slug']}"
+    try:
+        with open(percorso, "a", encoding="utf-8") as f:
+            f.write(
+                f"### {article['title']}\n\n"
+                f"- Online: <{url}>\n"
+                f"- [Ripubblica su Medium]({MEDIUM_IMPORT}) — incolla `{url}`, "
+                f"rileggi la bozza, poi pubblica\n\n"
+            )
+    except OSError as e:
+        log.warning(f"Riepilogo non scritto: {e}")
+
+
 # ─── PULIZIA ARCHIVIO ──────────────────────────────────────────────────────────
 
 def purge_old_articles(db, days: int = RETENTION_DAYS) -> int:
@@ -592,7 +649,8 @@ def run(mode: str = "normale", gp_name: str = ""):
         for art in articles:
             seen.add(article_id(art["url"]))
         save_seen(seen)
-        log.info("✅ Ciclo completato!")
+        log.info("✅ Ciclo completato!" + promemoria_medium(digest))
+        scrivi_riepilogo_azione(digest)
     else:
         log.error("❌ Pubblicazione fallita.")
 
