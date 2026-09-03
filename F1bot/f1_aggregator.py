@@ -525,10 +525,24 @@ def publish_to_firestore(article: dict, db, mode: str = "normale") -> bool:
 SITO_BASE = "https://formula-rossa.it"
 MEDIUM_IMPORT = "https://medium.com/p/import"
 
+# Quali articoli vale la pena ripubblicare su Medium.
+#
+# Solo il recap del lunedì. Gli altri quattro sono legati al momento:
+# l'anteprima del venerdì è già vecchia la domenica, le qualifiche e il
+# pre-gara durano poche ore. Su Medium, dove si arriva da una ricerca o dal
+# feed dei suggerimenti giorni dopo, un pezzo scaduto non lo legge nessuno e
+# intanto diluisce il profilo. Il recap invece è il pezzo che tira le somme:
+# regge anche a distanza, ed è l'unico che qualcuno cercherebbe.
+MODI_DA_RIPUBBLICARE = {"recap"}
 
-def promemoria_medium(article: dict) -> str:
+
+def promemoria_medium(article: dict, mode: str) -> str:
     """
     Prepara il promemoria per ripubblicare l'articolo su Medium.
+
+    Torna una stringa vuota per le modalità che non si ripubblicano: il
+    promemoria deve comparire quando c'è qualcosa da fare, altrimenti dopo tre
+    weekend non lo si legge più.
 
     Non lo pubblica: non può. Medium ha chiuso l'API alle nuove integrazioni il
     1° gennaio 2025 e non rilascia più integration token, quindi non esiste un
@@ -545,6 +559,8 @@ def promemoria_medium(article: dict) -> str:
     un dettaglio da aggirare. Una bozza che rileggi prima di pubblicare è la
     differenza fra ripubblicare e spammare.
     """
+    if mode not in MODI_DA_RIPUBBLICARE:
+        return ""
     url = f"{SITO_BASE}/news/{article['slug']}"
     return (
         f"\n  Articolo:  {url}"
@@ -553,9 +569,9 @@ def promemoria_medium(article: dict) -> str:
     )
 
 
-def scrivi_riepilogo_azione(article: dict) -> None:
+def scrivi_riepilogo_azione(article: dict, mode: str) -> None:
     """
-    Su GitHub Actions scrive il promemoria nel riepilogo del job.
+    Su GitHub Actions scrive nel riepilogo del job cosa è stato pubblicato.
 
     Il log di un workflow lo apre chi sta cercando un errore; il riepilogo
     arriva invece in cima alla pagina della run e nella notifica. Fuori da
@@ -565,14 +581,15 @@ def scrivi_riepilogo_azione(article: dict) -> None:
     if not percorso:
         return
     url = f"{SITO_BASE}/news/{article['slug']}"
+    righe = [f"### {article['title']}", "", f"- Online: <{url}>"]
+    if mode in MODI_DA_RIPUBBLICARE:
+        righe.append(
+            f"- [Ripubblica su Medium]({MEDIUM_IMPORT}) — incolla `{url}`, "
+            f"rileggi la bozza, poi pubblica"
+        )
     try:
         with open(percorso, "a", encoding="utf-8") as f:
-            f.write(
-                f"### {article['title']}\n\n"
-                f"- Online: <{url}>\n"
-                f"- [Ripubblica su Medium]({MEDIUM_IMPORT}) — incolla `{url}`, "
-                f"rileggi la bozza, poi pubblica\n\n"
-            )
+            f.write("\n".join(righe) + "\n\n")
     except OSError as e:
         log.warning(f"Riepilogo non scritto: {e}")
 
@@ -649,8 +666,8 @@ def run(mode: str = "normale", gp_name: str = ""):
         for art in articles:
             seen.add(article_id(art["url"]))
         save_seen(seen)
-        log.info("✅ Ciclo completato!" + promemoria_medium(digest))
-        scrivi_riepilogo_azione(digest)
+        log.info("✅ Ciclo completato!" + promemoria_medium(digest, mode))
+        scrivi_riepilogo_azione(digest, mode)
     else:
         log.error("❌ Pubblicazione fallita.")
 

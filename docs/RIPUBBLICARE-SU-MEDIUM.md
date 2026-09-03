@@ -16,10 +16,24 @@ pezzo. Quindi Google continua a considerare formula-rossa.it la fonte, e il
 sito non viene penalizzato per contenuto duplicato — che è il rischio vero di
 ripubblicare lo stesso testo in due posti.
 
+## Cosa finisce su Medium
+
+**Solo il recap del lunedì** (`MODI_DA_RIPUBBLICARE` in `f1_aggregator.py`).
+
+Gli altri quattro pezzi del weekend sono legati al momento: l'anteprima del
+venerdì è già vecchia la domenica, qualifiche e pre-gara durano poche ore. Su
+Medium ci si arriva da una ricerca o dal feed dei suggerimenti, spesso giorni
+dopo: un pezzo scaduto non lo legge nessuno e intanto diluisce il profilo. Il
+recap invece tira le somme del weekend, regge a distanza, ed è l'unico che
+qualcuno cercherebbe davvero.
+
+Per cambiare idea basta aggiungere una modalità a quell'insieme.
+
 ## Come funziona adesso
 
-Ogni volta che il bot pubblica un articolo, il workflow scrive in cima alla
-pagina della run (il *job summary*, quello che arriva anche nella notifica):
+Il bot scrive sempre l'indirizzo dell'articolo pubblicato in cima alla pagina
+della run (il *job summary*, quello che arriva anche nella notifica). Quando
+l'articolo è un recap, aggiunge il link per ripubblicarlo:
 
 > ### La Ferrari a Monza: cosa dicono i tempi
 > - Online: https://formula-rossa.it/news/ferrari-monza-2026-analisi
@@ -27,6 +41,7 @@ pagina della run (il *job summary*, quello che arriva anche nella notifica):
 >   rileggi la bozza, poi pubblica
 
 Tre tocchi dal telefono: apri la notifica, apri il link di import, incolla.
+Una volta a weekend di gara, non cinque.
 
 Lo stesso promemoria finisce anche nel log del bot, per quando lo lanci a mano.
 
@@ -56,9 +71,8 @@ Una bozza che rileggi prima di pubblicare costa un minuto ed è la differenza
 fra ripubblicare e spammare. Vale anche per il merito: se il modello ha scritto
 una sciocchezza, te ne accorgi prima che stia sotto il tuo nome.
 
-Un consiglio pratico: pubblica su Medium **una selezione**, non tutto. Il
-recap del lunedì e l'analisi post-gara reggono da soli; l'anteprima del venerdì
-invecchia in due giorni e su Medium non la leggerà nessuno.
+Vale anche il contrario: un solo pezzo a settimana, scelto e riletto, è un
+profilo che ha senso. Cinque digest automatici a weekend sono un feed.
 
 ## Se un giorno vuoi l'automazione completa
 
