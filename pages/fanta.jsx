@@ -75,8 +75,13 @@ const VOCI_REGOLE = [
   ['Pilota del giorno', `+${REGOLE.pilotaDelGiorno}`, 'Il voto del pubblico ti dà ragione.'],
   ['Ritiri esatti', `+${REGOLE.ritiri.esatti}`, 'Il numero preciso di chi non arriva in fondo.'],
   ['Ritiri per uno', `+${REGOLE.ritiri.scartoUno}`, 'Sbagliato di uno.'],
-  ['Podio fuori dai punti', `${REGOLE.malus.podioFuoriDaiPunti}`, 'Un pilota che avevi sul podio finisce fuori dai dieci.'],
+  ['Podio fuori dai punti', `${REGOLE.malus.podioFuoriDaiPunti}`, 'Per ogni pilota che avevi sul podio e finisce fuori dai dieci.'],
   ['Vincitore fuori dai cinque', `${REGOLE.malus.vincitoreFuoriDaiCinque}`, 'Il tuo vincitore non arriva nemmeno quinto.'],
+  ['Podio tutto sbagliato', `${REGOLE.malus.podioTuttoSbagliato}`, 'Nessuno dei tuoi tre sale sul podio.'],
+  ['Pilota del giorno fuori dai punti', `${REGOLE.malus.pilotaDelGiornoFuoriDaiPunti}`, 'Quello che hai scelto chiude fuori dai dieci, o si ritira.'],
+  ['Rimonta finita male', `${REGOLE.malus.scommessaFallita}`, `Avevi messo un pilota almeno quattro posizioni davanti alla sua griglia e lui ne perde. Al massimo ${REGOLE.malus.scommesseFalliteMax}.`],
+  ['Ritiri lontanissimi', `${REGOLE.malus.ritiriLontani}`, 'Sbagliato di quattro o più: il numero non è un biglietto della lotteria.'],
+  ['Schedina ricopiata', `${REGOLE.malus.grigliaRicopiata}`, `${REGOLE.malus.grigliaRicopiataDa} piloti o più lasciati esattamente dove partono. Qui si prevede la gara, non si ricopia la griglia.`],
 ];
 
 export default function FantaPage() {
@@ -85,7 +90,7 @@ export default function FantaPage() {
 
   const [dati, setDati] = useState(null);
   const [errore, setErrore] = useState(null);
-  const [round, setRound] = useState(null);
+  const [ricarica, setRicarica] = useState(0);
 
   const [top10, setTop10] = useState([]);
   const [pilotaDelGiorno, setPilotaDelGiorno] = useState(null);
@@ -99,17 +104,17 @@ export default function FantaPage() {
 
   const conto = useContoAllaRovescia(dati?.scadenza);
 
-  /* Il Gran Premio: senza round scelto decide il server qual è quello in
-     corso, così il link `/fanta` funziona tutto l'anno. */
+  /* Il Gran Premio non si sceglie: è quello in corso, e lo decide il server.
+     Poter compilare in anticipo tutte le gare della stagione vorrebbe dire
+     giocare a caso venti volte in una sera invece di guardare le qualifiche. */
   useEffect(() => {
     if (status === 'loading') return undefined;
     let vivo = true;
     setErrore(null);
-    chiedi(`/api/fanta/gp${round ? `?round=${round}` : ''}`)
+    chiedi('/api/fanta/gp')
       .then(d => {
         if (!vivo) return;
         setDati(d);
-        setRound(d.gara.round);
         setTop10(d.miaPrevisione?.top10 || []);
         setPilotaDelGiorno(d.miaPrevisione?.pilotaDelGiorno || null);
         setRitiri(d.miaPrevisione?.ritiri ?? 3);
@@ -117,7 +122,7 @@ export default function FantaPage() {
       })
       .catch(e => vivo && setErrore(e.message));
     return () => { vivo = false; };
-  }, [round, status]);
+  }, [ricarica, status]);
 
   useEffect(() => {
     let vivo = true;
@@ -206,7 +211,7 @@ export default function FantaPage() {
         <PageError
           title="Fanta non disponibile"
           message={errore}
-          onRetry={() => setRound(r => (r === null ? null : r))}
+          onRetry={() => setRicarica(n => n + 1)}
         />
       )}
 
@@ -220,20 +225,9 @@ export default function FantaPage() {
             title={dati.gara.nome}
             icon={Timer}
             actions={
-              <label className="flex items-center gap-2 text-xs">
-                <span className="sr-only">Scegli il Gran Premio</span>
-                <select
-                  value={dati.gara.round}
-                  onChange={e => setRound(Number(e.target.value))}
-                  className="px-2.5 py-1.5 rounded-[9px] border border-[var(--fr-border)] bg-[var(--fr-surface-2)] text-[var(--fr-text)]"
-                >
-                  {(dati.calendario || []).map(g => (
-                    <option key={g.round} value={g.round}>
-                      {g.round}. {g.nome}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <span className="text-[11px] font-semibold uppercase tracking-widest text-[var(--fr-text-faint)]">
+                Round {dati.gara.round} · {dati.gara.year}
+              </span>
             }
           >
             <div className="px-5 py-4 flex flex-wrap items-center justify-between gap-4 border-b border-[var(--fr-border)]">

@@ -1,24 +1,22 @@
 /**
- * GET /api/fanta/gp?year=2026&round=3
- * Tutto quello che serve alla pagina di gioco per un Gran Premio: scadenza,
- * griglia fra cui scegliere, e il pronostico già salvato di chi guarda.
+ * GET /api/fanta/gp
+ * Tutto quello che serve alla pagina di gioco: scadenza, griglia fra cui
+ * scegliere, e il pronostico già salvato di chi guarda.
+ *
+ * Il Gran Premio non si sceglie: è sempre quello in corso. Poter giocare le
+ * gare di giugno a marzo vorrebbe dire compilare venti schedine a caso in una
+ * sera e aspettare che qualcuna paghi — che è l'opposto di guardare le
+ * qualifiche e farsi un'idea. Una gara alla volta, quella che si corre adesso.
  */
 
 import { route } from '../../../lib/fanta/guardia';
 import {
-  caricaGara, caricaGriglia, gareAperte, scadenza, leggiPrevisione,
-  prossimaGara, calendario,
+  caricaGriglia, gareAperte, scadenza, leggiPrevisione, prossimaGara,
 } from '../../../lib/fanta/server';
 
 export default route('GET', async (req, res, utente) => {
-  /* Senza round si gioca sul Gran Premio corrente: la pagina si apre da un
-     link semplice (`/fanta`) e ci pensa il server a dire quale sia. */
-  const year = Number(req.query.year) || new Date().getUTCFullYear();
-  const chiesto = Number(req.query.round);
-  const race = Number.isInteger(chiesto)
-    ? await caricaGara(year, chiesto)
-    : await prossimaGara(year);
-  const round = race.round;
+  const race = await prossimaGara(Number(req.query.year) || new Date().getUTCFullYear());
+  const { year, round } = race;
   const aperto = gareAperte(race);
 
   return res.status(200).json({
@@ -33,6 +31,5 @@ export default route('GET', async (req, res, utente) => {
     griglia: await caricaGriglia(race),
     // Il proprio pronostico si rilegge sempre; quello degli altri mai da qui.
     miaPrevisione: utente ? await leggiPrevisione(utente.id, year, round) : null,
-    calendario: await calendario(year),
   });
 }, { richiediLogin: false });

@@ -7,6 +7,10 @@ server sul risultato ufficiale in archivio.
 
 1. Corse le qualifiche, la griglia è nota. Chi gioca mette in fila i primi
    dieci, sceglie il pilota del giorno e dice quanti ritiri ci saranno.
+   Si gioca **solo il Gran Premio in corso**: non c'è un selettore delle gare
+   future, e il server rifiuta un pronostico per un round diverso da quello
+   corrente. Compilare in anticipo tutte le domeniche della stagione sarebbe
+   giocare a caso venti volte in una sera, che è l'opposto del punto.
 2. Le giocate si chiudono allo start (`race.date` + `race.time`, in UTC).
 3. A gara conclusa il punteggio viene calcolato dal server e finisce in
    classifica: di stagione, di gara, e nelle leghe private.
@@ -16,6 +20,15 @@ quindi vincitore e podio pesano meno di quanto peserebbero al buio, e la voce
 che vale di più è la "scommessa" — un pilota messo almeno quattro posizioni
 davanti a dove parte, che poi ci arriva davvero. Il massimo teorico è 196
 punti a gara; una buona giocata ne fa fra 60 e 100.
+
+I malus seguono un criterio solo: si paga per le scelte che si è deciso di
+fare, non per aver sbagliato una posizione — sbagliare non porta punti, ed è
+già abbastanza. Si paga quindi per il podio letto al contrario, per il pilota
+del giorno scelto a caso, per la rimonta finita peggio della griglia, per il
+numero di ritiri sparato a occhio, e — il più pesante, −8 — per la **schedina
+ricopiata dalla griglia**: otto o più piloti lasciati esattamente dove
+partono. È l'unico malus che non dipende da come è andata la gara, perché non
+punisce un errore ma il non aver giocato.
 
 ## I pezzi
 
