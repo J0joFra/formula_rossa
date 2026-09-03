@@ -128,7 +128,7 @@ export default function GpIndex() {
       <PageHeader
         eyebrow="Stagione · Gara per gara"
         title="Analisi"
-        accent="GP"
+        accent="Gran Premi"
         subtitle="Ogni Gran Premio nel dettaglio: chi ha guadagnato posizioni dalla griglia all'arrivo, i punti raccolti e com'è andata la Ferrari."
         breadcrumb={[{ label: 'Stagione' }, { label: 'Analisi GP' }]}
         actions={picker}

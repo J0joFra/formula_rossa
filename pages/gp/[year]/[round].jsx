@@ -8,7 +8,7 @@
  * URL leggibile e stabile: /gp/2024/16.
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Trophy, TrendingUp, Smartphone, ArrowUpRight } from 'lucide-react';
@@ -20,6 +20,7 @@ import {
   ferrariSummary, retirementSummary,
 } from '../../../lib/f1/gp';
 import { getFlagCode } from '../../../lib/flags';
+import { buildBreadcrumbs } from '../../../components/seo';
 
 import { GRIDUP_URL } from '../../../lib/gridup';
 
@@ -206,82 +207,64 @@ function SessionTabs({ tabs, active, onChange }) {
   );
 }
 
-export default function GpDetail() {
+export async function getStaticPaths() {
+  /* Milleduecento Gran Premi: costruirli tutti a ogni deploy costerebbe
+     minuti per un HTML identico a quello che esce alla prima richiesta. */
+  return { paths: [], fallback: 'blocking' };
+}
+
+export async function getStaticProps({ params }) {
+  const year = Number(params.year);
+  const round = Number(params.round);
+  if (!Number.isInteger(year) || !Number.isInteger(round)) return { notFound: true };
+
+  try {
+    const race = await getRace(year, round);
+    if (!race) return { notFound: true, revalidate: 300 };
+
+    // Le sessioni sono indipendenti fra loro: si leggono in parallelo.
+    const [results, quali, sprint, extras] = await Promise.all([
+      getRaceResults(race.id),
+      getQualifying(race.id),
+      getSprint(race.id),
+      getRaceExtras(race.id),
+    ]);
+
+    /* Un nome solo per tutte le sessioni e per i riquadri: in qualifica può
+       comparire chi non si è qualificato, e giro veloce, pilota del giorno e
+       soste possono riguardare chi manca dall'ordine d'arrivo. */
+    const names = await getNames([
+      ...results,
+      ...(quali?.rows || []),
+      ...sprint,
+      ...(extras.pitStops?.rows || []),
+      ...[extras.fastestLap, extras.driverOfTheDay].filter(Boolean),
+    ]);
+
+    /* Una gara già corsa non cambia più: si ricontrolla una volta al giorno.
+       Quella in arrivo, ogni cinque minuti — è la domenica in cui il
+       risultato arriva, e una pagina ferma per un giorno sarebbe inutile. */
+    const passata = race.date && new Date(race.date) < new Date();
+
+    return {
+      props: { race, results, quali, sprint, extras, names },
+      revalidate: passata ? 86400 : 300,
+    };
+  } catch (e) {
+    console.error('Analisi GP (pre-rendering):', e.message);
+    // Archivio irraggiungibile: si riprova, non si mette in cache un 404.
+    return { notFound: true, revalidate: 60 };
+  }
+}
+
+export default function GpDetail({
+  race, results = [], quali = null, sprint = [], extras = null,
+  names = { drivers: {}, constructors: {} },
+}) {
   const router = useRouter();
-  const { year, round } = router.query;
-
-  const [race, setRace] = useState(null);
-  const [results, setResults] = useState([]);
-  const [quali, setQuali] = useState(null);
-  const [sprint, setSprint] = useState([]);
-  const [extras, setExtras] = useState(null);
-  const [names, setNames] = useState({ drivers: {}, constructors: {} });
   const [tab, setTab] = useState('gara');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    // Senza isReady i parametri sono vuoti al primo render e la pagina
-    // resterebbe in caricamento per sempre.
-    if (!router.isReady) return;
-    if (!year || !round) { setLoading(false); return; }
-
-    let alive = true;
-    setLoading(true);
-    (async () => {
-      try {
-        const r = await getRace(Number(year), Number(round));
-        if (!alive) return;
-        setRace(r);
-        // Passando da un GP all'altro i dati del precedente resterebbero
-        // appesi finché non arrivano i nuovi: qui la scheda riparte pulita.
-        setExtras(null);
-        if (r) {
-          // Le tre sessioni si leggono in parallelo: sono indipendenti fra loro.
-          const [res, q, sp, ex] = await Promise.all([
-            getRaceResults(r.id),
-            getQualifying(r.id),
-            getSprint(r.id),
-            getRaceExtras(r.id),
-          ]);
-          if (!alive) return;
-          setResults(res);
-          setQuali(q);
-          setSprint(sp);
-          setExtras(ex);
-          setTab('gara');
-          // Un nome solo per tutte le sessioni e per i riquadri: in qualifica
-          // può comparire chi non si è qualificato, e giro veloce, pilota del
-          // giorno e soste possono riguardare chi manca dall'ordine d'arrivo.
-          setNames(await getNames([
-            ...res,
-            ...(q?.rows || []),
-            ...sp,
-            ...(ex.pitStops?.rows || []),
-            ...[ex.fastestLap, ex.driverOfTheDay].filter(Boolean),
-          ]));
-        }
-        setError(null);
-      } catch (e) {
-        // Il messaggio tecnico serve a chi sviluppa, non a chi legge.
-        console.error('Analisi GP:', e);
-        if (alive) setError('Non riusciamo a raggiungere l\u2019archivio dati. Riprova fra poco.');
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
-    return () => { alive = false; };
-  }, [router.isReady, year, round]);
-
-  if (loading) return <PageShell><PageLoading label="Caricamento Gran Premio…" /></PageShell>;
-
-  if (error) return (
-    <PageShell>
-      <PageHeader eyebrow="Stagione" title="Analisi GP" breadcrumb={[{ label: 'Stagione' }, { label: 'Analisi GP', href: '/gp' }]} />
-      <PageError message={error} onRetry={() => router.reload()} />
-      <p className="text-center"><Link href="/gp" className="btn btn-outline">Tutti i Gran Premi</Link></p>
-    </PageShell>
-  );
+  if (router.isFallback) return <PageShell><PageLoading label="Caricamento Gran Premio…" /></PageShell>;
 
   if (!race) return (
     <PageShell>
@@ -322,16 +305,46 @@ export default function GpDetail() {
     path: `/gp/${race.year}/${race.round}`,
   };
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'SportsEvent',
-    name: `${title} ${race.year}`,
-    startDate: race.date || undefined,
-    sport: 'Formula 1',
-    location: race.circuit?.name
-      ? { '@type': 'Place', name: race.circuit.name, address: race.circuit.place_name || undefined }
-      : undefined,
-  };
+  /* Chi ha vinto, chi è salito sul podio: erano il contenuto della pagina ma
+     non lo schema, che diceva soltanto "esiste una gara con questo nome in
+     questo posto". Dichiarare il vincitore è la differenza fra comparire in
+     una ricerca sul Gran Premio e comparire in una ricerca su chi l'ha vinto —
+     che è come la gente cerca, e come un LLM viene interrogato. */
+  const podio = results.filter(r => r.positionNumber >= 1 && r.positionNumber <= 3);
+  const nomePilota = (id) => names.drivers?.[id] || id;
+
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'SportsEvent',
+      '@id': `https://formula-rossa.it/gp/${race.year}/${race.round}#gara`,
+      name: `${title} ${race.year}`,
+      url: `https://formula-rossa.it/gp/${race.year}/${race.round}`,
+      startDate: race.date || undefined,
+      sport: 'Formula 1',
+      eventStatus: race.date && new Date(race.date) < new Date()
+        ? 'https://schema.org/EventScheduled'
+        : undefined,
+      location: race.circuit?.name
+        ? {
+          '@type': 'Place',
+          name: race.circuit.name,
+          address: race.circuit.place_name || undefined,
+        }
+        : undefined,
+      organizer: { '@type': 'Organization', name: 'FIA Formula One World Championship' },
+      competitor: podio.map(r => ({
+        '@type': 'Person',
+        name: nomePilota(r.driverId),
+        url: `https://formula-rossa.it/piloti/${r.driverId}`,
+      })),
+      ...(podio[0] && { award: `Vittoria: ${nomePilota(podio[0].driverId)}` }),
+    },
+    buildBreadcrumbs([
+      { name: 'Analisi GP', path: '/gp' },
+      { name: `${title} ${race.year}`, path: `/gp/${race.year}/${race.round}` },
+    ]),
+  ];
 
   return (
     <PageShell seo={{ ...seo, jsonLd }} wide>

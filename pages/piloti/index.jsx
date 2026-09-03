@@ -1,7 +1,7 @@
 // pages/piloti/index.jsx
 import Link from 'next/link';
 import { useState, useMemo, useEffect } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import { leggi } from '../../lib/supabaseServer';
 import { driverPhoto, inquadratura } from '../../lib/driverPhoto';
 import PageShell from '../../components/ui/PageShell';
 import { getFlagCode } from '../../lib/flags';
@@ -80,7 +80,7 @@ function DriverAvatar({ driverId, firstName, lastName, number, size = 64, champi
         {mostraFoto && (
           <img
             src={foto}
-            alt=""
+            alt={`Ritratto di ${`${firstName || ''} ${lastName || ''}`.trim()}`}
             loading="lazy"
             onError={() => setRotta(true)}
             style={inquadratura(foto)}
@@ -104,10 +104,28 @@ function DriverAvatar({ driverId, firstName, lastName, number, size = 64, champi
   );
 }
  
-export default function PilotiIndex() {
-  const [drivers,  setDrivers]  = useState([]);
-  const [loading,  setLoading]  = useState(true);
-  const [error,    setError]    = useState(null);
+export async function getStaticProps() {
+  /* L'elenco arrivava da un `useEffect`: l'HTML servito conteneva zero nomi e
+     zero link, quindi le 917 schede non erano raggiungibili da un crawler se
+     non passando dalla sitemap. Un elenco di link nella pagina è il modo in
+     cui Google capisce che quelle schede contano — e come ci arriva chi non
+     esegue JavaScript. */
+  const righe = await leggi(c => c
+    .from('driver')
+    .select(`id, first_name, last_name, full_name, abbreviation, permanent_number,
+             date_of_birth, date_of_death, place_of_birth,
+             nationality_country_id, country_of_birth_country_id,
+             total_championship_wins, total_race_wins, total_podiums,
+             total_pole_positions, total_fastest_laps, total_points,
+             total_race_starts, best_championship_position, total_grand_slams`));
+
+  return {
+    props: { drivers: (righe || []).map(d => ({ ...d, era: getEra(d.date_of_birth) })) },
+    revalidate: 86400,
+  };
+}
+
+export default function PilotiIndex({ drivers = [] }) {
   const [search,   setSearch]   = useState('');
   const [eraFilter,setEraFilter]= useState('all');
   const [sortBy,   setSortBy]   = useState('wins');
@@ -115,26 +133,6 @@ export default function PilotiIndex() {
   const [mounted,  setMounted]  = useState(false);
  
   useEffect(() => { setMounted(true); }, []);
- 
-  useEffect(() => {
-    async function fetchDrivers() {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('driver')
-        .select(`id, first_name, last_name, full_name, abbreviation, permanent_number,
-                 date_of_birth, date_of_death, place_of_birth,
-                 nationality_country_id, country_of_birth_country_id,
-                 total_championship_wins, total_race_wins, total_podiums,
-                 total_pole_positions, total_fastest_laps, total_points,
-                 total_race_starts, best_championship_position, total_grand_slams`);
-      if (error) { setError(error.message); }
-      else {
-        setDrivers((data||[]).map(d => ({ ...d, era: getEra(d.date_of_birth) })));
-      }
-      setLoading(false);
-    }
-    fetchDrivers();
-  }, []);
  
   const eras = useMemo(() => {
     const s = new Set(drivers.map(d=>d.era).filter(Boolean));
@@ -197,7 +195,7 @@ export default function PilotiIndex() {
             <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'14px' }}>
               <span style={{ width:'6px', height:'6px', borderRadius:'50%', background:'var(--fr-red)', animation:'pulse 2s infinite' }}/>
               <span style={{ fontSize:'10px', color:'var(--fr-red)', fontFamily:'monospace', fontWeight:'800', letterSpacing:'2.5px' }}>
-                F1 DRIVERS DATABASE · {loading ? '…' : drivers.length} PILOTI
+                F1 DRIVERS DATABASE · {drivers.length} PILOTI
               </span>
             </div>
             <h1 style={{
@@ -205,14 +203,14 @@ export default function PilotiIndex() {
               fontSize:'clamp(52px,8vw,96px)', fontWeight:'400',
               letterSpacing:'4px', lineHeight:1,
             }}>
-              I PILOTI <span style={{ color:'var(--fr-red)' }}>DELLA STORIA</span>
+              I PILOTI DI <span style={{ color:'var(--fr-red)' }}>FORMULA 1</span>
             </h1>
             <p style={{ margin:'14px 0 0', fontSize:'12px', fontFamily:'monospace', color:'var(--fr-text-faint)', letterSpacing:'1px' }}>
               Vittorie, pole position, campionati e ogni record del Mondiale F1
             </p>
  
             {/* Stats globali */}
-            {!loading && (
+            {(
               <div style={{
                 display:'flex', gap:'32px', flexWrap:'wrap',
                 marginTop:'28px', paddingTop:'24px',
@@ -236,7 +234,7 @@ export default function PilotiIndex() {
           </header>
  
           {/* ── CONTROLS ── */}
-          {!loading && (
+          {(
             <div style={{
               display:'flex', flexWrap:'wrap', gap:'10px',
               marginBottom:'32px', alignItems:'center',
@@ -315,35 +313,11 @@ export default function PilotiIndex() {
             </div>
           )}
  
-          {/* ── ERROR ── */}
-          {error && (
-            <div style={{ padding:'16px 20px', borderRadius:'4px', border:'1px solid rgba(220,38,38,.3)', background:'rgba(220,38,38,.06)', color:'var(--fr-red-ink)', fontFamily:'monospace', fontSize:'13px', marginBottom:'24px' }}>
-              ⚠ Errore: {error}
-            </div>
-          )}
- 
-          {/* ── SKELETON ── */}
-          {loading && (
-            <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
-              {Array.from({length:12}).map((_,i)=>(
-                <div key={i} style={{
-                  height:'72px', borderRadius:'4px',
-                  border:'1px solid var(--fr-overlay)',
-                  background:'var(--fr-surface-3)',
-                  overflow:'hidden', position:'relative',
-                }}>
-                  <div style={{
-                    position:'absolute', inset:0,
-                    background:'linear-gradient(90deg,transparent,var(--fr-overlay),transparent)',
-                    animation:'shimmer 1.5s infinite',
-                  }}/>
-                </div>
-              ))}
-            </div>
-          )}
- 
-          {/* ── EMPTY ── */}
-          {!loading && filtered.length===0 && !error && (
+          {/* Niente riquadro d'errore né scheletro di caricamento: l'elenco
+              arriva già pronto dal server. Se il database non risponde, la
+              pagina esce con zero piloti e lo dice il vuoto qui sotto. */}
+
+          {filtered.length===0 && (
             <div style={{ textAlign:'center', padding:'80px 0', color:'var(--fr-text-faint)', fontFamily:'monospace' }}>
               <div style={{ fontSize:'36px', marginBottom:'16px' }}>🏎</div>
               <p style={{ fontSize:'12px', letterSpacing:'2px', textTransform:'uppercase' }}>Nessun pilota trovato</p>
@@ -351,7 +325,7 @@ export default function PilotiIndex() {
           )}
  
           {/* ── LIST ── */}
-          {!loading && filtered.length>0 && (
+          {filtered.length>0 && (
             <div style={{
               display:'flex', flexDirection:'column', gap:'6px',
               animation:'fadeUp .6s .15s ease both', opacity:0,
@@ -381,7 +355,7 @@ export default function PilotiIndex() {
           )}
  
           {/* Count footer */}
-          {!loading && filtered.length>0 && (
+          {filtered.length>0 && (
             <p style={{
               marginTop:'32px', textAlign:'center',
               fontSize:'10px', color:'var(--fr-text-faint)',

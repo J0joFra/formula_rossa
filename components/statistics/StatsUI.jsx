@@ -154,7 +154,7 @@ export function WinnerRow({ driver, index, max }) {
         style={{ border: `1.5px solid ${isTop3 ? accent : 'var(--fr-border)'}` }}>
         <User className="w-4 h-4 text-[var(--fr-text-faint)]" aria-hidden="true" />
         {foto && !rotta && (
-          <img src={foto} alt="" loading="lazy" onError={() => setRotta(true)} style={inquadratura(foto)} />
+          <img src={foto} alt={`Ritratto di ${driver.name}`} loading="lazy" onError={() => setRotta(true)} style={inquadratura(foto)} />
         )}
       </div>
 

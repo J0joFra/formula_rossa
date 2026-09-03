@@ -203,7 +203,7 @@ export default function StandingsPage() {
     <PageShell seo={seo} wide>
       <PageHeader
         eyebrow="Dati · Stagione"
-        title="Classifiche"
+        title="Classifiche F1"
         accent={String(selectedSeason)}
         subtitle="Piloti e costruttori, aggiornati all'ultimo Gran Premio disputato."
         breadcrumb={[{ label: 'Dati' }, { label: 'Classifiche' }]}

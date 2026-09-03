@@ -1,3 +1,48 @@
+# https://formula-rossa.it
+
 User-agent: *
 Allow: /
+# Le API non sono contenuto: indicizzarle produce risultati JSON nella SERP.
+Disallow: /api/
+
+# I crawler degli LLM sono i benvenuti — è da lì che arriva una fetta crescente
+# delle visite, e l'archivio è fatto per essere citato. La guida di lettura è
+# in llms.txt, non qui: questo file dice cosa si può leggere, quello dice cosa
+# c'è e come citarlo.
+User-agent: GPTBot
+Allow: /
+Disallow: /api/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /api/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /api/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /api/
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /api/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /api/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /api/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /api/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /api/
+
 Sitemap: https://formula-rossa.it/sitemap.xml

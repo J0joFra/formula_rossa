@@ -127,7 +127,7 @@ function DriverRow({ driver, index, max, cfg }) {
           <User className="w-5 h-5 text-[var(--fr-text-faint)]" />
         </span>
         {foto && !rotta && (
-          <img src={foto} alt="" loading="lazy" onError={() => setRotta(true)} style={inquadratura(foto)} />
+          <img src={foto} alt={`Ritratto di ${driver.name}`} loading="lazy" onError={() => setRotta(true)} style={inquadratura(foto)} />
         )}
       </div>
 

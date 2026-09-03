@@ -1,9 +1,24 @@
-// pages/piloti/[slug].jsx
+/**
+ * pages/piloti/[slug].jsx
+ * La scheda di un pilota.
+ *
+ * Si genera sul server (ISR). Prima i dati arrivavano da un `useEffect`: chi
+ * chiedeva la pagina — Google, un LLM, chiunque non esegua JavaScript —
+ * riceveva un HTML che diceva "Caricamento pilota…" e nient'altro. Novecento
+ * schede piene di statistiche, e per chi indicizza erano novecento pagine
+ * vuote e identiche fra loro.
+ *
+ * `fallback: 'blocking'` con `paths: []`: non si costruiscono novecento pagine
+ * a ogni deploy, la prima richiesta genera e da lì è in cache. Chi indicizza
+ * riceve comunque l'HTML completo, che è il punto.
+ */
+
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { supabase } from '../../lib/supabaseClient';
+import { leggi } from '../../lib/supabaseServer';
 import PageShell, { PageLoading, PageError } from '../../components/ui/PageShell';
+import { buildBreadcrumbs } from '../../components/seo';
 import { getFlagCode } from '../../lib/flags';
 import { driverPhoto, driverPhotoCredit, inquadratura } from '../../lib/driverPhoto';
 
@@ -70,7 +85,7 @@ function HeroAvatar({ driver }) {
             letterSpacing:'-2px',
           }}>{initials}</span>
           {foto && !rotta && (
-            <img src={foto} alt="" onError={() => setRotta(true)} style={inquadratura(foto)} />
+            <img src={foto} alt={`Ritratto di ${driver.first_name || ''} ${driver.last_name || ''}`.trim()} onError={() => setRotta(true)} style={inquadratura(foto)} />
           )}
         </span>
       </div>
@@ -168,40 +183,39 @@ function StatBar({ label, value, max, color='var(--fr-red)' }) {
   );
 }
  
-export default function DriverDetail() {
+export async function getStaticPaths() {
+  /* Nessun percorso pre-costruito: le pagine si generano alla prima richiesta.
+     Elencarle tutte qui allungherebbe ogni deploy di parecchi minuti senza
+     cambiare di una virgola l'HTML che riceve chi indicizza. */
+  return { paths: [], fallback: 'blocking' };
+}
+
+export async function getStaticProps({ params }) {
+  const driver = await leggi(c =>
+    c.from('driver').select('*').eq('id', params.slug).maybeSingle());
+
+  if (!driver) {
+    /* `notFound` con un `revalidate` breve: se il database era irraggiungibile
+       — e non se il pilota non esiste davvero — la pagina riprova fra un
+       minuto invece di restare un 404 in cache per sempre. */
+    return { notFound: true, revalidate: 60 };
+  }
+
+  return { props: { driver }, revalidate: 86400 };
+}
+
+export default function DriverDetail({ driver }) {
   const router = useRouter();
-  const { slug } = router.query;
-  const [driver,  setDriver]  = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState(null);
-  const [tab,     setTab]     = useState('stats');
-  const [mounted, setMounted] = useState(false);
- 
-  useEffect(()=>{ setMounted(true); },[]);
- 
-  useEffect(()=>{
-    if (!slug) return;
-    async function fetchDriver() {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('driver')
-        .select('*')
-        .eq('id', slug)
-        .single();
-      if (error) setError(error.message);
-      else setDriver(data);
-      setLoading(false);
-    }
-    fetchDriver();
-  }, [slug]);
- 
-  if (loading) return (
+  const slug = driver?.id || router.query.slug;
+  const [tab, setTab] = useState('stats');
+
+  if (router.isFallback) return (
     <PageShell><PageLoading label="Caricamento pilota…" /></PageShell>
   );
- 
-  if (error||!driver) return (
+
+  if (!driver) return (
     <PageShell>
-      <PageError title="Pilota non trovato" message={error || 'Il pilota richiesto non è presente in archivio.'} />
+      <PageError title="Pilota non trovato" message="Il pilota richiesto non è presente in archivio." />
       <p className="text-center"><Link href="/piloti" className="btn btn-outline">← Tutti i piloti</Link></p>
     </PageShell>
   );
@@ -224,15 +238,63 @@ export default function DriverDetail() {
     : 0;
  
   const seo = {
-    title: driver.full_name,
-    description: `Statistiche e biografia di ${driver.full_name}: ${driver.total_race_wins} vittorie e ${driver.total_championship_wins} titoli mondiali.`,
+    /* Il titolo era il solo nome. In una pagina di risultati "Max Verstappen"
+       non dice perché aprire questo link invece degli altri venti: il titolo
+       deve dire cosa c'è dentro. */
+    title: `${driver.full_name} — statistiche e carriera in Formula 1`,
+    description: `${driver.full_name} in Formula 1: ${driver.total_race_wins} vittorie, ${driver.total_podiums} podi, ${driver.total_pole_positions} pole position e ${driver.total_championship_wins} titoli mondiali in ${driver.total_race_starts} gare.`,
     path: `/piloti/${slug}`,
+    /* Dire "questa pagina parla di una persona, ecco chi è e cosa ha vinto"
+       in un formato che si legge senza interpretare l'HTML. È quello che
+       distingue una pagina indicizzata da una pagina capita: i numeri qui
+       sotto sono gli stessi che si vedono a schermo, ma un motore non deve
+       dedurli dal contorno grafico. */
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        '@id': `https://formula-rossa.it/piloti/${slug}#persona`,
+        name: driver.full_name,
+        givenName: driver.first_name || undefined,
+        familyName: driver.last_name || undefined,
+        alternateName: driver.abbreviation || undefined,
+        jobTitle: 'Pilota di Formula 1',
+        birthDate: driver.date_of_birth || undefined,
+        deathDate: driver.date_of_death || undefined,
+        birthPlace: driver.place_of_birth
+          ? { '@type': 'Place', name: driver.place_of_birth }
+          : undefined,
+        url: `https://formula-rossa.it/piloti/${slug}`,
+        /* Le statistiche come proprietà dichiarate, non come celle di tabella.
+           `additionalProperty` è il modo previsto da schema.org per i dati che
+           non hanno un campo proprio, ed è leggibile da un LLM così com'è. */
+        additionalProperty: [
+          ['Vittorie', driver.total_race_wins],
+          ['Podi', driver.total_podiums],
+          ['Pole position', driver.total_pole_positions],
+          ['Giri veloci', driver.total_fastest_laps],
+          ['Titoli mondiali', driver.total_championship_wins],
+          ['Gare disputate', driver.total_race_starts],
+          ['Punti', driver.total_points],
+          ['Grand Slam', driver.total_grand_slams],
+        ]
+          .filter(([, valore]) => valore !== null && valore !== undefined)
+          .map(([name, value]) => ({ '@type': 'PropertyValue', name, value })),
+      },
+      buildBreadcrumbs([
+        { name: 'Piloti', path: '/piloti' },
+        { name: driver.full_name, path: `/piloti/${slug}` },
+      ]),
+    ],
   };
 
   return (
     <PageShell seo={seo}>
       <ReadingProgress/>
-      <div style={{ opacity: mounted ? 1 : 0, transition:'opacity .45s ease' }}>
+      {/* Niente `opacity: 0` in attesa del mount: era una dissolvenza che, per
+          chi non esegue JavaScript, non finiva mai — pagina completa e
+          invisibile. L'animazione la fanno i singoli blocchi con `fadeUp`. */}
+      <div>
  
           {/* ── BREADCRUMB ── */}
           <nav style={{ marginBottom:'32px', display:'flex', alignItems:'center', gap:'10px', animation:'fadeUp .5s ease both' }}>

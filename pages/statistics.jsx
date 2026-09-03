@@ -182,6 +182,7 @@ export default function StatisticsPage() {
       <PageHeader
         eyebrow="Archivio"
         title="Statistiche"
+        accent="Ferrari"
         subtitle={`Le classifiche storiche della Scuderia dal 1950: chi ha vinto di più, dove, e come sono cambiati i numeri stagione dopo stagione. ${stagioni} stagioni di risultati di gara.`}
         breadcrumb={[{ label: 'Archivio' }, { label: 'Statistiche' }]}
       />

@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { useState, useMemo, useEffect } from 'react';
-import { supabase } from '../../lib/supabaseClient';
-import PageShell, { PageHeader, PageLoading, PageError } from '../../components/ui/PageShell';
+import { useState, useMemo } from 'react';
+import { leggi } from '../../lib/supabaseServer';
+import PageShell, { PageHeader } from '../../components/ui/PageShell';
 import { getFlagCode } from '../../lib/flags';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -22,31 +22,25 @@ function getRegion(countryId = '') {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function CircuitiIndex() {
-  const [circuits, setCircuits] = useState([]);
-  const [loading,  setLoading]  = useState(true);
-  const [error,    setError]    = useState(null);
+export async function getStaticProps() {
+  /* Come per /piloti: l'elenco arriva dal server, così i 78 link alle schede
+     sono nell'HTML e non solo nella memoria del browser. */
+  const righe = await leggi(c => c
+    .from('circuit')
+    .select('id, name, full_name, place_name, country_id, length, turns, direction, total_races_held')
+    .order('name'));
+
+  return {
+    props: { circuits: (righe || []).map(c => ({ ...c, region: getRegion(c.country_id || '') })) },
+    revalidate: 86400,
+  };
+}
+
+export default function CircuitiIndex({ circuits = [] }) {
 
   const [search, setSearch] = useState('');
   const [region, setRegion] = useState('all');
   const [sortBy, setSortBy] = useState('name');
-
-  useEffect(() => {
-    async function fetchCircuits() {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('circuit')           
-        .select('id, name, full_name, place_name, country_id, length, turns, direction, total_races_held')
-        .order('name');
-      if (error) {
-        setError(error.message);
-      } else {
-        setCircuits((data || []).map(c => ({ ...c, region: getRegion(c.country_id || '') })));
-      }
-      setLoading(false);
-    }
-    fetchCircuits();
-  }, []);
 
   const regions = useMemo(() => {
     const s = new Set(circuits.map(c => c.region).filter(Boolean));
@@ -80,18 +74,14 @@ export default function CircuitiIndex() {
     <PageShell seo={seo} wide>
       <PageHeader
         eyebrow="Circuiti · Calendario mondiale"
-        title="I circuiti"
-        accent="del mondo"
-        subtitle={loading ? 'Caricamento dei dati…' : `${circuits.length} piste con dati tecnici, record e storia.`}
+        title="Circuiti"
+        accent="di Formula 1"
+        subtitle={`${circuits.length} piste con dati tecnici, record e storia.`}
         breadcrumb={[{ label: 'Dati' }, { label: 'Circuiti' }]}
       />
 
-      {error && <PageError message={`Errore nel caricamento: ${error}`} />}
-
-      {loading && <PageLoading label="Caricamento circuiti…" />}
-
       {/* Controls */}
-          {!loading && (
+          {(
             <div className="flex flex-wrap gap-3 mb-8 items-center">
               <div className="relative flex-1 min-w-48">
                 <input
@@ -134,22 +124,14 @@ export default function CircuitiIndex() {
             </div>
           )}
 
-          {/* Skeleton loader */}
-          {loading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: 9 }).map((_, i) => (
-                <div key={i} className="rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)] h-44 skeleton" />
-              ))}
-            </div>
-          )}
 
           {/* Grid */}
-          {!loading && filtered.length === 0 && !error && (
+          {filtered.length === 0 && (
             <div className="text-center py-20 text-sm text-[var(--fr-text-muted)]">
               Nessun circuito trovato.
             </div>
           )}
-          {!loading && filtered.length > 0 && (
+          {filtered.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.map(c => <CircuitCard key={c.id} circuit={c} />)}
             </div>

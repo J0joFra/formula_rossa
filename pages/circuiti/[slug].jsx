@@ -7,58 +7,47 @@
  * colori come opacità del bianco (`text-white/30`, `text-white/35`). Sul tema
  * chiaro quelle scritte arrivavano a 1,03:1 di contrasto — cioè invisibili.
  * Ora usa PageShell come le altre pagine e prende i colori dai token.
+ *
+ * Si genera sul server (ISR): i dati arrivavano da un `useEffect`, quindi
+ * l'HTML servito a chi indicizza diceva "Caricamento circuito…" e basta.
  */
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { supabase } from '../../lib/supabaseClient';
+import { leggi } from '../../lib/supabaseServer';
 import PageShell, { PageHeader, PageLoading, PageError, Panel, StatTile } from '../../components/ui/PageShell';
 import { getFlagCode } from '../../lib/flags';
+import { buildBreadcrumbs } from '../../components/seo';
 
-export default function CircuitDetail() {
+export async function getStaticPaths() {
+  return { paths: [], fallback: 'blocking' };
+}
+
+export async function getStaticProps({ params }) {
+  // Tabella: "circuit" (singolare) — colonne reali del DB
+  const circuit = await leggi(c => c
+    .from('circuit')
+    .select('id, name, full_name, previous_names, place_name, country_id, length, turns, direction, type, latitude, longitude, total_races_held')
+    .eq('id', params.slug)
+    .maybeSingle());
+
+  if (!circuit) return { notFound: true, revalidate: 60 };
+
+  const layouts = await leggi(c => c
+    .from('circuit_layout')
+    .select('*')
+    .eq('circuit_id', params.slug)
+    .order('year', { ascending: false }));
+
+  return { props: { circuit, layouts: layouts || [] }, revalidate: 86400 };
+}
+
+export default function CircuitDetail({ circuit, layouts = [] }) {
   const router = useRouter();
-  const { slug } = router.query;
+  const [tab, setTab] = useState('info');
 
-  const [circuit, setCircuit] = useState(null);
-  const [layouts, setLayouts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState(null);
-  const [tab,     setTab]     = useState('info');
-
-  useEffect(() => {
-    if (!slug) return;
-    async function fetchCircuit() {
-      setLoading(true);
-      setError(null);
-
-      // Tabella: "circuit" (singolare) — colonne reali del DB
-      const { data, error } = await supabase
-        .from('circuit')                 // ← era 'circuits'
-        .select('id, name, full_name, previous_names, place_name, country_id, length, turns, direction, type, latitude, longitude, total_races_held')
-        .eq('id', slug)
-        .single();
-
-      if (error) {
-        setError(error.message);
-        setLoading(false);
-        return;
-      }
-
-      setCircuit(data);
-
-      // Carica i layout del circuito dalla tabella "circuit_layout"
-      const { data: layoutData } = await supabase
-        .from('circuit_layout')          // tabella layout reale
-        .select('*')
-        .eq('circuit_id', slug)
-        .order('year', { ascending: false });
-
-      setLayouts(layoutData || []);
-      setLoading(false);
-    }
-    fetchCircuit();
-  }, [slug]);
+  if (router.isFallback) return <PageShell><PageLoading label="Caricamento circuito…" /></PageShell>;
 
   const flag = circuit ? getFlagCode(circuit.country_id || '') : null;
 
@@ -71,11 +60,46 @@ export default function CircuitDetail() {
     title: `${circuit.name} — circuito di Formula 1`,
     description: `${circuit.name}: lunghezza ${circuit.length ?? '?'} km, ${circuit.turns ?? '?'} curve, ${circuit.total_races_held ?? '?'} gare disputate.`,
     path: `/circuiti/${circuit.id}`,
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'SportsActivityLocation',
+        '@id': `https://formula-rossa.it/circuiti/${circuit.id}#luogo`,
+        name: circuit.full_name || circuit.name,
+        alternateName: circuit.full_name && circuit.full_name !== circuit.name
+          ? circuit.name : undefined,
+        url: `https://formula-rossa.it/circuiti/${circuit.id}`,
+        sport: 'Formula 1',
+        address: circuit.place_name
+          ? {
+            '@type': 'PostalAddress',
+            addressLocality: circuit.place_name,
+            addressCountry: circuit.country_id?.replace(/-/g, ' ') || undefined,
+          }
+          : undefined,
+        /* Le coordinate sono l'informazione che un motore non può ricavare dal
+           testo, ed è quella che permette di rispondere a "quali circuiti ci
+           sono in Italia". Ci sono nel database: tanto vale dichiararle. */
+        geo: (circuit.latitude && circuit.longitude)
+          ? { '@type': 'GeoCoordinates', latitude: circuit.latitude, longitude: circuit.longitude }
+          : undefined,
+        additionalProperty: [
+          ['Lunghezza (km)', circuit.length],
+          ['Curve', circuit.turns],
+          ['Senso di marcia', circuit.direction],
+          ['Gare ospitate', circuit.total_races_held],
+        ]
+          .filter(([, valore]) => valore !== null && valore !== undefined)
+          .map(([name, value]) => ({ '@type': 'PropertyValue', name, value })),
+      },
+      buildBreadcrumbs([
+        { name: 'Circuiti', path: '/circuiti' },
+        { name: circuit.name, path: `/circuiti/${circuit.id}` },
+      ]),
+    ],
   } : null;
 
-  if (loading) return <PageShell><PageLoading label="Caricamento circuito…" /></PageShell>;
-
-  if (error || !circuit) return (
+  if (!circuit) return (
     <PageShell>
       <PageHeader
         eyebrow="Dati"
@@ -84,7 +108,7 @@ export default function CircuitDetail() {
       />
       <PageError
         title="Circuito non trovato"
-        message={error || 'Questo circuito non è presente in archivio.'}
+        message="Questo circuito non è presente in archivio."
       />
       <p className="text-center">
         <Link href="/circuiti" className="btn btn-outline">Tutti i circuiti</Link>
