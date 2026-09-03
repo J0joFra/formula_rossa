@@ -42,6 +42,7 @@ const SEZIONI = [
   {
     titolo: 'Progetto',
     voci: [
+      { label: 'Fanta GP', href: '/fanta' },
       { label: 'Fan Zone', href: '/fanzone' },
       { label: 'Chi siamo',   href: '/about' },
       { label: 'Contatti', href: 'mailto:info@formula-rossa.it' },

@@ -1,0 +1,6 @@
+{
+  "crons": [
+    { "path": "/api/fanta/calcola", "schedule": "0 20 * * 0" },
+    { "path": "/api/fanta/calcola", "schedule": "0 8 * * 1" }
+  ]
+}

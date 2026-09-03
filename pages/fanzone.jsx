@@ -16,7 +16,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useSession, signIn } from 'next-auth/react';
 import {
-  Gamepad2, Coins, Zap, Timer, Flame, Award, Trophy,
+  Gamepad2, Coins, Zap, Timer, Flame, Award, Trophy, ListOrdered, ArrowRight,
 } from 'lucide-react';
 import PageShell, { PageHeader, Panel } from '../components/ui/PageShell';
 import {
@@ -235,6 +235,31 @@ export default function FanZonePage() {
             </div>
           </div>
         </Panel>
+
+        {/* Il Fanta GP: è il motivo per cui si torna, non un mini-gioco.
+            Sta sopra i giochi di riflessi perché è l'unica cosa qui dentro
+            che ha a che fare con la gara della domenica. */}
+        <Link
+          href="/fanta"
+          className="group flex flex-wrap items-center gap-5 p-6 rounded-[var(--radius)] border border-[var(--fr-red)]/40 bg-[var(--fr-surface)] hover:border-[var(--fr-red)] transition-colors"
+        >
+          <span className="w-12 h-12 rounded-[14px] grid place-items-center bg-[var(--fr-red-soft)] text-[var(--fr-red)]" aria-hidden="true">
+            <ListOrdered className="w-6 h-6" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-head text-xl font-black uppercase text-[var(--fr-text)]">
+              Fanta GP
+            </span>
+            <span className="block text-sm text-[var(--fr-text-muted)] mt-1 max-w-[62ch]">
+              Metti in fila i primi dieci del prossimo Gran Premio, scegli il
+              pilota del giorno e quanti ritiri ci saranno. Punteggio a gara
+              conclusa, classifica di stagione e leghe private con gli amici.
+            </span>
+          </span>
+          <span className="btn btn-primary shrink-0">
+            Gioca <ArrowRight className="w-4 h-4" aria-hidden="true" />
+          </span>
+        </Link>
 
         {/* I giochi */}
         <section>

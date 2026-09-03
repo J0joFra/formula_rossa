@@ -222,6 +222,26 @@ td {
 }
 .btn:active { transform: scale(.98); }
 
+/* Bottone con la sola icona: quadrato, tocca­bile col dito (36px più il
+   padding della riga che lo contiene), e in grigio finché non ci si passa
+   sopra — sono comandi di servizio, non devono competere col contenuto. */
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  border: 1px solid var(--fr-border);
+  background: var(--fr-surface);
+  color: var(--fr-text-muted);
+  cursor: pointer;
+  transition: color .16s ease, border-color .16s ease, background-color .16s ease;
+}
+@media (hover: hover) {
+  .icon-btn:hover:not(:disabled) { color: var(--fr-red); border-color: var(--fr-red); }
+}
+.icon-btn:disabled { opacity: .35; cursor: not-allowed; }
+
 /* ── FORM ─────────────────────────────────────────────────────────────────── */
 /* Il minimo di 44px per il dito vale per i controlli, non per i link.
    Prima l'elenco cominciava con `a`, e ogni ancora del sito si portava dietro
