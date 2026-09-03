@@ -179,9 +179,7 @@ export default function Footer() {
         <div className="mt-10 pt-6 border-t border-[var(--fr-border)] flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
           <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-[var(--fr-text-faint)]">
-            <span>© {anno} Formula Rossa · fatto con</span>
-            <Heart className="w-3 h-3 text-[var(--fr-red)] fill-current" aria-hidden="true" />
-            <span>da</span>
+            <span>© {anno} Formula Rossa · sviluppato da</span>
             <a
               href="https://github.com/J0joFra"
               target="_blank"
