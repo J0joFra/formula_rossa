@@ -22,35 +22,67 @@ import Head from 'next/head';
 
 const BASE_URL    = 'https://formula-rossa.it';
 const SITE_NAME   = 'Formula Rossa';
-const DEFAULT_OG = `${BASE_URL}/data/images/formula-rossa-logo.png`;
+/* Il logo è quadrato 500×500: come og:image veniva ritagliato male da ogni
+   social e i meta dichiaravano 1200×630, che è la misura che i social si
+   aspettano ma non quella del file. Ora c'è una vera card 1200×630. */
+const DEFAULT_OG = `${BASE_URL}/og-formula-rossa.jpg`;
+const LOGO = `${BASE_URL}/data/images/formula-rossa-logo.png`;
+
+/* Gli account veri, quelli linkati nel footer. Prima qui c'erano
+   facebook.com/formularossa, instagram.com/formularossa e
+   twitter.com/formularossa: profili che non sono di questo sito. `sameAs`
+   serve a dire a Google e agli LLM "questa entità è anche quella lì" — se i
+   profili sono sbagliati il collegamento si fa comunque, con qualcun altro.
+   Meglio nessun sameAs che un sameAs falso. */
+const PROFILI = [
+  'https://www.linkedin.com/company/formula-rossa/',
+  'https://www.instagram.com/formularossa.it',
+  'https://www.youtube.com/@jofrancalanci',
+  'https://www.x.com/jofrancalanci',
+  'https://whatsapp.com/channel/0029Vb7EagL6WaKvnD5Slm30',
+];
+
+const HANDLE_X = '@jofrancalanci';
 const DEFAULT_DESC = 'Formula Rossa è la piattaforma definitiva per i tifosi della Scuderia Ferrari. Esplora statistiche F1, dati storici e grafici interattivi della Rossa.';
 
-// ── Local Business Schema (sempre incluso, migliora il ranking locale) ──
-const LOCAL_BUSINESS_SCHEMA = {
+/* L'identità del sito, ripetuta su ogni pagina.
+   Non è un LocalBusiness — quello descrive un'attività con un indirizzo e
+   degli orari di apertura, e dichiararlo per un sito che non ha né l'uno né
+   gli altri è un dato falso dato a Google. Quello che questo sito è davvero:
+   un'organizzazione (l'editore) che pubblica un'applicazione web gratuita. */
+const ORGANIZZAZIONE = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': `${BASE_URL}/#organization`,
+  name: SITE_NAME,
+  url: BASE_URL,
+  description: DEFAULT_DESC,
+  logo: { '@type': 'ImageObject', url: LOGO, width: 500, height: 500 },
+  image: DEFAULT_OG,
+  email: 'info@formula-rossa.it',
+  foundingDate: '2025',
+  knowsAbout: [
+    'Scuderia Ferrari', 'Formula 1', 'statistiche Formula 1',
+    'storia della Ferrari in Formula 1', 'Gran Premi', 'piloti Ferrari',
+  ],
+  founder: { '@type': 'Person', name: 'Joaquim Francalanci' },
+  sameAs: PROFILI,
+};
+
+const APPLICAZIONE = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
+  '@id': `${BASE_URL}/#webapp`,
   name: SITE_NAME,
   url: BASE_URL,
   description: DEFAULT_DESC,
   applicationCategory: 'SportsApplication',
+  browserRequirements: 'Richiede JavaScript',
   operatingSystem: 'All',
-  inLanguage: 'it',
-  offers: {
-    '@type': 'Offer',
-    price: '0',
-    priceCurrency: 'EUR',
-  },
-  author: {
-    '@type': 'Organization',
-    name: SITE_NAME,
-    url: BASE_URL,
-    logo: `${BASE_URL}/logo.png`,
-    sameAs: [
-      'https://www.facebook.com/formularossa',
-      'https://www.instagram.com/formularossa',
-      'https://twitter.com/formularossa',
-    ],
-  },
+  inLanguage: 'it-IT',
+  isAccessibleForFree: true,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+  publisher: { '@id': `${BASE_URL}/#organization` },
 };
 
 // ── BreadcrumbList helper ──
@@ -75,7 +107,7 @@ export default function SEO({
   ogImage = DEFAULT_OG,
   ogType = 'website',
   noIndex = false,
-  jsonLd = null,         // schema aggiuntivo specifico della pagina
+  jsonLd = null,         // schema della pagina: un oggetto, o un elenco
   facebookAppId = null,  // opzionale: ID app Facebook per og:app_id
 }) {
   const canonical = `${BASE_URL}${path.startsWith('/') ? path : '/' + path}`;
@@ -85,7 +117,12 @@ export default function SEO({
   const ogImageFull = ogImage.startsWith('http') ? ogImage : `${BASE_URL}${ogImage}`;
 
   // Combina schema globale + eventuale schema specifico della pagina
-  const schemas = [LOCAL_BUSINESS_SCHEMA, ...(jsonLd ? [jsonLd] : [])];
+  /* Una pagina può dichiarare più di un'entità — la scheda di un pilota è
+     una Person *e* una briciola di pane — quindi `jsonLd` accetta anche un
+     elenco. I `null` si scartano: chi chiama può costruire lo schema solo
+     quando ha i dati, senza scrivere condizioni. */
+  const dellaPagina = (Array.isArray(jsonLd) ? jsonLd : [jsonLd]).filter(Boolean);
+  const schemas = [ORGANIZZAZIONE, APPLICAZIONE, ...dellaPagina];
 
   return (
     <Head>
@@ -109,15 +146,19 @@ export default function SEO({
       <meta property="og:title"       content={fullTitle} />
       <meta property="og:description" content={description} />
       <meta property="og:image"       content={ogImageFull} />
-      <meta property="og:image:width"  content="1200" />
-      <meta property="og:image:height" content="630" />
+      {/* Le misure si dichiarano solo per l'immagine di default, che è
+          davvero 1200×630. Per un'immagine passata dalla pagina non le
+          conosciamo, e dichiararle a caso fa ritagliare male l'anteprima. */}
+      {ogImageFull === DEFAULT_OG && <meta property="og:image:width"  content="1200" />}
+      {ogImageFull === DEFAULT_OG && <meta property="og:image:height" content="630" />}
       <meta property="og:image:alt"   content={fullTitle} />
       <meta property="og:locale"      content="it_IT" />
       {facebookAppId && <meta property="fb:app_id" content={facebookAppId} />}
 
       {/* ── Twitter Card ── */}
       <meta name="twitter:card"        content="summary_large_image" />
-      <meta name="twitter:site"        content="@formularossa" />
+      <meta name="twitter:site"        content={HANDLE_X} />
+      <meta name="twitter:creator"     content={HANDLE_X} />
       <meta name="twitter:title"       content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image"       content={ogImageFull} />

@@ -68,7 +68,10 @@ function Scheda({ item, index }) {
           {item.thumbnail ? (
             <img
               src={item.thumbnail}
-              alt=""
+              /* L'immagine di apertura di una notizia non è decorativa: è
+                 quella che finisce in Google Immagini, e senza alt ci finisce
+                 senza un contesto. Il titolo è il contesto. */
+              alt={item.title || 'Immagine della notizia'}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
               onError={(e) => { e.currentTarget.style.display = 'none'; }}

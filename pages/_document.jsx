@@ -3,18 +3,34 @@ import { Html, Head, Main, NextScript } from 'next/document'
 export default function Document(props) {
   const locale = props.__NEXT_DATA__.locale || 'it';
 
+  /* Lo schema del sito come oggetto (il resto — organizzazione, applicazione,
+     pagina — sta in components/seo.js). I nodi si collegano per `@id`: senza,
+     Google riceve tre entità slegate e deve indovinare se parlino della stessa
+     cosa. Con `@id` glielo diciamo noi.
+
+     `about` dice di cosa parla il sito collegandolo a una fonte esterna: è il
+     modo per dire "quella Ferrari lì" invece di lasciare la disambiguazione al
+     caso, ed è quello che cercano i crawler degli LLM.
+     Manca l'identificativo Wikidata, che sarebbe il collegamento più forte:
+     va aggiunto a mano dopo averlo verificato su wikidata.org — un `sameAs`
+     che punta all'entità sbagliata è peggio di un `sameAs` in meno. */
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": "https://formula-rossa.it/#website",
     "name": "Formula Rossa",
     "alternateName": ["Formula Rossa F1 Stats", "Formula Rossa Dati Ferrari"],
     "url": "https://formula-rossa.it",
     "description": "Piattaforma data-driven dedicata alla storia e alle statistiche della Scuderia Ferrari in Formula 1.",
-    "genre": "Sports Analytics",
-    "keywords": "Ferrari F1, Statistiche Ferrari, Scuderia Ferrari Dati, Formula 1 Stats",
+    "inLanguage": "it-IT",
+    "publisher": { "@id": "https://formula-rossa.it/#organization" },
     "about": {
       "@type": "SportsOrganization",
-      "name": "Scuderia Ferrari"
+      "name": "Scuderia Ferrari",
+      "alternateName": ["Ferrari", "Scuderia Ferrari HP"],
+      "sameAs": [
+        "https://it.wikipedia.org/wiki/Scuderia_Ferrari"
+      ]
     }
   };
 
