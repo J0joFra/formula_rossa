@@ -133,6 +133,16 @@ export default function SEO({
       {/* ── Canonical ── */}
       <link rel="canonical" href={canonical} />
 
+      {/* Il feed delle news, dichiarato su ogni pagina: è così che un lettore
+          di feed lo trova senza doverne conoscere l'indirizzo, ed è anche il
+          modo più semplice per sapere cosa è uscito di nuovo. */}
+      <link
+        rel="alternate"
+        type="application/rss+xml"
+        title="Formula Rossa — News"
+        href={`${BASE_URL}/news/feed.xml`}
+      />
+
       {/* ── Robots ── */}
       {noIndex
         ? <meta name="robots" content="noindex, nofollow" />
