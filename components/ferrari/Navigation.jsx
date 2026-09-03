@@ -38,12 +38,23 @@ const STAGIONE = {
   ],
 };
 
-const MENU = [ARCHIVIO, STAGIONE];
+/* "Gioca" era un link singolo alla Fan Zone. Con il Fanta GP le pagine sono
+   due, e il Fanta è quella che conta: sta in cima, dove si guarda per prima. */
+const GIOCA = {
+  id: 'gioca',
+  label: 'Gioca',
+  icon: Gamepad2,
+  items: [
+    { href: '/fanta',   label: 'Fanta GP', desc: 'Pronostica l’ordine d’arrivo' },
+    { href: '/fanzone', label: 'Fan Zone', desc: 'Mini-giochi e SF Token' },
+  ],
+};
+
+const MENU = [ARCHIVIO, STAGIONE, GIOCA];
 
 /* Voci singole: una pagina, un link. Niente tendine da una voce sola. */
 const LINKS = [
-  { href: '/news',    label: 'News', icon: Newspaper },
-  { href: '/fanzone', label: 'Gioca', icon: Gamepad2 },
+  { href: '/news', label: 'News', icon: Newspaper },
 ];
 
 export default function Navigation() {
