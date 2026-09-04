@@ -152,32 +152,13 @@ export default function Home() {
   // 1950 è la prima stagione, quindi va contata.
   const stagioni = new Date().getFullYear() - 1950 + 1;
 
-  const homeJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'Formula Rossa',
-    url: 'https://formula-rossa.it',
-    description: 'Piattaforma di statistiche e analisi dati della Scuderia Ferrari F1.',
-    inLanguage: 'it',
-  };
-
-  const orgJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'Formula Rossa',
-    url: 'https://formula-rossa.it',
-    logo: 'https://formula-rossa.it/data/images/formula-rossa-logo.png',
-    foundingDate: '2024',
-    description: 'Piattaforma indipendente italiana di data intelligence sulla Scuderia Ferrari in Formula 1.',
-    sameAs: [
-      'https://www.instagram.com/formularossa.it',
-      'https://www.linkedin.com/company/formula-rossa/',
-      'https://www.youtube.com/@jofrancalanci',
-      'https://www.x.com/jofrancalanci',
-      'https://whatsapp.com/channel/0029Vb7EagL6WaKvnD5Slm30',
-    ],
-  };
-
+  /* Qui c'erano un secondo nodo WebSite e un secondo Organization, che
+     ripetevano quelli già emessi da _document.jsx e da components/seo.js su
+     ogni pagina — con una contraddizione: `foundingDate` diceva 2024 qui e
+     2025 là. Due entità con lo stesso nome e dati diversi non si sommano: chi
+     legge deve scegliere quale credere, ed è il tipo di incoerenza che fa
+     scartare tutto lo structured data. Resta solo l'applicazione, che è
+     l'unica entità che questa pagina aggiunge davvero. */
   const appJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'MobileApplication',
@@ -200,10 +181,10 @@ export default function Home() {
         title="Statistiche e Analisi Dati Ferrari F1"
         description="Formula Rossa è la piattaforma italiana per i tifosi della Scuderia Ferrari: statistiche F1, dati storici e classifiche sempre aggiornate."
         path="/"
-        jsonLd={homeJsonLd}
+        /* Passa dal componente SEO, quindi finisce nella <head> come gli
+           altri: i due <script> sciolti qui sotto stavano nel <body>. */
+        jsonLd={appJsonLd}
       />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(appJsonLd) }} />
 
       <Navigation />
 
