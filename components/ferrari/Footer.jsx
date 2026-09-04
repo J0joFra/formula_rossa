@@ -18,7 +18,7 @@
 import React from 'react';
 import Link from 'next/link';
 import {
-  Instagram, Twitter, Youtube, Linkedin, MessageCircle, Heart,
+  Instagram, Twitter, Youtube, Linkedin, Mail, Heart,
 } from 'lucide-react';
 import { GRIDUP_URL } from '../../lib/gridup';
 
@@ -45,7 +45,11 @@ const SEZIONI = [
       { label: 'Fanta GP', href: '/fanta' },
       { label: 'Fan Zone', href: '/fanzone' },
       { label: 'Chi siamo',   href: '/about' },
-      { label: 'Contatti', href: 'mailto:info@formula-rossa.it' },
+      /* "Contatti" non era una pagina: era un `mailto:` con l'etichetta di una
+         pagina, quindi cliccandolo si apriva il client di posta invece di
+         aprirsi una pagina — e su un telefono senza client configurato non
+         succedeva niente. La stessa email ora sta fra le icone qui sotto, con
+         l'icona della posta, che dice cosa fa prima di cliccarci. */
       { label: 'App GridUp',    href: GRIDUP_URL },
     ],
   },
@@ -61,8 +65,10 @@ const SOCIAL = [
   { icon: Linkedin,      href: 'https://www.linkedin.com/company/formula-rossa/',       label: 'Formula Rossa su LinkedIn' },
   { icon: Youtube,       href: 'https://www.youtube.com/@jofrancalanci',                label: 'Formula Rossa su YouTube' },
   { icon: Instagram,     href: 'https://www.instagram.com/formularossa.it',             label: 'Formula Rossa su Instagram' },
-  { icon: MessageCircle, href: 'https://whatsapp.com/channel/0029Vb7EagL6WaKvnD5Slm30', label: 'Formula Rossa su WhatsApp' },
   { icon: Twitter,       href: 'https://www.x.com/jofrancalanci',                       label: 'Formula Rossa su X' },
+  /* L'email in fondo, dopo i social: non è un profilo da seguire, è il modo
+     di scrivere a qualcuno, e va cercata lì dove si cerca un contatto. */
+  { icon: Mail,          href: 'mailto:info@formula-rossa.it',                          label: 'Scrivi a info@formula-rossa.it' },
 ];
 
 const CLS_LINK =
@@ -133,8 +139,12 @@ export default function Footer() {
                 <a
                   key={s.href}
                   href={s.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  /* `target="_blank"` solo per i link web. Su un `mailto:`
+                     aprirebbe una scheda vuota che resta lì dopo che il client
+                     di posta è partito. */
+                  {...(s.href.startsWith('http')
+                    ? { target: '_blank', rel: 'noopener noreferrer' }
+                    : {})}
                   aria-label={s.label}
                   title={s.label}
                   className="w-11 h-11 rounded-[13px] grid place-items-center bg-[var(--fr-surface-2)] text-[var(--fr-text-muted)] hover:bg-[var(--fr-red)] hover:text-white transition-colors"
