@@ -10,6 +10,8 @@ import {
 import PageShell, { PageHeader, StatTile } from '../components/ui/PageShell';
 import Link from 'next/link';
 import { leggi } from '../lib/supabaseServer';
+import Editoriale from '../components/ui/Editoriale';
+import { STATISTICHE } from '../content/editoriale';
 import { countryConfig } from '../lib/f1/circuitFlags';
 import {
   DarkTooltip, AccordionSection, TrophySVG, WinnerRow,
@@ -25,7 +27,7 @@ const POINTS_PERIODS = [
   { 
     name: '1950-1959', 
     color: 'var(--fr-red)', // Rosso Ferrari
-    description: '8-6-4-3-2 · solo miglior risultato',
+    description: '8-6-4-3-2 + 1 al giro veloce · contano solo i migliori risultati',
     start: 1950, 
     end: 1959,
     icon: '🏁'
@@ -33,7 +35,7 @@ const POINTS_PERIODS = [
   { 
     name: '1960-1990', 
     color: 'var(--fr-accent-amber)', // Oro
-    description: '9-6-4-3-2-1 · dal 1976 entrambi i piloti',
+    description: '9-6-4-3-2-1 (8 al vincitore nel 1960) · contano solo i migliori risultati',
     start: 1960, 
     end: 1990,
     icon: '⭐'
@@ -41,7 +43,7 @@ const POINTS_PERIODS = [
   { 
     name: '1991-2009', 
     color: 'var(--fr-accent-blue)', // Blu
-    description: '10-6-4-3-2-1 · tutti i risultati',
+    description: '10-6-4-3-2-1, dal 2003 10-8-6-5-4-3-2-1 · tutti i risultati',
     start: 1991, 
     end: 2009,
     icon: '🏆'
@@ -49,7 +51,7 @@ const POINTS_PERIODS = [
   { 
     name: '2010-oggi', 
     color: 'var(--fr-accent-green)', // Verde
-    description: '25-18-15-12-10-8-6-4-2-1 · sprint + giro veloce',
+    description: '25-18-15-12-10-8-6-4-2-1 · sprint dal 2021, giro veloce 2019-2024',
     start: 2010, 
     end: new Date().getFullYear(),
     icon: '⚡'
@@ -160,6 +162,8 @@ export default function StatisticsPage({
         <StatTile value={champSeasons.length} label="Titoli costruttori" />
         <StatTile value={poleStats.reduce((a, d) => a + d.count, 0).toLocaleString('it-IT')} label="Pole position" />
       </div>
+
+      <Editoriale testo={STATISTICHE} className="mb-8" />
 
         <motion.div
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }}
