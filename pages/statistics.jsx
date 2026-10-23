@@ -86,15 +86,25 @@ export async function getStaticProps() {
     leggi(c => c.from('ferrari_points_by_year').select('*')),
     leggi(c => c.from('ferrari_driver_nationalities').select('*')),
     leggi(c => c.from('ferrari_wins_by_grand_prix').select('*').limit(15)),
-    leggi(c => c.from('ferrari_driver_poles').select('*').limit(8)),
+    leggi(c => c.from('ferrari_driver_poles').select('*')),
     leggi(c => c.from('ferrari_driver_fastest_laps').select('*').limit(8)),
     leggi(c => c.from('ferrari_championship_seasons').select('*')),
     leggi(c => c.from('ferrari_driver_podiums').select('*').limit(8)),
     leggi(c => c.from('ferrari_season_summary').select('*').limit(20)),
   ]);
 
+  /* I totali si calcolano sugli elenchi completi: prima erano le somme delle
+     sole righe mostrate (primi 10 vincitori, prime 8 pole), quindi la pagina
+     diceva "170 vittorie" e "10 piloti vincitori". */
+  const totali = {
+    vittorie: (wins || []).reduce((a, d) => a + (d.wins || 0), 0),
+    vincitori: (wins || []).filter(d => d.wins > 0).length,
+    pole: (poles || []).reduce((a, d) => a + (d.poles || 0), 0),
+  };
+
   return {
     props: {
+      totali,
       pilotWins: (wins || []).slice(0, 10).map(d => ({ id: d.driver_id, name: d.full_name, count: d.wins })),
       history: (pts || []).map(r => ({ year: r.year.toString(), points: r.points ?? 0 })),
       nationalities: (nats || []).map(r => {
@@ -109,7 +119,7 @@ export async function getStaticProps() {
         flag: countryConfig[g.country_id]?.code || '',
         color: countryConfig[g.country_id]?.color || RED,
       })),
-      poleStats: (poles || []).map(d => ({ id: d.driver_id, name: d.full_name, count: d.poles })),
+      poleStats: (poles || []).slice(0, 8).map(d => ({ id: d.driver_id, name: d.full_name, count: d.poles })),
       fastestLaps: (fl || []).map(d => ({ id: d.driver_id, name: d.full_name, count: d.fastest_laps })),
       champSeasons: champs || [],
       podiumDrivers: (pods || []).map(d => ({
@@ -125,7 +135,7 @@ export async function getStaticProps() {
 }
 
 export default function StatisticsPage({
-  pilotWins, history, nationalities, grandPrix, poleStats,
+  totali, pilotWins, history, nationalities, grandPrix, poleStats,
   fastestLaps, champSeasons, podiumDrivers, seasonSummary,
 }) {
   const [openSection, setOpenSection] = useState('winners');
@@ -153,14 +163,13 @@ export default function StatisticsPage({
         breadcrumb={[{ label: 'Archivio' }, { label: 'Statistiche' }]}
       />
 
-      {/* Quattro numeri di sintesi. Le vittorie e le pole sono somme di quello
-          che le classifiche qui sotto mostrano riga per riga, quindi restano
-          coerenti con la pagina invece di essere scritte a mano. */}
+      {/* Quattro numeri di sintesi, calcolati in getStaticProps sugli elenchi
+          completi del database invece che scritti a mano. */}
       <div className="grid grid-cols-2 md:grid-cols-4 rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)] divide-x divide-y md:divide-y-0 divide-[var(--fr-border)] mb-8">
-        <StatTile accent value={pilotWins.reduce((a, d) => a + d.count, 0).toLocaleString('it-IT')} label="Vittorie" />
-        <StatTile value={pilotWins.length} label="Piloti vincitori" />
+        <StatTile accent value={totali.vittorie.toLocaleString('it-IT')} label="Vittorie" />
+        <StatTile value={totali.vincitori} label="Piloti vincitori" />
         <StatTile value={champSeasons.length} label="Titoli costruttori" />
-        <StatTile value={poleStats.reduce((a, d) => a + d.count, 0).toLocaleString('it-IT')} label="Pole position" />
+        <StatTile value={totali.pole.toLocaleString('it-IT')} label="Pole position" />
       </div>
 
       <Editoriale testo={STATISTICHE} className="mb-8" />
