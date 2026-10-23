@@ -30,7 +30,6 @@ const STATICHE = [
   ['/circuiti',             '0.8', 'monthly'],
   ['/gp',                   '0.8', 'weekly'],
   ['/news',                 '0.8', 'daily'],
-  ['/fanta',                '0.8', 'weekly'],
   ['/fanzone',              '0.7', 'monthly'],
   ['/games/trivia',         '0.5', 'monthly'],
   ['/games/pitstop',        '0.5', 'monthly'],

@@ -20,7 +20,7 @@ import Link from 'next/link';
 import {
   Instagram, Twitter, Youtube, Linkedin, Mail, Heart,
 } from 'lucide-react';
-import { GRIDUP_URL } from '../../lib/gridup';
+import { GRIDUP } from '../../lib/apps';
 
 const SEZIONI = [
   {
@@ -42,7 +42,6 @@ const SEZIONI = [
   {
     titolo: 'Progetto',
     voci: [
-      { label: 'Fanta GP', href: '/fanta' },
       { label: 'Fan Zone', href: '/fanzone' },
       { label: 'Chi siamo',   href: '/about' },
       /* "Contatti" non era una pagina: era un `mailto:` con l'etichetta di una
@@ -50,7 +49,8 @@ const SEZIONI = [
          aprirsi una pagina — e su un telefono senza client configurato non
          succedeva niente. La stessa email ora sta fra le icone qui sotto, con
          l'icona della posta, che dice cosa fa prima di cliccarci. */
-      { label: 'App GridUp',    href: GRIDUP_URL },
+      { label: 'App GridUp',    href: GRIDUP.url },
+      { label: 'Driver Clash',  href: '/fanzone#app' },
     ],
   },
 ];

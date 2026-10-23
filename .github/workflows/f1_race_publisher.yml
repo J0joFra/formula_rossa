@@ -1,186 +1,38 @@
 name: F1 Race Weekend Publisher
 
 # ─── TRIGGER ────────────────────────────────────────────────────────────────────
-# Questo workflow si esegue automaticamente secondo il calendario F1 2026.
-# Logica:
-#   - Giorno prima del GP  (venerdi):  articolo preview/anteprima weekend
-#   - Qualifiche (sabato):             articolo qualifiche (live + analisi post)
-#   - Giorno della gara (domenica):    articolo pre-gara (mattina) + post-gara (sera)
-#   - Giorno dopo (lunedì):            articolo recap & classifiche
-
-# ATTENZIONE sull'ultimo campo dei cron (giorno della settimana): deve restare
-# "*". In cron, quando sia il giorno del mese sia il giorno della settimana sono
-# valorizzati, le due condizioni si combinano in OR e non in AND. Scrivendo
-# "0 8 6 3 5" per intendere "6 marzo alle 8" si ottiene invece "6 marzo OPPURE
-# ogni venerdì di marzo": il bot partiva 206 volte l'anno invece di 110, e nei
-# weekend senza gara pubblicava l'anteprima di un Gran Premio inesistente.
+# Due orari fissi al giorno; cosa pubblicare lo decide lo step "Determina la
+# modalità" leggendo il calendario 2026 qui sotto (RACE_DAYS):
+#   - 2 giorni prima della gara:   anteprima del weekend   (preview)
+#   - 1 giorno prima:              qualifiche              (qualifiche)
+#   - giorno della gara, 08 UTC:   pre-gara                (pre-gara)
+#   - giorno della gara, 16 UTC:   post-gara               (post-gara)
+#   - giorno dopo:                 recap e classifiche     (recap)
+#   - tutti gli altri giorni, 08 UTC: sintesi quotidiana   (normale)
+#
+# Prima c'era un cron per ogni giorno di ogni Gran Premio, 110 in tutto. Dopo
+# la modifica del 1° settembre GitHub ha smesso di avviare il workflow (ultima
+# esecuzione: 12 luglio), la pulizia giornaliera ha continuato a cancellare gli
+# articoli dopo 30 giorni e la pagina /news si è svuotata. Due cron fissi e il
+# calendario nello script non hanno quel problema, e la modalità si ricava dalla
+# distanza dalla gara invece che dal giorno della settimana: così funzionano
+# anche i GP che si corrono di sabato (Baku, Las Vegas).
 
 on:
   schedule:
-
-    # ──── AUSTRALIA GP (6–8 mar 2026) ─────────────────────────────
-    - cron: "0 8 6 3 *"
-    - cron: "0 8 7 3 *"
-    - cron: "0 8 8 3 *"
-    - cron: "0 16 8 3 *"
-    - cron: "0 8 9 3 *"
-
-    # ──── CINA GP (13–15 mar 2026) ────────────────────────────────
-    - cron: "0 8 13 3 *"
-    - cron: "0 8 14 3 *"
-    - cron: "0 8 15 3 *"
-    - cron: "0 16 15 3 *"
-    - cron: "0 8 16 3 *"
-
-    # ──── GIAPPONE GP (27–29 mar 2026) ────────────────────────────
-    - cron: "0 8 27 3 *"
-    - cron: "0 8 28 3 *"
-    - cron: "0 8 29 3 *"
-    - cron: "0 16 29 3 *"
-    - cron: "0 8 30 3 *"
-
-    # ──── MIAMI GP (1–3 mag 2026) ─────────────────────────────────
-    - cron: "0 8 1 5 *"
-    - cron: "0 8 2 5 *"
-    - cron: "0 8 3 5 *"
-    - cron: "0 16 3 5 *"
-    - cron: "0 8 4 5 *"
-
-    # ──── CANADA GP (22–24 mag 2026) ──────────────────────────────
-    - cron: "0 8 22 5 *"
-    - cron: "0 8 23 5 *"
-    - cron: "0 8 24 5 *"
-    - cron: "0 16 24 5 *"
-    - cron: "0 8 25 5 *"
-
-    # ──── MONACO GP (5–7 giu 2026) ────────────────────────────────
-    - cron: "0 8 5 6 *"
-    - cron: "0 8 6 6 *"
-    - cron: "0 8 7 6 *"
-    - cron: "0 16 7 6 *"
-    - cron: "0 8 8 6 *"
-
-    # ──── SPAGNA GP (12–14 giu 2026) ──────────────────────────────
-    - cron: "0 8 12 6 *"
-    - cron: "0 8 13 6 *"
-    - cron: "0 8 14 6 *"
-    - cron: "0 16 14 6 *"
-    - cron: "0 8 15 6 *"
-
-    # ──── AUSTRIA GP (26–28 giu 2026) ─────────────────────────────
-    - cron: "0 8 26 6 *"
-    - cron: "0 8 27 6 *"
-    - cron: "0 8 28 6 *"
-    - cron: "0 16 28 6 *"
-    - cron: "0 8 29 6 *"
-
-    # ──── GRAN BRETAGNA GP (3–5 lug 2026) ─────────────────────────
-    - cron: "0 8 3 7 *"
-    - cron: "0 8 4 7 *"
-    - cron: "0 8 5 7 *"
-    - cron: "0 16 5 7 *"
-    - cron: "0 8 6 7 *"
-
-    # ──── BELGIO GP (17–19 lug 2026) ──────────────────────────────
-    - cron: "0 8 17 7 *"
-    - cron: "0 8 18 7 *"
-    - cron: "0 8 19 7 *"
-    - cron: "0 16 19 7 *"
-    - cron: "0 8 20 7 *"
-
-    # ──── UNGHERIA GP (24–26 lug 2026) ────────────────────────────
-    - cron: "0 8 24 7 *"
-    - cron: "0 8 25 7 *"
-    - cron: "0 8 26 7 *"
-    - cron: "0 16 26 7 *"
-    - cron: "0 8 27 7 *"
-
-    # ──── OLANDA GP (21–23 ago 2026) ──────────────────────────────
-    - cron: "0 8 21 8 *"
-    - cron: "0 8 22 8 *"
-    - cron: "0 8 23 8 *"
-    - cron: "0 16 23 8 *"
-    - cron: "0 8 24 8 *"
-
-    # ──── ITALIA GP (4–6 set 2026) ────────────────────────────────
-    - cron: "0 8 4 9 *"
-    - cron: "0 8 5 9 *"
-    - cron: "0 8 6 9 *"
-    - cron: "0 16 6 9 *"
-    - cron: "0 8 7 9 *"
-
-    # ──── SPAGNA (Madrid) GP (11–13 set 2026) ─────────────────────
-    - cron: "0 8 11 9 *"
-    - cron: "0 8 12 9 *"
-    - cron: "0 8 13 9 *"
-    - cron: "0 16 13 9 *"
-    - cron: "0 8 14 9 *"
-
-    # ──── AZERBAIJAN GP (24–26 set 2026) ──────────────────────────
-    - cron: "0 8 24 9 *"
-    - cron: "0 8 25 9 *"
-    - cron: "0 8 26 9 *"
-    - cron: "0 16 26 9 *"
-    - cron: "0 8 27 9 *"
-
-    # ──── SINGAPORE GP (9–11 ott 2026) ────────────────────────────
-    - cron: "0 8 9 10 *"
-    - cron: "0 8 10 10 *"
-    - cron: "0 8 11 10 *"
-    - cron: "0 16 11 10 *"
-    - cron: "0 8 12 10 *"
-
-    # ──── USA GP (23–25 ott 2026) ─────────────────────────────────
-    - cron: "0 8 23 10 *"
-    - cron: "0 8 24 10 *"
-    - cron: "0 8 25 10 *"
-    - cron: "0 16 25 10 *"
-    - cron: "0 8 26 10 *"
-
-    # ──── MESSICO GP (30 ott – 1 nov 2026) ────────────────────────
-    - cron: "0 8 30 10 *"
-    - cron: "0 8 31 10 *"
-    - cron: "0 8 1 11 *"
-    - cron: "0 16 1 11 *"
-    - cron: "0 8 2 11 *"
-
-    # ──── BRASILE GP (6–8 nov 2026) ───────────────────────────────
-    - cron: "0 8 6 11 *"
-    - cron: "0 8 7 11 *"
-    - cron: "0 8 8 11 *"
-    - cron: "0 16 8 11 *"
-    - cron: "0 8 9 11 *"
-
-    # ──── LAS VEGAS GP (20–22 nov 2026) ───────────────────────────
-    - cron: "0 8 20 11 *"
-    - cron: "0 8 21 11 *"
-    - cron: "0 8 22 11 *"
-    - cron: "0 16 22 11 *"
-    - cron: "0 8 23 11 *"
-
-    # ──── QATAR GP (27–29 nov 2026) ───────────────────────────────
-    - cron: "0 8 27 11 *"
-    - cron: "0 8 28 11 *"
-    - cron: "0 8 29 11 *"
-    - cron: "0 16 29 11 *"
-    - cron: "0 8 30 11 *"
-
-    # ──── ABU DHABI GP (4–6 dic 2026) ─────────────────────────────
-    - cron: "0 8 4 12 *"
-    - cron: "0 8 5 12 *"
-    - cron: "0 8 6 12 *"
-    - cron: "0 16 6 12 *"
-    - cron: "0 8 7 12 *"
+    - cron: "0 8 * * *"
+    - cron: "0 16 * * *"
 
   # Consente anche l'esecuzione manuale da GitHub UI
   workflow_dispatch:
     inputs:
       mode:
-        description: "Modalità articolo (preview / qualifiche / pre-gara / post-gara / recap)"
+        description: "Modalità articolo (normale / preview / qualifiche / pre-gara / post-gara / recap)"
         required: true
-        default: "preview"
+        default: "normale"
         type: choice
         options:
+          - normale
           - preview
           - qualifiche
           - pre-gara
@@ -225,48 +77,86 @@ jobs:
 
       - name: Determina la modalità in base alla data/ora
         id: detect_mode
+        env:
+          MANUAL_MODE: ${{ github.event.inputs.mode }}
+          MANUAL_GP: ${{ github.event.inputs.gp_name }}
         run: |
           python3 - <<'EOF'
           import os
-          from datetime import datetime, timezone
+          from datetime import date, datetime, timezone
+
+          # Giorno della gara (UTC) → nome del Gran Premio. Calendario 2026.
+          RACE_DAYS = {
+              date(2026, 3, 8):   "Australia",
+              date(2026, 3, 15):  "Cina",
+              date(2026, 3, 29):  "Giappone",
+              date(2026, 5, 3):   "Miami",
+              date(2026, 5, 24):  "Canada",
+              date(2026, 6, 7):   "Monaco",
+              date(2026, 6, 14):  "Spagna",
+              date(2026, 6, 28):  "Austria",
+              date(2026, 7, 5):   "Gran Bretagna",
+              date(2026, 7, 19):  "Belgio",
+              date(2026, 7, 26):  "Ungheria",
+              date(2026, 8, 23):  "Olanda",
+              date(2026, 9, 6):   "Italia",
+              date(2026, 9, 13):  "Madrid",
+              date(2026, 9, 26):  "Azerbaijan",
+              date(2026, 10, 11): "Singapore",
+              date(2026, 10, 25): "Stati Uniti",
+              date(2026, 11, 1):  "Messico",
+              date(2026, 11, 8):  "Brasile",
+              date(2026, 11, 22): "Las Vegas",
+              date(2026, 11, 29): "Qatar",
+              date(2026, 12, 6):  "Abu Dhabi",
+          }
+          # Distanza dalla gara (in giorni) → modalità.
+          OFFSET_MODE = {-2: "preview", -1: "qualifiche", 1: "recap"}
 
           now = datetime.now(timezone.utc)
-          hour = now.hour
-          weekday = now.weekday()  # 0=Lun, 4=Ven, 5=Sab, 6=Dom
+          today = now.date()
+          mode, gp, skip = "", "", False
 
-          # Sovrascrittura manuale da workflow_dispatch
-          manual = "${{ github.event.inputs.mode }}"
-          if manual:
-              mode = manual
-          elif weekday == 4:           # Venerdì
-              mode = "preview"
-          elif weekday == 5:           # Sabato
-              mode = "qualifiche"
-          elif weekday == 6 and hour < 13:  # Domenica mattina
-              mode = "pre-gara"
-          elif weekday == 6:           # Domenica pomeriggio/sera
-              mode = "post-gara"
-          else:                        # Lunedì
-              mode = "recap"
+          if os.environ.get("MANUAL_MODE"):
+              mode, gp = os.environ["MANUAL_MODE"], os.environ.get("MANUAL_GP", "")
+          else:
+              for race_day, name in RACE_DAYS.items():
+                  offset = (today - race_day).days
+                  if offset == 0:
+                      mode, gp = ("pre-gara" if now.hour < 13 else "post-gara"), name
+                  elif offset in OFFSET_MODE:
+                      mode, gp = OFFSET_MODE[offset], name
+                  if mode:
+                      break
+              if not mode:
+                  # Fuori dal weekend di gara: una sintesi al mattino, niente il pomeriggio.
+                  mode, skip = "normale", now.hour >= 13
+              elif mode != "post-gara" and now.hour >= 13:
+                  # Il cron delle 16 serve solo al post-gara.
+                  skip = True
 
           with open(os.environ["GITHUB_OUTPUT"], "a") as f:
               f.write(f"mode={mode}\n")
+              f.write(f"gp={gp}\n")
+              f.write(f"skip={'true' if skip else 'false'}\n")
 
-          print(f"Modalità rilevata: {mode}")
+          print(f"Modalità: {mode} | GP: {gp or '-'} | salta: {skip}")
           EOF
 
       - name: Esegui aggregatore F1
+        if: steps.detect_mode.outputs.skip != 'true'
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           FIREBASE_CREDENTIALS_JSON: ${{ secrets.FIREBASE_CREDENTIALS_JSON }}
           F1_MODE: ${{ steps.detect_mode.outputs.mode }}
-          GP_NAME: ${{ github.event.inputs.gp_name }}
+          GP_NAME: ${{ steps.detect_mode.outputs.gp }}
           FIREBASE_CREDENTIALS: F1bot/firebase-credentials.json
         run: |
           echo "$FIREBASE_CREDENTIALS_JSON" > F1bot/firebase-credentials.json
           python F1bot/f1_aggregator.py --mode "$F1_MODE" ${GP_NAME:+--gp "$GP_NAME"}
 
       - name: Salva seen_articles.json aggiornato
+        if: steps.detect_mode.outputs.skip != 'true'
         uses: actions/cache@v4
         with:
           path: seen_articles.json

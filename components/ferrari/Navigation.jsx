@@ -1,12 +1,11 @@
 'use client';
 // components/ferrari/Navigation.jsx
-// Menu: Archivio ▾ · Stagione ▾ · News · Gioca + app GridUp.
+// Menu: Archivio ▾ · Stagione ▾ · Gioca ▾ · News + app GridUp.
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useSession, signIn, signOut } from 'next-auth/react';
 import {
-  BarChart3, Trophy, Newspaper, Gamepad2, LogOut, Smartphone,
+  BarChart3, Trophy, Newspaper, Gamepad2, Smartphone,
   ChevronDown, Menu, X,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -38,15 +37,16 @@ const STAGIONE = {
   ],
 };
 
-/* "Gioca" era un link singolo alla Fan Zone. Con il Fanta GP le pagine sono
-   due, e il Fanta è quella che conta: sta in cima, dove si guarda per prima. */
+/* I tre mini-giochi, più la Fan Zone che li raccoglie insieme alle app. */
 const GIOCA = {
   id: 'gioca',
   label: 'Gioca',
   icon: Gamepad2,
   items: [
-    { href: '/fanta',   label: 'Fanta GP', desc: 'Pronostica l’ordine d’arrivo' },
-    { href: '/fanzone', label: 'Fan Zone', desc: 'Mini-giochi e SF Token' },
+    { href: '/fanzone',            label: 'Fan Zone',     desc: 'Mini-giochi e app di Formula Rossa' },
+    { href: '/games/trivia',       label: 'Trivia',       desc: 'Domande sulla storia della Scuderia' },
+    { href: '/games/pitstop',      label: 'Pit Stop',     desc: 'Riflessi al semaforo' },
+    { href: '/games/circuit-rush', label: 'Circuit Rush', desc: 'Schiva i detriti in pista' },
   ],
 };
 
@@ -60,7 +60,6 @@ const LINKS = [
 export default function Navigation() {
   const [openMenu, setOpenMenu] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { data: session } = useSession();
   const pathname = usePathname();
   const navRef = useRef(null);
 
@@ -205,31 +204,6 @@ export default function Navigation() {
 
             <div className="hidden sm:block"><ThemeToggle /></div>
 
-            <div className="hidden lg:flex items-center pl-2 ml-1 border-l border-[var(--fr-border)]">
-              {session ? (
-                <div className="flex items-center gap-2.5">
-                  <img
-                    src={session.user.image}
-                    alt={`Avatar di ${session.user.name}`}
-                    className="w-9 h-9 rounded-full border-2 border-[var(--fr-red)] object-cover"
-                  />
-                  <button
-                    onClick={() => signOut()}
-                    className="text-[11px] font-bold text-[var(--fr-text-muted)] hover:text-[var(--fr-text)] flex items-center gap-1 transition-colors"
-                  >
-                    Esci <LogOut className="w-3 h-3" aria-hidden="true" />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => signIn('google')}
-                  className="px-4 py-2.5 rounded-xl text-[12px] font-bold border-2 border-[var(--fr-border-strong)] text-[var(--fr-text)] hover:border-[var(--fr-red)] transition-colors"
-                >
-                  Accedi
-                </button>
-              )}
-            </div>
-
             <button
               onClick={() => setMobileOpen(o => !o)}
               aria-label="Menu"
@@ -308,20 +282,8 @@ export default function Navigation() {
                 Apri l&apos;app GridUp
               </a>
 
-              <div className="flex items-center justify-between pt-4 border-t border-[var(--fr-border)]">
+              <div className="flex items-center pt-4 border-t border-[var(--fr-border)]">
                 <ThemeToggle />
-                {session ? (
-                  <button onClick={() => signOut()} className="flex items-center gap-2 text-sm font-bold text-[var(--fr-text-muted)]">
-                    Esci <LogOut className="w-4 h-4" aria-hidden="true" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => signIn('google')}
-                    className="px-5 py-2.5 rounded-xl text-[12px] font-bold border-2 border-[var(--fr-border-strong)] text-[var(--fr-text)]"
-                  >
-                    Accedi
-                  </button>
-                )}
               </div>
             </div>
           </motion.div>

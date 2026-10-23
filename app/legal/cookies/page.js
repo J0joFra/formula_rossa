@@ -2,13 +2,13 @@ import { Cookie, Calendar, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default function CookiesPage() {
-  const lastUpdate = "27 agosto 2026";
+  const lastUpdate = "23 ottobre 2026";
 
   const cookies = [
     {
-      name: "NextAuth (sessione)",
-      duration: "Sessione",
-      purpose: "Mantiene l'accesso dell'utente registrato",
+      name: "fr-sf-tokens (localStorage)",
+      duration: "Persistente",
+      purpose: "Conserva sul dispositivo i punti guadagnati nei mini-giochi",
       type: "Tecnico"
     },
     {

@@ -3,8 +3,7 @@ import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Coins, Trophy, Zap } from 'lucide-react';
 import GameShell from '../../components/ui/GameShell';
-import { useSession } from "next-auth/react";
-import { addTokens, getTokens, initUser } from '../../lib/tokens';
+import { addTokens, getTokens } from '../../lib/tokens';
 
 // ─── RATING CONFIG ────────────────────────────────────────────────────────────
 const RATINGS = [
@@ -75,7 +74,6 @@ function AnalogTimer({ progress, color }) {
 // ─── COMPONENTE PRINCIPALE ────────────────────────────────────────────────────
 export default function PitStopGame() {
   const router = useRouter();
-  const { data: session } = useSession();
 
   const [gameState, setGameState] = useState('idle');  // idle | countdown | running | result
   const [targetTime, setTargetTime] = useState(0);
@@ -92,16 +90,8 @@ export default function PitStopGame() {
   const rafRef = useRef();
   const countdownRef = useRef();
 
-  // Init Firestore
-  useEffect(() => {
-    if (!session) return;
-    const init = async () => {
-      await initUser(session);
-      const t = await getTokens(session);
-      setTotalTokens(t);
-    };
-    init();
-  }, [session]);
+  // Saldo salvato sul dispositivo
+  useEffect(() => { setTotalTokens(getTokens()); }, []);
 
   const generateTarget = () => {
     const t = parseFloat((Math.random() * 3 + 2).toFixed(2)); // 2.00 – 5.00s
@@ -165,16 +155,9 @@ export default function PitStopGame() {
     if (bestTime === null || diff < bestTime) setBestTime(diff);
 
     // Salva token
-    const save = async () => {
-      if (!session) return;
-      const earned = Math.floor(r.points / 10);
-      setEarnedTokens(earned);
-      if (earned > 0) {
-        await addTokens(session, earned);
-        setTotalTokens(prev => prev + earned);
-      }
-    };
-    save();
+    const earned = Math.floor(r.points / 10);
+    setEarnedTokens(earned);
+    if (earned > 0) setTotalTokens(addTokens(earned));
 
     setGameState('result');
   };
@@ -210,7 +193,7 @@ export default function PitStopGame() {
   };
 
   return (
-    <GameShell seo={seo} title="Pit Stop Challenge" tokens={session ? totalTokens : null}>
+    <GameShell seo={seo} title="Pit Stop Challenge" tokens={totalTokens}>
       <div className="max-w-md mx-auto">
 
           {/* TITOLO */}
@@ -339,7 +322,7 @@ export default function PitStopGame() {
                     </div>
                   )}
 
-                  {session && (
+                  {totalTokens > 0 && (
                     <p className="text-zinc-600 text-xs font-bold">
                       Totale wallet: <span className="text-zinc-300">{totalTokens.toLocaleString()} SFT</span>
                     </p>

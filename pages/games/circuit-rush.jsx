@@ -3,8 +3,7 @@ import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, RefreshCw, Gauge, Heart, Zap, Battery } from 'lucide-react';
 import GameShell from '../../components/ui/GameShell';
-import { useSession } from "next-auth/react";
-import { addTokens, getTokens, initUser } from '../../lib/tokens';
+import { addTokens, getTokens } from '../../lib/tokens';
 
 // ─── COSTANTI ────────────────────────────────────────────────────────────────
 const LANES = [16.66, 50, 83.33]; // % orizzontale delle 3 corsie
@@ -93,7 +92,6 @@ function EnergyPickup() {
 // ─── COMPONENTE PRINCIPALE ────────────────────────────────────────────────────
 export default function CircuitRush() {
   const router = useRouter();
-  const { data: session } = useSession();
 
   const [gameState, setGameState] = useState('idle');
   const [score, setScore] = useState(0);
@@ -121,23 +119,13 @@ export default function CircuitRush() {
   // Sync carLane ref
   useEffect(() => { carLaneRef.current = carLane; }, [carLane]);
 
-  // Init Firestore
-  useEffect(() => {
-    if (!session) return;
-    const init = async () => {
-      await initUser(session);
-      const t = await getTokens(session);
-      setTotalTokens(t);
-    };
-    init();
-  }, [session]);
+  // Saldo salvato sul dispositivo
+  useEffect(() => { setTotalTokens(getTokens()); }, []);
 
-  const saveTokens = async (points) => {
-    if (!session) return;
+  const saveTokens = (points) => {
     const earned = Math.floor(points / 5);
     setEarnedTokens(earned);
-    await addTokens(session, earned);
-    setTotalTokens(prev => prev + earned);
+    setTotalTokens(addTokens(earned));
   };
 
   const startGame = () => {
@@ -167,7 +155,7 @@ export default function CircuitRush() {
       cancelAnimationFrame(gameLoopRef.current);
       saveTokens(scoreRef.current);
     }
-  }, [session]);
+  }, []);
 
   const collectEnergy = useCallback(() => {
     if (livesRef.current < MAX_LIVES) {
@@ -398,7 +386,7 @@ export default function CircuitRush() {
                     <p className="text-[9px] text-zinc-400 uppercase font-bold">Evita rivali</p>
                   </div>
                 </div>
-                {session && (
+                {totalTokens > 0 && (
                   <p className="text-yellow-500 text-xs font-black mb-6">
                     Bilancio: {totalTokens.toLocaleString()} SFT
                   </p>

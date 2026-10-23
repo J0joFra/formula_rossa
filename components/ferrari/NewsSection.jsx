@@ -19,8 +19,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, RefreshCw, Newspaper } from 'lucide-react';
 
-const RSS_URL = 'https://it.motorsport.com/rss/f1/news/';
-
 /* Le categorie sono tre bucket ricavati dal titolo, non un campo del feed.
    Ognuna ha il suo colore preso dai token, così resta leggibile su entrambi
    i temi: prima "F1" era `text-zinc-300`, invisibile sul bianco. */
@@ -35,15 +33,6 @@ function categoria(titolo = '') {
   if (t.includes('leclerc') || t.includes('hamilton')) return 'drivers';
   if (t.includes('ferrari')) return 'team';
   return 'f1';
-}
-
-/* L'immagine sta in tre posti diversi a seconda di come il feed è stato
-   generato: enclosure, un <img> dentro il contenuto, o il campo thumbnail. */
-function anteprima(item) {
-  if (item.enclosure?.link) return item.enclosure.link;
-  const nelContenuto = item.content?.match(/<img[^>]+src="([^">]+)"/);
-  if (nelContenuto) return nelContenuto[1];
-  return item.thumbnail || null;
 }
 
 function Scheda({ item, index }) {
@@ -127,28 +116,29 @@ export default function NewsSection() {
     setLoading(true);
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
+    const timeout = setTimeout(() => controller.abort(), 10000);
 
     try {
-      const res = await fetch(
-        `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(RSS_URL)}`,
-        { signal: controller.signal },
-      );
+      /* Il feed si legge dal nostro server (pages/api/flash-news.js): prima
+         passava da api.rss2json.com, che oltre il tetto gratuito di richieste
+         rispondeva con un errore e lasciava la sezione vuota. */
+      const res = await fetch('/api/flash-news', { signal: controller.signal });
       const data = await res.json();
-      if (data.status !== 'ok' || !data.items?.length) throw new Error('feed vuoto');
+      if (!res.ok || !data.items?.length) throw new Error('feed vuoto');
 
       setNews(data.items.slice(0, 3).map((item, i) => {
         const d = new Date(item.pubDate);
         const valida = !Number.isNaN(d.getTime());
+        const testo = item.description || '';
         return {
           id: item.guid || item.link || i,
           title: item.title,
-          description: `${(item.description || '').replace(/<[^>]*>?/gm, '').slice(0, 130)}…`,
+          description: testo.length > 130 ? `${testo.slice(0, 130)}…` : testo,
           category: categoria(item.title),
           date: valida ? d.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }) : '',
           iso: valida ? d.toISOString() : undefined,
           url: item.link,
-          thumbnail: anteprima(item),
+          thumbnail: item.thumbnail,
         };
       }));
       setFailed(false);
