@@ -48,11 +48,10 @@ export default function PrivacyPage() {
               </Link>.
             </p>
 
-            <h3 className="text-xl font-semibold text-[var(--fr-text)] mt-4 mb-2">Accesso con Google</h3>
+            <h3 className="text-xl font-semibold text-[var(--fr-text)] mt-4 mb-2">Nessun account</h3>
             <p className="text-[var(--fr-text-muted)]">
-              Se scegli di autenticarti tramite il tuo account Google, riceviamo dal profilo il
-              tuo nome, il tuo indirizzo email e l&apos;immagine del profilo, al solo fine di
-              gestire la sessione e le funzionalità riservate agli utenti registrati.
+              Il sito non prevede registrazione né accesso con account di terze parti. I punti
+              dei mini-giochi restano salvati solo nel tuo browser e non ci vengono inviati.
             </p>
 
             <h3 className="text-xl font-semibold text-[var(--fr-text)] mt-4 mb-2">Dati di navigazione</h3>
@@ -80,7 +79,7 @@ export default function PrivacyPage() {
               conto o come titolari autonomi:
             </p>
             <ul className="list-disc pl-6 text-[var(--fr-text-muted)] mt-2 space-y-1">
-              <li><strong className="text-[var(--fr-text)]">Google</strong> — accesso con account Google, Google Analytics, Google AdSense e Google Fonts</li>
+              <li><strong className="text-[var(--fr-text)]">Google</strong> — Google Analytics, Google AdSense e Google Fonts</li>
               <li><strong className="text-[var(--fr-text)]">Supabase</strong> — database delle statistiche F1 (dati sportivi, non personali)</li>
               <li><strong className="text-[var(--fr-text)]">Google Firebase</strong> — servizi di supporto all'infrastruttura</li>
               <li><strong className="text-[var(--fr-text)]">Vercel</strong> — hosting e distribuzione del sito</li>
@@ -157,7 +156,7 @@ export default function PrivacyPage() {
 
           <div className="border-t border-[var(--fr-border)] pt-4 mt-8">
             <p className="text-xs text-[var(--fr-text-faint)] text-center">
-              Ultimo aggiornamento: 27 agosto 2026
+              Ultimo aggiornamento: 23 ottobre 2026
             </p>
           </div>
         </div>

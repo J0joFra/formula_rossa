@@ -102,6 +102,9 @@ const nextConfig = {
          aggressiva nei browser. */
       { source: '/fantaf1',     destination: GRIDUP_URL, permanent: false },
       { source: '/predictions', destination: GRIDUP_URL, permanent: false },
+      /* Il Fanta GP è stato tolto insieme all'accesso con Google: chi arriva
+         da un vecchio link trova i mini-giochi e le app. */
+      { source: '/fanta',       destination: '/fanzone', permanent: false },
       /* Il live timing in tempo reale richiederebbe il tier a pagamento di
          OpenF1, ed è una commodity già coperta meglio dall'app ufficiale F1.
          La pagina resta nel repo: i suoi grafici (components/livetiming/)

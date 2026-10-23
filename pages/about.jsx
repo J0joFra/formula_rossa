@@ -40,7 +40,7 @@ const COSA_TROVI = [
   {
     icon: Gamepad2,
     title: 'Gioca',
-    text: 'Mini-giochi a tema Ferrari per metterti alla prova tra un Gran Premio e l’altro.',
+    text: 'Mini-giochi a tema Ferrari per metterti alla prova tra un Gran Premio e l’altro, e le nostre app GridUp e Driver Clash.',
     href: '/fanzone',
     cta: 'Entra nella Fan Zone',
   },

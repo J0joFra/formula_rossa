@@ -8,8 +8,7 @@ import {
   ChevronRight, RefreshCw, Loader2, AlertTriangle,
   Flame, Star
 } from 'lucide-react';
-import { useSession } from "next-auth/react";
-import { addTokens, getTokens, initUser } from '../../lib/tokens';
+import { addTokens, getTokens } from '../../lib/tokens';
 
 const SEO_TRIVIA = {
   title: 'F1 Trivia — quiz sulla storia della Ferrari',
@@ -39,7 +38,6 @@ function LoadingScreen() {
 // ─── COMPONENTE PRINCIPALE ────────────────────────────────────────────────────
 export default function F1TriviaQuiz() {
   const router = useRouter();
-  const { data: session } = useSession();
 
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -72,11 +70,8 @@ export default function F1TriviaQuiz() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Init Firestore
-  useEffect(() => {
-    if (!session) return;
-    initUser(session).then(() => getTokens(session).then(setUserTokens));
-  }, [session]);
+  // Saldo salvato sul dispositivo
+  useEffect(() => { setUserTokens(getTokens()); }, []);
 
   // Timer
   useEffect(() => {
@@ -157,10 +152,7 @@ export default function F1TriviaQuiz() {
     setTokensEarned(earned);
     setPhase('result');
 
-    if (session) {
-      await addTokens(session, earned);
-      setUserTokens(prev => prev + earned);
-    }
+    setUserTokens(addTokens(earned));
   };
 
   const q = questions[current];
@@ -183,7 +175,7 @@ export default function F1TriviaQuiz() {
   );
 
   return (
-    <GameShell seo={SEO_TRIVIA} title="F1 Trivia" tokens={session ? userTokens : null}>
+    <GameShell seo={SEO_TRIVIA} title="F1 Trivia" tokens={userTokens}>
       <div className="max-w-3xl mx-auto">
         <AnimatePresence mode="wait">
 
@@ -218,7 +210,7 @@ export default function F1TriviaQuiz() {
               </div>
 
               {/* Wallet */}
-              {session && (
+              {userTokens > 0 && (
                 <div className="flex items-center justify-center gap-2 mb-8 bg-yellow-500/10 border border-yellow-500/20 rounded-full py-2 px-6 w-fit mx-auto">
                   <Star className="w-4 h-4 text-yellow-400" />
                   <span className="text-yellow-400 font-black text-sm">{userTokens.toLocaleString()} SFT</span>
@@ -437,7 +429,7 @@ export default function F1TriviaQuiz() {
               >
                 <p className="text-zinc-500 text-[10px] uppercase tracking-widest font-black mb-2">SFT Guadagnati</p>
                 <p className="text-4xl font-black text-yellow-400">+{tokensEarned} SFT</p>
-                {session && (
+                {userTokens > 0 && (
                   <p className="text-yellow-500/50 text-xs font-bold mt-1">
                     Totale wallet: {userTokens.toLocaleString()} SFT
                   </p>
