@@ -19,6 +19,8 @@ import { useRouter } from 'next/router';
 import { leggi } from '../../lib/supabaseServer';
 import PageShell, { PageLoading, PageError } from '../../components/ui/PageShell';
 import { buildBreadcrumbs } from '../../components/seo';
+import Editoriale from '../../components/ui/Editoriale';
+import { PILOTI } from '../../content/editoriale';
 import { getFlagCode } from '../../lib/flags';
 import { driverPhoto, driverPhotoCredit, inquadratura } from '../../lib/driverPhoto';
 
@@ -426,6 +428,9 @@ export default function DriverDetail({ driver }) {
             <BigStat label="Gare"        value={driver.total_race_starts}/>
           </div>
  
+          {/* ── IL COMMENTO ── fuori dalle schede, così c'è sempre nell'HTML */}
+          <Editoriale testo={PILOTI[driver.id]} className="mb-10" />
+
           {/* ── TABS ── */}
           <div style={{
             display:'flex', gap:'2px',

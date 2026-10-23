@@ -19,6 +19,8 @@ import { leggi } from '../../lib/supabaseServer';
 import PageShell, { PageHeader, PageLoading, PageError, Panel, StatTile } from '../../components/ui/PageShell';
 import { getFlagCode } from '../../lib/flags';
 import { buildBreadcrumbs } from '../../components/seo';
+import Editoriale from '../../components/ui/Editoriale';
+import { CIRCUITI } from '../../content/editoriale';
 
 export async function getStaticPaths() {
   return { paths: [], fallback: 'blocking' };
@@ -237,7 +239,7 @@ export default function CircuitDetail({ circuit, layouts = [] }) {
               </Panel>
             )}
 
-            <CircuitNotes circuitId={circuit.id} />
+            <Editoriale testo={CIRCUITI[circuit.id]} />
           </>
         )}
 
@@ -256,28 +258,5 @@ export default function CircuitDetail({ circuit, layouts = [] }) {
         </p>
       </div>
     </PageShell>
-  );
-}
-
-// ── Subcomponents ─────────────────────────────────────────────────────────────
-
-const CIRCUIT_NOTES = {
-  'monza':             { title: 'Il Tempio della Velocità',        body: `Monza è il circuito più veloce del calendario F1. I suoi lunghi rettilinei — tra cui il Rettifilo Tribune lungo oltre un chilometro — spingono le monoposto oltre i 350 km/h. Le scuderie montano setup ad altissima efficienza aerodinamica con pochissimo carico, sacrificando la tenuta in curva per la velocità massima. Le storiche paraboliche e la Prima Variante sono tra i punti di frenata più impegnativi dell'intera stagione. Ospita il Gran Premio d'Italia dal 1950, primo anno del Mondiale.` },
-  'monaco':            { title: 'La Corsa più Prestigiosa',        body: `Monaco è l'opposto di Monza: il circuito più lento, più stretto e più iconico del mondo. Le barriere sono a pochi centimetri dalle ruote, non esiste margine di errore. La pole position è determinante perché sorpassare è quasi impossibile — spesso il vincitore è chi parte davanti. Il tunnel, il Casino, il Portier e la chicane della piscina sono luoghi leggendari. Vincere a Monaco vale doppio nell'immaginario della Formula 1.` },
-  'silverstone':       { title: 'La Casa del Motorsport',          body: `Silverstone ha ospitato il primo Gran Premio del Mondiale di Formula 1 nel 1950. Le sue curve rapide — Copse, Maggots, Becketts — sono tra le più spettacolari del calendario e richiedono altissimo carico aerodinamico e una grande fiducia nella macchina. Abbey, in piena velocità, è uno dei passaggi più emozionanti del Mondiale.` },
-  'spa-francorchamps': { title: 'Il Circuito più Amato dai Piloti', body: `Spa-Francorchamps è spesso citato come il circuito preferito dai piloti. L'Eau Rouge-Raidillon — la combinazione di curve in salita a tutta velocità — è il punto più iconico dell'intero calendario F1. Il meteo è imprevedibile: è normale avere sole da un lato e pioggia battente dall'altro. Il Kemmel Straight è uno dei principali punti di sorpasso del campionato.` },
-  'suzuka':            { title: 'Il Circuito dei Tecnici',         body: `Suzuka è il circuito più tecnico del calendario, con una sequenza di curve in S nella prima parte del tracciato che mette alla prova l'equilibrio aerodinamico della vettura in modo unico. Il disegno a otto incrociato è unico nel motorsport. Spoon Curve, Degner e 130R sono punti dove i piloti dimostrano il massimo coraggio.` },
-};
-
-function CircuitNotes({ circuitId }) {
-  const note = CIRCUIT_NOTES[circuitId] || null;
-  if (!note) return null;   // Meglio niente che un riquadro che dice "non c'è niente".
-  return (
-    <Panel title="Note editoriali">
-      <div className="p-5">
-        <h3 className="text-lg font-black text-[var(--fr-text)] mb-2">{note.title}</h3>
-        <p className="text-sm leading-relaxed text-[var(--fr-text-muted)]">{note.body}</p>
-      </div>
-    </Panel>
   );
 }

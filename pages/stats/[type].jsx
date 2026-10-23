@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { User, Trophy, Timer, Zap, Star, Award, Gauge } from 'lucide-react';
 import Link from 'next/link';
 import { leggi } from '../../lib/supabaseServer';
+import Editoriale from '../../components/ui/Editoriale';
+import { CLASSIFICHE } from '../../content/editoriale';
 import { driverPhoto, inquadratura } from '../../lib/driverPhoto';
 
 /* ─── Config — ora solo metadati, niente query ──────────────────────────── */
@@ -267,6 +269,8 @@ export default function StatDetail({ type, data, loadError }) {
             />
             <StatTile value={data[0]?.name ?? '—'} label="Detenuto da" />
           </div>
+
+          <Editoriale testo={CLASSIFICHE[type]} />
 
           <Panel title={`Classifica ${cfg.title.toLowerCase()}`}>
             <div className="flex items-center gap-4 md:gap-6 px-5 md:px-8 py-4 border-b border-[var(--fr-border)] text-[10px] uppercase tracking-widest font-bold text-[var(--fr-text-faint)]">
