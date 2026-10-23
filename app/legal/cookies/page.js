@@ -1,6 +1,12 @@
 import { Cookie, Calendar, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
+export const metadata = {
+  title: 'Cookie policy',
+  description: 'Quali cookie usa Formula Rossa, a cosa servono e come gestirli.',
+  alternates: { canonical: '/legal/cookies' },
+};
+
 export default function CookiesPage() {
   const lastUpdate = "23 ottobre 2026";
 

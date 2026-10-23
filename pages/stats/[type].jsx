@@ -1,10 +1,9 @@
-import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
-import PageShell, { PageHeader, PageLoading, PageError, Panel, StatTile } from '../../components/ui/PageShell';
+import { useState } from 'react';
+import PageShell, { PageHeader, PageError, Panel, StatTile } from '../../components/ui/PageShell';
 import { motion } from 'framer-motion';
 import { User, Trophy, Timer, Zap, Star, Award, Gauge } from 'lucide-react';
 import Link from 'next/link';
-import { supabase } from '../../lib/supabaseClient';
+import { leggi } from '../../lib/supabaseServer';
 import { driverPhoto, inquadratura } from '../../lib/driverPhoto';
 
 /* ─── Config — ora solo metadati, niente query ──────────────────────────── */
@@ -171,79 +170,44 @@ function DriverRow({ driver, index, max, cfg }) {
   );
 }
 
+/* ─── Dati ───────────────────────────────────────────────────────────────
+   Generati sul server e rigenerati una volta al giorno: prima la classifica
+   arrivava solo nel browser, e Google vedeva "Caricamento classifica…". Le
+   classifiche sono sei e fisse, quindi si generano tutte in build; un tipo
+   che non esiste è un 404 vero invece di una pagina d'errore con stato 200. */
+export async function getStaticPaths() {
+  return { paths: Object.keys(CONFIG).map(type => ({ params: { type } })), fallback: false };
+}
+
+export async function getStaticProps({ params }) {
+  const cfg = CONFIG[params.type];
+  // driver_id + il campo richiesto + join driver per il nome
+  const rows = await leggi(c => c
+    .from('driver_ferrari_stats')
+    .select(`driver_id, first_year, last_year, ${cfg.field}, driver:driver_id(first_name, last_name)`)
+    .order(cfg.field, { ascending: false })
+    .gt(cfg.field, 0)
+    .limit(50));
+
+  const data = (rows ?? []).map(row => ({
+    id:         row.driver_id,
+    name:       row.driver
+                  ? `${row.driver.first_name} ${row.driver.last_name}`
+                  : row.driver_id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+    count:      Number(row[cfg.field]) || 0,
+    first_year: row.first_year ?? null,
+    last_year:  row.last_year ?? null,
+  }));
+
+  return {
+    props: { type: params.type, data, loadError: rows === null },
+    revalidate: rows ? 86400 : 3600,
+  };
+}
+
 /* ─── Page ──────────────────────────────────────────────────────────────── */
-export default function StatDetail() {
-  const router = useRouter();
-  const { type } = router.query;
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(null);
-
-  const cfg = type ? CONFIG[type] : null;
-
-  useEffect(() => {
-    if (!type || !cfg || !supabase) return;
-
-    async function loadStats() {
-      setLoading(true);
-      try {
-        // Seleziona driver_id + il campo richiesto + join driver per il nome
-        const { data: rows, error } = await supabase
-          .from('driver_ferrari_stats')
-          .select(`driver_id, first_year, last_year, ${cfg.field}, driver:driver_id(first_name, last_name)`)
-          .order(cfg.field, { ascending: false })
-          .gt(cfg.field, 0)
-          .limit(50);
-
-        if (error) throw error;
-
-        const formatted = (rows ?? []).map(row => ({
-          id:         row.driver_id,
-          name:       row.driver
-                        ? `${row.driver.first_name} ${row.driver.last_name}`
-                        : row.driver_id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-          count:      Number(row[cfg.field]) || 0,
-          first_year: row.first_year,
-          last_year:  row.last_year,
-        }));
-
-        setData(formatted);
-        setLoadError(null);
-      } catch (err) {
-        console.error('Errore caricamento stats:', err);
-        setLoadError(err.message);
-        setData([]);
-      }
-      setLoading(false);
-    }
-
-    loadStats();
-  }, [type]);
-
-  /* ── 404 per tipo non riconosciuto ── */
-  if (!loading && !cfg) {
-    return (
-      <PageShell>
-        <PageHeader
-          eyebrow="Archivio"
-          title="Classifica"
-          breadcrumb={[{ label: 'Archivio' }, { label: 'Statistiche', href: '/statistics' }]}
-        />
-        <PageError
-          title="Classifica non trovata"
-          message={`Le classifiche disponibili sono: ${Object.keys(CONFIG).join(', ')}.`}
-        />
-        <p className="text-center">
-          <Link href="/statistics" className="btn btn-outline">Torna alle statistiche</Link>
-        </p>
-      </PageShell>
-    );
-  }
-
-  /* ── Loading ── */
-  if (loading || !cfg) {
-    return <PageShell><PageLoading label="Caricamento classifica…" /></PageShell>;
-  }
+export default function StatDetail({ type, data, loadError }) {
+  const cfg = CONFIG[type];
 
   const Icon = cfg.icon;
   const max = data[0]?.count ?? 1;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -7,9 +7,9 @@ import {
 import {
   Trophy, Activity, ChevronRight, Globe2, Landmark,
 } from 'lucide-react';
-import PageShell, { PageHeader, PageLoading, StatTile } from '../components/ui/PageShell';
+import PageShell, { PageHeader, StatTile } from '../components/ui/PageShell';
 import Link from 'next/link';
-import { supabase } from '../lib/supabaseClient';
+import { leggi } from '../lib/supabaseServer';
 import { countryConfig } from '../lib/f1/circuitFlags';
 import {
   DarkTooltip, AccordionSection, TrophySVG, WinnerRow,
@@ -73,98 +73,62 @@ function ClassificaCompleta({ href, children }) {
   );
 }
 
-export default function StatisticsPage() {
-  const [loading,        setLoading]        = useState(true);
-  const [pilotWins,      setPilotWins]      = useState([]);
-  const [history,        setHistory]        = useState([]);
-  const [nationalities,  setNationalities]  = useState([]);
-  const [circuits,       setCircuits]       = useState([]);
-  const [poleStats,      setPoleStats]      = useState([]);   // NEW: pole positions per driver
-  const [fastestLaps,    setFastestLaps]    = useState([]);   // NEW: fastest laps per driver
-  const [champSeasons,   setChampSeasons]   = useState([]);   // NEW: championship winning seasons
-  const [podiumDrivers,  setPodiumDrivers]  = useState([]);   // NEW: podiums per driver
-  const [grandPrix,      setGrandPrix]      = useState([]);   // NEW: vittorie per GP
-  const [seasonSummary,  setSeasonSummary]  = useState([]);   // NEW: riepilogo per stagione
-  const [openSection,    setOpenSection]    = useState('winners');
+/* Prima i dati arrivavano solo nel browser, da un useEffect: a Google e al
+   crawler di AdSense la pagina arrivava con il solo "Caricamento archivio
+   Ferrari…", senza titolo né contenuto. Ora si genera sul server e si
+   rigenera una volta al giorno (ISR), come /piloti e /circuiti. */
+export async function getStaticProps() {
+  // Tutte le query usano le VIEW — una sola riga per query, zero join pesanti
+  const [wins, pts, nats, gps, poles, fl, champs, pods, seasons] = await Promise.all([
+    leggi(c => c.from('ferrari_driver_wins').select('*')),
+    leggi(c => c.from('ferrari_points_by_year').select('*')),
+    leggi(c => c.from('ferrari_driver_nationalities').select('*')),
+    leggi(c => c.from('ferrari_wins_by_grand_prix').select('*').limit(15)),
+    leggi(c => c.from('ferrari_driver_poles').select('*').limit(8)),
+    leggi(c => c.from('ferrari_driver_fastest_laps').select('*').limit(8)),
+    leggi(c => c.from('ferrari_championship_seasons').select('*')),
+    leggi(c => c.from('ferrari_driver_podiums').select('*').limit(8)),
+    leggi(c => c.from('ferrari_season_summary').select('*').limit(20)),
+  ]);
 
-  useEffect(() => {
-    if (!supabase) return;
-    async function loadData() {
-      try {
-        // Tutte le query ora usano le VIEW — una sola riga per query, zero join pesanti
-        const [
-          { data: wins },
-          { data: pts },
-          { data: nats },
-          { data: gps },
-          { data: poles },
-          { data: fl },
-          { data: champs },
-          { data: pods },
-          { data: seasons },
-        ] = await Promise.all([
-          supabase.from('ferrari_driver_wins').select('*'),
-          supabase.from('ferrari_points_by_year').select('*'),
-          supabase.from('ferrari_driver_nationalities').select('*'),
-          supabase.from('ferrari_wins_by_grand_prix').select('*').limit(15),
-          supabase.from('ferrari_driver_poles').select('*').limit(8),
-          supabase.from('ferrari_driver_fastest_laps').select('*').limit(8),
-          supabase.from('ferrari_championship_seasons').select('*'),
-          supabase.from('ferrari_driver_podiums').select('*').limit(8),
-          supabase.from('ferrari_season_summary').select('*').limit(20),
-        ]);
+  return {
+    props: {
+      pilotWins: (wins || []).slice(0, 10).map(d => ({ id: d.driver_id, name: d.full_name, count: d.wins })),
+      history: (pts || []).map(r => ({ year: r.year.toString(), points: r.points ?? 0 })),
+      nationalities: (nats || []).map(r => {
+        const cfg = countryConfig[r.country_id] || countryConfig['unknown'];
+        return { id: r.country_id, name: cfg.name, value: r.driver_count, color: cfg.color, flag: cfg.code };
+      }),
+      grandPrix: (gps || []).map(g => ({
+        name: g.grand_prix_name,
+        wins: g.ferrari_wins,
+        total: g.total_races_held,
+        winRate: g.win_rate_pct,
+        flag: countryConfig[g.country_id]?.code || '',
+        color: countryConfig[g.country_id]?.color || RED,
+      })),
+      poleStats: (poles || []).map(d => ({ id: d.driver_id, name: d.full_name, count: d.poles })),
+      fastestLaps: (fl || []).map(d => ({ id: d.driver_id, name: d.full_name, count: d.fastest_laps })),
+      champSeasons: champs || [],
+      podiumDrivers: (pods || []).map(d => ({
+        id: d.driver_id, name: d.full_name,
+        wins: d.wins, p2: d.p2, p3: d.p3, total: d.total_podiums,
+      })),
+      seasonSummary: seasons || [],
+    },
+    /* Se il database non risponde in build, la pagina riprova dopo un'ora
+       invece di restare vuota per un giorno intero. */
+    revalidate: wins ? 86400 : 3600,
+  };
+}
 
-        if (wins) setPilotWins(wins.slice(0, 10).map(d => ({ id: d.driver_id, name: d.full_name, count: d.wins })));
-
-        if (pts) setHistory(pts.map(r => ({ year: r.year.toString(), points: r.points ?? 0 })));
-
-        if (nats) {
-          setNationalities(
-            nats.map(r => {
-              const cfg = countryConfig[r.country_id] || countryConfig['unknown'];
-              return { id: r.country_id, name: cfg.name, value: r.driver_count, color: cfg.color, flag: cfg.code };
-            })
-          );
-        }
-
-        if (gps) {
-          setGrandPrix(gps.map(g => ({
-            name: g.grand_prix_name,
-            wins: g.ferrari_wins,
-            total: g.total_races_held,
-            winRate: g.win_rate_pct,
-            flag: countryConfig[g.country_id]?.code || '',
-            color: countryConfig[g.country_id]?.color || RED,
-          })));
-        }
-
-        if (poles) setPoleStats(poles.map(d => ({ id: d.driver_id, name: d.full_name, count: d.poles })));
-
-        if (fl) setFastestLaps(fl.map(d => ({ id: d.driver_id, name: d.full_name, count: d.fastest_laps })));
-
-        if (champs) setChampSeasons(champs);
-
-        if (pods) setPodiumDrivers(pods.map(d => ({
-          id: d.driver_id, name: d.full_name,
-          wins: d.wins, p2: d.p2, p3: d.p3, total: d.total_podiums,
-        })));
-
-        if (seasons) setSeasonSummary(seasons);
-
-      } catch (err) {
-        console.error('Error loading data:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, []);
+export default function StatisticsPage({
+  pilotWins, history, nationalities, grandPrix, poleStats,
+  fastestLaps, champSeasons, podiumDrivers, seasonSummary,
+}) {
+  const [openSection, setOpenSection] = useState('winners');
 
   const toggle = (id) => setOpenSection(openSection === id ? null : id);
-
-  if (loading) return (
-    <PageShell><PageLoading label="Caricamento archivio Ferrari…" /></PageShell>
-  );
 
   const maxWins = pilotWins[0]?.count ?? 1;
   // Il 1950 è la prima stagione e va contato, come nel footer.
