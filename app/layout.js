@@ -11,18 +11,24 @@ import CookieConsent from '../components/CookieConsent';
 import '../styles/globals.css';
 
 export const metadata = {
-  title: 'Formula Rossa - Data Intelligence Scuderia Ferrari F1',
+  metadataBase: new URL('https://formula-rossa.it'),
+  /* Le pagine figlie danno il proprio titolo: prima tutte e tre le pagine
+     legali avevano questo, uguale. */
+  title: {
+    default: 'Formula Rossa - Data Intelligence Scuderia Ferrari F1',
+    template: '%s | Formula Rossa',
+  },
   description: 'Piattaforma indipendente di data intelligence sulla Scuderia Ferrari in Formula 1. Statistiche, analisi e storia della Rossa.',
   keywords: 'Ferrari, Formula 1, F1, Scuderia Ferrari, dati F1, statistiche F1, storia Ferrari',
   authors: [{ name: 'Formula Rossa' }],
   openGraph: {
     title: 'Formula Rossa - Data Intelligence Ferrari F1',
     description: 'Statistiche, analisi e storia della Scuderia Ferrari in Formula 1',
-    url: 'https://formularossa.it',
+    url: 'https://formula-rossa.it',
     siteName: 'Formula Rossa',
     images: [
       {
-        url: 'https://formularossa.it/og-image.jpg',
+        url: 'https://formula-rossa.it/og-formula-rossa.jpg',
         width: 1200,
         height: 630,
       },
@@ -34,7 +40,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Formula Rossa - Data Intelligence Ferrari F1',
     description: 'Statistiche, analisi e storia della Scuderia Ferrari in Formula 1',
-    images: ['https://formularossa.it/twitter-image.jpg'],
+    images: ['https://formula-rossa.it/og-formula-rossa.jpg'],
   },
   robots: {
     index: true,

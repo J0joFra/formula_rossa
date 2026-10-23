@@ -4,6 +4,7 @@ import { Users, Trophy, CalendarDays, Flag } from 'lucide-react';
 import PageShell, { PageHeader, PageLoading, Panel } from '../components/ui/PageShell';
 
 import { supabase } from '../lib/supabaseClient';
+import { db } from '../lib/supabaseServer';
 
 /** Le date arrivano in ISO e finivano a schermo così com'erano: "2026-01-14". */
 function formatDate(iso) {
@@ -71,96 +72,117 @@ const circuitToCountry = {
   'red_bull_ring': 'at', 'silverstone_circuit': 'gb', 'spa_francorchamps': 'be', 'circuit_de_monaco': 'mc', 'fuji_speedway': 'jp'
 };
 
-export default function StandingsPage() {
-  const [driverStandings, setDriverStandings] = useState([]);
-  const [constructorStandings, setConstructorStandings] = useState([]);
-  const [calendar, setCalendar] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [drivers, setDrivers] = useState({});
-  const [constructors, setConstructors] = useState({});
-  const [selectedSeason, setSelectedSeason] = useState(2026);
-  const [availableSeasons, setAvailableSeasons] = useState([]);
+const STAGIONE_INIZIALE = 2026;
+
+/**
+ * Tutti i dati di una stagione, con il client che gli si passa: quello del
+ * server in getStaticProps, quello del browser quando si cambia stagione.
+ * Prima esisteva solo la seconda strada, quindi a Google la pagina arrivava
+ * con "Caricamento classifiche…" e nient'altro.
+ *
+ * Di piloti e costruttori si tengono solo quelli che compaiono nelle
+ * classifiche: l'anagrafica intera sono quasi mille righe, che finirebbero
+ * nell'HTML di ogni richiesta.
+ */
+async function caricaStagione(client, year) {
+  const [seasonsRes, drStRes, coStRes, racesRes] = await Promise.all([
+    client.from('season').select('year').order('year', { ascending: false }),
+    client.from('season_driver_standing').select('*').eq('year', year).order('position_number', { ascending: true }),
+    client.from('season_constructor_standing').select('*').eq('year', year).order('position_number', { ascending: true }),
+    client.from('race')
+      .select('id, round, date, circuit_id, official_name, sprint_race_date, qualifying_date, grand_prix_id')
+      .eq('year', year)
+      .order('round', { ascending: true }),
+  ]);
+  for (const r of [seasonsRes, drStRes, coStRes, racesRes]) {
+    if (r.error) throw new Error(r.error.message);
+  }
+
+  const driverStandings = (drStRes.data || [])
+    .filter(s => s.position_number)
+    .sort((a, b) => a.position_number - b.position_number);
+  const constructorStandings = (coStRes.data || [])
+    .filter(s => s.position_number)
+    .sort((a, b) => a.position_number - b.position_number);
+
+  const driverIds = [...new Set(driverStandings.map(s => s.driver_id).filter(Boolean))];
+  const constructorIds = [...new Set([
+    ...driverStandings.map(s => s.constructor_id),
+    ...constructorStandings.map(s => s.constructor_id),
+  ].filter(Boolean))];
+
+  const [drRes, coRes] = await Promise.all([
+    driverIds.length
+      ? client.from('driver').select('id, first_name, last_name, nationality_country_id').in('id', driverIds)
+      : { data: [] },
+    constructorIds.length
+      ? client.from('constructor').select('id, name').in('id', constructorIds)
+      : { data: [] },
+  ]);
+
+  const drivers = {};
+  drRes.data?.forEach(d => { drivers[d.id] = d; });
+  const constructors = {};
+  coRes.data?.forEach(c => { constructors[c.id] = c; });
+
+  return {
+    seasons: seasonsRes.data?.map(s => s.year) ?? [],
+    drivers,
+    constructors,
+    driverStandings,
+    constructorStandings,
+    calendar: racesRes.data || [],
+  };
+}
+
+const VUOTA = {
+  seasons: [], drivers: {}, constructors: {},
+  driverStandings: [], constructorStandings: [], calendar: [],
+};
+
+export async function getStaticProps() {
+  const client = db();
+  let iniziale = null;
+  if (client) {
+    try {
+      iniziale = await caricaStagione(client, STAGIONE_INIZIALE);
+    } catch (e) {
+      console.error('Classifiche (server):', e.message);
+    }
+  }
+  return {
+    props: { iniziale: iniziale || VUOTA },
+    /* Ogni ora: dopo una gara la classifica deve aggiornarsi in giornata. */
+    revalidate: 3600,
+  };
+}
+
+export default function StandingsPage({ iniziale }) {
+  const [dati, setDati] = useState(iniziale);
+  const [loading, setLoading] = useState(false);
+  const [selectedSeason, setSelectedSeason] = useState(STAGIONE_INIZIALE);
   const [showFullDrivers, setShowFullDrivers] = useState(false);
   const [showFullConstructors, setShowFullConstructors] = useState(false);
   const [showSprintRaces, setShowSprintRaces] = useState(false); // Nuovo stato per filtrare le sprint race
 
-  async function loadStandings() {
-    try {
-      setLoading(true);
+  const {
+    seasons: availableSeasons, drivers, constructors,
+    driverStandings, constructorStandings, calendar,
+  } = dati;
 
-      // ── 1. Stagioni disponibili ──────────────────────────────────
-      const { data: seasonsData, error: seasonsErr } = await supabase
-        .from('season')
-        .select('year')
-        .order('year', { ascending: false });
-      if (seasonsErr) console.error('❌ stagioni:', seasonsErr.message);
-      const seasons = seasonsData?.map(s => s.year) ?? [];
-      setAvailableSeasons(seasons);
-
-      // ── 2. Piloti e costruttori ─────────────────────────────────
-      const [{ data: drData }, { data: coData }] = await Promise.all([
-        supabase.from('driver').select('id, first_name, last_name, nationality_country_id'),
-        supabase.from('constructor').select('id, name'),
-      ]);
-      const drMap = {};
-      drData?.forEach(d => { drMap[d.id] = d; });
-      const coMap = {};
-      coData?.forEach(c => { coMap[c.id] = c; });
-      setDrivers(drMap);
-      setConstructors(coMap);
-
-      // ── 3. Driver standings — usa season_driver_standing (ha year direttamente) ──
-      const { data: drStData, error: drStErr } = await supabase
-        .from('season_driver_standing')
-        .select('*')
-        .eq('year', selectedSeason)
-        .order('position_number', { ascending: true });
-
-      if (drStErr) console.error('❌ driver_standings year:', drStErr.message);
-      else console.log('✅ driver standings:', drStData?.length, 'righe per anno', selectedSeason);
-      if (drStData && drStData.length > 0) {
-        setDriverStandings(
-          drStData
-            .filter(s => s.position_number)
-            .sort((a, b) => a.position_number - b.position_number)
-        );
-      }
-
-      // ── 4. Constructor standings — usa season_constructor_standing ─────────────
-      const { data: coStData, error: coStErr } = await supabase
-        .from('season_constructor_standing')
-        .select('*')
-        .eq('year', selectedSeason)
-        .order('position_number', { ascending: true });
-
-      if (coStErr) console.error('❌ constructor_standings:', coStErr.message);
-      else console.log('✅ constructor standings:', coStData?.length);
-      if (coStData && coStData.length > 0) {
-        setConstructorStandings(
-          coStData
-            .filter(s => s.position_number)
-            .sort((a, b) => a.position_number - b.position_number)
-        );
-      }
-
-      // ── 5. Calendario ─────────────────────────────────────────
-      const { data: racesData, error: racesErr } = await supabase
-        .from('race')
-        .select('id, round, date, circuit_id, official_name, sprint_race_date, qualifying_date, grand_prix_id')
-        .eq('year', selectedSeason)
-        .order('round', { ascending: true });
-      if (racesErr) console.error('❌ races:', racesErr.message);
-      else console.log('✅ calendario:', racesData?.length, 'gare');
-      setCalendar(racesData || []);
-
-    } catch (e) {
-      console.error("Errore caricamento:", e);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => { loadStandings(); }, [selectedSeason]);
+  /* La stagione iniziale arriva già dal server; le altre si caricano qui. */
+  useEffect(() => {
+    if (selectedSeason === STAGIONE_INIZIALE) { setDati(iniziale); return; }
+    if (!supabase) return;
+    let alive = true;
+    setLoading(true);
+    caricaStagione(supabase, selectedSeason)
+      .then(d => { if (alive) setDati({ ...d, seasons: d.seasons.length ? d.seasons : availableSeasons }); })
+      .catch(e => console.error('Errore caricamento:', e))
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSeason]);
 
   const visibleDrivers = showFullDrivers ? driverStandings : driverStandings.slice(0, 5);
   const visibleConstructors = showFullConstructors ? constructorStandings : constructorStandings.slice(0, 5);

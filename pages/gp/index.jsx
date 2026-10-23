@@ -1,4 +1,3 @@
-'use client';
 /**
  * pages/gp/index.jsx
  * Indice delle analisi per Gran Premio: scegli la stagione, poi la gara.
@@ -65,33 +64,39 @@ function RaceCard({ race }) {
   );
 }
 
-export default function GpIndex() {
-  const [seasons, setSeasons] = useState([]);
-  const [season, setSeason] = useState(null);
-  const [races, setRaces] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+/* La stagione più recente si genera sul server, come le schede dei singoli
+   GP: prima l'elenco arrivava solo nel browser e Google vedeva
+   "Caricamento calendario…" invece dei link alle gare. */
+export async function getStaticProps() {
+  let seasons = [];
+  let races = [];
+  let errore = false;
+  try {
+    seasons = await getSeasons();
+    if (seasons[0] != null) races = await getSeasonRaces(seasons[0]);
+  } catch (e) {
+    console.error('Analisi GP (server):', e.message);
+    errore = true;
+  }
+  return {
+    props: { seasons, iniziali: races, errore: errore || !seasons.length },
+    revalidate: seasons.length ? 3600 : 600,
+  };
+}
 
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const ys = await getSeasons();
-        if (!alive) return;
-        setSeasons(ys);
-        setSeason(ys[0] ?? null);
-      } catch (e) {
-        console.error('Analisi GP — stagioni:', e);
-        if (alive) setError('Non riusciamo a raggiungere l\u2019archivio dati. Riprova fra poco.');
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
-    return () => { alive = false; };
-  }, []);
+export default function GpIndex({ seasons, iniziali, errore }) {
+  const prima = seasons[0] ?? null;
+  const [season, setSeason] = useState(prima);
+  const [races, setRaces] = useState(iniziali);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(
+    errore ? 'Non riusciamo a raggiungere l\u2019archivio dati. Riprova fra poco.' : null,
+  );
 
+  /* La stagione iniziale arriva già dal server; le altre si caricano qui. */
   useEffect(() => {
     if (season == null) return;
+    if (season === prima) { setRaces(iniziali); return; }
     let alive = true;
     setLoading(true);
     (async () => {
@@ -106,6 +111,7 @@ export default function GpIndex() {
       }
     })();
     return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [season]);
 
   const seo = {

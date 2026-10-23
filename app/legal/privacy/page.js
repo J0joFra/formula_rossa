@@ -1,6 +1,12 @@
 import { Shield, Calendar, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
+export const metadata = {
+  title: 'Privacy policy',
+  description: 'Come Formula Rossa tratta i dati personali di chi visita il sito.',
+  alternates: { canonical: '/legal/privacy' },
+};
+
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen">

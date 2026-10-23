@@ -1,6 +1,12 @@
 import { Scale, Calendar, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
+export const metadata = {
+  title: 'Termini di utilizzo',
+  description: 'Le condizioni di utilizzo del sito Formula Rossa.',
+  alternates: { canonical: '/legal/terms' },
+};
+
 export default function TermsPage() {
   const lastUpdate = "27 agosto 2026";
 

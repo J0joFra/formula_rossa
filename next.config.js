@@ -22,7 +22,6 @@ const nextConfig = {
       { protocol: 'https', hostname: 'flagcdn.com' },
       { protocol: 'https', hostname: 'it.motorsport.com' },
       { protocol: 'https', hostname: 'cdn.motorsport.com' },
-      { protocol: 'https', hostname: 'api.rss2json.com' },
     ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
@@ -106,10 +105,8 @@ const nextConfig = {
          da un vecchio link trova i mini-giochi e le app. */
       { source: '/fanta',       destination: '/fanzone', permanent: false },
       /* Il live timing in tempo reale richiederebbe il tier a pagamento di
-         OpenF1, ed è una commodity già coperta meglio dall'app ufficiale F1.
-         La pagina resta nel repo: i suoi grafici (components/livetiming/)
-         lavorano su dati di sessione, gratuiti dopo la gara, e saranno la base
-         delle pagine "Analisi GP". Redirect temporaneo, non permanente. */
+         OpenF1. La pagina è stata tolta; i suoi grafici vivono nelle Analisi
+         GP (components/livetiming/Charts). */
       { source: '/live-timing', destination: '/standings', permanent: false },
       /* /races?id=123 mostrava lo stesso Gran Premio di /gp/[anno]/[round], con
          una URL che non dice quale gara sia. Ora l'analisi vive in un posto
