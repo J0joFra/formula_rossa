@@ -1,9 +1,9 @@
 'use client';
 /**
  * components/ferrari/AppsSection.jsx
- * Le app di Formula Rossa: GridUp (su Google Play) e Driver Clash (Android in
- * test chiuso). Entrambe si giocano anche dal sito, in /gioca/<id>; testi e
- * link vengono da lib/apps.js.
+ * Le app di Formula Rossa: GridUp e Driver Clash. Entrambe si giocano anche
+ * dal sito, in /gioca/<id>, e si scaricano da Google Play; testi e link
+ * vengono da lib/apps.js.
  *
  * Usata in home e nella Fan Zone. `compact` toglie l'intestazione grande, per
  * quando la sezione sta dentro una pagina che ha già il suo titolo.
