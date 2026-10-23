@@ -140,6 +140,9 @@ jobs:
         if: steps.detect_mode.outputs.skip != 'true'
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          # Facoltativo: un modello Groq preciso (Settings → Variables).
+          # Se manca, il bot sceglie il primo disponibile della sua lista.
+          GROQ_MODEL: ${{ vars.GROQ_MODEL }}
           FIREBASE_CREDENTIALS_JSON: ${{ secrets.FIREBASE_CREDENTIALS_JSON }}
           F1_MODE: ${{ steps.detect_mode.outputs.mode }}
           GP_NAME: ${{ steps.detect_mode.outputs.gp }}

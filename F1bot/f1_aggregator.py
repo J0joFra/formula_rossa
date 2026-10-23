@@ -57,6 +57,22 @@ FIRESTORE_COLLECTION = "news"
 FIREBASE_CREDENTIALS = os.getenv("FIREBASE_CREDENTIALS", "firebase-credentials.json")
 GROQ_API_KEY         = os.getenv("GROQ_API_KEY")
 
+# Modelli Groq in ordine di preferenza. Groq ritira i modelli senza troppo
+# preavviso: a ottobre 2026 "llama-3.3-70b-versatile" ha cominciato a
+# rispondere "model_not_found" e per settimane non è uscito nessun articolo.
+# Ora all'avvio si chiede a Groq quali modelli esistono e si usa il primo di
+# questa lista che c'è ancora. GROQ_MODEL (variabile d'ambiente o secret del
+# workflow) li scavalca tutti.
+GROQ_MODELS = [m for m in [
+    os.getenv("GROQ_MODEL"),
+    "openai/gpt-oss-120b",
+    "llama-3.3-70b-versatile",
+    "meta-llama/llama-4-maverick-17b-128e-instruct",
+    "moonshotai/kimi-k2-instruct",
+    "qwen/qwen3-32b",
+    "llama-3.1-8b-instant",
+] if m]
+
 # ─── MODALITÀ WEEKEND GARA ─────────────────────────────────────────────────────
 
 RACE_WEEKEND_MODES = {
@@ -273,7 +289,13 @@ def get_ferrari_current_context() -> str:
 # ─── CLEAN JSON ────────────────────────────────────────────────────────────────
 
 def clean_json_string(text: str) -> str:
+    # Alcuni modelli (qwen3) scrivono il loro ragionamento fra <think> e
+    # </think> prima del JSON; e c'è chi aggiunge una frase prima o dopo.
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
     text = re.sub(r"^```json|^```|```$", "", text, flags=re.MULTILINE).strip()
+    inizio, fine = text.find("{"), text.rfind("}")
+    if inizio > 0 and fine > inizio:
+        text = text[inizio:fine + 1]
     text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
 
     def fix_newlines_in_strings(json_text):
@@ -327,11 +349,27 @@ def validate_and_fix_ferrari_drivers(html_content: str, title: str) -> tuple:
 
 # ─── GENERAZIONE CON GROQ ──────────────────────────────────────────────────────
 
+def choose_model(client) -> str:
+    """Il primo modello di GROQ_MODELS che Groq offre ancora."""
+    try:
+        disponibili = {m.id for m in client.models.list().data}
+    except Exception as e:
+        log.warning(f"Elenco modelli Groq non disponibile ({e}): uso {GROQ_MODELS[0]}")
+        return GROQ_MODELS[0]
+    for m in GROQ_MODELS:
+        if m in disponibili:
+            log.info(f"Modello Groq: {m}")
+            return m
+    log.error(f"Nessuno dei modelli preferiti è disponibile. Modelli Groq: {sorted(disponibili)}")
+    return GROQ_MODELS[0]
+
+
 def generate_digest(articles: list, mode: str = "normale", gp_name: str = "") -> dict:
     if not articles:
         return None
 
     client = groq.Groq(api_key=GROQ_API_KEY)
+    model = choose_model(client)
 
     mode_cfg  = RACE_WEEKEND_MODES.get(mode, {})
     mode_tags  = mode_cfg.get("tags", ["F1", "Ferrari", "news"])
@@ -436,8 +474,10 @@ Rispondi **solo** con l'oggetto JSON, senza testo prima o dopo:
     for tentativo in (1, 2):
         try:
             response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                max_tokens=6000,
+                model=model,
+                # I modelli che "ragionano" (gpt-oss, qwen3) spendono token
+                # anche prima della risposta: 6000 lasciava l'articolo a metà.
+                max_tokens=8000,
                 temperature=0.7,
                 messages=messages,
             )
@@ -639,7 +679,8 @@ def purge_old_articles(db, days: int = RETENTION_DAYS) -> int:
 
 # ─── CICLO PRINCIPALE ──────────────────────────────────────────────────────────
 
-def run(mode: str = "normale", gp_name: str = ""):
+def run(mode: str = "normale", gp_name: str = "") -> bool:
+    """False se c'erano notizie ma l'articolo non è uscito."""
     log.info("=" * 55)
     log.info(f"F1 Aggregator Bot — formula-rossa.it (SOLO NOTIZIE RECENTI) [{mode.upper()}]")
     log.info(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
@@ -653,12 +694,12 @@ def run(mode: str = "normale", gp_name: str = ""):
 
     if not articles:
         log.info("Nessuna notizia nuova degli ultimi 2 giorni.")
-        return
+        return True
 
     digest = generate_digest(articles, mode=mode, gp_name=gp_name)
     if not digest:
-        log.warning("Generazione fallita.")
-        return
+        log.error("❌ Generazione fallita.")
+        return False
 
     success = publish_to_firestore(digest, db, mode=mode)
 
@@ -670,6 +711,7 @@ def run(mode: str = "normale", gp_name: str = ""):
         scrivi_riepilogo_azione(digest, mode)
     else:
         log.error("❌ Pubblicazione fallita.")
+    return success
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -690,4 +732,7 @@ if __name__ == "__main__":
             schedule.run_pending()
             time.sleep(60)
     else:
-        run(mode=args.mode, gp_name=args.gp)
+        # Uscita con errore se l'articolo non è uscito: prima il workflow
+        # finiva verde anche quando Groq rifiutava ogni richiesta, e per
+        # settimane nessuno se n'è accorto.
+        sys.exit(0 if run(mode=args.mode, gp_name=args.gp) else 1)
