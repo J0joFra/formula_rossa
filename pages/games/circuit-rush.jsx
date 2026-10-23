@@ -274,7 +274,7 @@ export default function CircuitRush() {
   }, [gameState, updateGame]);
 
   const seo = {
-    title: 'Circuit Rush — schiva i detriti in pista',
+    title: 'Circuit Rush — gioco F1 a tema Ferrari',
     description: 'Mini-gioco arcade a tema Ferrari: sfreccia in pista, schiva i detriti e raccogli energia per guadagnare SF Token.',
     path: '/games/circuit-rush',
   };

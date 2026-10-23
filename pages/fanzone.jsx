@@ -90,8 +90,8 @@ export default function FanZonePage() {
     <PageShell seo={seo}>
       <PageHeader
         eyebrow="Gioca"
-        title="Fan"
-        accent="Zone"
+        title="Fan Zone"
+        accent="Ferrari"
         subtitle="Tre mini-giochi a tema Ferrari per riempire l'attesa fra un Gran Premio e l'altro, e le app di Formula Rossa da portare in tasca."
         breadcrumb={[{ label: 'Gioca' }]}
         actions={tokens > 0 ? (

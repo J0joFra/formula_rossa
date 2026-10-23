@@ -10,6 +10,7 @@
  */
 
 import React from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Cpu, Zap, Activity, ChevronRight, Settings, Shield } from 'lucide-react';
 
@@ -82,13 +83,14 @@ export default function StatsSection() {
           transition={{ duration: .5 }}
           className="relative w-full aspect-[21/9] rounded-[var(--radius)] overflow-hidden border border-[var(--fr-border)] shadow-[var(--fr-shadow)] mb-6 group"
         >
-          <img
+          {/* next/image: l'originale è 3392 px e 739 KB; così arriva
+              ridimensionato e in AVIF/WebP secondo lo schermo. */}
+          <Image
             src="/data/images/sf26.jpg"
             alt="Ferrari SF-26 — monoposto di Formula 1 della stagione 2026"
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            width={1400}
-            height={600}
-            loading="lazy"
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            fill
+            sizes="(max-width: 1280px) 100vw, 1280px"
           />
           {/* La scritta sta sopra una foto, quindi non può contare sui token
               del tema: la sfumatura scura sotto vale in chiaro come in scuro, e

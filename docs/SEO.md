@@ -127,7 +127,7 @@ Vale la pena farlo, non come lavoro di SEO.
 
 **Link building e iscritti YouTube.** Non sono lavoro di codice. I link in
 entrata sono la voce con la priorità più alta del rapporto, e nessuna
-modifica al sito li produce.
+modifica al sito li produce: il piano è in `LINK-BUILDING.md`.
 
 ## Da fare a mano
 

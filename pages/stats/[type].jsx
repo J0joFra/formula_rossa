@@ -225,6 +225,7 @@ export default function StatDetail({ type, data, loadError }) {
       <PageHeader
         eyebrow="Archivio · Statistiche"
         title={cfg.title}
+        accent="Ferrari"
         subtitle={cfg.description}
         breadcrumb={[
           { label: 'Archivio' },

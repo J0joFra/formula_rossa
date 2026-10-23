@@ -102,8 +102,10 @@ export default function Navigation() {
           <Link href="/" className="flex items-center gap-3 group shrink-0">
             <span className="w-10 h-10 rounded-xl bg-[var(--fr-red)] flex items-center justify-center overflow-hidden shadow-[var(--fr-glow-red)] p-1 transition-transform group-hover:scale-105">
               <img
-                src="/data/images/formula-rossa-logo.png"
+                src="/data/images/formula-rossa-logo-96.png"
                 alt="Formula Rossa — torna alla home"
+                width={40}
+                height={40}
                 className="w-full h-full object-contain"
               />
             </span>

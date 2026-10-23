@@ -9,8 +9,8 @@
 ## 📸 Preview del Progetto
 
 <p align="center">
-  <img src="public/data/images/gif_site.gif" width="48%" alt="Gif Overview" />
-  <img src="public/data/images/stats_overview.png" width="48%" alt="Statistiche" />
+  <img src="docs/images/gif_site.gif" width="48%" alt="Gif Overview" />
+  <img src="docs/images/stats_overview.png" width="48%" alt="Statistiche" />
 </p>
 
 ---
