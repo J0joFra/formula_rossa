@@ -49,8 +49,9 @@ const SEZIONI = [
          aprirsi una pagina — e su un telefono senza client configurato non
          succedeva niente. La stessa email ora sta fra le icone qui sotto, con
          l'icona della posta, che dice cosa fa prima di cliccarci. */
-      { label: 'App GridUp',    href: GRIDUP.url },
-      { label: 'Driver Clash',  href: '/fanzone#app' },
+      { label: 'GridUp',        href: '/gioca/gridup' },
+      { label: 'Driver Clash',  href: '/gioca/driver-clash' },
+      { label: 'GridUp su Google Play', href: GRIDUP.url },
     ],
   },
 ];
