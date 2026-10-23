@@ -166,6 +166,7 @@ export default function NewsPage({ articles, errore }) {
       <PageHeader
         eyebrow="Stagione"
         title="News"
+        accent="Ferrari e F1"
         subtitle="Una sintesi quotidiana di quello che scrivono le principali testate di Formula 1, con lo sguardo puntato sulla Ferrari."
         breadcrumb={[{ label: 'Stagione' }, { label: 'News' }]}
       />

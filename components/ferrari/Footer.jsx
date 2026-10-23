@@ -108,7 +108,7 @@ export default function Footer() {
           <div>
             <Link href="/" className="inline-flex items-center gap-3 group">
               <img
-                src="/data/images/formula-rossa-logo.png"
+                src="/data/images/formula-rossa-logo-96.png"
                 alt=""
                 width={44}
                 height={44}

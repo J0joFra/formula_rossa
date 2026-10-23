@@ -100,8 +100,10 @@ export default function HeroSection() {
               Data Intelligence · Scuderia Ferrari
             </span>
 
+            {/* L'h1 è il segnale più forte su cosa parla la pagina: "La Rossa
+                nei numeri" non conteneva né "Ferrari" né "F1". */}
             <h1 className="uppercase">
-              La Rossa<br />
+              La Ferrari in F1<br />
               <span className="text-[var(--fr-red)]">nei numeri</span>
             </h1>
 

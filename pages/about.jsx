@@ -10,6 +10,7 @@
  */
 
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   BarChart3, Trophy, Gamepad2, Database, Github, Linkedin,
   Youtube, Instagram, Mail, Smartphone, ArrowUpRight, Shield,
@@ -100,12 +101,15 @@ export default function AboutPage() {
               raccontarli con grafici che si capiscono al primo sguardo. Niente di più.
             </p>
           </div>
-          <img
-            src="/data/images/sf26.jpg"
-            alt="Una monoposto della Scuderia Ferrari in pista"
-            className="rounded-[var(--radius)] border border-[var(--fr-border)] w-full object-cover aspect-[4/3]"
-            loading="lazy"
-          />
+          <div className="relative w-full aspect-[4/3] rounded-[var(--radius)] border border-[var(--fr-border)] overflow-hidden">
+            <Image
+              src="/data/images/sf26.jpg"
+              alt="Una monoposto della Scuderia Ferrari in pista"
+              className="object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
         </section>
 
         {/* ── Cosa trovi ── */}

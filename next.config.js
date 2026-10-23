@@ -47,13 +47,13 @@ const nextConfig = {
           { key: 'X-XSS-Protection',         value: '1; mode=block' },
           { key: 'Referrer-Policy',          value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy',       value: 'camera=(), microphone=(), geolocation=()' },
-          // HTTP/2 Server Push — preload risorse critiche
+          /* Si precarica solo il logo della barra, che sta in cima a ogni
+             pagina. Qui c'era anche sf26.jpg: 739 KB scaricati con priorità
+             alta su tutte le pagine, mentre la foto compare solo in home e in
+             /about, più in basso, ed è in lazy loading. */
           {
             key: 'Link',
-            value: [
-              '</data/images/formula-rossa-logo.png>; rel=preload; as=image',
-              '</data/images/sf26.jpg>; rel=preload; as=image',
-            ].join(', '),
+            value: '</data/images/formula-rossa-logo-96.png>; rel=preload; as=image',
           },
         ],
       },

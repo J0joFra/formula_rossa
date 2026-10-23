@@ -187,7 +187,7 @@ export default function PitStopGame() {
   }[gameState];
 
   const seo = {
-    title: 'Pit Stop Challenge — riflessi al semaforo',
+    title: 'Pit Stop Challenge — gioco di riflessi F1',
     description: 'Mini-gioco di riflessi a tema Ferrari: ferma il cronometro appena si spengono i semafori, come ai box.',
     path: '/games/pitstop',
   };
