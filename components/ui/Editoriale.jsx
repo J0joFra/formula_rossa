@@ -27,7 +27,9 @@ export default function Editoriale({ testo, className = '' }) {
       {testo.titolo && (
         <h2 className="uppercase text-xl md:text-2xl mt-3 text-[var(--fr-text)]">{testo.titolo}</h2>
       )}
-      <div className="mt-4 space-y-3.5 max-w-[72ch] text-[15px] leading-relaxed text-[var(--fr-text-muted)]">
+      {/* Testo giustificato su tutta la larghezza del riquadro; la sillabazione
+          (la pagina è in italiano) evita i buchi fra le parole su mobile. */}
+      <div lang="it" className="mt-4 space-y-3.5 text-justify hyphens-auto text-[15px] leading-relaxed text-[var(--fr-text-muted)]">
         {testo.paragrafi.map((p, i) => <p key={i}>{p}</p>)}
       </div>
       <p className="mt-5 text-xs text-[var(--fr-text-faint)]">— {FIRMA}</p>
