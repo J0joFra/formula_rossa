@@ -34,6 +34,8 @@ const STATICHE = [
   ['/games/trivia',         '0.5', 'monthly'],
   ['/games/pitstop',        '0.5', 'monthly'],
   ['/games/circuit-rush',   '0.5', 'monthly'],
+  ['/gioca/gridup',         '0.7', 'monthly'],
+  ['/gioca/driver-clash',   '0.7', 'monthly'],
   ['/about',                '0.5', 'yearly'],
   ['/stats/wins',           '0.7', 'weekly'],
   ['/stats/podiums',        '0.7', 'weekly'],

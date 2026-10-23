@@ -37,7 +37,7 @@ const STAGIONE = {
   ],
 };
 
-/* I tre mini-giochi, più la Fan Zone che li raccoglie insieme alle app. */
+/* La Fan Zone, i tre mini-giochi e le due app, giocabili anche dal sito. */
 const GIOCA = {
   id: 'gioca',
   label: 'Gioca',
@@ -47,6 +47,8 @@ const GIOCA = {
     { href: '/games/trivia',       label: 'Trivia',       desc: 'Domande sulla storia della Scuderia' },
     { href: '/games/pitstop',      label: 'Pit Stop',     desc: 'Riflessi al semaforo' },
     { href: '/games/circuit-rush', label: 'Circuit Rush', desc: 'Schiva i detriti in pista' },
+    { href: '/gioca/driver-clash', label: 'Driver Clash', desc: 'Il gioco di carte della F1' },
+    { href: '/gioca/gridup',       label: 'GridUp',       desc: 'Il calcolatore del Mondiale' },
   ],
 };
 

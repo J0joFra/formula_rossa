@@ -1,19 +1,22 @@
 'use client';
 /**
  * components/ferrari/AppsSection.jsx
- * Le app di Formula Rossa: GridUp (su Google Play) e Driver Clash (in test
- * chiuso). Testi e link vengono da lib/apps.js.
+ * Le app di Formula Rossa: GridUp (su Google Play) e Driver Clash (Android in
+ * test chiuso). Entrambe si giocano anche dal sito, in /gioca/<id>; testi e
+ * link vengono da lib/apps.js.
  *
  * Usata in home e nella Fan Zone. `compact` toglie l'intestazione grande, per
  * quando la sezione sta dentro una pagina che ha già il suo titolo.
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
   ArrowUpRight, Smartphone, Swords, Calculator, TrendingUp, Trophy, FlaskConical,
+  Play, Layers, Users, Package,
 } from 'lucide-react';
-import { APPS } from '../../lib/apps';
+import { APPS, playPath } from '../../lib/apps';
 
 /* Le icone e i punti forti restano qui: sono presentazione, non dati. */
 const EXTRA = {
@@ -27,7 +30,11 @@ const EXTRA = {
   },
   'driver-clash': {
     Icon: Swords,
-    punti: [],
+    punti: [
+      { icon: Layers,  label: '1.501 carte' },
+      { icon: Users,   label: 'Sfida un amico' },
+      { icon: Package, label: 'Pacchetti' },
+    ],
   },
 };
 
@@ -106,14 +113,21 @@ function AppCard({ app, index }) {
         </ul>
       )}
 
-      <a
-        href={app.url}
-        {...(esterno ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-        className={`mt-auto self-start ${app.status === 'live' ? 'btn btn-primary' : 'btn btn-outline'}`}
-      >
-        {app.cta}
-        <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
-      </a>
+      {/* Prima strada: giocare subito dal sito. Seconda: l'app Android. */}
+      <div className="mt-auto flex flex-wrap gap-2">
+        <Link href={playPath(app)} className="btn btn-primary">
+          <Play className="w-4 h-4 fill-current" aria-hidden="true" />
+          {app.id === 'gridup' ? 'Usa sul sito' : 'Gioca sul sito'}
+        </Link>
+        <a
+          href={app.url}
+          {...(esterno ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+          className="btn btn-outline"
+        >
+          {app.cta}
+          <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+        </a>
+      </div>
     </motion.article>
   );
 }
@@ -137,7 +151,7 @@ export default function AppsSection({ compact = false }) {
           <span className="fr-eyebrow">Le app</span>
           <h2 id="apps-heading" className="uppercase mt-3">Formula Rossa in tasca</h2>
           <p className="text-[var(--fr-text-muted)] mt-2.5 max-w-[56ch]">
-            Due app nate dallo stesso progetto: GridUp per seguire il Mondiale, Driver Clash per sfidarsi a colpi di piloti.
+            Due app nate dallo stesso progetto: GridUp per seguire il Mondiale, Driver Clash per sfidarsi a colpi di carte. Si usano direttamente qui sul sito, o si scaricano su Android.
           </p>
         </header>
         {griglia}
