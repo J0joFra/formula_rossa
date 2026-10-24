@@ -57,6 +57,9 @@ export default function CookieConsent() {
   const decide = (granted) => {
     try { localStorage.setItem(STORAGE_KEY, granted ? 'accepted' : 'rejected'); } catch (e) { /* ignore */ }
     applyConsent(granted);
+    /* Gli embed dei social (components/ferrari/SocialSection.jsx) aspettano
+       il consenso: così si caricano subito, senza ricaricare la pagina. */
+    window.dispatchEvent(new Event('cookie-consent-change'));
     setVisible(false);
   };
 

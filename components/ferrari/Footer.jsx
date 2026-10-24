@@ -21,6 +21,7 @@ import {
   Instagram, Twitter, Youtube, Linkedin, Mail, Heart,
 } from 'lucide-react';
 import { GRIDUP } from '../../lib/apps';
+import TikTokIcon from '../ui/TikTokIcon';
 
 const SEZIONI = [
   {
@@ -66,6 +67,7 @@ const SOCIAL = [
   { icon: Linkedin,      href: 'https://www.linkedin.com/company/formula-rossa/',       label: 'Formula Rossa su LinkedIn' },
   { icon: Youtube,       href: 'https://www.youtube.com/@jofrancalanci',                label: 'Formula Rossa su YouTube' },
   { icon: Instagram,     href: 'https://www.instagram.com/formularossa.it',             label: 'Formula Rossa su Instagram' },
+  { icon: TikTokIcon,    href: 'https://www.tiktok.com/@formularossa.it',               label: 'Formula Rossa su TikTok' },
   { icon: Twitter,       href: 'https://www.x.com/jofrancalanci',                       label: 'Formula Rossa su X' },
   /* L'email in fondo, dopo i social: non è un profilo da seguire, è il modo
      di scrivere a qualcuno, e va cercata lì dove si cerca un contatto. */

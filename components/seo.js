@@ -37,6 +37,7 @@ const LOGO = `${BASE_URL}/data/images/formula-rossa-logo.png`;
 const PROFILI = [
   'https://www.linkedin.com/company/formula-rossa/',
   'https://www.instagram.com/formularossa.it',
+  'https://www.tiktok.com/@formularossa.it',
   'https://www.youtube.com/@jofrancalanci',
   'https://www.x.com/jofrancalanci',
   'https://whatsapp.com/channel/0029Vb7EagL6WaKvnD5Slm30',
