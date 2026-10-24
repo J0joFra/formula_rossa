@@ -10,6 +10,8 @@ import NewsSection from '../components/ferrari/NewsSection';
 import AppsSection from '../components/ferrari/AppsSection';
 import Footer from '../components/ferrari/Footer';
 import SEO from '../components/seo';
+import Editoriale from '../components/ui/Editoriale';
+import { HOME } from '../content/editoriale';
 import { GRIDUP_URL } from '../lib/gridup';
 
 /* I tre pilastri: stessa struttura del menu, così la home spiega il sito.
@@ -211,6 +213,13 @@ export default function Home() {
         </section>
 
         <FactsBand years={stagioni} />
+
+        {/* Il testo che spiega il sito: la home era quasi solo schede e link. */}
+        <section className="snap-section py-12 md:py-16 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-wrap mx-auto">
+            <Editoriale testo={HOME} />
+          </div>
+        </section>
 
         <AppsSection />
 

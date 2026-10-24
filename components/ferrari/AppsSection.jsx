@@ -117,7 +117,7 @@ function AppCard({ app, index }) {
       <div className="mt-auto flex flex-wrap gap-2">
         <Link href={playPath(app)} className="btn btn-primary">
           <Play className="w-4 h-4 fill-current" aria-hidden="true" />
-          {app.id === 'gridup' ? 'Usa sul sito' : 'Gioca sul sito'}
+          {app.id === 'gridup' ? 'Apri GridUp' : 'Gioca ora'}
         </Link>
         <a
           href={app.url}

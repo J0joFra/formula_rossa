@@ -15,6 +15,16 @@
 
 export const FIRMA = 'Joaquim Francalanci, Formula Rossa';
 
+/* ─── / (home) ─────────────────────────────────────────────────────────── */
+
+export const HOME = {
+  titolo: 'Perché un archivio della Ferrari in Formula 1',
+  paragrafi: [
+    'La Scuderia Ferrari è la squadra più vincente e più longeva della Formula 1: c’è dal primo Mondiale, nel 1950, e non ha mai saltato una stagione. Dietro i titoli e le vittorie c’è un archivio enorme di gare, piloti e risultati, sparso fra siti diversi e quasi sempre in inglese.',
+    'Formula Rossa nasce per metterlo in ordine e raccontarlo in italiano: le statistiche Ferrari dal 1950 a oggi, le classifiche dei piloti più vincenti in rosso, le schede di ogni pilota e circuito di F1, e l’analisi di ogni Gran Premio della stagione in corso. I numeri vengono da archivi pubblici e verificabili; il commento è nostro.',
+  ],
+};
+
 /* ─── /statistics ──────────────────────────────────────────────────────── */
 
 export const STATISTICHE = {

@@ -104,6 +104,10 @@ const nextConfig = {
       /* Il Fanta GP è stato tolto insieme all'accesso con Google: chi arriva
          da un vecchio link trova i mini-giochi e le app. */
       { source: '/fanta',       destination: '/fanzone', permanent: false },
+      /* La vecchia versione inglese viveva sotto /en: è dove punta l'unico
+         link esterno che il sito ha (innolope.com), e finiva su un 404. */
+      { source: '/en',          destination: '/',        permanent: true },
+      { source: '/en/:path*',   destination: '/:path*',  permanent: true },
       /* Il live timing in tempo reale richiederebbe il tier a pagamento di
          OpenF1. La pagina è stata tolta; i suoi grafici vivono nelle Analisi
          GP (components/livetiming/Charts). */

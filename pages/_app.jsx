@@ -2,6 +2,20 @@ import Head from 'next/head';
 import { ThemeProvider } from 'next-themes';
 import Script from 'next/script';
 import CookieConsent from '../components/CookieConsent';
+/* Font del design system, serviti dal sito (@fontsource) invece che da Google
+   Fonts: niente CSS esterno che blocca il primo disegno, niente connessione in
+   più verso fonts.googleapis.com, e solo l'alfabeto latino. */
+import '@fontsource/barlow-condensed/latin-600.css';
+import '@fontsource/barlow-condensed/latin-700.css';
+import '@fontsource/barlow-condensed/latin-800.css';
+import '@fontsource/barlow-condensed/latin-900.css';
+import '@fontsource/dm-sans/latin-400.css';
+import '@fontsource/dm-sans/latin-500.css';
+import '@fontsource/dm-sans/latin-600.css';
+import '@fontsource/dm-sans/latin-700.css';
+import '@fontsource/jetbrains-mono/latin-400.css';
+import '@fontsource/jetbrains-mono/latin-500.css';
+import '@fontsource/jetbrains-mono/latin-700.css';
 import '../styles/globals.css';
 
 function MyApp({ Component, pageProps }) {
@@ -26,15 +40,6 @@ function MyApp({ Component, pageProps }) {
             producevano un 404 a ogni caricamento di pagina. */}
         <link rel="icon"             href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/data/images/formula-rossa-logo.png" />
-
-        {/* Font del design system — Barlow Condensed (titoli), DM Sans (testo),
-            JetBrains Mono (numeri). Preconnect prima del CSS per velocizzare. */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;700&display=swap"
-          rel="stylesheet"
-        />
       </Head>
 
       {/* Google Consent Mode v2 default "denied" impostato in pages/_document.jsx,
@@ -54,13 +59,16 @@ function MyApp({ Component, pageProps }) {
         `}
       </Script>
 
-      {/* Google AdSense */}
+      {/* Google AdSense — `lazyOnload`: parte quando la pagina ha finito di
+          caricarsi. Sono decine di script di terze parti, e con
+          `afterInteractive` si contendevano la rete con il contenuto. La
+          verifica dell'account usa il meta tag qui sopra e ads.txt. */}
       <Script
         id="adsense-id"
         async
         src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8762257220044998"
         crossOrigin="anonymous"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
       />
 
       {/* Stili globali: design system in styles/globals.css + styles/tokens.css */}
