@@ -1,20 +1,21 @@
 'use client';
 /**
  * pages/fanzone.jsx
- * L'angolo leggero del sito: i tre mini-giochi e le app di Formula Rossa.
+ * L'angolo leggero del sito: i tre mini-giochi, le app e i social di Formula Rossa.
  *
  * Prima c'erano anche il Fanta GP, il bonus giornaliero e la classifica degli
  * SF Token, tutti legati all'accesso con Google. Con l'accesso tolto i token
  * restano sul dispositivo di chi gioca (lib/tokens.js) e la pagina presenta
- * solo quello che si può usare senza account: i giochi e le app.
+ * solo quello che si può usare senza account: i giochi, le app e i social.
  */
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Gamepad2, Coins, Zap, Timer, Award, Smartphone } from 'lucide-react';
-import PageShell, { PageHeader, Panel } from '../components/ui/PageShell';
+import { Gamepad2, Coins, Zap, Timer, Award, Smartphone, Instagram } from 'lucide-react';
+import PageShell, { PageHeader } from '../components/ui/PageShell';
 import AppsSection from '../components/ferrari/AppsSection';
+import SocialSection from '../components/ferrari/SocialSection';
 import { getTokens } from '../lib/tokens';
 
 /* I premi sono letti dalle formule dei giochi, non scritti a occhio: le
@@ -125,19 +126,14 @@ export default function FanZonePage() {
           <AppsSection compact />
         </section>
 
-        <Panel title="Cosa sono gli SF Token">
-          <div className="p-6 text-sm text-[var(--fr-text-muted)] space-y-3">
-            <p>
-              Sono un punteggio, non una valuta: si guadagnano giocando e misurano
-              quanto e quanto bene hai giocato. Non si comprano, non si scambiano e
-              non danno accesso a nulla.
-            </p>
-            <p>
-              Non serve nessun account: restano salvati su questo dispositivo, nel
-              browser con cui giochi. Se cancelli i dati del sito, ripartono da zero.
-            </p>
-          </div>
-        </Panel>
+        {/* I social — l'ancora #social permette di linkare direttamente qui */}
+        <section id="social" className="scroll-mt-24">
+          <h2 className="flex items-center gap-2 text-base font-black uppercase tracking-wide mb-4">
+            <Instagram className="w-4 h-4 text-[var(--fr-red)]" aria-hidden="true" />
+            Seguici sui social
+          </h2>
+          <SocialSection />
+        </section>
       </div>
     </PageShell>
   );

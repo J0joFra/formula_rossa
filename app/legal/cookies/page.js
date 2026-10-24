@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 export default function CookiesPage() {
-  const lastUpdate = "23 ottobre 2026";
+  const lastUpdate = "24 ottobre 2026";
 
   const cookies = [
     {
@@ -34,6 +34,12 @@ export default function CookiesPage() {
       duration: "Variabile",
       purpose: "Pubblicità personalizzata",
       type: "Profilazione"
+    },
+    {
+      name: "TikTok e Instagram (contenuti incorporati)",
+      duration: "Variabile",
+      purpose: "Mostrare i video e i post della Fan Zone; si caricano solo dopo il consenso o su richiesta",
+      type: "Terze parti"
     }
   ];
 

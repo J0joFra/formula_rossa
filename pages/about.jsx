@@ -10,6 +10,7 @@
  */
 
 import Link from 'next/link';
+import TikTokIcon from '../components/ui/TikTokIcon';
 import Image from 'next/image';
 import {
   BarChart3, Trophy, Gamepad2, Database, Github, Linkedin,
@@ -65,6 +66,7 @@ const SOCIAL = [
   { icon: Linkedin,  href: 'https://www.linkedin.com/company/formula-rossa/', label: 'LinkedIn' },
   { icon: Youtube,   href: 'https://www.youtube.com/@jofrancalanci',          label: 'YouTube' },
   { icon: Instagram, href: 'https://www.instagram.com/formularossa.it',       label: 'Instagram' },
+  { icon: TikTokIcon, href: 'https://www.tiktok.com/@formularossa.it',       label: 'TikTok' },
 ];
 
 export default function AboutPage() {
