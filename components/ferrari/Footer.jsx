@@ -111,7 +111,7 @@ export default function Footer() {
             <Link href="/" className="inline-flex items-center gap-3 group">
               <img
                 src="/data/images/formula-rossa-logo-96.png"
-                alt=""
+                alt="Logo di Formula Rossa"
                 width={44}
                 height={44}
                 className="w-11 h-11 rounded-[13px] object-contain bg-[var(--fr-surface-2)] p-1"

@@ -8,6 +8,20 @@ import CookieConsent from '../components/CookieConsent';
    .fr-eyebrow) e senza il layer di compatibilità, che è quello che tiene
    leggibile il bianco sul rosso dei bottoni. Barra e piè di pagina sono gli
    stessi componenti, quindi si vedeva la differenza. */
+/* Font del design system, serviti dal sito (@fontsource) invece che da Google
+   Fonts: niente CSS esterno che blocca il primo disegno, niente connessione in
+   più verso fonts.googleapis.com, e solo l'alfabeto latino. */
+import '@fontsource/barlow-condensed/latin-600.css';
+import '@fontsource/barlow-condensed/latin-700.css';
+import '@fontsource/barlow-condensed/latin-800.css';
+import '@fontsource/barlow-condensed/latin-900.css';
+import '@fontsource/dm-sans/latin-400.css';
+import '@fontsource/dm-sans/latin-500.css';
+import '@fontsource/dm-sans/latin-600.css';
+import '@fontsource/dm-sans/latin-700.css';
+import '@fontsource/jetbrains-mono/latin-400.css';
+import '@fontsource/jetbrains-mono/latin-500.css';
+import '@fontsource/jetbrains-mono/latin-700.css';
 import '../styles/globals.css';
 
 export const metadata = {
@@ -64,13 +78,6 @@ export default function RootLayout({ children }) {
         <meta name="keywords" content="Ferrari, Formula 1, F1, Scuderia Ferrari, dati F1, statistiche F1" />
         <meta name="author" content="Formula Rossa" />
 
-        {/* Font del design system — stessi del Pages Router */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;700&display=swap"
-          rel="stylesheet"
-        />
       </head>
       {/* `suppressHydrationWarning`: next-themes scrive la classe del tema su
           <html> prima dell'idratazione, quindi server e client differiscono

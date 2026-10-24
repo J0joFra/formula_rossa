@@ -15,7 +15,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { BarChart3, Trophy } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
@@ -90,11 +89,11 @@ export default function HeroSection() {
         <div className="grid lg:grid-cols-[1.15fr_.85fr] gap-10 lg:gap-12 items-center">
 
           {/* ── Tesi ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: .55, ease: 'easeOut' }}
-          >
+          {/* Niente dissolvenza in entrata: il blocco partiva a opacità 0 e
+              diventava visibile solo dopo il caricamento di JavaScript. Il
+              titolo è l'elemento più grande della pagina (LCP), e su mobile
+              compariva dopo 9 secondi. */}
+          <div>
             <span className="fr-eyebrow inline-flex items-center gap-2.5 mb-5">
               <span className="w-[7px] h-[7px] rounded-full bg-[var(--fr-red)] shadow-[0_0_0_4px_var(--fr-red-soft)]" aria-hidden="true" />
               Data Intelligence · Scuderia Ferrari
@@ -121,15 +120,10 @@ export default function HeroSection() {
                 Classifiche {anno}
               </Link>
             </div>
-          </motion.div>
+          </div>
 
           {/* ── Riepilogo dati ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: .55, delay: .12, ease: 'easeOut' }}
-            className="rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)] shadow-[var(--fr-shadow)] overflow-hidden"
-          >
+          <div className="rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)] shadow-[var(--fr-shadow)] overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--fr-border)]">
               <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[var(--fr-text-faint)]">
                 Ferrari · F1 all-time
@@ -163,7 +157,7 @@ export default function HeroSection() {
               <span>{stats.constructorTitles} Titoli Costruttori</span>
               <span className="tabular">{TITOLI_PILOTI} Titoli Piloti</span>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
