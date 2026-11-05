@@ -45,7 +45,7 @@ const GIOCA = {
   items: [
     { href: '/fanzone',            label: 'Fan Zone',     desc: 'Mini-giochi e app di Formula Rossa' },
     { href: '/games/trivia',       label: 'Trivia',       desc: 'Domande sulla storia della Scuderia' },
-    { href: '/games/pitstop',      label: 'Pit Stop',     desc: 'Riflessi al semaforo' },
+    { href: '/games/pitstop',      label: 'Pit Stop',     desc: 'Il cambio gomme cronometrato' },
     { href: '/games/circuit-rush', label: 'Circuit Rush', desc: 'Schiva i detriti in pista' },
     { href: '/gioca/driver-clash', label: 'Driver Clash', desc: 'Il gioco di carte della F1' },
     { href: '/gioca/gridup',       label: 'GridUp',       desc: 'Il calcolatore del Mondiale' },

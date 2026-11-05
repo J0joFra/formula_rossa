@@ -1,378 +1,335 @@
-import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Coins, Trophy, Zap } from 'lucide-react';
-import GameShell from '../../components/ui/GameShell';
-import { addTokens, getTokens } from '../../lib/tokens';
+/**
+ * pages/games/pitstop.jsx
+ * Pit Stop: il cambio gomme della Ferrari, cronometrato.
+ *
+ * Prima il gioco si chiamava Pit Stop ma era "ferma il cronometro a X
+ * secondi". Ora è un pit stop vero: la macchina si ferma, le quattro ruote si
+ * accendono una alla volta in ordine casuale e vanno toccate subito (la ruota
+ * sbagliata costa mezzo secondo); poi il lecca-lecca passa al verde e si
+ * riparte. Partire col rosso costa un secondo. Vince il tempo più basso.
+ *
+ * Si gioca col tocco o da tastiera: Q E A D per le ruote, spazio per ripartire.
+ */
 
-// ─── RATING CONFIG ────────────────────────────────────────────────────────────
-const RATINGS = [
-  { max: 0.05, label: 'PERFETTO',   emoji: '🏆', color: 'text-yellow-400', glow: 'shadow-yellow-400/40', points: 1000, bg: 'from-yellow-900/40 to-black', border: 'border-yellow-500/30' },
-  { max: 0.2,  label: 'OTTIMO',     emoji: '🔥', color: 'text-orange-400', glow: 'shadow-orange-400/40', points: 500,  bg: 'from-orange-900/40 to-black', border: 'border-orange-500/30' },
-  { max: 0.5,  label: 'BUONO',      emoji: '✅', color: 'text-green-400',  glow: 'shadow-green-400/40',  points: 200,  bg: 'from-green-900/40 to-black',  border: 'border-green-500/30'  },
-  { max: 1.0,  label: 'ACCETTABILE',emoji: '⏱️', color: 'text-blue-400',  glow: 'shadow-blue-400/40',   points: 50,   bg: 'from-blue-900/40 to-black',   border: 'border-blue-500/30'   },
-  { max: Infinity, label: 'TROPPO LENTO', emoji: '💨', color: 'text-zinc-400', glow: '', points: 0, bg: 'from-zinc-900/40 to-black', border: 'border-[var(--fr-border)]' },
+import { useState, useEffect, useRef, useCallback } from 'react';
+import Link from 'next/link';
+import { Timer, RefreshCw, Coins, Trophy, Keyboard } from 'lucide-react';
+import GameShell, { Record } from '../../components/ui/GameShell';
+import { addTokens, getTokens } from '../../lib/tokens';
+import { getRecord, saveRecord } from '../../lib/records';
+
+const SEO = {
+  title: 'Pit Stop Challenge — gioco di riflessi F1',
+  description: 'Cambia le quattro gomme della Ferrari e riparti al verde: un pit stop cronometrato, al centesimo. Riesci a stare sotto i due secondi?',
+  path: '/games/pitstop',
+};
+
+/* Le quattro ruote viste dall'alto (muso in alto), con il tasto che le cambia. */
+const RUOTE = [
+  { id: 'ant-sx',  label: 'Anteriore sinistra',  tasto: 'Q', pos: 'left-[6%] top-[18%]' },
+  { id: 'ant-dx',  label: 'Anteriore destra',    tasto: 'E', pos: 'right-[6%] top-[18%]' },
+  { id: 'post-sx', label: 'Posteriore sinistra', tasto: 'A', pos: 'left-[6%] bottom-[14%]' },
+  { id: 'post-dx', label: 'Posteriore destra',   tasto: 'D', pos: 'right-[6%] bottom-[14%]' },
+];
+const TASTI = { q: 0, e: 1, a: 2, d: 3 };
+
+const PENALITA_RUOTA = 0.5;
+const PENALITA_PARTENZA = 1.0;
+const RECORD_F1 = 1.80; // McLaren, Qatar 2023
+
+const VALUTAZIONI = [
+  { max: 2.2,      label: 'Da record',  testo: 'Un tempo da squadra di vertice. Il box Ferrari ti vuole.' },
+  { max: 2.8,      label: 'Ottimo',     testo: 'Un pit stop da Formula 1 vera: sei rientrato davanti.' },
+  { max: 3.5,      label: 'Buono',      testo: 'Pulito, ma qualche decimo è rimasto sulla pistola.' },
+  { max: 4.5,      label: 'Lento',      testo: 'Il rivale ti ha passato con l’undercut.' },
+  { max: Infinity, label: 'Disastro',   testo: 'Gara compromessa. Si torna a provare in fabbrica.' },
 ];
 
-function getRating(diff) {
-  return RATINGS.find(r => diff < r.max);
+const fmt = (s) => s.toFixed(2).replace('.', ',');
+
+function mescola(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
-// ─── SVG SEMAFORO ─────────────────────────────────────────────────────────────
-function Semaphore({ phase }) {
-  // phase: 'off' | 'red' | 'go'
-  const lights = [
-    { on: phase === 'red' || phase === 'go', color: phase === 'go' ? '#22c55e' : '#ef4444' },
-    { on: phase === 'red' || phase === 'go', color: phase === 'go' ? '#22c55e' : '#ef4444' },
-    { on: phase === 'red' || phase === 'go', color: phase === 'go' ? '#22c55e' : '#ef4444' },
-    { on: phase === 'red' || phase === 'go', color: phase === 'go' ? '#22c55e' : '#ef4444' },
-    { on: phase === 'red' || phase === 'go', color: phase === 'go' ? '#22c55e' : '#ef4444' },
-  ];
-
+/* La monoposto vista dall'alto. Il colore usa il rosso del brand: è la
+   macchina, non un elemento d'interfaccia, quindi non cambia col tema. */
+function Monoposto() {
   return (
-    <div className="flex gap-3 justify-center mb-8">
-      {lights.map((l, i) => (
-        <div key={i} className="flex flex-col items-center gap-1">
-          <div
-            className="w-10 h-10 rounded-full border-2 border-zinc-700 transition-all duration-150"
-            style={{
-              backgroundColor: l.on ? l.color : '#1a1a1a',
-              boxShadow: l.on ? `0 0 16px ${l.color}88` : 'none',
-            }}
-          />
-          <div className="w-2 h-6 bg-zinc-700 rounded-full" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─── SVG CRONOMETRO ANALOGICO ─────────────────────────────────────────────────
-function AnalogTimer({ progress, color }) {
-  const r = 52;
-  const circ = 2 * Math.PI * r;
-  const dash = circ * (1 - progress);
-  return (
-    <svg width="130" height="130" viewBox="0 0 130 130">
-      <circle cx="65" cy="65" r={r} fill="none" stroke="#27272a" strokeWidth="8" />
-      <circle
-        cx="65" cy="65" r={r}
-        fill="none"
-        stroke={color}
-        strokeWidth="8"
-        strokeDasharray={circ}
-        strokeDashoffset={dash}
-        strokeLinecap="round"
-        transform="rotate(-90 65 65)"
-        style={{ transition: 'stroke-dashoffset 0.05s linear, stroke 0.3s' }}
-      />
-      <circle cx="65" cy="65" r="6" fill={color} />
+    <svg viewBox="0 0 120 240" className="w-full h-full" aria-hidden="true">
+      <rect x="22" y="6" width="76" height="12" rx="3" fill="#a3001f" />
+      <path d="M52 18 L68 18 L74 70 L46 70 Z" fill="#E8002D" />
+      <path d="M40 70 L80 70 L90 150 L86 200 L34 200 L30 150 Z" fill="#E8002D" />
+      <path d="M30 110 L18 150 L30 170 Z M90 110 L102 150 L90 170 Z" fill="#c4001f" />
+      <ellipse cx="60" cy="112" rx="11" ry="18" fill="#111" />
+      <path d="M49 100 Q60 88 71 100" stroke="#ddd" strokeWidth="3" fill="none" />
+      <rect x="44" y="160" width="32" height="14" rx="3" fill="#fff" opacity=".9" />
+      <text x="60" y="171" textAnchor="middle" fontSize="11" fontWeight="700" fill="#E8002D" fontFamily="monospace">16</text>
+      <rect x="20" y="214" width="80" height="16" rx="3" fill="#a3001f" />
     </svg>
   );
 }
 
-// ─── COMPONENTE PRINCIPALE ────────────────────────────────────────────────────
 export default function PitStopGame() {
-  const router = useRouter();
+  const [fase, setFase] = useState('pronto');   // pronto | ingresso | gomme | uscita | fine
+  const [ordine, setOrdine] = useState([]);       // indici delle ruote, nell'ordine in cui si accendono
+  const [fatte, setFatte] = useState(0);          // ruote cambiate
+  const [errore, setErrore] = useState(null);     // indice della ruota toccata per sbaglio
+  const [verde, setVerde] = useState(false);
+  const [penalita, setPenalita] = useState(0);
+  const [cronometro, setCronometro] = useState(0);
+  const [esito, setEsito] = useState(null);
+  const [record, setRecord] = useState(null);
+  const [token, setToken] = useState(0);
 
-  const [gameState, setGameState] = useState('idle');  // idle | countdown | running | result
-  const [targetTime, setTargetTime] = useState(0);
-  const [resultTime, setResultTime] = useState(0);
-  const [earnedTokens, setEarnedTokens] = useState(0);
-  const [totalTokens, setTotalTokens] = useState(0);
-  const [rating, setRating] = useState(null);
-  const [elapsedDisplay, setElapsedDisplay] = useState(0);
-  const [semaphorePhase, setSemaphorePhase] = useState('off');
-  const [countdown, setCountdown] = useState(3);
-  const [bestTime, setBestTime] = useState(null); // best diff this session
+  const t0 = useRef(0);
+  const raf = useRef(0);
+  const timeouts = useRef([]);
+  const penalitaRef = useRef(0);
+  const boxRef = useRef(null);
 
-  const startTimeRef = useRef(0);
-  const rafRef = useRef();
-  const countdownRef = useRef();
+  useEffect(() => {
+    setRecord(getRecord('pitstop'));
+    setToken(getTokens());
+    return () => { cancelAnimationFrame(raf.current); timeouts.current.forEach(clearTimeout); };
+  }, []);
 
-  // Saldo salvato sul dispositivo
-  useEffect(() => { setTotalTokens(getTokens()); }, []);
+  const dopo = (ms, fn) => timeouts.current.push(setTimeout(fn, ms));
 
-  const generateTarget = () => {
-    const t = parseFloat((Math.random() * 3 + 2).toFixed(2)); // 2.00 – 5.00s
-    setTargetTime(t);
+  // Cronometro a vista mentre la macchina è ferma ai box.
+  useEffect(() => {
+    if (fase !== 'gomme' && fase !== 'uscita') return;
+    const tick = () => {
+      setCronometro((performance.now() - t0.current) / 1000 + penalitaRef.current);
+      raf.current = requestAnimationFrame(tick);
+    };
+    raf.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf.current);
+  }, [fase]);
+
+  const inizia = () => {
+    timeouts.current.forEach(clearTimeout);
+    timeouts.current = [];
+    setOrdine(mescola([0, 1, 2, 3]));
+    setFatte(0);
+    setErrore(null);
+    setVerde(false);
+    penalitaRef.current = 0;
+    setPenalita(0);
+    setCronometro(0);
+    setEsito(null);
+    setFase('ingresso');
+    boxRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // La macchina entra nel box; il cronometro parte quando si ferma.
+    dopo(900, () => { t0.current = performance.now(); setFase('gomme'); });
   };
 
-  useEffect(() => { generateTarget(); }, []);
+  const aggiungiPenalita = (s) => {
+    penalitaRef.current += s;
+    setPenalita(penalitaRef.current);
+  };
 
-  // Tick elapsed durante il gioco
-  useEffect(() => {
-    if (gameState !== 'running') {
-      cancelAnimationFrame(rafRef.current);
+  const tocca = useCallback((i) => {
+    if (fase !== 'gomme') return;
+    if (i !== ordine[fatte]) {
+      aggiungiPenalita(PENALITA_RUOTA);
+      setErrore(i);
+      dopo(250, () => setErrore(null));
       return;
     }
-    const tick = () => {
-      setElapsedDisplay((Date.now() - startTimeRef.current) / 1000);
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [gameState]);
-
-  const startSequence = () => {
-    if (gameState !== 'idle') return;
-    setGameState('countdown');
-    setSemaphorePhase('off');
-    setCountdown(3);
-
-    let count = 3;
-    // Accendi luci rosse una alla volta (simulato con un solo cambio qui)
-    setTimeout(() => setSemaphorePhase('red'), 200);
-
-    countdownRef.current = setInterval(() => {
-      count -= 1;
-      setCountdown(count);
-      if (count <= 0) {
-        clearInterval(countdownRef.current);
-        // Lights out! Vai!
-        setSemaphorePhase('go');
-        setTimeout(() => {
-          setSemaphorePhase('off');
-          startTimeRef.current = Date.now();
-          setElapsedDisplay(0);
-          setGameState('running');
-        }, 400);
-      }
-    }, 800);
-  };
-
-  const stopTimer = () => {
-    if (gameState !== 'running') return;
-    cancelAnimationFrame(rafRef.current);
-    const duration = (Date.now() - startTimeRef.current) / 1000;
-    setResultTime(duration);
-
-    const diff = Math.abs(duration - targetTime);
-    const r = getRating(diff);
-    setRating(r);
-
-    // Aggiorna best session
-    if (bestTime === null || diff < bestTime) setBestTime(diff);
-
-    // Salva token
-    const earned = Math.floor(r.points / 10);
-    setEarnedTokens(earned);
-    if (earned > 0) setTotalTokens(addTokens(earned));
-
-    setGameState('result');
-  };
-
-  const handleMain = () => {
-    if (gameState === 'idle') startSequence();
-    else if (gameState === 'running') stopTimer();
-    else if (gameState === 'result') {
-      generateTarget();
-      setGameState('idle');
-      setSemaphorePhase('off');
-      setEarnedTokens(0);
-      setRating(null);
-      setElapsedDisplay(0);
+    const nuove = fatte + 1;
+    setFatte(nuove);
+    if (nuove === 4) {
+      setFase('uscita');
+      // Il lecca-lecca resta rosso per un tempo imprevedibile.
+      dopo(300 + Math.random() * 500, () => setVerde(true));
     }
-  };
+  }, [fase, ordine, fatte]);
 
-  // Barra progresso cronometro (0→1 in base a targetTime)
-  const timerProgress = Math.min(elapsedDisplay / (targetTime * 1.5), 1);
-  const timerColor = timerProgress < 0.6 ? '#22c55e' : timerProgress < 0.9 ? '#f59e0b' : '#ef4444';
+  const riparti = useCallback(() => {
+    if (fase !== 'uscita') return;
+    if (!verde) { aggiungiPenalita(PENALITA_PARTENZA); return; }
+    cancelAnimationFrame(raf.current);
+    const totale = (performance.now() - t0.current) / 1000 + penalitaRef.current;
+    const v = VALUTAZIONI.find((x) => totale < x.max);
+    const guadagnati = Math.max(0, Math.min(100, Math.round((6 - totale) * 20)));
+    if (guadagnati) setToken(addTokens(guadagnati));
+    const r = saveRecord('pitstop', Number(totale.toFixed(2)), 'basso');
+    setRecord(r.record);
+    setCronometro(totale);
+    setEsito({ totale, v, guadagnati, nuovoRecord: r.nuovo });
+    setFase('fine');
+  }, [fase, verde]);
 
-  const mainLabel = {
-    idle: '🏁 PRONTI',
-    countdown: '...',
-    running: '🛑 STOP!',
-    result: '🔄 RIPROVA',
-  }[gameState];
+  // Tastiera: Q E A D per le ruote, spazio o Invio per partire / ripartire.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const k = e.key.toLowerCase();
+      if (k in TASTI) { tocca(TASTI[k]); return; }
+      if (k === ' ' || k === 'enter') {
+        if (fase === 'uscita') { e.preventDefault(); riparti(); }
+        else if ((fase === 'pronto' || fase === 'fine') && e.target === document.body) { e.preventDefault(); inizia(); }
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
 
-  const seo = {
-    title: 'Pit Stop Challenge — gioco di riflessi F1',
-    description: 'Mini-gioco di riflessi a tema Ferrari: ferma il cronometro appena si spengono i semafori, come ai box.',
-    path: '/games/pitstop',
-  };
+  const attiva = fase === 'gomme' ? ordine[fatte] : null;
+  const cambiata = (i) => ordine.indexOf(i) < fatte && (fase === 'gomme' || fase === 'uscita' || fase === 'fine');
 
   return (
-    <GameShell seo={seo} title="Pit Stop Challenge" tokens={totalTokens}>
-      <div className="max-w-md mx-auto">
+    <GameShell
+      seo={SEO}
+      title="Pit Stop"
+      accent="Challenge"
+      subtitle="Cambia le quattro gomme nell’ordine in cui si accendono e riparti appena il lecca-lecca diventa verde. In Formula 1 il record è 1,80 secondi."
+      tokens={token}
+      record={<Record label="Record" value={record !== null ? `${fmt(record)} s` : null} />}
+    >
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
 
-          {/* TITOLO */}
-          <div className="text-center mb-8">
-            <p className="text-red-600 text-[10px] font-black uppercase tracking-[0.4em] mb-2">Scuderia Ferrari</p>
-            <h2 className="text-5xl font-black italic uppercase tracking-tighter leading-none">
-              Pit Stop<br /><span className="text-red-600">Challenge</span>
-            </h2>
-            <p className="text-zinc-600 text-xs uppercase tracking-widest mt-3">Ferma il cronometro al momento esatto</p>
-          </div>
-
-          {/* CARD PRINCIPALE */}
-          <div className="bg-zinc-900/60 border border-white/8 rounded-[40px] p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
-
-            {/* Glow decorativo */}
-            <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-64 h-64 bg-red-600/5 rounded-full blur-3xl pointer-events-none" />
-
-            <AnimatePresence mode="wait">
-
-              {/* ── IDLE ── */}
-              {gameState === 'idle' && (
-                <motion.div key="idle" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="text-center">
-                  <Semaphore phase="off" />
-                  <p className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold mb-2">Obiettivo</p>
-                  <div className="text-8xl font-black text-white font-mono mb-2 leading-none">
-                    {targetTime.toFixed(2)}<span className="text-3xl text-red-600">s</span>
-                  </div>
-                  <p className="text-zinc-600 text-sm mb-6">
-                    Aspetta il via, poi premi <span className="text-white font-bold">STOP</span> esattamente a <span className="text-red-400 font-bold">{targetTime}s</span>
-                  </p>
-                  {bestTime !== null && (
-                    <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 px-4 py-2 rounded-full mb-4">
-                      <Trophy className="w-3 h-3 text-yellow-400" />
-                      <span className="text-[10px] text-yellow-400 font-black uppercase tracking-widest">Miglior diff: {bestTime.toFixed(3)}s</span>
-                    </div>
-                  )}
-                </motion.div>
-              )}
-
-              {/* ── COUNTDOWN ── */}
-              {gameState === 'countdown' && (
-                <motion.div key="countdown" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-4">
-                  <Semaphore phase={semaphorePhase} />
-                  <motion.div
-                    key={countdown}
-                    initial={{ scale: 1.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="text-8xl font-black font-mono text-red-500 mb-4"
-                  >
-                    {countdown > 0 ? countdown : '🟢'}
-                  </motion.div>
-                  <p className="text-zinc-500 text-sm uppercase tracking-widest">Preparati...</p>
-                </motion.div>
-              )}
-
-              {/* ── RUNNING ── */}
-              {gameState === 'running' && (
-                <motion.div key="running" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="text-center">
-                  <Semaphore phase="off" />
-                  <div className="relative flex items-center justify-center mb-4">
-                    <AnalogTimer progress={timerProgress} color={timerColor} />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-3xl font-black font-mono" style={{ color: timerColor }}>
-                        {elapsedDisplay.toFixed(2)}
-                      </span>
-                      <span className="text-[10px] text-zinc-600 uppercase font-bold">secondi</span>
-                    </div>
-                  </div>
-                  <p className="text-zinc-400 text-sm italic">
-                    Target: <span className="text-white font-black">{targetTime}s</span>
-                  </p>
-                </motion.div>
-              )}
-
-              {/* ── RESULT ── */}
-              {gameState === 'result' && rating && (
-                <motion.div key="result" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
-                  <motion.div
-                    initial={{ scale: 0 }} animate={{ scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 15, delay: 0.1 }}
-                    className="text-6xl mb-3"
-                  >
-                    {rating.emoji}
-                  </motion.div>
-
-                  <motion.h2
-                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                    className={`text-3xl font-black uppercase italic mb-6 ${rating.color}`}
-                  >
-                    {rating.label}
-                  </motion.h2>
-
-                  {/* Confronto tempi */}
-                  <div className={`grid grid-cols-3 gap-3 mb-6 p-4 rounded-3xl bg-gradient-to-b ${rating.bg} border ${rating.border}`}>
-                    <div>
-                      <p className="text-[9px] text-zinc-500 uppercase font-black mb-1">Target</p>
-                      <p className="text-xl font-black font-mono text-zinc-300">{targetTime.toFixed(2)}s</p>
-                    </div>
-                    <div className="border-x border-white/5 px-2">
-                      <p className="text-[9px] text-zinc-500 uppercase font-black mb-1">Diff</p>
-                      <p className={`text-xl font-black font-mono ${rating.color}`}>
-                        {Math.abs(resultTime - targetTime).toFixed(3)}s
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[9px] text-zinc-500 uppercase font-black mb-1">Tuo</p>
-                      <p className="text-xl font-black font-mono text-white">{resultTime.toFixed(2)}s</p>
-                    </div>
-                  </div>
-
-                  {/* Token */}
-                  {earnedTokens > 0 ? (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                      className="bg-yellow-500/10 border border-yellow-500/20 rounded-3xl p-5 mb-4"
-                    >
-                      <div className="flex items-center justify-center gap-3">
-                        <Coins className="text-yellow-400 w-6 h-6" />
-                        <span className="text-3xl font-black text-yellow-400">+{earnedTokens} SFT</span>
-                      </div>
-                      <p className="text-[9px] text-yellow-500/60 uppercase font-bold tracking-widest mt-1">Accreditati</p>
-                    </motion.div>
-                  ) : (
-                    <div className="bg-[var(--fr-surface-2)] rounded-3xl p-4 mb-4">
-                      <p className="text-zinc-500 text-sm">Nessun token — riprova ad avvicinarti al target!</p>
-                    </div>
-                  )}
-
-                  {totalTokens > 0 && (
-                    <p className="text-zinc-600 text-xs font-bold">
-                      Totale wallet: <span className="text-zinc-300">{totalTokens.toLocaleString()} SFT</span>
-                    </p>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* ── BOTTONE PRINCIPALE ── */}
-            <motion.button
-              whileTap={{ scale: 0.96 }}
-              onClick={handleMain}
-              disabled={gameState === 'countdown'}
-              className={`mt-8 w-full py-6 rounded-2xl text-xl font-black uppercase tracking-widest transition-all shadow-xl
-                ${gameState === 'idle'
-                  ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/30'
-                  : gameState === 'running'
-                  ? 'bg-[var(--fr-red)] hover:brightness-110 text-white shadow-[var(--fr-red)]/20'
-                  : gameState === 'countdown'
-                  ? 'bg-[var(--fr-surface-2)] text-[var(--fr-text-faint)] cursor-not-allowed'
-                  : 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/20'
-                }`}
-            >
-              {mainLabel}
-            </motion.button>
-
-            {gameState === 'result' && (
-              <button
-                onClick={() => router.push('/fanzone')}
-                className="mt-3 w-full py-3 rounded-2xl text-zinc-600 hover:text-white text-xs font-bold uppercase tracking-widest transition-all"
-              >
-                Torna alla Fan Zone
-              </button>
+        {/* ── Il box ── */}
+        <div ref={boxRef} className="rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)] p-4 sm:p-6 select-none">
+          {/* Cronometro */}
+          <div className="flex items-end justify-between mb-4">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--fr-text-faint)]">Tempo ai box</p>
+              <p className="tabular text-4xl sm:text-5xl font-bold text-[var(--fr-text)] leading-none mt-1" aria-live="off">
+                {fmt(cronometro)}<span className="text-xl text-[var(--fr-text-faint)]"> s</span>
+              </p>
+            </div>
+            {penalita > 0 && (
+              <p className="tabular text-sm font-bold text-[var(--fr-danger)]">+{fmt(penalita)} s penalità</p>
             )}
           </div>
 
-          {/* STATS BOTTOM */}
-          <div className="mt-8 grid grid-cols-3 gap-4 opacity-60">
-            {[
-              { icon: <Zap className="w-4 h-4 text-yellow-500" />, label: 'Riflessi' },
-              { icon: <Trophy className="w-4 h-4 text-red-500" />, label: 'Precisione' },
-              { icon: <Coins className="w-4 h-4 text-yellow-400" />, label: 'Guadagna SFT' },
-            ].map((s, i) => (
-              <div key={i} className="flex flex-col items-center gap-1.5 bg-zinc-900/40 rounded-2xl py-3 border border-white/5">
-                {s.icon}
-                <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">{s.label}</span>
+          {/* Corsia dei box: l'asfalto è scuro in entrambi i temi */}
+          <div className="relative mx-auto w-full max-w-[min(340px,calc((100dvh-260px)*0.75))] aspect-[3/4] rounded-[var(--radius-md)] overflow-hidden bg-[#1b2124]">
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[78%] border-y-2 border-dashed border-white/15" aria-hidden="true" />
+            <div
+              className="absolute left-1/2 top-1/2 w-[46%] h-[86%] transition-transform duration-[900ms] ease-out"
+              style={{ transform: `translate(-50%, ${fase === 'pronto' ? '120%' : fase === 'fine' && esito ? '-130%' : '-50%'})` }}
+            >
+              <Monoposto />
+            </div>
+
+            {/* Le ruote */}
+            {RUOTE.map((r, i) => {
+              const accesa = attiva === i;
+              const ok = cambiata(i);
+              return (
+                <button
+                  key={r.id}
+                  type="button"
+                  onPointerDown={(e) => { e.preventDefault(); tocca(i); }}
+                  disabled={fase !== 'gomme'}
+                  aria-label={`${r.label} (tasto ${r.tasto})`}
+                  className={`absolute ${r.pos} w-[24%] aspect-square rounded-2xl grid place-items-center border-4 transition-all duration-100 ${
+                    errore === i ? 'border-[var(--fr-danger)] bg-[var(--fr-danger)]/30 scale-95'
+                      : accesa ? 'border-[var(--fr-gold)] bg-[var(--fr-gold)]/25 scale-105 shadow-[0_0_24px_rgba(231,184,78,.6)]'
+                      : ok ? 'border-[var(--fr-success)] bg-[var(--fr-success)]/20'
+                      : 'border-white/15 bg-black/40'
+                  }`}
+                >
+                  <span className="w-[62%] aspect-square rounded-full bg-[#0d0d0d] border-[5px] border-[#2d2d2d] grid place-items-center">
+                    <span className={`text-[11px] font-bold ${accesa ? 'text-[var(--fr-gold)]' : ok ? 'text-[var(--fr-success)]' : 'text-white/50'}`}>
+                      {ok ? '✓' : r.tasto}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+
+            {/* Lecca-lecca */}
+            {(fase === 'uscita' || fase === 'gomme') && (
+              <div className="absolute left-1/2 -translate-x-1/2 top-[3%] flex flex-col items-center" aria-hidden="true">
+                <span className={`w-10 h-10 rounded-full border-4 border-white/80 ${verde ? 'bg-[#22c55e] shadow-[0_0_20px_#22c55e]' : 'bg-[#ef4444]'}`} />
+                <span className="w-1 h-6 bg-white/70" />
               </div>
-            ))}
+            )}
+
+            {/* Schermate di inizio e fine, sopra la corsia */}
+            {fase === 'pronto' && (
+              <div className="absolute inset-0 grid place-items-center p-6 text-center bg-black/55">
+                <div>
+                  <p className="text-white font-head text-2xl font-black uppercase">Box, box!</p>
+                  <p className="text-white/75 text-sm mt-1 mb-5">La Ferrari sta per entrare ai box.</p>
+                  <button type="button" onClick={inizia} className="btn btn-primary">
+                    <Timer className="w-4 h-4" aria-hidden="true" /> Chiama il pit stop
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
+          {/* Pulsante di ripartenza: grande, sotto la corsia, comodo col pollice */}
+          <button
+            type="button"
+            onPointerDown={(e) => { e.preventDefault(); riparti(); }}
+            disabled={fase !== 'uscita'}
+            className={`mt-4 w-full py-5 rounded-[var(--radius-md)] font-head text-2xl font-black uppercase tracking-wide transition-colors ${
+              fase === 'uscita'
+                ? verde ? 'bg-[#16a34a] text-white' : 'bg-[var(--fr-red-fill)] text-white'
+                : 'bg-[var(--fr-surface-2)] text-[var(--fr-text-faint)]'
+            }`}
+          >
+            {fase === 'uscita' ? (verde ? 'Via!' : 'Aspetta il verde…') : fase === 'gomme' ? `Gomme ${fatte}/4` : 'Via'}
+          </button>
+        </div>
+
+        {/* ── Pannello laterale: esito o istruzioni ── */}
+        <aside className="rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)] p-6" aria-live="polite">
+          {fase === 'fine' && esito ? (
+            <>
+              {esito.nuovoRecord && (
+                <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[color-mix(in_srgb,var(--fr-gold)_18%,transparent)] text-[var(--fr-gold)] text-xs font-bold uppercase tracking-wider mb-3">
+                  <Trophy className="w-3.5 h-3.5" aria-hidden="true" /> Nuovo record
+                </p>
+              )}
+              <p className="font-head text-3xl font-black uppercase text-[var(--fr-text)]">{esito.v.label}</p>
+              <p className="text-sm text-[var(--fr-text-muted)] mt-1">{esito.v.testo}</p>
+              <dl className="grid grid-cols-2 gap-3 my-5">
+                <div className="rounded-[var(--radius-md)] bg-[var(--fr-surface-2)] p-3">
+                  <dt className="text-[10px] font-semibold uppercase tracking-wider text-[var(--fr-text-faint)]">Il tuo tempo</dt>
+                  <dd className="tabular text-xl font-bold text-[var(--fr-text)]">{fmt(esito.totale)} s</dd>
+                </div>
+                <div className="rounded-[var(--radius-md)] bg-[var(--fr-surface-2)] p-3">
+                  <dt className="text-[10px] font-semibold uppercase tracking-wider text-[var(--fr-text-faint)]">Record F1</dt>
+                  <dd className="tabular text-xl font-bold text-[var(--fr-text)]">{fmt(RECORD_F1)} s</dd>
+                </div>
+              </dl>
+              <p className="flex items-center gap-2 text-sm font-semibold text-[var(--fr-text)] mb-5">
+                <Coins className="w-4 h-4 text-[var(--fr-gold)]" aria-hidden="true" />
+                {esito.guadagnati ? `+${esito.guadagnati} SF Token` : 'Nessun token: sotto i 6 secondi si comincia a guadagnare.'}
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <button type="button" onClick={inizia} className="btn btn-primary">
+                  <RefreshCw className="w-4 h-4" aria-hidden="true" /> Un altro pit stop
+                </button>
+                <Link href="/fanzone" className="btn btn-outline">Fan Zone</Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className="text-base font-black uppercase tracking-wide mb-3">Come si gioca</h2>
+              <ol className="space-y-3 text-sm text-[var(--fr-text-muted)] list-decimal pl-5">
+                <li>La macchina si ferma e il cronometro parte.</li>
+                <li>Tocca la ruota che si <strong className="text-[var(--fr-gold)]">accende</strong>, una dopo l’altra. Quella sbagliata costa {fmt(PENALITA_RUOTA)} s.</li>
+                <li>Quando il lecca-lecca diventa <strong className="text-[#16a34a]">verde</strong>, premi «Via». Partire col rosso costa {fmt(PENALITA_PARTENZA)} s.</li>
+              </ol>
+              <p className="hidden md:flex items-center gap-2 mt-5 text-xs text-[var(--fr-text-faint)]">
+                <Keyboard className="w-4 h-4" aria-hidden="true" />
+                Da tastiera: Q E A D per le ruote, spazio per ripartire.
+              </p>
+            </>
+          )}
+        </aside>
       </div>
     </GameShell>
   );
