@@ -1,460 +1,347 @@
-import { useRouter } from 'next/router';
-import { useState, useEffect, useRef } from 'react';
+/**
+ * pages/games/trivia.jsx
+ * Dieci domande sulla storia della Ferrari e della Formula 1.
+ *
+ * Cosa è cambiato rispetto alla prima versione:
+ * - ogni partita pesca 10 domande nuove dall'archivio (3 facili, 4 medie,
+ *   3 difficili): prima le dieci erano scelte una volta sola al caricamento e
+ *   "Rigioca" rimescolava sempre le stesse;
+ * - le risposte vengono mescolate: nel file la giusta era la prima più di una
+ *   volta su due, e bastava accorgersene;
+ * - se scade il tempo si perde la domanda, non la partita (prima un solo
+ *   timeout chiudeva tutto con una penalità del 30%);
+ * - la spiegazione resta finché non si preme "Avanti", invece di sparire dopo
+ *   un secondo e mezzo;
+ * - si gioca anche da tastiera (1-4 o A-D, Invio per andare avanti);
+ * - colori del tema del sito, leggibili anche in chiaro.
+ */
+
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import GameShell from '../../components/ui/GameShell';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Trophy, CheckCircle, XCircle, Timer, Zap,
-  ChevronRight, RefreshCw, Loader2, AlertTriangle,
-  Flame, Star
+  CheckCircle2, XCircle, Timer, Flame, Zap, RefreshCw, ArrowRight, AlertTriangle, Coins, Trophy,
 } from 'lucide-react';
+import GameShell, { Record } from '../../components/ui/GameShell';
 import { addTokens, getTokens } from '../../lib/tokens';
+import { getRecord, saveRecord } from '../../lib/records';
 
 const SEO_TRIVIA = {
   title: 'F1 Trivia — quiz sulla storia della Ferrari',
-  description: 'Quiz a tempo sulla storia della Scuderia Ferrari in Formula 1: piloti, titoli, circuiti e record.',
+  description: 'Quiz a tempo sulla storia della Scuderia Ferrari e della Formula 1: piloti, titoli, circuiti e record. Dieci domande nuove a ogni partita.',
   path: '/games/trivia',
 };
 
-// ─── DIFFICOLTÀ ───────────────────────────────────────────────────────────────
-const DIFF_CONFIG = {
-  Easy:   { color: 'text-green-400',  bg: 'bg-green-400/10',  border: 'border-green-400/30',  dot: 'bg-green-400'  },
-  Medium: { color: 'text-yellow-400', bg: 'bg-yellow-400/10', border: 'border-yellow-400/30', dot: 'bg-yellow-400' },
-  Hard:   { color: 'text-red-400',    bg: 'bg-red-400/10',    border: 'border-red-400/30',    dot: 'bg-red-400'    },
+const DOMANDE = 10;
+const SECONDI = 15;
+const MIX = { Easy: 3, Medium: 4, Hard: 3 };
+
+const LIVELLI = {
+  Easy:   { label: 'Facile',    fg: 'var(--fr-success)' },
+  Medium: { label: 'Media',     fg: 'var(--fr-warning)' },
+  Hard:   { label: 'Difficile', fg: 'var(--fr-danger)' },
 };
 
-// ─── LOADING ──────────────────────────────────────────────────────────────────
-function LoadingScreen() {
-  return (
-    <GameShell seo={SEO_TRIVIA} title="F1 Trivia">
-      <div className="flex flex-col items-center justify-center py-28 gap-5" role="status" aria-live="polite">
-        <div className="w-14 h-14 border-4 border-[var(--fr-red)] border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-        <p className="text-sm text-[var(--fr-text-muted)]">Caricamento domande…</p>
-      </div>
-    </GameShell>
-  );
+function mescola(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
-// ─── COMPONENTE PRINCIPALE ────────────────────────────────────────────────────
-export default function F1TriviaQuiz() {
-  const router = useRouter();
+/** Dieci domande col mix di difficoltà, e le risposte di ognuna mescolate. */
+function nuovaPartita(archivio) {
+  const scelte = Object.entries(MIX).flatMap(([livello, n]) =>
+    mescola(archivio.filter((d) => d.difficulty === livello)).slice(0, n));
+  // Se un livello ha meno domande del previsto, si completa con le altre.
+  const resto = mescola(archivio.filter((d) => !scelte.includes(d)));
+  return mescola([...scelte, ...resto].slice(0, DOMANDE)).map((d) => {
+    const ordine = mescola(d.options.map((_, i) => i));
+    return { ...d, options: ordine.map((i) => d.options[i]), correct: ordine.indexOf(d.correct) };
+  });
+}
 
-  const [questions, setQuestions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [phase, setPhase] = useState('intro');   // intro | playing | result
-  const [current, setCurrent] = useState(0);
-  const [score, setScore] = useState(0);
-  const [selected, setSelected] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(15);
-  const [userTokens, setUserTokens] = useState(0);
-  const [history, setHistory] = useState([]);
+const BOX = 'rounded-[var(--radius)] border border-[var(--fr-border)] bg-[var(--fr-surface)]';
+
+export default function F1Trivia() {
+  const [archivio, setArchivio] = useState(null);   // null = caricamento
+  const [errore, setErrore] = useState(false);
+  const [fase, setFase] = useState('intro');        // intro | gioco | fine
+  const [domande, setDomande] = useState([]);
+  const [indice, setIndice] = useState(0);
+  const [scelta, setScelta] = useState(null);       // indice risposta, -1 = tempo scaduto
+  const [tempo, setTempo] = useState(SECONDI);
+  const [storia, setStoria] = useState([]);         // { giusta, punti, bonus }
   const [streak, setStreak] = useState(0);
   const [maxStreak, setMaxStreak] = useState(0);
-  const [timeExpired, setTimeExpired] = useState(false);
-  const [tokensEarned, setTokensEarned] = useState(0);
-  const [finalScore, setFinalScore] = useState(0);
+  const [esito, setEsito] = useState(null);         // { punteggio, token, nuovoRecord }
+  const [token, setToken] = useState(0);
+  const [record, setRecord] = useState(null);
+  const avantiRef = useRef(null);
 
-  const scoreRef = useRef(0);
-  const streakRef = useRef(0);
-  const maxStreakRef = useRef(0);
-
-  // Carica domande
   useEffect(() => {
     fetch('/data/trivia-questions.json')
-      .then(r => r.json())
-      .then(data => {
-        const shuffled = [...(data.questions || [])].sort(() => Math.random() - 0.5).slice(0, 10);
-        setQuestions(shuffled);
-      })
-      .catch(() => setQuestions([]))
-      .finally(() => setLoading(false));
+      .then((r) => r.json())
+      .then((d) => setArchivio(d.questions || []))
+      .catch(() => { setErrore(true); setArchivio([]); });
+    setToken(getTokens());
+    setRecord(getRecord('trivia'));
   }, []);
 
-  // Saldo salvato sul dispositivo
-  useEffect(() => { setUserTokens(getTokens()); }, []);
+  const d = domande[indice];
+  const risposto = scelta !== null;
 
-  // Timer
-  useEffect(() => {
-    if (phase !== 'playing' || selected !== null || timeExpired) return;
-    const t = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(t);
-          setTimeExpired(true);
-          finishGame(scoreRef.current, maxStreakRef.current, true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(t);
-  }, [phase, current, selected, timeExpired]);
-
-  const startGame = () => {
-    const shuffled = [...questions].sort(() => Math.random() - 0.5);
-    setQuestions(shuffled);
-    scoreRef.current = 0;
-    streakRef.current = 0;
-    maxStreakRef.current = 0;
-    setScore(0);
+  const inizia = () => {
+    setDomande(nuovaPartita(archivio));
+    setIndice(0);
+    setScelta(null);
+    setTempo(SECONDI);
+    setStoria([]);
     setStreak(0);
     setMaxStreak(0);
-    setCurrent(0);
-    setSelected(null);
-    setTimeLeft(15);
-    setHistory([]);
-    setTimeExpired(false);
-    setPhase('playing');
+    setEsito(null);
+    setFase('gioco');
   };
 
-  const handleAnswer = (idx) => {
-    if (selected !== null || timeExpired) return;
-    const q = questions[current];
-    const isCorrect = idx === q.correct;
-    const pts = isCorrect ? q.points : 0;
-    const speedBonus = timeLeft > 10 ? Math.floor(q.points * 0.2) : 0;
-    const total = pts + speedBonus;
+  const rispondi = useCallback((i) => {
+    if (fase !== 'gioco' || risposto || !d) return;
+    const giusta = i === d.correct;
+    const bonus = giusta && tempo > SECONDI - 5 ? Math.round(d.points * 0.2) : 0;
+    const nuovoStreak = giusta ? streak + 1 : 0;
+    setStreak(nuovoStreak);
+    setMaxStreak((m) => Math.max(m, nuovoStreak));
+    setScelta(i);
+    setStoria((s) => [...s, { giusta, punti: giusta ? d.points + bonus : 0, bonus }]);
+  }, [fase, risposto, d, tempo, streak]);
 
-    if (isCorrect) {
-      streakRef.current += 1;
-      if (streakRef.current > maxStreakRef.current) maxStreakRef.current = streakRef.current;
-      setStreak(streakRef.current);
-      setMaxStreak(maxStreakRef.current);
-    } else {
-      streakRef.current = 0;
-      setStreak(0);
+  const avanti = useCallback(() => {
+    if (!risposto) return;
+    if (indice + 1 < domande.length) {
+      setIndice((n) => n + 1);
+      setScelta(null);
+      setTempo(SECONDI);
+      return;
     }
+    const base = storia.reduce((s, h) => s + h.punti, 0);
+    const punteggio = base + maxStreak * 10;
+    const guadagnati = 10 + Math.floor(punteggio / 10);
+    setToken(addTokens(guadagnati));
+    const r = saveRecord('trivia', punteggio, 'alto');
+    setRecord(r.record);
+    setEsito({ punteggio, token: guadagnati, nuovoRecord: r.nuovo });
+    setFase('fine');
+  }, [risposto, indice, domande.length, storia, maxStreak]);
 
-    scoreRef.current += total;
-    setScore(scoreRef.current);
-    setSelected(idx);
-    setHistory(prev => [...prev, { correct: isCorrect, points: total, speedBonus }]);
+  // Timer: allo scadere la domanda conta come sbagliata, e si va avanti.
+  useEffect(() => {
+    if (fase !== 'gioco' || risposto) return;
+    if (tempo <= 0) { rispondi(-1); return; }
+    const t = setTimeout(() => setTempo((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [fase, risposto, tempo, rispondi]);
 
-    setTimeout(() => {
-      if (current + 1 < questions.length) {
-        setCurrent(c => c + 1);
-        setSelected(null);
-        setTimeLeft(15);
-      } else {
-        finishGame(scoreRef.current, maxStreakRef.current, false);
-      }
-    }, 1600);
+  // Dopo la risposta il fuoco va su "Avanti", così Invio porta alla prossima.
+  useEffect(() => { if (risposto) avantiRef.current?.focus(); }, [risposto]);
+
+  // Tastiera: 1-4 o A-D per rispondere.
+  useEffect(() => {
+    if (fase !== 'gioco') return;
+    const onKey = (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const k = e.key.toLowerCase();
+      const i = ['1', '2', '3', '4'].indexOf(k) >= 0 ? Number(k) - 1 : ['a', 'b', 'c', 'd'].indexOf(k);
+      if (i >= 0 && d && i < d.options.length) rispondi(i);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [fase, d, rispondi]);
+
+  const shellProps = {
+    seo: SEO_TRIVIA,
+    title: 'F1',
+    accent: 'Trivia',
+    subtitle: 'Dieci domande sulla storia della Ferrari e della Formula 1, quindici secondi per ognuna. Rispondere in fretta e di fila vale di più.',
+    tokens: token,
+    record: <Record label="Record" value={record} />,
   };
 
-  const finishGame = async (sc, ms, expired) => {
-    const streakBonus = ms * 10;
-    const raw = sc + streakBonus;
-    const penalty = expired ? Math.floor(raw * 0.3) : 0;
-    const adj = Math.max(0, raw - penalty);
-    const earned = 30 + Math.floor(adj / 10);
+  if (archivio === null) {
+    return (
+      <GameShell {...shellProps}>
+        <div className={`${BOX} py-24 grid place-items-center`} role="status">
+          <span className="w-10 h-10 border-4 border-[var(--fr-red)] border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+          <span className="sr-only">Caricamento domande…</span>
+        </div>
+      </GameShell>
+    );
+  }
 
-    setFinalScore(adj);
-    setTokensEarned(earned);
-    setPhase('result');
-
-    setUserTokens(addTokens(earned));
-  };
-
-  const q = questions[current];
-  const timerPct = timeLeft / 15;
-  const timerColor = timeLeft > 10 ? '#22c55e' : timeLeft > 5 ? '#f59e0b' : '#ef4444';
-  const diff = q ? DIFF_CONFIG[q.difficulty] ?? DIFF_CONFIG.Medium : null;
-
-  if (loading) return <LoadingScreen />;
-  if (questions.length === 0) return (
-    <GameShell seo={SEO_TRIVIA} title="F1 Trivia">
-      <div className="empty-state">
-        <AlertTriangle className="empty-state-icon" aria-hidden="true" />
-        <h2 className="empty-state-title">Domande non disponibili</h2>
-        <p className="empty-state-description">
-          Non siamo riusciti a caricare le domande. Riprova fra poco.
-        </p>
-        <Link href="/fanzone" className="btn btn-outline mt-5">Torna alla Fan Zone</Link>
-      </div>
-    </GameShell>
-  );
+  if (errore || archivio.length < DOMANDE) {
+    return (
+      <GameShell {...shellProps}>
+        <div className="empty-state">
+          <AlertTriangle className="empty-state-icon" aria-hidden="true" />
+          <h2 className="empty-state-title">Domande non disponibili</h2>
+          <p className="empty-state-description">Non siamo riusciti a caricare le domande. Riprova fra poco.</p>
+          <Link href="/fanzone" className="btn btn-outline mt-5">Torna alla Fan Zone</Link>
+        </div>
+      </GameShell>
+    );
+  }
 
   return (
-    <GameShell seo={SEO_TRIVIA} title="F1 Trivia" tokens={userTokens}>
+    <GameShell {...shellProps}>
       <div className="max-w-3xl mx-auto">
-        <AnimatePresence mode="wait">
 
-          {/* ══════════════ INTRO ══════════════ */}
-          {phase === 'intro' && (
-            <motion.div key="intro" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-
-              {/* Header */}
-              <div className="text-center mb-12">
-                <p className="text-red-600 text-[10px] font-black uppercase tracking-[0.5em] mb-3">Scuderia Ferrari</p>
-                <h2 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter leading-none mb-4">
-                  F1<br /><span className="text-red-600">Trivia</span>
-                </h2>
-                <p className="text-zinc-500 text-sm max-w-md mx-auto leading-relaxed">
-                  15 secondi per rispondere. Rispondi veloce per il bonus velocità. Sbaglia e perdi lo streak.
-                </p>
-              </div>
-
-              {/* Regole */}
-              <div className="grid grid-cols-3 gap-4 mb-10">
-                {[
-                  { icon: <Timer className="w-6 h-6 text-red-500" />, title: '15 sec', sub: 'per domanda' },
-                  { icon: <Flame className="w-6 h-6 text-orange-400" />, title: 'Streak', sub: '+10 pts bonus' },
-                  { icon: <Zap className="w-6 h-6 text-yellow-400" />, title: 'Velocità', sub: '+20% se <5s' },
-                ].map((r, i) => (
-                  <div key={i} className="bg-zinc-900/60 border border-white/5 rounded-3xl p-5 text-center">
-                    <div className="flex justify-center mb-3">{r.icon}</div>
-                    <p className="font-black text-white text-sm">{r.title}</p>
-                    <p className="text-zinc-600 text-[10px] uppercase tracking-wider mt-1">{r.sub}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Wallet */}
-              {userTokens > 0 && (
-                <div className="flex items-center justify-center gap-2 mb-8 bg-yellow-500/10 border border-yellow-500/20 rounded-full py-2 px-6 w-fit mx-auto">
-                  <Star className="w-4 h-4 text-yellow-400" />
-                  <span className="text-yellow-400 font-black text-sm">{userTokens.toLocaleString()} SFT</span>
+        {/* ── INTRO ── */}
+        {fase === 'intro' && (
+          <div className={`${BOX} p-6 md:p-10`}>
+            <div className="grid sm:grid-cols-3 gap-3 mb-8">
+              {[
+                { icon: Timer, titolo: `${SECONDI} secondi`, testo: 'per ogni domanda. Allo scadere, la risposta conta come sbagliata.' },
+                { icon: Zap, titolo: 'Bonus velocità', testo: '+20% se rispondi giusto nei primi 5 secondi.' },
+                { icon: Flame, titolo: 'Serie', testo: '+10 punti per ogni risposta della tua serie più lunga.' },
+              ].map((r) => (
+                <div key={r.titolo} className="rounded-[var(--radius-md)] bg-[var(--fr-surface-2)] p-4">
+                  <r.icon className="w-5 h-5 text-[var(--fr-red)] mb-2" aria-hidden="true" />
+                  <p className="font-bold text-sm text-[var(--fr-text)]">{r.titolo}</p>
+                  <p className="text-xs text-[var(--fr-text-muted)] mt-1">{r.testo}</p>
                 </div>
-              )}
+              ))}
+            </div>
+            <p className="text-sm text-[var(--fr-text-muted)] mb-6">
+              {archivio.length} domande in archivio: ogni partita ne pesca dieci nuove, dalle più facili alle più difficili.
+              Da tastiera rispondi con <kbd className="tabular">1</kbd>–<kbd className="tabular">4</kbd> e vai avanti con <kbd className="tabular">Invio</kbd>.
+            </p>
+            <button type="button" onClick={inizia} className="btn btn-primary w-full sm:w-auto">
+              Inizia il quiz <ArrowRight className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </div>
+        )}
 
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={startGame}
-                className="w-full py-6 bg-red-600 hover:bg-red-500 text-white rounded-3xl text-xl font-black uppercase tracking-widest shadow-2xl shadow-red-600/20 transition-all"
-              >
-                🏎️ Accetta la Sfida
-              </motion.button>
-            </motion.div>
-          )}
-
-          {/* ══════════════ PLAYING ══════════════ */}
-          {phase === 'playing' && q && (
-            <motion.div key={`q-${current}`} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
-
-              {/* HUD */}
-              <div className="flex items-center justify-between mb-6">
-                {/* Progresso */}
-                <div className="flex items-center gap-2">
-                  {questions.map((_, i) => (
-                    <div key={i} className={`h-1.5 rounded-full transition-all ${
-                      i < current ? 'bg-red-600 w-6' :
-                      i === current ? 'bg-white w-8' :
-                      'bg-[var(--fr-surface-2)] w-4'
-                    }`} />
-                  ))}
-                </div>
-
-                {/* Streak */}
-                {streak > 0 && (
-                  <motion.div
-                    initial={{ scale: 0 }} animate={{ scale: 1 }}
-                    className="flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/20 px-3 py-1 rounded-full"
-                  >
-                    <Flame className="w-3.5 h-3.5 text-orange-400" />
-                    <span className="text-orange-400 font-black text-xs">{streak}x</span>
-                  </motion.div>
+        {/* ── GIOCO ── */}
+        {fase === 'gioco' && d && (
+          <div className={`${BOX} p-5 md:p-8`}>
+            {/* Avanzamento, serie, punti */}
+            <div className="flex items-center justify-between gap-4 mb-5">
+              <span className="text-xs font-bold uppercase tracking-widest text-[var(--fr-text-faint)]">
+                Domanda <span className="tabular text-[var(--fr-text)]">{indice + 1}</span> di {domande.length}
+              </span>
+              <span className="flex items-center gap-4">
+                {streak > 1 && (
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-[var(--fr-accent-orange)]">
+                    <Flame className="w-3.5 h-3.5" aria-hidden="true" /> {streak} di fila
+                  </span>
                 )}
+                <span className="tabular font-bold text-[var(--fr-text)]">
+                  {storia.reduce((s, h) => s + h.punti, 0)} <span className="text-xs text-[var(--fr-text-faint)]">pt</span>
+                </span>
+              </span>
+            </div>
 
-                {/* Score */}
-                <div className="font-black text-white tabular-nums">
-                  {score} <span className="text-zinc-600 text-xs font-bold">pts</span>
-                </div>
-              </div>
-
-              {/* Timer bar */}
-              <div className="relative h-2 bg-[var(--fr-surface-2)] rounded-full mb-8 overflow-hidden">
-                <motion.div
-                  className="absolute left-0 top-0 h-full rounded-full"
-                  style={{ backgroundColor: timerColor }}
-                  initial={{ width: '100%' }}
-                  animate={{ width: `${timerPct * 100}%` }}
-                  transition={{ duration: 1, ease: 'linear' }}
+            {/* Barra del tempo */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex-1 h-2 rounded-full bg-[var(--fr-surface-2)] overflow-hidden" aria-hidden="true">
+                <div
+                  className="h-full rounded-full transition-[width] duration-1000 ease-linear"
+                  style={{
+                    width: `${(tempo / SECONDI) * 100}%`,
+                    background: tempo > 10 ? 'var(--fr-success)' : tempo > 5 ? 'var(--fr-warning)' : 'var(--fr-danger)',
+                  }}
                 />
               </div>
+              <span className="tabular text-sm font-bold w-8 text-right" aria-live="off">{tempo}s</span>
+            </div>
 
-              {/* Meta domanda */}
-              <div className="flex items-center justify-between mb-5">
-                <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black ${diff.bg} ${diff.border} border ${diff.color}`}>
-                  <div className={`w-1.5 h-1.5 rounded-full ${diff.dot}`} />
-                  {q.difficulty} · {q.points} pts
-                </div>
-                <span className="text-zinc-600 text-xs font-bold uppercase tracking-widest">{q.category}</span>
-                <div className={`font-black font-mono text-lg tabular-nums transition-colors`} style={{ color: timerColor }}>
-                  {timeLeft}s
-                </div>
-              </div>
+            <div className="flex flex-wrap items-center gap-2 mb-3 text-[11px] font-bold uppercase tracking-wider">
+              <span style={{ color: LIVELLI[d.difficulty]?.fg }}>{LIVELLI[d.difficulty]?.label ?? d.difficulty} · {d.points} pt</span>
+              <span className="text-[var(--fr-text-dim)]" aria-hidden="true">·</span>
+              <span className="text-[var(--fr-text-faint)]">{d.category}</span>
+            </div>
 
-              {/* Domanda */}
-              <h2 className="text-2xl md:text-3xl font-black leading-snug mb-8">{q.question}</h2>
+            <h2 className="text-xl md:text-2xl font-bold leading-snug text-[var(--fr-text)] mb-6 normal-case">{d.question}</h2>
 
-              {/* Opzioni */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-                {q.options.map((opt, i) => {
-                  const isCorrect = i === q.correct;
-                  const isSelected = i === selected;
-                  let cls = 'bg-[var(--fr-surface)] border-[var(--fr-border)] hover:border-[var(--fr-border-strong)]';
-                  if (selected !== null) {
-                    if (isCorrect) cls = 'bg-green-900/30 border-green-500';
-                    else if (isSelected) cls = 'bg-red-900/30 border-red-500';
-                    else cls = 'bg-[var(--fr-surface)] border-[var(--fr-border)] opacity-50';
-                  }
-
-                  return (
-                    <motion.button
-                      key={i}
-                      whileHover={selected === null ? { scale: 1.02 } : {}}
-                      whileTap={selected === null ? { scale: 0.98 } : {}}
-                      onClick={() => handleAnswer(i)}
-                      disabled={selected !== null}
-                      className={`relative p-5 rounded-2xl border-2 text-left transition-all ${cls}`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0 transition-all ${
-                          selected === null ? 'bg-[var(--fr-surface-2)] text-[var(--fr-text-muted)]' :
-                          isCorrect ? 'bg-green-600 text-white' :
-                          isSelected ? 'bg-red-600 text-white' :
-                          'bg-[var(--fr-surface-2)] text-[var(--fr-text-faint)]'
-                        }`}>
-                          {String.fromCharCode(65 + i)}
-                        </div>
-                        <span className="font-bold text-sm leading-snug">{opt}</span>
-                        {selected !== null && isCorrect && <CheckCircle className="w-5 h-5 text-green-400 ml-auto shrink-0" />}
-                        {selected !== null && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-red-400 ml-auto shrink-0" />}
-                      </div>
-                    </motion.button>
-                  );
-                })}
-              </div>
-
-              {/* Feedback */}
-              <AnimatePresence>
-                {selected !== null && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                    className={`p-5 rounded-2xl border ${selected === q.correct
-                      ? 'bg-green-900/20 border-green-500/30'
-                      : 'bg-red-900/20 border-red-500/30'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      {selected === q.correct
-                        ? <CheckCircle className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
-                        : <XCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-                      }
-                      <div>
-                        <p className={`font-black text-sm mb-1 ${selected === q.correct ? 'text-green-400' : 'text-red-400'}`}>
-                          {selected === q.correct ? `Corretto! +${history[history.length - 1]?.points} pts` : `Risposta errata`}
-                        </p>
-                        {selected !== q.correct && (
-                          <p className="text-zinc-400 text-xs mb-1">
-                            Risposta corretta: <span className="text-white font-bold">{q.options[q.correct]}</span>
-                          </p>
-                        )}
-                        <p className="text-zinc-500 text-xs leading-relaxed">{q.explanation}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Alert tempo */}
-              <AnimatePresence>
-                {timeLeft <= 5 && selected === null && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                    className="mt-4 flex items-center justify-center gap-2 bg-red-900/30 border border-red-500/40 rounded-2xl py-3"
-                  >
-                    <AlertTriangle className="w-4 h-4 text-red-400 animate-pulse" />
-                    <span className="text-red-300 font-black text-sm uppercase tracking-widest">Solo {timeLeft}s!</span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          )}
-
-          {/* ══════════════ RESULT ══════════════ */}
-          {phase === 'result' && (
-            <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-
-              {/* Titolo */}
-              <div className="text-center mb-10">
-                {timeExpired
-                  ? <AlertTriangle className="w-20 h-20 text-red-500 mx-auto mb-4 animate-pulse" />
-                  : <Trophy className="w-20 h-20 text-yellow-400 mx-auto mb-4" />
+            <div className="grid md:grid-cols-2 gap-3">
+              {d.options.map((opt, i) => {
+                const giusta = i === d.correct;
+                const scelta_ = i === scelta;
+                let stile = 'border-[var(--fr-border)] bg-[var(--fr-surface)] hover:border-[var(--fr-border-strong)] hover:bg-[var(--fr-surface-2)]';
+                if (risposto) {
+                  if (giusta) stile = 'border-[var(--fr-success)] bg-[color-mix(in_srgb,var(--fr-success)_12%,transparent)]';
+                  else if (scelta_) stile = 'border-[var(--fr-danger)] bg-[color-mix(in_srgb,var(--fr-danger)_12%,transparent)]';
+                  else stile = 'border-[var(--fr-border)] bg-[var(--fr-surface)] opacity-50';
                 }
-                <h2 className="text-5xl font-black uppercase italic mb-2">
-                  {timeExpired ? 'Tempo!' : 'Completato!'}
-                </h2>
-                <p className="text-zinc-500 text-sm uppercase tracking-widest">
-                  {history.filter(h => h.correct).length}/{history.length} risposte corrette
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => rispondi(i)}
+                    disabled={risposto}
+                    className={`flex items-center gap-3 p-4 rounded-[var(--radius-md)] border-2 text-left transition-colors ${stile}`}
+                  >
+                    <span className="w-8 h-8 shrink-0 rounded-lg grid place-items-center bg-[var(--fr-surface-2)] text-xs font-bold text-[var(--fr-text-muted)]">
+                      {String.fromCharCode(65 + i)}
+                    </span>
+                    <span className="font-semibold text-sm text-[var(--fr-text)]">{opt}</span>
+                    {risposto && giusta && <CheckCircle2 className="w-5 h-5 ml-auto shrink-0 text-[var(--fr-success)]" aria-label="Risposta giusta" />}
+                    {risposto && scelta_ && !giusta && <XCircle className="w-5 h-5 ml-auto shrink-0 text-[var(--fr-danger)]" aria-label="Risposta sbagliata" />}
+                  </button>
+                );
+              })}
+            </div>
+
+            {risposto && (
+              <div className="mt-6 rounded-[var(--radius-md)] bg-[var(--fr-surface-2)] p-5" aria-live="polite">
+                <p className="font-bold text-sm" style={{ color: scelta === d.correct ? 'var(--fr-success)' : 'var(--fr-danger)' }}>
+                  {scelta === d.correct
+                    ? `Giusto! +${storia[storia.length - 1]?.punti} punti${storia[storia.length - 1]?.bonus ? ' (con bonus velocità)' : ''}`
+                    : scelta === -1 ? `Tempo scaduto. La risposta era: ${d.options[d.correct]}` : `Sbagliato. La risposta era: ${d.options[d.correct]}`}
                 </p>
+                {d.explanation && <p className="text-sm text-[var(--fr-text-muted)] mt-1.5">{d.explanation}</p>}
+                <button ref={avantiRef} type="button" onClick={avanti} className="btn btn-primary mt-4">
+                  {indice + 1 < domande.length ? 'Avanti' : 'Vedi il risultato'} <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                </button>
               </div>
+            )}
+          </div>
+        )}
 
-              {/* Score grande */}
-              <div className="bg-zinc-900/60 border border-white/5 rounded-3xl p-8 mb-6 text-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-b from-red-600/5 to-transparent pointer-events-none" />
-                <p className="text-zinc-500 text-[10px] uppercase tracking-widest font-black mb-2">Punteggio Finale</p>
-                <p className={`text-7xl font-black font-mono mb-4 ${timeExpired ? 'text-red-400' : 'text-white'}`}>
-                  {finalScore}
-                </p>
+        {/* ── FINE ── */}
+        {fase === 'fine' && esito && (
+          <div className={`${BOX} p-6 md:p-10 text-center`}>
+            {esito.nuovoRecord && (
+              <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[color-mix(in_srgb,var(--fr-gold)_18%,transparent)] text-[var(--fr-gold)] text-xs font-bold uppercase tracking-wider mb-4">
+                <Trophy className="w-3.5 h-3.5" aria-hidden="true" /> Nuovo record
+              </p>
+            )}
+            <p className="text-xs font-bold uppercase tracking-widest text-[var(--fr-text-faint)]">Punteggio</p>
+            <p className="tabular text-6xl md:text-7xl font-bold text-[var(--fr-text)] mt-1">{esito.punteggio}</p>
+            <p className="text-sm text-[var(--fr-text-muted)] mt-2">
+              {storia.filter((h) => h.giusta).length} risposte giuste su {storia.length}
+            </p>
 
-                {/* Mini stats */}
-                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/5">
-                  <div>
-                    <p className="text-zinc-600 text-[9px] uppercase font-black mb-1">Max Streak</p>
-                    <div className="flex items-center justify-center gap-1">
-                      <Flame className="w-3.5 h-3.5 text-orange-400" />
-                      <span className="font-black text-white">{maxStreak}x</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-zinc-600 text-[9px] uppercase font-black mb-1">Accuratezza</p>
-                    <span className="font-black text-white">
-                      {history.length > 0 ? Math.round((history.filter(h => h.correct).length / history.length) * 100) : 0}%
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-zinc-600 text-[9px] uppercase font-black mb-1">Bonus velocità</p>
-                    <span className="font-black text-yellow-400">
-                      +{history.reduce((s, h) => s + (h.speedBonus || 0), 0)}
-                    </span>
-                  </div>
+            <div className="grid grid-cols-3 gap-3 max-w-md mx-auto my-8">
+              {[
+                { label: 'Serie migliore', value: maxStreak },
+                { label: 'Bonus velocità', value: `+${storia.reduce((s, h) => s + h.bonus, 0)}` },
+                { label: 'SF Token', value: `+${esito.token}`, icon: Coins },
+              ].map((s) => (
+                <div key={s.label} className="rounded-[var(--radius-md)] bg-[var(--fr-surface-2)] p-3">
+                  <p className="tabular text-xl font-bold text-[var(--fr-text)]">{s.value}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--fr-text-faint)] mt-1">{s.label}</p>
                 </div>
-              </div>
+              ))}
+            </div>
 
-              {/* Token */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                className="bg-yellow-500/10 border border-yellow-500/20 rounded-3xl p-6 mb-6 text-center"
-              >
-                <p className="text-zinc-500 text-[10px] uppercase tracking-widest font-black mb-2">SFT Guadagnati</p>
-                <p className="text-4xl font-black text-yellow-400">+{tokensEarned} SFT</p>
-                {userTokens > 0 && (
-                  <p className="text-yellow-500/50 text-xs font-bold mt-1">
-                    Totale wallet: {userTokens.toLocaleString()} SFT
-                  </p>
-                )}
-              </motion.div>
-
-              {/* CTA */}
-              <div className="flex flex-col gap-3">
-                <button
-                  onClick={startGame}
-                  className="w-full py-5 bg-red-600 hover:bg-red-500 text-white rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-lg shadow-red-600/20"
-                >
-                  <RefreshCw className="w-5 h-5" /> Rigioca
-                </button>
-                <button
-                  onClick={() => router.push('/fanzone')}
-                  className="w-full py-4 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-2 transition-all border border-white/5"
-                >
-                  <ChevronRight className="w-4 h-4" /> Fan Zone
-                </button>
-              </div>
-            </motion.div>
-          )}
-
-        </AnimatePresence>
+            <div className="flex flex-wrap justify-center gap-3">
+              <button type="button" onClick={inizia} className="btn btn-primary">
+                <RefreshCw className="w-4 h-4" aria-hidden="true" /> Nuova partita
+              </button>
+              <Link href="/fanzone" className="btn btn-outline">Fan Zone</Link>
+            </div>
+          </div>
+        )}
       </div>
     </GameShell>
   );

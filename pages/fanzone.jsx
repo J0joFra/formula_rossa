@@ -27,7 +27,7 @@ const GIOCHI = [
     title: 'Pit Stop',
     icon: Timer,
     reward: 'fino a 100 SFT',
-    desc: 'Riflessi al semaforo: fermare il cronometro al momento giusto, come ai box. Uno stop perfetto vale il massimo.',
+    desc: 'Il cambio gomme della Ferrari, cronometrato: quattro ruote, il lecca-lecca e via. Sotto i due secondi sei da top team.',
   },
   {
     href: '/games/circuit-rush',
@@ -40,7 +40,7 @@ const GIOCHI = [
     href: '/games/trivia',
     title: 'Trivia',
     icon: Award,
-    reward: 'da 30 SFT in su',
+    reward: 'da 10 SFT in su',
     desc: 'Domande sulla storia della Scuderia. Qui contano gli anni passati a guardare le gare.',
   },
 ];

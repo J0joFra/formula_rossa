@@ -3,7 +3,12 @@
     {
       "id": 1,
       "question": "Quale pilota detiene il record di vittorie con la Ferrari?",
-      "options": ["Michael Schumacher", "Niki Lauda", "Fernando Alonso", "Kimi Räikkönen"],
+      "options": [
+        "Michael Schumacher",
+        "Niki Lauda",
+        "Fernando Alonso",
+        "Kimi Räikkönen"
+      ],
       "correct": 0,
       "category": "Record Ferrari",
       "difficulty": "Medium",
@@ -13,7 +18,12 @@
     {
       "id": 2,
       "question": "In che anno la Ferrari vinse il suo primo titolo Costruttori?",
-      "options": ["1961", "1952", "1975", "1964"],
+      "options": [
+        "1961",
+        "1952",
+        "1975",
+        "1964"
+      ],
       "correct": 0,
       "category": "Storia Ferrari",
       "difficulty": "Easy",
@@ -23,7 +33,12 @@
     {
       "id": 3,
       "question": "Quale di questi circuiti NON ha mai ospitato un GP vinto da una Ferrari?",
-      "options": ["Indianapolis", "Sochi", "Valencia", "Baku"],
+      "options": [
+        "Indianapolis",
+        "Sochi",
+        "Valencia",
+        "Baku"
+      ],
       "correct": 3,
       "category": "Circuiti",
       "difficulty": "Hard",
@@ -33,7 +48,12 @@
     {
       "id": 4,
       "question": "Quanti titoli piloti ha vinto la Scuderia Ferrari?",
-      "options": ["15", "12", "18", "20"],
+      "options": [
+        "15",
+        "12",
+        "18",
+        "20"
+      ],
       "correct": 0,
       "category": "Statistiche",
       "difficulty": "Medium",
@@ -43,7 +63,12 @@
     {
       "id": 5,
       "question": "Chi era il team principal durante l'era Schumacher?",
-      "options": ["Mattia Binotto", "Jean Todt", "Stefano Domenicali", "Maurizio Arrivabene"],
+      "options": [
+        "Mattia Binotto",
+        "Jean Todt",
+        "Stefano Domenicali",
+        "Maurizio Arrivabene"
+      ],
       "correct": 1,
       "category": "Team Ferrari",
       "difficulty": "Easy",
@@ -53,7 +78,12 @@
     {
       "id": 6,
       "question": "Quale di queste vetture Ferrari NON vinse il titolo costruttori?",
-      "options": ["F2004", "F2008", "SF70H", "312T"],
+      "options": [
+        "F2004",
+        "F2008",
+        "SF70H",
+        "312T"
+      ],
       "correct": 2,
       "category": "Vetture",
       "difficulty": "Hard",
@@ -63,7 +93,12 @@
     {
       "id": 7,
       "question": "In che anno la Ferrari introdusse il primo motore turbo?",
-      "options": ["1979", "1981", "1977", "1985"],
+      "options": [
+        "1979",
+        "1981",
+        "1977",
+        "1985"
+      ],
       "correct": 1,
       "category": "Tecnologia",
       "difficulty": "Medium",
@@ -73,37 +108,42 @@
     {
       "id": 8,
       "question": "Chi ha guidato più stagioni per la Ferrari?",
-      "options": ["Michael Schumacher", "Kimi Räikkönen", "Fernando Alonso", "Felipe Massa"],
-      "correct": 1,
+      "options": [
+        "Michael Schumacher",
+        "Kimi Räikkönen",
+        "Fernando Alonso",
+        "Felipe Massa"
+      ],
+      "correct": 0,
       "category": "Piloti",
       "difficulty": "Hard",
       "points": 100,
-      "explanation": "Kimi Räikkönen ha guidato per la Ferrari in 9 stagioni (2007-2009, 2014-2018)."
+      "explanation": "Michael Schumacher ha corso 11 stagioni con la Ferrari, dal 1996 al 2006."
     },
     {
       "id": 9,
       "question": "Quale GP è stato vinto più volte dalla Ferrari?",
-      "options": ["GP d'Italia", "GP di Germania", "GP di Monaco", "GP del Belgio"],
+      "options": [
+        "GP d'Italia",
+        "GP di Germania",
+        "GP di Monaco",
+        "GP del Belgio"
+      ],
       "correct": 0,
       "category": "Record GP",
       "difficulty": "Medium",
       "points": 50,
-      "explanation": "La Ferrari ha vinto il GP d'Italia 20 volte (record assoluto)."
-    },
-    {
-      "id": 10,
-      "question": "La Ferrari vinse il suo primo mondiale nel...",
-      "options": ["1950", "1951", "1952", "1953"],
-      "correct": 1,
-      "category": "Storia",
-      "difficulty": "Easy",
-      "points": 30,
-      "explanation": "Il primo titolo mondiale Ferrari fu nel 1951 con Alberto Ascari."
+      "explanation": "Il GP d'Italia è quello che la Ferrari ha vinto più volte: oltre 20 successi, gli ultimi con Leclerc nel 2019 e nel 2024."
     },
     {
       "id": 11,
       "question": "Chi vinse il mondiale di Formula 1 nel 1950?",
-      "options": ["Juan Manuel Fangio", "Alberto Ascari", "Giuseppe Farina", "Stirling Moss"],
+      "options": [
+        "Juan Manuel Fangio",
+        "Alberto Ascari",
+        "Giuseppe Farina",
+        "Stirling Moss"
+      ],
       "correct": 2,
       "category": "Storia",
       "difficulty": "Easy",
@@ -112,8 +152,13 @@
     },
     {
       "id": 12,
-      "question": "Quale pilota ha vinto 7 titoli mondiali di F1?",
-      "options": ["Michael Schumacher", "Lewis Hamilton", "Sebastian Vettel", "Ayrton Senna"],
+      "question": "Quale pilota ha vinto 7 titoli mondiali, cinque dei quali con la Ferrari?",
+      "options": [
+        "Michael Schumacher",
+        "Lewis Hamilton",
+        "Sebastian Vettel",
+        "Ayrton Senna"
+      ],
       "correct": 0,
       "category": "Piloti",
       "difficulty": "Easy",
@@ -123,7 +168,12 @@
     {
       "id": 13,
       "question": "Quale scuderia ha sede a Maranello?",
-      "options": ["Ferrari", "McLaren", "Alfa Romeo", "Williams"],
+      "options": [
+        "Ferrari",
+        "McLaren",
+        "Alfa Romeo",
+        "Williams"
+      ],
       "correct": 0,
       "category": "Scuderie",
       "difficulty": "Easy",
@@ -133,7 +183,12 @@
     {
       "id": 14,
       "question": "In quale circuito si corre il GP di Monaco?",
-      "options": ["Monte Carlo", "Le Castellet", "Imola", "Spa"],
+      "options": [
+        "Monte Carlo",
+        "Le Castellet",
+        "Imola",
+        "Spa"
+      ],
       "correct": 0,
       "category": "Circuiti",
       "difficulty": "Easy",
@@ -143,7 +198,12 @@
     {
       "id": 15,
       "question": "Chi è stato il più giovane campione del mondo di F1?",
-      "options": ["Fernando Alonso", "Sebastian Vettel", "Lewis Hamilton", "Max Verstappen"],
+      "options": [
+        "Fernando Alonso",
+        "Sebastian Vettel",
+        "Lewis Hamilton",
+        "Max Verstappen"
+      ],
       "correct": 1,
       "category": "Record",
       "difficulty": "Medium",
@@ -152,18 +212,28 @@
     },
     {
       "id": 16,
-      "question": "Quale circuito è noto come 'La Rouge'?",
-      "options": ["Spa-Francorchamps", "Monza", "Silverstone", "Suzuka"],
+      "question": "In quale circuito si trova la curva Eau Rouge?",
+      "options": [
+        "Spa-Francorchamps",
+        "Monza",
+        "Silverstone",
+        "Suzuka"
+      ],
       "correct": 0,
       "category": "Circuiti",
       "difficulty": "Medium",
       "points": 50,
-      "explanation": "Eau Rouge è la celebre curva del circuito di Spa-Francorchamps."
+      "explanation": "L'Eau Rouge, con il Raidillon che la segue, è il passaggio più famoso di Spa-Francorchamps."
     },
     {
       "id": 17,
       "question": "Quanti titoli mondiali ha vinto Ayrton Senna?",
-      "options": ["2", "3", "4", "5"],
+      "options": [
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
       "correct": 1,
       "category": "Piloti",
       "difficulty": "Easy",
@@ -172,18 +242,28 @@
     },
     {
       "id": 18,
-      "question": "Quale scuderia dominò l'era turbo negli anni '80?",
-      "options": ["Ferrari", "McLaren", "Williams", "Lotus"],
-      "correct": 2,
+      "question": "Quale scuderia vinse più titoli piloti nell'era turbo degli anni '80?",
+      "options": [
+        "Ferrari",
+        "McLaren",
+        "Williams",
+        "Lotus"
+      ],
+      "correct": 1,
       "category": "Storia",
       "difficulty": "Medium",
       "points": 50,
-      "explanation": "La Williams dominò l'era turbo grazie ai motori Honda e Renault."
+      "explanation": "La McLaren, con motori TAG Porsche e poi Honda, vinse i titoli piloti 1984, 1985, 1986 e 1988."
     },
     {
       "id": 19,
       "question": "Chi vinse il mondiale F1 nel 2007?",
-      "options": ["Lewis Hamilton", "Fernando Alonso", "Kimi Räikkönen", "Felipe Massa"],
+      "options": [
+        "Lewis Hamilton",
+        "Fernando Alonso",
+        "Kimi Räikkönen",
+        "Felipe Massa"
+      ],
       "correct": 2,
       "category": "Storia",
       "difficulty": "Easy",
@@ -193,7 +273,12 @@
     {
       "id": 20,
       "question": "Quale circuito è soprannominato 'Tempio della Velocità'?",
-      "options": ["Monza", "Silverstone", "Hockenheim", "Imola"],
+      "options": [
+        "Monza",
+        "Silverstone",
+        "Hockenheim",
+        "Imola"
+      ],
       "correct": 0,
       "category": "Circuiti",
       "difficulty": "Easy",
@@ -203,7 +288,12 @@
     {
       "id": 21,
       "question": "Quale pilota ha più pole position in carriera?",
-      "options": ["Ayrton Senna", "Michael Schumacher", "Lewis Hamilton", "Sebastian Vettel"],
+      "options": [
+        "Ayrton Senna",
+        "Michael Schumacher",
+        "Lewis Hamilton",
+        "Sebastian Vettel"
+      ],
       "correct": 2,
       "category": "Record",
       "difficulty": "Medium",
@@ -213,7 +303,12 @@
     {
       "id": 22,
       "question": "In quale anno la F1 ha introdotto il DRS?",
-      "options": ["2009", "2010", "2011", "2012"],
+      "options": [
+        "2009",
+        "2010",
+        "2011",
+        "2012"
+      ],
       "correct": 2,
       "category": "Tecnologia",
       "difficulty": "Medium",
@@ -223,7 +318,12 @@
     {
       "id": 23,
       "question": "Quale GP si corre di notte?",
-      "options": ["Singapore", "Abu Dhabi", "Bahrain", "Las Vegas"],
+      "options": [
+        "Singapore",
+        "Abu Dhabi",
+        "Bahrain",
+        "Las Vegas"
+      ],
       "correct": 0,
       "category": "Gran Premi",
       "difficulty": "Easy",
@@ -233,7 +333,12 @@
     {
       "id": 24,
       "question": "Quale pilota è soprannominato 'The Iceman'?",
-      "options": ["Mika Häkkinen", "Kimi Räikkönen", "Valtteri Bottas", "Nico Rosberg"],
+      "options": [
+        "Mika Häkkinen",
+        "Kimi Räikkönen",
+        "Valtteri Bottas",
+        "Nico Rosberg"
+      ],
       "correct": 1,
       "category": "Piloti",
       "difficulty": "Easy",
@@ -243,7 +348,12 @@
     {
       "id": 25,
       "question": "Quale scuderia ha vinto il mondiale costruttori nel 2021?",
-      "options": ["Mercedes", "Red Bull", "Ferrari", "McLaren"],
+      "options": [
+        "Mercedes",
+        "Red Bull",
+        "Ferrari",
+        "McLaren"
+      ],
       "correct": 0,
       "category": "Scuderie",
       "difficulty": "Medium",
@@ -253,7 +363,12 @@
     {
       "id": 26,
       "question": "Chi vinse il mondiale F1 nel 2023?",
-      "options": ["Max Verstappen", "Lewis Hamilton", "Charles Leclerc", "Sergio Perez"],
+      "options": [
+        "Max Verstappen",
+        "Lewis Hamilton",
+        "Charles Leclerc",
+        "Sergio Perez"
+      ],
       "correct": 0,
       "category": "F1 Moderna",
       "difficulty": "Easy",
@@ -263,7 +378,12 @@
     {
       "id": 27,
       "question": "Quale circuito è famoso per la curva 130R?",
-      "options": ["Suzuka", "Fuji", "Sepang", "Shanghai"],
+      "options": [
+        "Suzuka",
+        "Fuji",
+        "Sepang",
+        "Shanghai"
+      ],
       "correct": 0,
       "category": "Circuiti",
       "difficulty": "Medium",
@@ -273,7 +393,12 @@
     {
       "id": 28,
       "question": "Quale pilota vinse il mondiale F1 nel 1996?",
-      "options": ["Damon Hill", "Jacques Villeneuve", "Michael Schumacher", "Mika Häkkinen"],
+      "options": [
+        "Damon Hill",
+        "Jacques Villeneuve",
+        "Michael Schumacher",
+        "Mika Häkkinen"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Medium",
@@ -283,7 +408,12 @@
     {
       "id": 29,
       "question": "Quale scuderia è soprannominata 'le Frecce d'Argento'?",
-      "options": ["McLaren", "Mercedes", "Williams", "Audi"],
+      "options": [
+        "McLaren",
+        "Mercedes",
+        "Williams",
+        "Audi"
+      ],
       "correct": 1,
       "category": "Scuderie",
       "difficulty": "Easy",
@@ -293,7 +423,12 @@
     {
       "id": 30,
       "question": "Quante vittorie ha ottenuto Michael Schumacher in carriera?",
-      "options": ["85", "91", "94", "100"],
+      "options": [
+        "85",
+        "91",
+        "94",
+        "100"
+      ],
       "correct": 1,
       "category": "Record",
       "difficulty": "Hard",
@@ -303,7 +438,12 @@
     {
       "id": 31,
       "question": "Quale circuito ospita il GP del Giappone?",
-      "options": ["Suzuka", "Fuji", "Motegi", "Okayama"],
+      "options": [
+        "Suzuka",
+        "Fuji",
+        "Motegi",
+        "Okayama"
+      ],
       "correct": 0,
       "category": "Gran Premi",
       "difficulty": "Easy",
@@ -313,7 +453,12 @@
     {
       "id": 32,
       "question": "Quale pilota ha vinto il mondiale F1 nel 2012?",
-      "options": ["Fernando Alonso", "Sebastian Vettel", "Lewis Hamilton", "Jenson Button"],
+      "options": [
+        "Fernando Alonso",
+        "Sebastian Vettel",
+        "Lewis Hamilton",
+        "Jenson Button"
+      ],
       "correct": 1,
       "category": "Storia",
       "difficulty": "Medium",
@@ -323,7 +468,12 @@
     {
       "id": 33,
       "question": "Quale GP è considerato 'di casa' per la Ferrari?",
-      "options": ["Monaco", "Imola", "Monza", "Mugello"],
+      "options": [
+        "Monaco",
+        "Imola",
+        "Monza",
+        "Mugello"
+      ],
       "correct": 2,
       "category": "Ferrari",
       "difficulty": "Easy",
@@ -333,7 +483,12 @@
     {
       "id": 34,
       "question": "Chi vinse il mondiale F1 nel 2009?",
-      "options": ["Sebastian Vettel", "Jenson Button", "Lewis Hamilton", "Rubens Barrichello"],
+      "options": [
+        "Sebastian Vettel",
+        "Jenson Button",
+        "Lewis Hamilton",
+        "Rubens Barrichello"
+      ],
       "correct": 1,
       "category": "Storia",
       "difficulty": "Medium",
@@ -343,7 +498,12 @@
     {
       "id": 35,
       "question": "Quale circuito ha la curva 'Parabolica'?",
-      "options": ["Monza", "Imola", "Silverstone", "Spa"],
+      "options": [
+        "Monza",
+        "Imola",
+        "Silverstone",
+        "Spa"
+      ],
       "correct": 0,
       "category": "Circuiti",
       "difficulty": "Medium",
@@ -353,7 +513,12 @@
     {
       "id": 36,
       "question": "Quale pilota ha vinto più GP consecutivi?",
-      "options": ["Sebastian Vettel", "Lewis Hamilton", "Max Verstappen", "Michael Schumacher"],
+      "options": [
+        "Sebastian Vettel",
+        "Lewis Hamilton",
+        "Max Verstappen",
+        "Michael Schumacher"
+      ],
       "correct": 2,
       "category": "Record",
       "difficulty": "Hard",
@@ -362,18 +527,28 @@
     },
     {
       "id": 37,
-      "question": "In che anno è stata fondata la Ferrari?",
-      "options": ["1945", "1947", "1950", "1952"],
+      "question": "In che anno la Ferrari nacque come costruttore di automobili?",
+      "options": [
+        "1945",
+        "1947",
+        "1950",
+        "1952"
+      ],
       "correct": 1,
       "category": "Ferrari",
       "difficulty": "Easy",
       "points": 30,
-      "explanation": "La Ferrari è stata fondata nel 1947."
+      "explanation": "La Scuderia Ferrari correva dal 1929 come squadra; la prima auto con il nome Ferrari, la 125 S, è del 1947."
     },
     {
       "id": 38,
       "question": "Quale pilota ha vinto il mondiale F1 nel 1998?",
-      "options": ["Michael Schumacher", "Mika Häkkinen", "Jacques Villeneuve", "Eddie Irvine"],
+      "options": [
+        "Michael Schumacher",
+        "Mika Häkkinen",
+        "Jacques Villeneuve",
+        "Eddie Irvine"
+      ],
       "correct": 1,
       "category": "Storia",
       "difficulty": "Medium",
@@ -383,7 +558,12 @@
     {
       "id": 39,
       "question": "Quale scuderia vinse il mondiale costruttori nel 2014?",
-      "options": ["Red Bull", "Mercedes", "Ferrari", "Williams"],
+      "options": [
+        "Red Bull",
+        "Mercedes",
+        "Ferrari",
+        "Williams"
+      ],
       "correct": 1,
       "category": "Scuderie",
       "difficulty": "Medium",
@@ -393,7 +573,12 @@
     {
       "id": 40,
       "question": "Quale circuito ospita il GP del Belgio?",
-      "options": ["Zolder", "Spa-Francorchamps", "Nürburgring", "Hockenheim"],
+      "options": [
+        "Zolder",
+        "Spa-Francorchamps",
+        "Nürburgring",
+        "Hockenheim"
+      ],
       "correct": 1,
       "category": "Gran Premi",
       "difficulty": "Easy",
@@ -403,7 +588,12 @@
     {
       "id": 41,
       "question": "Chi vinse il mondiale F1 nel 2020?",
-      "options": ["Lewis Hamilton", "Max Verstappen", "Valtteri Bottas", "Sebastian Vettel"],
+      "options": [
+        "Lewis Hamilton",
+        "Max Verstappen",
+        "Valtteri Bottas",
+        "Sebastian Vettel"
+      ],
       "correct": 0,
       "category": "F1 Moderna",
       "difficulty": "Easy",
@@ -413,7 +603,12 @@
     {
       "id": 42,
       "question": "Quale circuito è noto per la 'Esses'?",
-      "options": ["Suzuka", "Silverstone", "Interlagos", "Austin"],
+      "options": [
+        "Suzuka",
+        "Silverstone",
+        "Interlagos",
+        "Austin"
+      ],
       "correct": 0,
       "category": "Circuiti",
       "difficulty": "Medium",
@@ -423,7 +618,12 @@
     {
       "id": 43,
       "question": "Quale pilota ha vinto il mondiale F1 nel 2005?",
-      "options": ["Michael Schumacher", "Fernando Alonso", "Kimi Räikkönen", "Juan Pablo Montoya"],
+      "options": [
+        "Michael Schumacher",
+        "Fernando Alonso",
+        "Kimi Räikkönen",
+        "Juan Pablo Montoya"
+      ],
       "correct": 1,
       "category": "Storia",
       "difficulty": "Medium",
@@ -433,7 +633,12 @@
     {
       "id": 44,
       "question": "Quale scuderia è entrata in F1 nel 2016?",
-      "options": ["Haas", "AlphaTauri", "Aston Martin", "Alfa Romeo"],
+      "options": [
+        "Haas",
+        "AlphaTauri",
+        "Aston Martin",
+        "Alfa Romeo"
+      ],
       "correct": 0,
       "category": "Scuderie",
       "difficulty": "Medium",
@@ -443,7 +648,12 @@
     {
       "id": 45,
       "question": "Quale circuito ospita il GP del Brasile?",
-      "options": ["Interlagos", "Rio", "Curitiba", "Brasilia"],
+      "options": [
+        "Interlagos",
+        "Rio",
+        "Curitiba",
+        "Brasilia"
+      ],
       "correct": 0,
       "category": "Gran Premi",
       "difficulty": "Easy",
@@ -453,7 +663,12 @@
     {
       "id": 46,
       "question": "Chi vinse il mondiale F1 nel 2016?",
-      "options": ["Lewis Hamilton", "Nico Rosberg", "Sebastian Vettel", "Max Verstappen"],
+      "options": [
+        "Lewis Hamilton",
+        "Nico Rosberg",
+        "Sebastian Vettel",
+        "Max Verstappen"
+      ],
       "correct": 1,
       "category": "Storia",
       "difficulty": "Medium",
@@ -463,17 +678,27 @@
     {
       "id": 47,
       "question": "Quale circuito è stato introdotto nel calendario F1 nel 2021?",
-      "options": ["Jeddah", "Baku", "Sochi", "Sepang"],
+      "options": [
+        "Jeddah",
+        "Baku",
+        "Sochi",
+        "Sepang"
+      ],
       "correct": 0,
       "category": "F1 Moderna",
       "difficulty": "Medium",
       "points": 50,
       "explanation": "Il circuito di Jeddah ha debuttato nel 2021."
-    },    
+    },
     {
       "id": 48,
       "question": "Quale pilota è noto come 'Il Leone'?",
-      "options": ["Niki Lauda", "Gilles Villeneuve", "Nigel Mansell", "Sebastian Vettel"],
+      "options": [
+        "Niki Lauda",
+        "Gilles Villeneuve",
+        "Nigel Mansell",
+        "Sebastian Vettel"
+      ],
       "correct": 2,
       "category": "Soprannomi",
       "difficulty": "Medium",
@@ -481,19 +706,14 @@
       "explanation": "Nigel Mansell era soprannominato 'Il Leone' per il suo stile di guida aggressivo."
     },
     {
-      "id": 49,
-      "question": "In che anno la Ferrari introdusse il sistema F-DUCT?",
-      "options": ["2009", "2010", "2011", "Non lo ha mai usato"],
-      "correct": 3,
-      "category": "Tecnologia",
-      "difficulty": "Hard",
-      "points": 100,
-      "explanation": "La Ferrari non ha mai utilizzato ufficialmente il sistema F-DUCT, introdotto dalla McLaren."
-    },
-    {
       "id": 50,
       "question": "Quale pilota ha perso il mondiale all'ultima curva dell'ultimo GP?",
-      "options": ["Felipe Massa", "Lewis Hamilton", "Sebastian Vettel", "Fernando Alonso"],
+      "options": [
+        "Felipe Massa",
+        "Lewis Hamilton",
+        "Sebastian Vettel",
+        "Fernando Alonso"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Medium",
@@ -502,18 +722,28 @@
     },
     {
       "id": 51,
-      "question": "Quanti pit stop obbligatori ci sono in una gara di F1?",
-      "options": ["Uno", "Due", "Dipende dalla strategia", "Nessuno"],
-      "correct": 2,
+      "question": "In una gara asciutta, quanti pit stop sono di fatto obbligatori?",
+      "options": [
+        "Uno",
+        "Due",
+        "Nessuno",
+        "Tre"
+      ],
+      "correct": 0,
       "category": "Regole",
       "difficulty": "Easy",
       "points": 30,
-      "explanation": "Non ci sono pit stop obbligatori, dipende dalla strategia di gara."
+      "explanation": "Su asciutto bisogna usare almeno due mescole diverse, quindi serve almeno una sosta."
     },
     {
       "id": 52,
       "question": "Quale motore utilizzava la Ferrari nel 2020?",
-      "options": ["Ferrari 065", "Ferrari 066", "Ferrari 067", "Ferrari 064"],
+      "options": [
+        "Ferrari 065",
+        "Ferrari 066",
+        "Ferrari 067",
+        "Ferrari 064"
+      ],
       "correct": 0,
       "category": "Tecnologia",
       "difficulty": "Hard",
@@ -523,7 +753,12 @@
     {
       "id": 53,
       "question": "Chi è l'attuale team principal della Ferrari?",
-      "options": ["Mattia Binotto", "Frédéric Vasseur", "Laurent Mekies", "Jock Clear"],
+      "options": [
+        "Mattia Binotto",
+        "Frédéric Vasseur",
+        "Laurent Mekies",
+        "Jock Clear"
+      ],
       "correct": 1,
       "category": "Team Ferrari",
       "difficulty": "Easy",
@@ -531,19 +766,14 @@
       "explanation": "Frédéric Vasseur è il team principal della Ferrari dal 2023."
     },
     {
-      "id": 54,
-      "question": "Quale vettura Ferrari era soprannominata 'La Rossa'?",
-      "options": ["F2002", "F2004", "F2007", "SF70H"],
-      "correct": 1,
-      "category": "Vetture",
-      "difficulty": "Medium",
-      "points": 50,
-      "explanation": "La F2004 è spesso chiamata 'La Rossa' per la sua dominanza."
-    },
-    {
       "id": 55,
       "question": "Quanti giri dura il GP di Monaco?",
-      "options": ["70", "78", "82", "90"],
+      "options": [
+        "70",
+        "78",
+        "82",
+        "90"
+      ],
       "correct": 1,
       "category": "Circuiti",
       "difficulty": "Hard",
@@ -552,18 +782,28 @@
     },
     {
       "id": 56,
-      "question": "Quale pilota ha vinto il suo primo GP con la Ferrari?",
-      "options": ["Charles Leclerc", "Carlos Sainz", "Fernando Alonso", "Kimi Räikkönen"],
+      "question": "In quale circuito Charles Leclerc vinse il suo primo Gran Premio?",
+      "options": [
+        "Spa-Francorchamps",
+        "Monza",
+        "Bahrain",
+        "Monaco"
+      ],
       "correct": 0,
       "category": "Ferrari",
       "difficulty": "Medium",
       "points": 50,
-      "explanation": "Charles Leclerc vinse il suo primo GP con la Ferrari a Spa 2019."
+      "explanation": "Leclerc vinse il suo primo GP a Spa nel 2019, e la settimana dopo anche a Monza."
     },
     {
       "id": 57,
       "question": "In che anno la F1 introdusse il sistema Halo?",
-      "options": ["2016", "2017", "2018", "2019"],
+      "options": [
+        "2016",
+        "2017",
+        "2018",
+        "2019"
+      ],
       "correct": 2,
       "category": "Sicurezza",
       "difficulty": "Medium",
@@ -573,17 +813,27 @@
     {
       "id": 58,
       "question": "Quale pilota ha più GP disputati con la Ferrari?",
-      "options": ["Michael Schumacher", "Kimi Räikkönen", "Felipe Massa", "Fernando Alonso"],
-      "correct": 1,
+      "options": [
+        "Michael Schumacher",
+        "Kimi Räikkönen",
+        "Felipe Massa",
+        "Fernando Alonso"
+      ],
+      "correct": 0,
       "category": "Ferrari",
       "difficulty": "Hard",
       "points": 100,
-      "explanation": "Kimi Räikkönen ha disputato 208 GP con la Ferrari."
+      "explanation": "Michael Schumacher ha disputato con la Ferrari oltre 170 Gran Premi, più di qualsiasi altro pilota."
     },
     {
       "id": 59,
       "question": "Quale circuito ha la curva 'Tamburello'?",
-      "options": ["Imola", "Monza", "Mugello", "Vallelunga"],
+      "options": [
+        "Imola",
+        "Monza",
+        "Mugello",
+        "Vallelunga"
+      ],
       "correct": 0,
       "category": "Circuiti",
       "difficulty": "Medium",
@@ -593,7 +843,12 @@
     {
       "id": 60,
       "question": "Chi vinse il mondiale F1 nel 1994?",
-      "options": ["Damon Hill", "Michael Schumacher", "Ayrton Senna", "Nigel Mansell"],
+      "options": [
+        "Damon Hill",
+        "Michael Schumacher",
+        "Ayrton Senna",
+        "Nigel Mansell"
+      ],
       "correct": 1,
       "category": "Storia",
       "difficulty": "Medium",
@@ -603,7 +858,12 @@
     {
       "id": 61,
       "question": "Quale scuderia vinse 8 titoli costruttori consecutivi?",
-      "options": ["Ferrari", "Mercedes", "Red Bull", "Williams"],
+      "options": [
+        "Ferrari",
+        "Mercedes",
+        "Red Bull",
+        "Williams"
+      ],
       "correct": 1,
       "category": "Record",
       "difficulty": "Medium",
@@ -613,7 +873,12 @@
     {
       "id": 62,
       "question": "Quale pilota è soprannominato 'Honey Badger'?",
-      "options": ["Daniel Ricciardo", "Lando Norris", "George Russell", "Esteban Ocon"],
+      "options": [
+        "Daniel Ricciardo",
+        "Lando Norris",
+        "George Russell",
+        "Esteban Ocon"
+      ],
       "correct": 0,
       "category": "Soprannomi",
       "difficulty": "Easy",
@@ -623,7 +888,12 @@
     {
       "id": 63,
       "question": "In che anno la F1 passò ai motori V6 turbo ibridi?",
-      "options": ["2012", "2013", "2014", "2015"],
+      "options": [
+        "2012",
+        "2013",
+        "2014",
+        "2015"
+      ],
       "correct": 2,
       "category": "Tecnologia",
       "difficulty": "Medium",
@@ -633,7 +903,12 @@
     {
       "id": 64,
       "question": "Quale pilota ha vinto il GP d'Italia 2020?",
-      "options": ["Lewis Hamilton", "Pierre Gasly", "Carlos Sainz", "Charles Leclerc"],
+      "options": [
+        "Lewis Hamilton",
+        "Pierre Gasly",
+        "Carlos Sainz",
+        "Charles Leclerc"
+      ],
       "correct": 1,
       "category": "F1 Moderna",
       "difficulty": "Medium",
@@ -643,7 +918,12 @@
     {
       "id": 65,
       "question": "Quante zone DRS ci sono a Monza?",
-      "options": ["Una", "Due", "Tre", "Quattro"],
+      "options": [
+        "Una",
+        "Due",
+        "Tre",
+        "Quattro"
+      ],
       "correct": 1,
       "category": "Circuiti",
       "difficulty": "Medium",
@@ -651,19 +931,14 @@
       "explanation": "A Monza ci sono due zone DRS."
     },
     {
-      "id": 66,
-      "question": "Chi è stato il primo pilota della storia della F1?",
-      "options": ["Giuseppe Farina", "Juan Manuel Fangio", "Stirling Moss", "Tazio Nuvolari"],
-      "correct": 0,
-      "category": "Storia",
-      "difficulty": "Hard",
-      "points": 100,
-      "explanation": "Giuseppe Farina è stato il primo pilota a vincere un mondiale F1 (1950)."
-    },
-    {
       "id": 67,
       "question": "Quale circuito ha il record di velocità media più alta?",
-      "options": ["Monza", "Spa", "Silverstone", "Baku"],
+      "options": [
+        "Monza",
+        "Spa",
+        "Silverstone",
+        "Baku"
+      ],
       "correct": 0,
       "category": "Record",
       "difficulty": "Medium",
@@ -673,7 +948,12 @@
     {
       "id": 68,
       "question": "Chi vinse il mondiale F1 nel 2018?",
-      "options": ["Sebastian Vettel", "Lewis Hamilton", "Kimi Räikkönen", "Max Verstappen"],
+      "options": [
+        "Sebastian Vettel",
+        "Lewis Hamilton",
+        "Kimi Räikkönen",
+        "Max Verstappen"
+      ],
       "correct": 1,
       "category": "Storia",
       "difficulty": "Easy",
@@ -683,7 +963,12 @@
     {
       "id": 69,
       "question": "Quale pilota ha più podi senza vittorie?",
-      "options": ["Nick Heidfeld", "Romain Grosjean", "Kevin Magnussen", "Lando Norris"],
+      "options": [
+        "Nick Heidfeld",
+        "Romain Grosjean",
+        "Kevin Magnussen",
+        "Lando Norris"
+      ],
       "correct": 0,
       "category": "Record",
       "difficulty": "Hard",
@@ -691,19 +976,14 @@
       "explanation": "Nick Heidfeld detiene il record di più podi (13) senza vittorie."
     },
     {
-      "id": 70,
-      "question": "In che anno la F1 introdusse le qualifiche a eliminazione?",
-      "options": ["2015", "2016", "2017", "2018"],
-      "correct": 1,
-      "category": "Regole",
-      "difficulty": "Hard",
-      "points": 100,
-      "explanation": "Le qualifiche a eliminazione furono introdotte nel 2016."
-    },
-    {
       "id": 71,
       "question": "Quale circuito è noto come 'The Green Hell'?",
-      "options": ["Nürburgring Nordschleife", "Spa", "Suzuka", "Le Mans"],
+      "options": [
+        "Nürburgring Nordschleife",
+        "Spa",
+        "Suzuka",
+        "Le Mans"
+      ],
       "correct": 0,
       "category": "Circuiti",
       "difficulty": "Medium",
@@ -713,7 +993,12 @@
     {
       "id": 72,
       "question": "Chi vinse il mondiale F1 nel 2000?",
-      "options": ["Mika Häkkinen", "Michael Schumacher", "David Coulthard", "Rubens Barrichello"],
+      "options": [
+        "Mika Häkkinen",
+        "Michael Schumacher",
+        "David Coulthard",
+        "Rubens Barrichello"
+      ],
       "correct": 1,
       "category": "Storia",
       "difficulty": "Easy",
@@ -723,7 +1008,12 @@
     {
       "id": 73,
       "question": "Quale scuderia ha sede a Woking?",
-      "options": ["McLaren", "Williams", "Red Bull", "Mercedes"],
+      "options": [
+        "McLaren",
+        "Williams",
+        "Red Bull",
+        "Mercedes"
+      ],
       "correct": 0,
       "category": "Scuderie",
       "difficulty": "Easy",
@@ -733,7 +1023,12 @@
     {
       "id": 74,
       "question": "Quanti titoli mondiali ha vinto Alain Prost?",
-      "options": ["3", "4", "5", "6"],
+      "options": [
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
       "correct": 1,
       "category": "Piloti",
       "difficulty": "Medium",
@@ -742,18 +1037,28 @@
     },
     {
       "id": 75,
-      "question": "Quale pilota ha vinto il GP più lungo della storia della F1?",
-      "options": ["Niki Lauda", "Ayrton Senna", "Lewis Hamilton", "Alberto Ascari"],
+      "question": "Chi vinse il GP del Canada 2011, la gara più lunga della storia della F1 (oltre 4 ore)?",
+      "options": [
+        "Jenson Button",
+        "Sebastian Vettel",
+        "Fernando Alonso",
+        "Lewis Hamilton"
+      ],
       "correct": 0,
       "category": "Record",
       "difficulty": "Hard",
       "points": 100,
-      "explanation": "Niki Lauda vinse il GP di Monaco 1984, il più lungo per durata (2h 00' 00\")."
+      "explanation": "Fra pioggia e bandiera rossa, la gara durò più di quattro ore; Button la vinse superando Vettel all'ultimo giro."
     },
     {
       "id": 76,
       "question": "In che anno la Ferrari vinse il suo ultimo titolo costruttori?",
-      "options": ["2007", "2008", "2009", "2010"],
+      "options": [
+        "2007",
+        "2008",
+        "2009",
+        "2010"
+      ],
       "correct": 1,
       "category": "Ferrari",
       "difficulty": "Easy",
@@ -763,7 +1068,12 @@
     {
       "id": 77,
       "question": "Quale circuito ha la curva 'Peraltada'?",
-      "options": ["Monza", "Interlagos", "Suzuka", "Mexico City"],
+      "options": [
+        "Monza",
+        "Interlagos",
+        "Suzuka",
+        "Mexico City"
+      ],
       "correct": 3,
       "category": "Circuiti",
       "difficulty": "Medium",
@@ -773,27 +1083,42 @@
     {
       "id": 78,
       "question": "Chi è il più giovane poleman della storia della F1?",
-      "options": ["Sebastian Vettel", "Max Verstappen", "Charles Leclerc", "Lando Norris"],
-      "correct": 1,
+      "options": [
+        "Sebastian Vettel",
+        "Max Verstappen",
+        "Charles Leclerc",
+        "Lando Norris"
+      ],
+      "correct": 0,
       "category": "Record",
       "difficulty": "Hard",
       "points": 100,
-      "explanation": "Max Verstappen è il più giovane poleman (17 anni, 166 giorni nel 2016)."
+      "explanation": "Sebastian Vettel conquistò la pole a Monza 2008 con la Toro Rosso, a 21 anni e 72 giorni."
     },
     {
       "id": 79,
       "question": "Quale motore utilizzava la Ferrari 312T?",
-      "options": ["V12", "V10", "V8", "V6"],
+      "options": [
+        "12 cilindri piatto",
+        "V10",
+        "V8",
+        "V6 turbo"
+      ],
       "correct": 0,
       "category": "Vetture",
       "difficulty": "Medium",
       "points": 50,
-      "explanation": "La Ferrari 312T utilizzava un motore V12."
+      "explanation": "La 312 T montava un 12 cilindri piatto (a 180°) di 3 litri."
     },
     {
       "id": 80,
       "question": "Chi vinse il mondiale F1 nel 1988?",
-      "options": ["Alain Prost", "Ayrton Senna", "Nelson Piquet", "Nigel Mansell"],
+      "options": [
+        "Alain Prost",
+        "Ayrton Senna",
+        "Nelson Piquet",
+        "Nigel Mansell"
+      ],
       "correct": 1,
       "category": "Storia",
       "difficulty": "Medium",
@@ -803,7 +1128,12 @@
     {
       "id": 81,
       "question": "Quale scuderia è soprannominata 'The Prancing Horse'?",
-      "options": ["Ferrari", "Red Bull", "Mercedes", "Alpine"],
+      "options": [
+        "Ferrari",
+        "Red Bull",
+        "Mercedes",
+        "Alpine"
+      ],
       "correct": 0,
       "category": "Scuderie",
       "difficulty": "Easy",
@@ -813,7 +1143,12 @@
     {
       "id": 82,
       "question": "Quanti GP ha vinto la Ferrari nel 2022?",
-      "options": ["0", "1", "2", "4"],
+      "options": [
+        "0",
+        "1",
+        "2",
+        "4"
+      ],
       "correct": 3,
       "category": "F1 Moderna",
       "difficulty": "Medium",
@@ -823,7 +1158,12 @@
     {
       "id": 83,
       "question": "Quale circuito ha la curva 'Maggots e Becketts'?",
-      "options": ["Silverstone", "Spa", "Suzuka", "Circuit de Barcelona-Catalunya"],
+      "options": [
+        "Silverstone",
+        "Spa",
+        "Suzuka",
+        "Circuit de Barcelona-Catalunya"
+      ],
       "correct": 0,
       "category": "Circuiti",
       "difficulty": "Medium",
@@ -831,19 +1171,14 @@
       "explanation": "Maggots e Becketts è una sezione iconica di Silverstone."
     },
     {
-      "id": 84,
-      "question": "Chi è stato il primo pilota a superare i 400 km/h in F1?",
-      "options": ["Juan Pablo Montoya", "Kimi Räikkönen", "Jacques Villeneuve", "Michael Schumacher"],
-      "correct": 0,
-      "category": "Record",
-      "difficulty": "Hard",
-      "points": 100,
-      "explanation": "Juan Pablo Montoya raggiunse 372.6 km/h a Monza nel 2005 (record all'epoca)."
-    },
-    {
       "id": 85,
       "question": "Quale pilota ha vinto il mondiale F1 nel 1976?",
-      "options": ["Niki Lauda", "James Hunt", "Emerson Fittipaldi", "Jody Scheckter"],
+      "options": [
+        "Niki Lauda",
+        "James Hunt",
+        "Emerson Fittipaldi",
+        "Jody Scheckter"
+      ],
       "correct": 1,
       "category": "Storia",
       "difficulty": "Medium",
@@ -853,7 +1188,12 @@
     {
       "id": 86,
       "question": "In che anno la F1 introdusse il Safety Car?",
-      "options": ["1973", "1980", "1993", "2000"],
+      "options": [
+        "1973",
+        "1980",
+        "1993",
+        "2000"
+      ],
       "correct": 0,
       "category": "Regole",
       "difficulty": "Hard",
@@ -861,19 +1201,14 @@
       "explanation": "Il Safety Car fu introdotto ufficialmente nel 1973."
     },
     {
-      "id": 87,
-      "question": "Quale circuito ha il soprannome 'The Cathedral of Speed'?",
-      "options": ["Monza", "Silverstone", "Spa", "Suzuka"],
-      "correct": 0,
-      "category": "Circuiti",
-      "difficulty": "Easy",
-      "points": 30,
-      "explanation": "Monza è chiamata 'The Cathedral of Speed' (La Cattedrale della Velocità)."
-    },
-    {
       "id": 88,
       "question": "Chi vinse il mondiale F1 nel 2003?",
-      "options": ["Michael Schumacher", "Kimi Räikkönen", "Juan Pablo Montoya", "Ralf Schumacher"],
+      "options": [
+        "Michael Schumacher",
+        "Kimi Räikkönen",
+        "Juan Pablo Montoya",
+        "Ralf Schumacher"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Medium",
@@ -883,7 +1218,12 @@
     {
       "id": 89,
       "question": "Quale scuderia vinse il mondiale costruttori nel 2005?",
-      "options": ["Ferrari", "Renault", "McLaren", "Williams"],
+      "options": [
+        "Ferrari",
+        "Renault",
+        "McLaren",
+        "Williams"
+      ],
       "correct": 1,
       "category": "Scuderie",
       "difficulty": "Medium",
@@ -893,7 +1233,12 @@
     {
       "id": 90,
       "question": "Quale pilota è soprannominato 'El Matador'?",
-      "options": ["Fernando Alonso", "Carlos Sainz", "Pedro de la Rosa", "Marc Gené"],
+      "options": [
+        "Fernando Alonso",
+        "Carlos Sainz",
+        "Pedro de la Rosa",
+        "Marc Gené"
+      ],
       "correct": 0,
       "category": "Soprannomi",
       "difficulty": "Easy",
@@ -903,7 +1248,12 @@
     {
       "id": 91,
       "question": "Quanti secondi dura un pit stop medio in F1?",
-      "options": ["2-3 secondi", "3-4 secondi", "4-5 secondi", "5-6 secondi"],
+      "options": [
+        "2-3 secondi",
+        "3-4 secondi",
+        "4-5 secondi",
+        "5-6 secondi"
+      ],
       "correct": 0,
       "category": "Statistiche",
       "difficulty": "Medium",
@@ -913,7 +1263,12 @@
     {
       "id": 92,
       "question": "Chi vinse il mondiale F1 nel 1992?",
-      "options": ["Nigel Mansell", "Ayrton Senna", "Alain Prost", "Michael Schumacher"],
+      "options": [
+        "Nigel Mansell",
+        "Ayrton Senna",
+        "Alain Prost",
+        "Michael Schumacher"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Medium",
@@ -921,29 +1276,29 @@
       "explanation": "Nigel Mansell vinse il mondiale 1992 con la Williams."
     },
     {
-      "id": 93,
-      "question": "Quale circuito ha la curva 'Camber' più famosa?",
-      "options": ["Suzuka", "Silverstone", "Spa", "Monza"],
-      "correct": 0,
-      "category": "Circuiti",
-      "difficulty": "Hard",
-      "points": 100,
-      "explanation": "Suzuka ha curve con camber molto pronunciate."
-    },
-    {
       "id": 94,
-      "question": "In che anno la F1 introdusse le gomme slick?",
-      "options": ["1998", "2009", "2011", "Sono sempre state usate"],
+      "question": "In che anno la F1 reintrodusse le gomme slick?",
+      "options": [
+        "1998",
+        "2009",
+        "2011",
+        "2014"
+      ],
       "correct": 1,
       "category": "Tecnologia",
       "difficulty": "Hard",
       "points": 100,
-      "explanation": "Le gomme slick sono state reintrodotte nel 2009 dopo essere state bandite nel 1998."
+      "explanation": "Le slick furono vietate dal 1998 e tornarono nel 2009."
     },
     {
       "id": 95,
       "question": "Quale pilota ha vinto il mondiale F1 nel 1975?",
-      "options": ["Niki Lauda", "Emerson Fittipaldi", "James Hunt", "Jody Scheckter"],
+      "options": [
+        "Niki Lauda",
+        "Emerson Fittipaldi",
+        "James Hunt",
+        "Jody Scheckter"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Medium",
@@ -951,19 +1306,14 @@
       "explanation": "Niki Lauda vinse il mondiale 1975 con la Ferrari."
     },
     {
-      "id": 96,
-      "question": "Quante Ferrari si sono ritirate nel GP di Monaco 1996?",
-      "options": ["0", "1", "2", "3"],
-      "correct": 2,
-      "category": "Ferrari",
-      "difficulty": "Hard",
-      "points": 100,
-      "explanation": "Entrambe le Ferrari (Schumacher e Irvine) si ritirarono nel GP di Monaco 1996."
-    },
-    {
       "id": 97,
       "question": "Quale circuito ha la curva 'Swimming Pool'?",
-      "options": ["Monaco", "Singapore", "Abu Dhabi", "Baku"],
+      "options": [
+        "Monaco",
+        "Singapore",
+        "Abu Dhabi",
+        "Baku"
+      ],
       "correct": 0,
       "category": "Circuiti",
       "difficulty": "Medium",
@@ -973,7 +1323,12 @@
     {
       "id": 98,
       "question": "Chi vinse il mondiale F1 nel 1985?",
-      "options": ["Alain Prost", "Niki Lauda", "Ayrton Senna", "Nelson Piquet"],
+      "options": [
+        "Alain Prost",
+        "Niki Lauda",
+        "Ayrton Senna",
+        "Nelson Piquet"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Medium",
@@ -983,7 +1338,12 @@
     {
       "id": 99,
       "question": "Quale scuderia ha sede a Milton Keynes?",
-      "options": ["Red Bull", "Mercedes", "Aston Martin", "Williams"],
+      "options": [
+        "Red Bull",
+        "Mercedes",
+        "Aston Martin",
+        "Williams"
+      ],
       "correct": 0,
       "category": "Scuderie",
       "difficulty": "Easy",
@@ -993,7 +1353,12 @@
     {
       "id": 100,
       "question": "Chi è il più anziano vincitore di un GP in F1?",
-      "options": ["Luigi Fagioli", "Juan Manuel Fangio", "Alberto Ascari", "Giuseppe Farina"],
+      "options": [
+        "Luigi Fagioli",
+        "Juan Manuel Fangio",
+        "Alberto Ascari",
+        "Giuseppe Farina"
+      ],
       "correct": 0,
       "category": "Record",
       "difficulty": "Hard",
@@ -1003,7 +1368,12 @@
     {
       "id": 101,
       "question": "Quale pilota ha vinto il mondiale F1 nel 1999?",
-      "options": ["Mika Häkkinen", "Michael Schumacher", "Eddie Irvine", "David Coulthard"],
+      "options": [
+        "Mika Häkkinen",
+        "Michael Schumacher",
+        "Eddie Irvine",
+        "David Coulthard"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Medium",
@@ -1013,7 +1383,12 @@
     {
       "id": 102,
       "question": "In che anno la Ferrari introdusse il sistema di trazione integrale?",
-      "options": ["Non lo ha mai usato", "1979", "1983", "1987"],
+      "options": [
+        "Non lo ha mai usato",
+        "1979",
+        "1983",
+        "1987"
+      ],
       "correct": 0,
       "category": "Tecnologia",
       "difficulty": "Hard",
@@ -1023,7 +1398,12 @@
     {
       "id": 103,
       "question": "Quale circuito ha il record di più GP ospitati?",
-      "options": ["Monza", "Monaco", "Silverstone", "Spa"],
+      "options": [
+        "Monza",
+        "Monaco",
+        "Silverstone",
+        "Spa"
+      ],
       "correct": 0,
       "category": "Record",
       "difficulty": "Hard",
@@ -1033,7 +1413,12 @@
     {
       "id": 104,
       "question": "Chi vinse il mondiale F1 nel 1970?",
-      "options": ["Jochen Rindt", "Jackie Stewart", "Emerson Fittipaldi", "Graham Hill"],
+      "options": [
+        "Jochen Rindt",
+        "Jackie Stewart",
+        "Emerson Fittipaldi",
+        "Graham Hill"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Hard",
@@ -1043,7 +1428,12 @@
     {
       "id": 105,
       "question": "Quale scuderia vinse il mondiale costruttori nel 1998?",
-      "options": ["McLaren", "Ferrari", "Williams", "Benetton"],
+      "options": [
+        "McLaren",
+        "Ferrari",
+        "Williams",
+        "Benetton"
+      ],
       "correct": 0,
       "category": "Scuderie",
       "difficulty": "Medium",
@@ -1051,19 +1441,14 @@
       "explanation": "La McLaren vinse il mondiale costruttori nel 1998."
     },
     {
-      "id": 106,
-      "question": "Quanti km percorre una vettura di F1 in una stagione?",
-      "options": ["Circa 5.000 km", "Circa 8.000 km", "Circa 12.000 km", "Circa 15.000 km"],
-      "correct": 2,
-      "category": "Statistiche",
-      "difficulty": "Hard",
-      "points": 100,
-      "explanation": "Una vettura percorre circa 12.000 km tra test, prove, qualifiche e gare."
-    },
-    {
       "id": 107,
       "question": "Quale pilota è soprannominato 'The Flying Finn'?",
-      "options": ["Kimi Räikkönen", "Mika Häkkinen", "Valtteri Bottas", "Heikki Kovalainen"],
+      "options": [
+        "Kimi Räikkönen",
+        "Mika Häkkinen",
+        "Valtteri Bottas",
+        "Heikki Kovalainen"
+      ],
       "correct": 1,
       "category": "Soprannomi",
       "difficulty": "Medium",
@@ -1073,7 +1458,12 @@
     {
       "id": 108,
       "question": "In che anno la F1 introdusse il sistema KERS?",
-      "options": ["2007", "2009", "2011", "2014"],
+      "options": [
+        "2007",
+        "2009",
+        "2011",
+        "2014"
+      ],
       "correct": 1,
       "category": "Tecnologia",
       "difficulty": "Medium",
@@ -1083,7 +1473,12 @@
     {
       "id": 109,
       "question": "Quale circuito ha la curva 'Raidillon'?",
-      "options": ["Spa-Francorchamps", "Monza", "Silverstone", "Suzuka"],
+      "options": [
+        "Spa-Francorchamps",
+        "Monza",
+        "Silverstone",
+        "Suzuka"
+      ],
       "correct": 0,
       "category": "Circuiti",
       "difficulty": "Medium",
@@ -1093,7 +1488,12 @@
     {
       "id": 110,
       "question": "Chi vinse il mondiale F1 nel 1967?",
-      "options": ["Jim Clark", "Graham Hill", "Denny Hulme", "Jack Brabham"],
+      "options": [
+        "Jim Clark",
+        "Graham Hill",
+        "Denny Hulme",
+        "Jack Brabham"
+      ],
       "correct": 2,
       "category": "Storia",
       "difficulty": "Hard",
@@ -1103,7 +1503,12 @@
     {
       "id": 111,
       "question": "Quale scuderia ha sede a Grove?",
-      "options": ["Williams", "McLaren", "Red Bull", "Mercedes"],
+      "options": [
+        "Williams",
+        "McLaren",
+        "Red Bull",
+        "Mercedes"
+      ],
       "correct": 0,
       "category": "Scuderie",
       "difficulty": "Easy",
@@ -1111,19 +1516,14 @@
       "explanation": "La Williams ha sede a Grove, Inghilterra."
     },
     {
-      "id": 112,
-      "question": "Quanti cavalli aveva la Ferrari F2004?",
-      "options": ["Circa 850 CV", "Circa 900 CV", "Circa 950 CV", "Oltre 1.000 CV"],
-      "correct": 2,
-      "category": "Vetture",
-      "difficulty": "Hard",
-      "points": 100,
-      "explanation": "La Ferrari F2004 sviluppava circa 950 CV."
-    },
-    {
       "id": 113,
       "question": "Quale pilota ha vinto il mondiale F1 nel 1958?",
-      "options": ["Mike Hawthorn", "Stirling Moss", "Jack Brabham", "Phil Hill"],
+      "options": [
+        "Mike Hawthorn",
+        "Stirling Moss",
+        "Jack Brabham",
+        "Phil Hill"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Hard",
@@ -1133,7 +1533,12 @@
     {
       "id": 114,
       "question": "In che anno la F1 introdusse il Virtual Safety Car?",
-      "options": ["2013", "2014", "2015", "2016"],
+      "options": [
+        "2013",
+        "2014",
+        "2015",
+        "2016"
+      ],
       "correct": 2,
       "category": "Regole",
       "difficulty": "Hard",
@@ -1143,7 +1548,12 @@
     {
       "id": 115,
       "question": "Quale circuito è noto per la curva 'La Source'?",
-      "options": ["Spa-Francorchamps", "Monza", "Silverstone", "Monaco"],
+      "options": [
+        "Spa-Francorchamps",
+        "Monza",
+        "Silverstone",
+        "Monaco"
+      ],
       "correct": 0,
       "category": "Circuiti",
       "difficulty": "Medium",
@@ -1153,7 +1563,12 @@
     {
       "id": 116,
       "question": "Chi vinse il mondiale F1 nel 2004?",
-      "options": ["Michael Schumacher", "Rubens Barrichello", "Juan Pablo Montoya", "Fernando Alonso"],
+      "options": [
+        "Michael Schumacher",
+        "Rubens Barrichello",
+        "Juan Pablo Montoya",
+        "Fernando Alonso"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Easy",
@@ -1163,7 +1578,12 @@
     {
       "id": 117,
       "question": "Quale scuderia vinse il mondiale costruttori nel 1979?",
-      "options": ["Ferrari", "Williams", "Lotus", "McLaren"],
+      "options": [
+        "Ferrari",
+        "Williams",
+        "Lotus",
+        "McLaren"
+      ],
       "correct": 0,
       "category": "Scuderie",
       "difficulty": "Medium",
@@ -1173,7 +1593,12 @@
     {
       "id": 118,
       "question": "Quale pilota è soprannominato 'The Professor'?",
-      "options": ["Alain Prost", "Niki Lauda", "Jackie Stewart", "James Hunt"],
+      "options": [
+        "Alain Prost",
+        "Niki Lauda",
+        "Jackie Stewart",
+        "James Hunt"
+      ],
       "correct": 0,
       "category": "Soprannomi",
       "difficulty": "Medium",
@@ -1182,8 +1607,13 @@
     },
     {
       "id": 119,
-      "question": "Quanti titoli mondiali ha vinto la Williams?",
-      "options": ["7", "9", "11", "13"],
+      "question": "Quanti titoli costruttori ha vinto la Williams?",
+      "options": [
+        "7",
+        "9",
+        "11",
+        "13"
+      ],
       "correct": 1,
       "category": "Scuderie",
       "difficulty": "Medium",
@@ -1191,19 +1621,14 @@
       "explanation": "La Williams ha vinto 9 titoli costruttori."
     },
     {
-      "id": 120,
-      "question": "Quale circuito ha la curva 'Turn 1' più famosa in F1?",
-      "options": ["Suzuka", "Monza", "Interlagos", "Silverstone"],
-      "correct": 2,
-      "category": "Circuiti",
-      "difficulty": "Hard",
-      "points": 100,
-      "explanation": "La curva 1 di Interlagos (Senna S) è una delle più famose."
-    },
-    {
       "id": 121,
       "question": "Chi vinse il mondiale F1 nel 1997?",
-      "options": ["Jacques Villeneuve", "Michael Schumacher", "Heinz-Harald Frentzen", "David Coulthard"],
+      "options": [
+        "Jacques Villeneuve",
+        "Michael Schumacher",
+        "Heinz-Harald Frentzen",
+        "David Coulthard"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Medium",
@@ -1213,7 +1638,12 @@
     {
       "id": 122,
       "question": "In che anno la F1 introdusse i motori V8?",
-      "options": ["2005", "2006", "2007", "2008"],
+      "options": [
+        "2005",
+        "2006",
+        "2007",
+        "2008"
+      ],
       "correct": 1,
       "category": "Tecnologia",
       "difficulty": "Hard",
@@ -1221,19 +1651,14 @@
       "explanation": "I motori V8 furono introdotti nel 2006."
     },
     {
-      "id": 123,
-      "question": "Quale scuderia è soprannominata 'The Bulls'?",
-      "options": ["Red Bull", "Ferrari", "McLaren", "Mercedes"],
-      "correct": 0,
-      "category": "Scuderie",
-      "difficulty": "Easy",
-      "points": 30,
-      "explanation": "Red Bull è conosciuta come 'The Bulls' (I Tori)."
-    },
-    {
       "id": 124,
       "question": "Quanti GP ci sono nella stagione 2023?",
-      "options": ["21", "22", "23", "24"],
+      "options": [
+        "21",
+        "22",
+        "23",
+        "24"
+      ],
       "correct": 1,
       "category": "F1 Moderna",
       "difficulty": "Easy",
@@ -1243,7 +1668,12 @@
     {
       "id": 125,
       "question": "Quale pilota ha vinto il mondiale F1 nel 1982?",
-      "options": ["Keke Rosberg", "Niki Lauda", "Alain Prost", "Nelson Piquet"],
+      "options": [
+        "Keke Rosberg",
+        "Niki Lauda",
+        "Alain Prost",
+        "Nelson Piquet"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Hard",
@@ -1253,7 +1683,12 @@
     {
       "id": 126,
       "question": "Quale circuito ha la curva 'Ascari'?",
-      "options": ["Monza", "Imola", "Silverstone", "Spa"],
+      "options": [
+        "Monza",
+        "Imola",
+        "Silverstone",
+        "Spa"
+      ],
       "correct": 0,
       "category": "Circuiti",
       "difficulty": "Medium",
@@ -1263,7 +1698,12 @@
     {
       "id": 127,
       "question": "Chi è il più giovane vincitore di un GP in F1?",
-      "options": ["Max Verstappen", "Sebastian Vettel", "Charles Leclerc", "Lando Norris"],
+      "options": [
+        "Max Verstappen",
+        "Sebastian Vettel",
+        "Charles Leclerc",
+        "Lando Norris"
+      ],
       "correct": 0,
       "category": "Record",
       "difficulty": "Medium",
@@ -1273,7 +1713,12 @@
     {
       "id": 128,
       "question": "In che anno la Ferrari vinse il suo primo titolo piloti?",
-      "options": ["1951", "1952", "1953", "1956"],
+      "options": [
+        "1951",
+        "1952",
+        "1953",
+        "1956"
+      ],
       "correct": 1,
       "category": "Ferrari",
       "difficulty": "Medium",
@@ -1283,7 +1728,12 @@
     {
       "id": 129,
       "question": "Quale scuderia vinse il mondiale costruttori nel 2010?",
-      "options": ["Red Bull", "McLaren", "Ferrari", "Mercedes"],
+      "options": [
+        "Red Bull",
+        "McLaren",
+        "Ferrari",
+        "Mercedes"
+      ],
       "correct": 0,
       "category": "Scuderie",
       "difficulty": "Medium",
@@ -1293,7 +1743,12 @@
     {
       "id": 130,
       "question": "Quanti punti si ottengono per una vittoria?",
-      "options": ["20", "25", "30", "35"],
+      "options": [
+        "20",
+        "25",
+        "30",
+        "35"
+      ],
       "correct": 1,
       "category": "Regole",
       "difficulty": "Easy",
@@ -1303,7 +1758,12 @@
     {
       "id": 131,
       "question": "Quale pilota ha vinto il mondiale F1 nel 1961?",
-      "options": ["Phil Hill", "Graham Hill", "Jim Clark", "Jack Brabham"],
+      "options": [
+        "Phil Hill",
+        "Graham Hill",
+        "Jim Clark",
+        "Jack Brabham"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Hard",
@@ -1313,7 +1773,12 @@
     {
       "id": 132,
       "question": "Quale circuito ha il record di altitudine più alta?",
-      "options": ["Mexico City", "Interlagos", "Spielberg", "Suzuka"],
+      "options": [
+        "Mexico City",
+        "Interlagos",
+        "Spielberg",
+        "Suzuka"
+      ],
       "correct": 0,
       "category": "Record",
       "difficulty": "Hard",
@@ -1323,7 +1788,12 @@
     {
       "id": 133,
       "question": "Chi vinse il mondiale F1 nel 2001?",
-      "options": ["Michael Schumacher", "David Coulthard", "Rubens Barrichello", "Mika Häkkinen"],
+      "options": [
+        "Michael Schumacher",
+        "David Coulthard",
+        "Rubens Barrichello",
+        "Mika Häkkinen"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Easy",
@@ -1333,7 +1803,12 @@
     {
       "id": 134,
       "question": "In che anno la F1 introdusse il sistema DAS?",
-      "options": ["2019", "2020", "2021", "2022"],
+      "options": [
+        "2019",
+        "2020",
+        "2021",
+        "2022"
+      ],
       "correct": 1,
       "category": "Tecnologia",
       "difficulty": "Hard",
@@ -1341,39 +1816,44 @@
       "explanation": "Il sistema DAS fu introdotto dalla Mercedes nel 2020."
     },
     {
-      "id": 135,
-      "question": "Quale scuderia è soprannominata 'The Silver Arrows'?",
-      "options": ["Mercedes", "McLaren", "Williams", "Red Bull"],
-      "correct": 0,
-      "category": "Scuderie",
-      "difficulty": "Easy",
-      "points": 30,
-      "explanation": "Mercedes è conosciuta come 'The Silver Arrows' (Le Frecce d'Argento)."
-    },
-    {
       "id": 136,
-      "question": "Quanti titoli mondiali ha vinto la McLaren?",
-      "options": ["6", "8", "10", "12"],
-      "correct": 1,
+      "question": "Quanti titoli costruttori aveva vinto la McLaren alla fine del 2025?",
+      "options": [
+        "8",
+        "9",
+        "10",
+        "12"
+      ],
+      "correct": 2,
       "category": "Scuderie",
       "difficulty": "Medium",
       "points": 50,
-      "explanation": "La McLaren ha vinto 8 titoli costruttori."
+      "explanation": "La McLaren ha vinto 10 titoli costruttori, gli ultimi due nel 2024 e nel 2025."
     },
     {
       "id": 137,
       "question": "Quale pilota ha vinto il mondiale F1 nel 1977?",
-      "options": ["Niki Lauda", "James Hunt", "Jody Scheckter", "Mario Andretti"],
-      "correct": 2,
+      "options": [
+        "Niki Lauda",
+        "James Hunt",
+        "Jody Scheckter",
+        "Mario Andretti"
+      ],
+      "correct": 0,
       "category": "Storia",
       "difficulty": "Hard",
       "points": 100,
-      "explanation": "Jody Scheckter vinse il mondiale 1977 con la Wolf."
+      "explanation": "Niki Lauda vinse il mondiale 1977 con la Ferrari, il suo secondo titolo."
     },
     {
       "id": 138,
       "question": "Quale circuito ha la curva 'Mirabeau'?",
-      "options": ["Monaco", "Spa", "Silverstone", "Monza"],
+      "options": [
+        "Monaco",
+        "Spa",
+        "Silverstone",
+        "Monza"
+      ],
       "correct": 0,
       "category": "Circuiti",
       "difficulty": "Medium",
@@ -1383,7 +1863,12 @@
     {
       "id": 139,
       "question": "Chi è il più anziano campione del mondo di F1?",
-      "options": ["Juan Manuel Fangio", "Giuseppe Farina", "Jack Brabham", "Graham Hill"],
+      "options": [
+        "Juan Manuel Fangio",
+        "Giuseppe Farina",
+        "Jack Brabham",
+        "Graham Hill"
+      ],
       "correct": 0,
       "category": "Record",
       "difficulty": "Hard",
@@ -1391,19 +1876,14 @@
       "explanation": "Juan Manuel Fangio vinse il suo ultimo mondiale nel 1957 a 46 anni."
     },
     {
-      "id": 140,
-      "question": "In che anno la Ferrari introdusse la prima vettura a mid-engine?",
-      "options": ["1959", "1960", "1961", "1962"],
-      "correct": 1,
-      "category": "Vetture",
-      "difficulty": "Hard",
-      "points": 100,
-      "explanation": "La Ferrari 156 (1960) fu la prima con motore posteriore."
-    },
-    {
       "id": 141,
       "question": "Quale scuderia vinse il mondiale costruttori nel 1994?",
-      "options": ["Williams", "Benetton", "Ferrari", "McLaren"],
+      "options": [
+        "Williams",
+        "Benetton",
+        "Ferrari",
+        "McLaren"
+      ],
       "correct": 1,
       "category": "Scuderie",
       "difficulty": "Medium",
@@ -1413,7 +1893,12 @@
     {
       "id": 142,
       "question": "Quanti GP ha vinto Michael Schumacher con la Ferrari?",
-      "options": ["72", "78", "85", "91"],
+      "options": [
+        "72",
+        "78",
+        "85",
+        "91"
+      ],
       "correct": 0,
       "category": "Ferrari",
       "difficulty": "Medium",
@@ -1423,7 +1908,12 @@
     {
       "id": 143,
       "question": "Quale pilota ha vinto il mondiale F1 nel 1955?",
-      "options": ["Juan Manuel Fangio", "Stirling Moss", "Alberto Ascari", "Mike Hawthorn"],
+      "options": [
+        "Juan Manuel Fangio",
+        "Stirling Moss",
+        "Alberto Ascari",
+        "Mike Hawthorn"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Hard",
@@ -1433,7 +1923,12 @@
     {
       "id": 144,
       "question": "Quale circuito ha la curva 'Tabac'?",
-      "options": ["Monaco", "Spa", "Monza", "Silverstone"],
+      "options": [
+        "Monaco",
+        "Spa",
+        "Monza",
+        "Silverstone"
+      ],
       "correct": 0,
       "category": "Circuiti",
       "difficulty": "Medium",
@@ -1443,7 +1938,12 @@
     {
       "id": 145,
       "question": "Chi vinse il mondiale F1 nel 1989?",
-      "options": ["Alain Prost", "Ayrton Senna", "Nigel Mansell", "Nelson Piquet"],
+      "options": [
+        "Alain Prost",
+        "Ayrton Senna",
+        "Nigel Mansell",
+        "Nelson Piquet"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Medium",
@@ -1452,28 +1952,28 @@
     },
     {
       "id": 146,
-      "question": "In che anno la F1 introdusse il sistema di rifornimento?",
-      "options": ["1982", "1994", "1998", "2010"],
+      "question": "In che anno la F1 reintrodusse il rifornimento in gara?",
+      "options": [
+        "1982",
+        "1994",
+        "1998",
+        "2010"
+      ],
       "correct": 1,
       "category": "Regole",
       "difficulty": "Hard",
       "points": 100,
-      "explanation": "Il rifornimento in gara fu introdotto nel 1994."
-    },
-    {
-      "id": 147,
-      "question": "Quale scuderia è soprannominata 'The Prancing Horse'?",
-      "options": ["Ferrari", "Red Bull", "Mercedes", "McLaren"],
-      "correct": 0,
-      "category": "Scuderie",
-      "difficulty": "Easy",
-      "points": 30,
-      "explanation": "Ferrari è conosciuta come 'The Prancing Horse' (Il Cavallino Rampante)."
+      "explanation": "Il rifornimento tornò nel 1994 e fu vietato di nuovo dal 2010."
     },
     {
       "id": 148,
       "question": "Quanti titoli mondiali ha vinto la Lotus?",
-      "options": ["5", "6", "7", "8"],
+      "options": [
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
       "correct": 2,
       "category": "Scuderie",
       "difficulty": "Hard",
@@ -1483,22 +1983,17 @@
     {
       "id": 149,
       "question": "Quale pilota ha vinto il mondiale F1 nel 1968?",
-      "options": ["Graham Hill", "Jim Clark", "Jackie Stewart", "Denny Hulme"],
+      "options": [
+        "Graham Hill",
+        "Jim Clark",
+        "Jackie Stewart",
+        "Denny Hulme"
+      ],
       "correct": 0,
       "category": "Storia",
       "difficulty": "Hard",
       "points": 100,
       "explanation": "Graham Hill vinse il mondiale 1968 con la Lotus."
-    },
-    {
-      "id": 150,
-      "question": "Quale circuito ha il record di più curve?",
-      "options": ["Suzuka", "Monaco", "Singapore", "Hungaroring"],
-      "correct": 1,
-      "category": "Record",
-      "difficulty": "Hard",
-      "points": 100,
-      "explanation": "Monaco ha 19 curve, il massimo in calendario."
     }
   ]
 }
