@@ -15,7 +15,25 @@
  * larghi, ma se un giorno si superasse serve un sitemap index.
  */
 
+import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { leggi } from '../lib/supabaseServer';
+import { db as firestore } from '../lib/firebase';
+
+/* Gli articoli delle news vivono su Firestore, non su Supabase. Restano
+   online 30 giorni (vedi pages/news/index.js): la sitemap elenca solo quelli,
+   così non manda Google su pagine già cancellate. */
+async function leggiNews() {
+  try {
+    const snap = await getDocs(query(collection(firestore, 'news'), orderBy('published_at', 'desc'), limit(60)));
+    const limite = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    return snap.docs
+      .map((d) => ({ slug: d.data().slug || d.id, data: d.data().published_at?.toDate?.() }))
+      .filter((a) => a.data && a.data.getTime() >= limite);
+  } catch (e) {
+    console.error('Sitemap — news:', e.message);
+    return [];
+  }
+}
 
 const BASE = 'https://formula-rossa.it';
 
@@ -62,17 +80,23 @@ const nodo = ({ loc, lastmod, priority, changefreq }) => [
 export async function getServerSideProps({ res }) {
   const oggi = new Date().toISOString().slice(0, 10);
 
-  /* Tre letture in parallelo. Se il database non risponde, `leggi` torna
-     `null` e la sitemap esce con le sole pagine fisse: una sitemap ridotta è
+  /* Quattro letture in parallelo. Se il database non risponde, `leggi` torna
+     `null` (le news un elenco vuoto) e la sitemap esce con le sole pagine fisse: una sitemap ridotta è
      comunque meglio di un 500, che Search Console interpreta come "sparita". */
-  const [piloti, circuiti, gare] = await Promise.all([
+  const [piloti, circuiti, gare, news] = await Promise.all([
     leggi(c => c.from('driver').select('id').order('id')),
     leggi(c => c.from('circuit').select('id').order('id')),
     leggi(c => c.from('race').select('year, round, date').order('year', { ascending: false }).order('round')),
+    leggiNews(),
   ]);
 
   const url = [
     ...STATICHE.map(([loc, priority, changefreq]) => ({ loc, lastmod: oggi, priority, changefreq })),
+
+    /* Le news erano assenti: Google le trovava solo passando da /news. */
+    ...news.map(a => ({
+      loc: `/news/${a.slug}`, lastmod: a.data.toISOString().slice(0, 10), priority: '0.6', changefreq: 'monthly',
+    })),
 
     ...(piloti || []).map(p => ({
       loc: `/piloti/${p.id}`, priority: '0.6', changefreq: 'monthly',
