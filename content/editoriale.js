@@ -217,3 +217,22 @@ export const CIRCUITI = {
     ],
   },
 };
+
+/* ─── /bilancio/[anno] ─────────────────────────────────────────────────── */
+
+/*
+ * Il commento al bilancio di fine stagione. Finché `pubblicato` è false la
+ * pagina esiste ma è nascosta ai motori di ricerca (noindex), non sta nella
+ * sitemap e non è linkata dal sito: si può guardare e controllare con calma.
+ *
+ * Per pubblicarla, dopo l'ultima gara:
+ *   1. scrivi titolo e paragrafi qui sotto;
+ *   2. metti `pubblicato: true`.
+ */
+export const BILANCI = {
+  2026: {
+    pubblicato: false,
+    titolo: '',
+    paragrafi: [],
+  },
+};

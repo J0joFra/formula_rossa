@@ -53,7 +53,11 @@ Da quella pagina nascono:
 ### Fase 2 — Lancio del bilancio (7-21 dicembre)
 
 - [ ] Pubblica la pagina «La stagione Ferrari 2026 in numeri» il giorno dopo
-      Abu Dhabi, quando l'interesse è al massimo.
+      Abu Dhabi, quando l'interesse è al massimo. La pagina è già pronta in
+      `/bilancio/2026` e si aggiorna da sola dopo ogni gara: per pubblicarla
+      scrivi il commento in `content/editoriale.js` (voce `BILANCI`) e metti
+      `pubblicato: true`. Da quel momento è indicizzabile, entra nella
+      sitemap e nel menu Stagione, e mostra i pulsanti di condivisione.
 - [ ] Social: carosello Instagram il giorno stesso, poi un video al giorno
       per una settimana, ognuno con il link in bio alla pagina.
 - [ ] Outreach: messaggi personali a 15-20 blog, pagine fan, podcast e canali

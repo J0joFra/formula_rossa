@@ -18,6 +18,7 @@
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { leggi } from '../lib/supabaseServer';
 import { db as firestore } from '../lib/firebase';
+import { BILANCI } from '../content/editoriale';
 
 /* Gli articoli delle news vivono su Firestore, non su Supabase. Restano
    online 30 giorni (vedi pages/news/index.js): la sitemap elenca solo quelli,
@@ -92,6 +93,11 @@ export async function getServerSideProps({ res }) {
 
   const url = [
     ...STATICHE.map(([loc, priority, changefreq]) => ({ loc, lastmod: oggi, priority, changefreq })),
+
+    /* I bilanci di stagione entrano solo quando il commento è pubblicato. */
+    ...Object.entries(BILANCI).filter(([, b]) => b.pubblicato).map(([anno]) => ({
+      loc: `/bilancio/${anno}`, lastmod: oggi, priority: '0.8', changefreq: 'weekly',
+    })),
 
     /* Le news erano assenti: Google le trovava solo passando da /news. */
     ...news.map(a => ({
