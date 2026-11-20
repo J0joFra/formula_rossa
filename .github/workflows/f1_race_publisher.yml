@@ -73,6 +73,8 @@ jobs:
         env:
           MANUAL_MODE: ${{ github.event.inputs.mode }}
           MANUAL_GP: ${{ github.event.inputs.gp_name }}
+          # Il cron che ha avviato l'esecuzione ("0 8 * * *" o "0 16 * * *").
+          CRON: ${{ github.event.schedule }}
         run: |
           python3 - <<'EOF'
           import os
@@ -110,21 +112,29 @@ jobs:
           today = now.date()
           mode, gp, skip = "", "", False
 
+          # Turno del pomeriggio: si decide dal cron che ha avviato
+          # l'esecuzione, non dall'ora attuale. GitHub esegue i cron con ore
+          # di ritardo (a novembre 2026 quello delle 8 partiva alle 16-23):
+          # guardando l'ora, il turno del mattino sembrava quello del
+          # pomeriggio e veniva saltato, e non usciva più nessun articolo.
+          cron = os.environ.get("CRON", "")
+          pomeriggio = cron.startswith("0 16") if cron else now.hour >= 13
+
           if os.environ.get("MANUAL_MODE"):
               mode, gp = os.environ["MANUAL_MODE"], os.environ.get("MANUAL_GP", "")
           else:
               for race_day, name in RACE_DAYS.items():
                   offset = (today - race_day).days
                   if offset == 0:
-                      mode, gp = ("pre-gara" if now.hour < 13 else "post-gara"), name
+                      mode, gp = ("post-gara" if pomeriggio else "pre-gara"), name
                   elif offset in OFFSET_MODE:
                       mode, gp = OFFSET_MODE[offset], name
                   if mode:
                       break
               if not mode:
                   # Fuori dal weekend di gara: una sintesi al mattino, niente il pomeriggio.
-                  mode, skip = "normale", now.hour >= 13
-              elif mode != "post-gara" and now.hour >= 13:
+                  mode, skip = "normale", pomeriggio
+              elif mode != "post-gara" and pomeriggio:
                   # Il cron delle 16 serve solo al post-gara.
                   skip = True
 

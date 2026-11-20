@@ -11,6 +11,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
 import { GRIDUP_URL } from '../../lib/gridup';
+import { BILANCI } from '../../content/editoriale';
 
 export { GRIDUP_URL } from '../../lib/gridup';
 
@@ -34,6 +35,10 @@ const STAGIONE = {
   items: [
     { href: '/standings', label: 'Classifiche', desc: 'Piloti e costruttori' },
     { href: '/gp',        label: 'Analisi GP',        desc: 'Ogni gara nel dettaglio' },
+    /* Il bilancio più recente, quando è pubblicato (content/editoriale.js). */
+    ...Object.entries(BILANCI).filter(([, b]) => b.pubblicato).slice(-1).map(([anno]) => (
+      { href: `/bilancio/${anno}`, label: `Bilancio ${anno}`, desc: `La stagione Ferrari ${anno} in numeri` }
+    )),
   ],
 };
 
